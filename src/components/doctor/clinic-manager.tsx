@@ -42,7 +42,7 @@ import {
 } from "@/components/ui/dialog"
 import { Checkbox } from '@/components/ui/checkbox';
 import Image from 'next/image';
-import { PlusCircle, Edit, Trash2, MapPin, Calendar, Clock, Upload, X, ChevronsUpDown, Check, IndianRupee } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, MapPin, Calendar, Clock, Upload, X, ChevronsUpDown, Check, IndianRupee, Link as LinkIcon, Pill, FlaskConical } from 'lucide-react';
 import { initialClinics, mockPharmacies, mockLabs } from '@/lib/mock-data';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
@@ -295,7 +295,7 @@ export function ClinicManager() {
                                                     checked={field.value?.includes(day)}
                                                     onCheckedChange={(checked) => {
                                                         return checked
-                                                        ? field.onChange([...field.value, day])
+                                                        ? field.onChange([...(field.value || []), day])
                                                         : field.onChange(field.value?.filter((value) => value !== day)
                                                         )
                                                     }}
@@ -401,6 +401,24 @@ export function ClinicManager() {
                                 <p className="text-sm text-muted-foreground">{clinic.slots}</p>
                              </div>
                         </div>
+                         {(clinic.associatedPharmacyIds?.length || 0) > 0 || (clinic.associatedLabIds?.length || 0) > 0 ? (
+                            <div className="flex items-start gap-2">
+                                <LinkIcon className="w-4 h-4 mt-1 text-primary"/>
+                                <div>
+                                    <h4 className="font-semibold">Associations</h4>
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                        {clinic.associatedPharmacyIds?.map(id => {
+                                            const pharmacy = mockPharmacies.find(p => p.id === id);
+                                            return pharmacy ? <Badge key={id} variant="secondary" className="bg-emerald-100 text-emerald-800"><Pill className="w-3 h-3 mr-1"/>{pharmacy.name}</Badge> : null;
+                                        })}
+                                        {clinic.associatedLabIds?.map(id => {
+                                            const lab = mockLabs.find(l => l.id === id);
+                                            return lab ? <Badge key={id} variant="secondary" className="bg-sky-100 text-sky-800"><FlaskConical className="w-3 h-3 mr-1"/>{lab.name}</Badge> : null;
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
+                        ) : null}
                     </CardContent>
                     <CardFooter className="bg-slate-50/70 p-4 border-t flex justify-end gap-2">
                          <Button variant="outline" size="sm" onClick={() => handleEdit(clinic)}><Edit className="mr-2"/> Edit</Button>

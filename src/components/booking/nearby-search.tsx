@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Stethoscope, MapPin, Pill, FlaskConical, Loader2, AlertTriangle, Building, LinkIcon, Search } from 'lucide-react';
+import { Stethoscope, MapPin, Pill, FlaskConical, Loader2, AlertTriangle, Building, Link as LinkIcon, Search } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { initialDoctors, mockPharmacies, mockLabs, initialClinics } from '@/lib/mock-data';
@@ -288,4 +288,3 @@ export function NearbySearch() {
     </div>
   );
 }
-

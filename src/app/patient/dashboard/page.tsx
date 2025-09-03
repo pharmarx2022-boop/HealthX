@@ -79,7 +79,7 @@ export default function PatientDashboardPage() {
 
     const nextReminder = myAppointments.find(appt => appt.nextAppointmentDate && !isNaN(new Date(appt.nextAppointmentDate).getTime()));
     
-    const healthPoints = myAppointments
+    const totalHealthPointsEarned = myAppointments
         .filter(appt => appt.status === 'done' && appt.refundStatus === 'Refunded')
         .reduce((total, appt) => total + appt.consultationFee, 0);
 
@@ -112,15 +112,15 @@ export default function PatientDashboardPage() {
             },
         ];
         
-        // This is a mock calculation, a real app would have a separate balance.
-        const mockBalance = healthPoints - 150 - 450;
+        const totalSpent = spending.reduce((acc, curr) => acc + parseFloat(curr.amount.replace('- ₹', '')), 0);
+        const availableBalance = totalHealthPointsEarned - totalSpent;
 
         return {
-            balance: mockBalance > 0 ? mockBalance : 0,
+            balance: availableBalance > 0 ? availableBalance : 0,
             transactions: [...earnings, ...spending].sort((a, b) => b.date.getTime() - a.date.getTime()),
         }
 
-    }, [myAppointments, healthPoints]);
+    }, [myAppointments, totalHealthPointsEarned]);
 
 
     const openReviewDialog = (appointment: any) => {
@@ -286,6 +286,7 @@ export default function PatientDashboardPage() {
                                 <CardContent>
                                     <p className="text-3xl font-bold">₹{transactionHistory.balance.toFixed(2)}</p>
                                     <p className="text-sm text-muted-foreground mt-1">Available to redeem.</p>
+                                    <p className="text-sm text-muted-foreground">Total cashback earned: ₹{totalHealthPointsEarned.toFixed(2)}</p>
                                     <Button variant="link" className="p-0 h-auto mt-2" onClick={() => setIsHistoryOpen(true)}>
                                         <History className="mr-2"/> View History
                                     </Button>
@@ -439,4 +440,5 @@ export default function PatientDashboardPage() {
             </Dialog>
         </div>
     );
-}
+
+    

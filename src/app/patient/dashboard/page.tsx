@@ -4,7 +4,7 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { User, Calendar, Clock, Stethoscope, IndianRupee, RefreshCw, Bell, Star, Users, Wallet } from 'lucide-react';
+import { User, Calendar, Clock, Stethoscope, IndianRupee, RefreshCw, Bell, Star, Users, Wallet, QrCode, KeyRound } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { mockPatients } from '@/components/doctor/patient-list';
 import { initialDoctors } from '@/lib/mock-data';
@@ -24,6 +24,8 @@ export default function PatientDashboardPage() {
     const [myAppointments, setMyAppointments] = useState<any[]>([]);
     const [isClient, setIsClient] = useState(false);
     const [isReviewOpen, setIsReviewOpen] = useState(false);
+    const [isRedeemOpen, setIsRedeemOpen] = useState(false);
+    const [redeemStep, setRedeemStep] = useState<'initial' | 'scan'>('initial');
     const [selectedAppointment, setSelectedAppointment] = useState<any | null>(null);
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState('');
@@ -207,6 +209,9 @@ export default function PatientDashboardPage() {
                                     <p className="text-3xl font-bold">₹{healthPoints.toFixed(2)}</p>
                                     <p className="text-sm text-muted-foreground mt-1">Use these points for future services.</p>
                                 </CardContent>
+                                <CardFooter>
+                                    <Button className="w-full" onClick={() => { setIsRedeemOpen(true); setRedeemStep('initial');}}>Redeem Points</Button>
+                                </CardFooter>
                             </Card>
                             <Card className="shadow-sm">
                                 <CardHeader className="flex flex-row items-center gap-4">
@@ -229,6 +234,7 @@ export default function PatientDashboardPage() {
             </main>
             <Footer />
 
+            {/* Review Dialog */}
             <Dialog open={isReviewOpen} onOpenChange={setIsReviewOpen}>
                 <DialogContent>
                     <DialogHeader>
@@ -267,6 +273,51 @@ export default function PatientDashboardPage() {
                         </DialogClose>
                         <Button onClick={handleSubmitReview}>Submit Review</Button>
                     </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+             {/* Redeem Points Dialog */}
+            <Dialog open={isRedeemOpen} onOpenChange={setIsRedeemOpen}>
+                 <DialogContent>
+                    {redeemStep === 'initial' && (
+                        <>
+                            <DialogHeader>
+                                <DialogTitle>Redeem Your Health Points</DialogTitle>
+                                <DialogDescription>
+                                    You can redeem up to 15% of your bill at pharmacies and up to 30% at labs.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="grid grid-cols-2 gap-4 py-4">
+                                <Button variant="outline" className="h-24 flex-col gap-2" onClick={() => setRedeemStep('scan')}>
+                                    <QrCode className="w-8 h-8"/>
+                                    <span>Scan to Pay</span>
+                                </Button>
+                                <div className="p-4 border rounded-md flex flex-col items-center justify-center text-center">
+                                    <KeyRound className="w-8 h-8 mb-2"/>
+                                    <span className="font-semibold">Pay with OTP</span>
+                                    <p className="text-xs text-muted-foreground">Ask the partner to initiate a payment to receive an OTP.</p>
+                                </div>
+                            </div>
+                        </>
+                    )}
+                    {redeemStep === 'scan' && (
+                         <>
+                            <DialogHeader>
+                                <DialogTitle>Scan QR Code</DialogTitle>
+                                <DialogDescription>
+                                    Point your camera at the pharmacy or lab's QR code to proceed with the payment.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="py-4">
+                                <div className="aspect-square bg-slate-900 rounded-lg flex items-center justify-center">
+                                    <p className="text-slate-500">Mock Camera View</p>
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <Button variant="outline" onClick={() => setRedeemStep('initial')}>Back</Button>
+                            </DialogFooter>
+                        </>
+                    )}
                 </DialogContent>
             </Dialog>
         </div>

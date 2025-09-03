@@ -3,6 +3,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FlaskConical } from 'lucide-react';
+import { RedemptionTool } from '@/components/partner/redemption-tool';
 
 export default function LabDashboardPage() {
   return (
@@ -15,20 +16,35 @@ export default function LabDashboardPage() {
                 <p className="text-muted-foreground">Manage your lab's services and offers.</p>
             </div>
             
-            <Card className="shadow-sm">
-                <CardHeader className="flex flex-row items-center gap-4">
-                    <FlaskConical className="w-8 h-8 text-primary"/>
-                    <div>
-                        <CardTitle>Welcome, Lab Partner!</CardTitle>
-                        <CardDescription>
-                            List your diagnostic services and manage patient requests.
+            <div className="grid md:grid-cols-2 gap-8">
+                <Card className="shadow-sm">
+                    <CardHeader className="flex flex-row items-center gap-4">
+                        <FlaskConical className="w-8 h-8 text-primary"/>
+                        <div>
+                            <CardTitle>Welcome, Lab Partner!</CardTitle>
+                            <CardDescription>
+                                List your diagnostic services and manage patient requests.
+                            </CardDescription>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <p>Lab-specific content and tools will be displayed here.</p>
+                    </CardContent>
+                </Card>
+
+                 <Card className="shadow-sm">
+                    <CardHeader>
+                        <CardTitle>Collect Health Points</CardTitle>
+                         <CardDescription>
+                            Redeem Health Points for patients via OTP verification.
                         </CardDescription>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <p>Lab-specific content and tools will be displayed here.</p>
-                </CardContent>
-            </Card>
+                    </CardHeader>
+                    <CardContent>
+                       <RedemptionTool partnerType="lab" />
+                    </CardContent>
+                </Card>
+            </div>
+
 
         </div>
       </main>

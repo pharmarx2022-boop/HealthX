@@ -1,0 +1,190 @@
+
+'use client';
+
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { IndianRupee } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+
+const redemptionSchema = z.object({
+  patientId: z.string().min(1, 'Patient ID is required.'),
+  totalBill: z.coerce.number().positive('Total bill must be a positive number.'),
+  otp: z.string().optional(),
+});
+
+interface RedemptionToolProps {
+    partnerType: 'pharmacy' | 'lab';
+}
+
+// Mock patient data for demonstration
+const mockPatientWallets: Record<string, { name: string, healthPoints: number }> = {
+    'rohan_sharma': { name: 'Rohan Sharma', healthPoints: 7450 },
+    'jane_doe': { name: 'Jane Doe', healthPoints: 1200 },
+};
+
+export function RedemptionTool({ partnerType }: RedemptionToolProps) {
+  const [step, setStep] = useState<'initial' | 'confirm'>('initial');
+  const [redemptionDetails, setRedemptionDetails] = useState<any>(null);
+  const { toast } = useToast();
+
+  const redemptionLimit = partnerType === 'pharmacy' ? 0.15 : 0.30;
+  const partnerName = partnerType.charAt(0).toUpperCase() + partnerType.slice(1);
+
+  const form = useForm<z.infer<typeof redemptionSchema>>({
+    resolver: zodResolver(redemptionSchema),
+    defaultValues: {
+      patientId: '',
+      totalBill: 0,
+      otp: '',
+    },
+  });
+
+  const handleInitiateRedemption = (values: z.infer<typeof redemptionSchema>) => {
+    const patientData = mockPatientWallets[values.patientId];
+
+    if (!patientData) {
+        toast({
+            title: 'Patient Not Found',
+            description: 'The entered Patient ID does not exist.',
+            variant: 'destructive',
+        });
+        return;
+    }
+
+    const maxRedeemable = values.totalBill * redemptionLimit;
+    const redeemAmount = Math.min(patientData.healthPoints, maxRedeemable);
+    const finalAmount = values.totalBill - redeemAmount;
+
+    setRedemptionDetails({
+        ...values,
+        patientName: patientData.name,
+        healthPoints: patientData.healthPoints,
+        redeemAmount,
+        finalAmount,
+    });
+    setStep('confirm');
+
+     toast({
+        title: "OTP Sent to Patient",
+        description: `An OTP has been sent to ${patientData.name}. Please enter it to confirm.`,
+    });
+  };
+
+  const handleConfirmPayment = () => {
+    // In a real app, you would verify the OTP here.
+    const otp = form.getValues('otp');
+    if (otp === '123456') { // Mock OTP
+        toast({
+            title: "Payment Successful!",
+            description: `₹${redemptionDetails.redeemAmount.toFixed(2)} redeemed. Final amount of ₹${redemptionDetails.finalAmount.toFixed(2)} collected.`,
+        });
+        form.reset();
+        setStep('initial');
+        setRedemptionDetails(null);
+    } else {
+        toast({
+            title: "Invalid OTP",
+            description: 'The entered OTP is incorrect. Please try again.',
+            variant: 'destructive',
+        })
+    }
+  }
+
+  return (
+    <div>
+      {step === 'initial' && (
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleInitiateRedemption)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="patientId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Patient ID</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., rohan_sharma" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="totalBill"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Total Bill Amount (₹)</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="e.g., 1000" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit" className="w-full">
+              Initiate Redemption
+            </Button>
+          </form>
+        </Form>
+      )}
+
+      {step === 'confirm' && redemptionDetails && (
+         <Card className="bg-slate-50/70 border-dashed">
+            <CardHeader>
+                <CardTitle>Confirm Payment</CardTitle>
+                <CardDescription>Verify details and enter OTP from patient.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="flex justify-between">
+                    <span className="text-muted-foreground">Patient:</span>
+                    <span className="font-medium">{redemptionDetails.patientName}</span>
+                </div>
+                 <div className="flex justify-between">
+                    <span className="text-muted-foreground">Total Bill:</span>
+                    <span className="font-medium">₹{redemptionDetails.totalBill.toFixed(2)}</span>
+                </div>
+                 <div className="flex justify-between text-destructive">
+                    <span className="text-destructive/80">Points Redeemed:</span>
+                    <span className="font-medium">- ₹{redemptionDetails.redeemAmount.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-primary font-bold text-lg border-t pt-4">
+                    <span>Final Amount to Pay:</span>
+                    <span>₹{redemptionDetails.finalAmount.toFixed(2)}</span>
+                </div>
+                <p className="text-xs text-center text-muted-foreground pt-2">
+                    Patient can redeem up to {redemptionLimit * 100}% of the bill at this {partnerName}.
+                </p>
+                <Form {...form}>
+                    <form className="space-y-4">
+                         <FormField
+                            control={form.control}
+                            name="otp"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Enter 6-Digit OTP</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="123456" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </form>
+                </Form>
+            </CardContent>
+            <CardFooter className="flex gap-2">
+                <Button variant="outline" className="w-full" onClick={() => setStep('initial')}>Cancel</Button>
+                <Button className="w-full" onClick={handleConfirmPayment}>Confirm Payment</Button>
+            </CardFooter>
+         </Card>
+      )}
+    </div>
+  );
+}

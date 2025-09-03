@@ -54,7 +54,7 @@ export function Header() {
           <Link href="/login">Login</Link>
         </Button>
         <Button asChild>
-          <Link href="/register/patient">Sign Up</Link>
+          <Link href="/register/patient">Register</Link>
         </Button>
       </>
     );
@@ -83,7 +83,7 @@ export function Header() {
           <Link href="/login" onClick={() => setIsSheetOpen(false)}>Login</Link>
         </Button>
         <Button asChild className="text-lg">
-          <Link href="/register/patient" onClick={() => setIsSheetOpen(false)}>Sign Up</Link>
+          <Link href="/register/patient" onClick={() => setIsSheetOpen(false)}>Register</Link>
         </Button>
       </>
     );

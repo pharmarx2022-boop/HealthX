@@ -130,7 +130,7 @@ export default function LoginPage() {
             <div className="mt-6 text-center text-sm">
               Don&apos;t have an account?{' '}
               <Link href="/register/patient" className="text-primary hover:underline font-medium">
-                Sign up
+                Register
               </Link>
             </div>
           </CardContent>

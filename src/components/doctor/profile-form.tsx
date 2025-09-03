@@ -148,102 +148,101 @@ export function ProfileForm() {
   const currentImage = form.watch('image');
 
   return (
-    <div className="grid md:grid-cols-3 gap-8">
-        <div className="md:col-span-1">
-            <h3 className="font-semibold mb-2">Profile Picture</h3>
-            <div className="relative w-full aspect-square rounded-lg overflow-hidden border">
-                {currentImage ? (
-                    <Image src={currentImage} alt="Profile Preview" fill style={{objectFit:"cover"}} data-ai-hint="doctor portrait" />
-                ) : (
-                    <div className="bg-slate-100 h-full w-full flex items-center justify-center text-muted-foreground text-sm">
-                        No Image
-                    </div>
-                )}
-            </div>
-             <FormField control={form.control} name="image" render={({ field }) => (
-                <FormItem className="mt-4">
-                    <FormControl>
-                        <div>
-                            <Input 
-                                id="image-upload"
-                                type="file"
-                                accept="image/*"
-                                onChange={handleImageUpload}
-                                className="hidden" 
-                            />
-                            <label htmlFor="image-upload" className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full">
-                                <Upload className="mr-2" />
-                                Upload from Device
-                            </label>
+    <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="grid md:grid-cols-3 gap-8">
+            <div className="md:col-span-1">
+                <h3 className="font-semibold mb-2">Profile Picture</h3>
+                <div className="relative w-full aspect-square rounded-lg overflow-hidden border">
+                    {currentImage ? (
+                        <Image src={currentImage} alt="Profile Preview" fill style={{objectFit:"cover"}} data-ai-hint="doctor portrait" />
+                    ) : (
+                        <div className="bg-slate-100 h-full w-full flex items-center justify-center text-muted-foreground text-sm">
+                            No Image
                         </div>
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-            )} />
-        </div>
-        <div className="md:col-span-2">
-            <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Full Name</FormLabel>
-                    <FormControl>
-                        <Input placeholder="e.g., Dr. Anjali Sharma" {...field} />
-                    </FormControl>
-                    <FormMessage />
+                    )}
+                </div>
+                <FormField control={form.control} name="image" render={({ field }) => (
+                    <FormItem className="mt-4">
+                        <FormControl>
+                            <div>
+                                <Input 
+                                    id="image-upload"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleImageUpload}
+                                    className="hidden" 
+                                />
+                                <label htmlFor="image-upload" className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full">
+                                    <Upload className="mr-2" />
+                                    Upload from Device
+                                </label>
+                            </div>
+                        </FormControl>
+                        <FormMessage />
                     </FormItem>
-                )}
+                )} />
+            </div>
+            <div className="md:col-span-2 space-y-6">
+                <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Full Name</FormLabel>
+                        <FormControl>
+                            <Input placeholder="e.g., Dr. Anjali Sharma" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
                 />
                 <FormField
-                control={form.control}
-                name="specialty"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Specialty</FormLabel>
-                    <FormControl>
-                        <Input placeholder="e.g., Cardiologist" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
+                    control={form.control}
+                    name="specialty"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Specialty</FormLabel>
+                        <FormControl>
+                            <Input placeholder="e.g., Cardiologist" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
                 />
                 <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Location</FormLabel>
-                    <FormControl>
-                        <Input placeholder="e.g., Mumbai, IN" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Location</FormLabel>
+                        <FormControl>
+                            <Input placeholder="e.g., Mumbai, IN" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
                 />
                 <FormField
-                control={form.control}
-                name="bio"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Bio / Experience</FormLabel>
-                    <FormControl>
-                        <Textarea rows={5} placeholder="Tell patients a little about yourself..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
+                    control={form.control}
+                    name="bio"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Bio / Experience</FormLabel>
+                        <FormControl>
+                            <Textarea rows={5} placeholder="Tell patients a little about yourself..." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
                 />
                 
                 <Button type="submit" disabled={form.formState.isSubmitting}>
                     {form.formState.isSubmitting && <Loader2 className="animate-spin mr-2" />}
                     Save Changes
                 </Button>
-            </form>
-            </Form>
-        </div>
-    </div>
+            </div>
+        </form>
+    </Form>
   );
 }
+

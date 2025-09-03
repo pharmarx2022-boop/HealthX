@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { HeartPulse, Calendar, Menu, X, UserCircle, LogOut, Settings } from 'lucide-react';
+import { HeartPulse, Calendar, Menu, X, UserCircle, LogOut, Settings, Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { useState, useEffect } from 'react';
@@ -61,12 +61,20 @@ export function Header() {
               </Link>
             </DropdownMenuItem>
              {user.role === 'doctor' && (
-                <DropdownMenuItem asChild>
-                    <Link href="/doctor/profile">
-                        <Settings className="mr-2" />
-                        <span>Manage Profile</span>
-                    </Link>
-                </DropdownMenuItem>
+                <>
+                    <DropdownMenuItem asChild>
+                        <Link href="/doctor/profile">
+                            <Settings className="mr-2" />
+                            <span>Manage Profile</span>
+                        </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                        <Link href="/doctor/clinics">
+                            <Briefcase className="mr-2" />
+                            <span>Manage Clinics</span>
+                        </Link>
+                    </DropdownMenuItem>
+                </>
              )}
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
@@ -95,12 +103,20 @@ export function Header() {
             </Link>
           </Button>
            {user.role === 'doctor' && (
-             <Button variant="ghost" asChild className="justify-start text-lg">
-                <Link href="/doctor/profile" onClick={() => setIsSheetOpen(false)}>
-                    <Settings className="mr-2" />
-                    Manage Profile
-                </Link>
-            </Button>
+             <>
+                <Button variant="ghost" asChild className="justify-start text-lg">
+                    <Link href="/doctor/profile" onClick={() => setIsSheetOpen(false)}>
+                        <Settings className="mr-2" />
+                        Manage Profile
+                    </Link>
+                </Button>
+                 <Button variant="ghost" asChild className="justify-start text-lg">
+                    <Link href="/doctor/clinics" onClick={() => setIsSheetOpen(false)}>
+                        <Briefcase className="mr-2" />
+                        Manage Clinics
+                    </Link>
+                </Button>
+            </>
            )}
           <Button variant="ghost" className="justify-start text-lg" onClick={handleLogout}>
             <LogOut className="mr-2" />

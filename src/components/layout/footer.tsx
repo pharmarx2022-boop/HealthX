@@ -8,11 +8,17 @@ export function Footer() {
         <p className="text-sm text-muted-foreground">
           © {new Date().getFullYear()} HealthLink Hub. All rights reserved.
         </p>
-        <nav className="flex items-center gap-4">
-          <Link href="#" className="text-sm text-muted-foreground hover:text-primary">
+        <nav className="flex items-center gap-4 flex-wrap justify-center">
+           <Link href="/about" className="text-sm text-muted-foreground hover:text-primary">
+            About Us
+          </Link>
+           <Link href="/contact" className="text-sm text-muted-foreground hover:text-primary">
+            Contact Us
+          </Link>
+          <Link href="/terms-of-service" className="text-sm text-muted-foreground hover:text-primary">
             Terms of Service
           </Link>
-          <Link href="#" className="text-sm text-muted-foreground hover:text-primary">
+          <Link href="/privacy-policy" className="text-sm text-muted-foreground hover:text-primary">
             Privacy Policy
           </Link>
         </nav>

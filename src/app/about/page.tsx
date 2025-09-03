@@ -1,0 +1,101 @@
+
+import { Header } from '@/components/layout/header';
+import { Footer } from '@/components/layout/footer';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import Image from 'next/image';
+import { Target, Eye, Users } from 'lucide-react';
+import { FloatingWhatsApp } from '@/components/layout/floating-whatsapp';
+
+const teamMembers = [
+  {
+    name: 'Dr. Anjali Sharma',
+    title: 'Founder & CEO',
+    image: 'https://picsum.photos/400/400',
+    dataAiHint: 'ceo portrait',
+    bio: 'A visionary leader with a passion for leveraging technology to improve healthcare access for all.',
+  },
+  {
+    name: 'Vikram Singh',
+    title: 'Chief Technology Officer',
+    image: 'https://picsum.photos/401/401',
+    dataAiHint: 'cto portrait',
+    bio: 'The architect of our platform, ensuring a seamless and secure experience for all users.',
+  },
+  {
+    name: 'Priya Patel',
+    title: 'Head of Patient Relations',
+    image: 'https://picsum.photos/402/402',
+    dataAiHint: 'manager portrait',
+    bio: 'Dedicated to making sure every patient feels heard, supported, and cared for.',
+  },
+];
+
+export default function AboutUsPage() {
+  return (
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      <main className="flex-1 bg-slate-50/50">
+        <div className="container mx-auto py-16">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-headline font-bold">About HealthLink Hub</h1>
+            <p className="text-lg text-muted-foreground mt-4 max-w-3xl mx-auto">
+              We are dedicated to revolutionizing the healthcare landscape by creating a truly connected and accessible ecosystem.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-12 mb-16">
+            <Card className="shadow-lg">
+              <CardHeader className="text-center items-center">
+                 <div className="p-4 bg-primary/10 rounded-full mb-4">
+                    <Eye className="w-10 h-10 text-primary" />
+                </div>
+                <CardTitle className="font-headline text-2xl">Our Vision</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-center text-muted-foreground">
+                  To create a world where high-quality healthcare is not a privilege, but a right accessible to everyone, everywhere, through a single, unified digital platform.
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="shadow-lg">
+              <CardHeader className="text-center items-center">
+                 <div className="p-4 bg-primary/10 rounded-full mb-4">
+                    <Target className="w-10 h-10 text-primary" />
+                </div>
+                <CardTitle className="font-headline text-2xl">Our Mission</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-center text-muted-foreground">
+                  To empower patients and connect them seamlessly with doctors, pharmacies, labs, and agents by building intuitive, reliable, and innovative technology solutions that prioritize health and well-being.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-headline font-bold">Meet Our Team</h2>
+              <p className="text-lg text-muted-foreground mt-2">The minds behind the mission.</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {teamMembers.map((member) => (
+                <Card key={member.name} className="text-center hover:shadow-xl transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="w-32 h-32 rounded-full mx-auto overflow-hidden border-4 border-primary/20 mb-4">
+                        <Image src={member.image} alt={member.name} width={128} height={128} className="object-cover" data-ai-hint={member.dataAiHint} />
+                    </div>
+                    <h3 className="text-xl font-semibold font-headline">{member.name}</h3>
+                    <p className="text-primary font-medium">{member.title}</p>
+                    <p className="text-muted-foreground mt-2 text-sm">{member.bio}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </div>
+      </main>
+      <Footer />
+      <FloatingWhatsApp />
+    </div>
+  );
+}

@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { cn } from '@/lib/utils';
 import { Toaster } from "@/components/ui/toaster";
 import './globals.css';
+import { FloatingWhatsApp } from '@/components/layout/floating-whatsapp';
 
 export const metadata: Metadata = {
   title: 'HealthLink Hub',
@@ -28,6 +29,7 @@ export default function RootLayout({
       >
         {children}
         <Toaster />
+        <FloatingWhatsApp />
       </body>
     </html>
   );

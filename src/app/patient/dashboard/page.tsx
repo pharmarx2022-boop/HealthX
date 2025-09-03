@@ -4,8 +4,8 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { User, Calendar, Clock, Stethoscope, IndianRupee, RefreshCw, Bell, Star, Users, Wallet, QrCode, KeyRound } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { User, Calendar, Clock, Stethoscope, IndianRupee, RefreshCw, Bell, Star, Users, Wallet, QrCode, KeyRound, History } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
 import { mockPatients } from '@/components/doctor/patient-list';
 import { initialDoctors } from '@/lib/mock-data';
 import { format } from 'date-fns';
@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { FamilyManager } from '@/components/patient/family-manager';
+import { Separator } from '@/components/ui/separator';
 
 const DOCTORS_KEY = 'doctorsData';
 
@@ -25,6 +26,7 @@ export default function PatientDashboardPage() {
     const [isClient, setIsClient] = useState(false);
     const [isReviewOpen, setIsReviewOpen] = useState(false);
     const [isRedeemOpen, setIsRedeemOpen] = useState(false);
+    const [isHistoryOpen, setIsHistoryOpen] = useState(false);
     const [redeemStep, setRedeemStep] = useState<'initial' | 'scan'>('initial');
     const [selectedAppointment, setSelectedAppointment] = useState<any | null>(null);
     const [rating, setRating] = useState(0);
@@ -45,6 +47,46 @@ export default function PatientDashboardPage() {
     const healthPoints = myAppointments
         .filter(appt => appt.status === 'done' && appt.refundStatus === 'Refunded')
         .reduce((total, appt) => total + appt.consultationFee, 0);
+
+    const transactionHistory = useMemo(() => {
+        const earnings = myAppointments
+            .filter(appt => appt.status === 'done' && appt.refundStatus === 'Refunded')
+            .map(appt => ({
+                type: 'Cashback Earned',
+                description: `From consultation on ${format(new Date(appt.appointmentDate), 'PP')}`,
+                amount: `+ ₹${appt.consultationFee.toFixed(2)}`,
+                date: new Date(appt.appointmentDate),
+                status: 'credited'
+            }));
+        
+        // Mock spending for demonstration purposes
+        const spending = [
+            {
+                type: 'Points Redeemed',
+                description: 'At Wellness Forever',
+                amount: `- ₹150.00`,
+                date: new Date('2024-08-16T10:00:00Z'),
+                status: 'debited'
+            },
+            {
+                type: 'Points Redeemed',
+                description: 'At Metropolis Labs',
+                amount: `- ₹450.00`,
+                date: new Date('2024-08-18T14:30:00Z'),
+                status: 'debited'
+            },
+        ];
+        
+        // This is a mock calculation, a real app would have a separate balance.
+        const mockBalance = healthPoints - 150 - 450;
+
+        return {
+            balance: mockBalance > 0 ? mockBalance : 0,
+            transactions: [...earnings, ...spending].sort((a, b) => b.date.getTime() - a.date.getTime()),
+        }
+
+    }, [myAppointments, healthPoints]);
+
 
     const openReviewDialog = (appointment: any) => {
         setSelectedAppointment(appointment);
@@ -206,8 +248,11 @@ export default function PatientDashboardPage() {
                                     </div>
                                 </CardHeader>
                                 <CardContent>
-                                    <p className="text-3xl font-bold">₹{healthPoints.toFixed(2)}</p>
-                                    <p className="text-sm text-muted-foreground mt-1">Use these points for future services.</p>
+                                    <p className="text-3xl font-bold">₹{transactionHistory.balance.toFixed(2)}</p>
+                                    <p className="text-sm text-muted-foreground mt-1">Available to redeem.</p>
+                                    <Button variant="link" className="p-0 h-auto mt-2" onClick={() => setIsHistoryOpen(true)}>
+                                        <History className="mr-2"/> View History
+                                    </Button>
                                 </CardContent>
                                 <CardFooter>
                                     <Button className="w-full" onClick={() => { setIsRedeemOpen(true); setRedeemStep('initial');}}>Redeem Points</Button>
@@ -318,6 +363,34 @@ export default function PatientDashboardPage() {
                             </DialogFooter>
                         </>
                     )}
+                </DialogContent>
+            </Dialog>
+
+             {/* Transaction History Dialog */}
+            <Dialog open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Health Points History</DialogTitle>
+                        <DialogDescription>
+                            A record of your earnings and redemptions.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="max-h-[60vh] overflow-y-auto -mx-6 px-6">
+                        <ul className="space-y-4 py-4">
+                            {transactionHistory.transactions.map((tx, index) => (
+                                <li key={index} className="flex items-center justify-between">
+                                    <div>
+                                        <p className="font-medium">{tx.type}</p>
+                                        <p className="text-sm text-muted-foreground">{tx.description}</p>
+                                         <p className="text-xs text-muted-foreground mt-1">{format(tx.date, 'PP, p')}</p>
+                                    </div>
+                                    <span className={`font-semibold ${tx.status === 'credited' ? 'text-green-600' : 'text-destructive'}`}>
+                                        {tx.amount}
+                                    </span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 </DialogContent>
             </Dialog>
         </div>

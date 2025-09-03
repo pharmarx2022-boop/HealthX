@@ -15,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { mockPharmacies, mockLabs } from '@/lib/mock-data';
 
 const redemptionSchema = z.object({
-  patientId: z.string().min(1, 'Patient ID is required.'),
+  phone: z.string().min(10, 'A valid 10-digit phone number is required.').max(10, 'A valid 10-digit phone number is required.'),
   totalBill: z.coerce.number().positive('Total bill must be a positive number.'),
   otp: z.string().optional(),
 });
@@ -26,8 +26,8 @@ interface RedemptionToolProps {
 
 // Mock patient data for demonstration
 const mockPatientWallets: Record<string, { name: string, healthPoints: number }> = {
-    'rohan_sharma': { name: 'Rohan Sharma', healthPoints: 7450 - 150 - 450 }, // Using the calculated balance from patient dashboard
-    'jane_doe': { name: 'Jane Doe', healthPoints: 1200 },
+    '9876543210': { name: 'Rohan Sharma', healthPoints: 7450 - 150 - 450 }, // Using the calculated balance from patient dashboard
+    '9999999999': { name: 'Jane Doe', healthPoints: 1200 },
 };
 
 // Mock partner data - in a real app this would be fetched for the logged in partner
@@ -49,20 +49,20 @@ export function RedemptionTool({ partnerType }: RedemptionToolProps) {
   const form = useForm<z.infer<typeof redemptionSchema>>({
     resolver: zodResolver(redemptionSchema),
     defaultValues: {
-      patientId: '',
+      phone: '',
       totalBill: 0,
       otp: '',
     },
   });
 
   const handleInitiateRedemption = (values: z.infer<typeof redemptionSchema>) => {
-    // Use 'rohan_sharma' as the key to look up patient data
-    const patientData = mockPatientWallets[values.patientId.toLowerCase()];
+    // Use phone number as the key to look up patient data
+    const patientData = mockPatientWallets[values.phone];
 
     if (!patientData) {
         toast({
             title: 'Patient Not Found',
-            description: 'The entered Patient ID does not exist. Try "rohan_sharma".',
+            description: 'The entered mobile number does not exist. Try "9876543210".',
             variant: 'destructive',
         });
         return;
@@ -114,12 +114,12 @@ export function RedemptionTool({ partnerType }: RedemptionToolProps) {
           <form onSubmit={form.handleSubmit(handleInitiateRedemption)} className="space-y-4">
             <FormField
               control={form.control}
-              name="patientId"
+              name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Patient ID</FormLabel>
+                  <FormLabel>Patient's Mobile Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., rohan_sharma" {...field} />
+                    <Input type="tel" placeholder="e.g., 9876543210" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

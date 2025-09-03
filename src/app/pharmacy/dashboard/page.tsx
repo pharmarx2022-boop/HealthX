@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useState, useMemo, useEffect } from 'react';
 import { initialPharmacies, mockPatientData } from '@/lib/mock-data';
 import { getTransactionHistory, recordTransaction, type Transaction } from '@/lib/transactions';
+import { getPharmacyData, recordCommission, type PharmacyTransaction } from '@/lib/pharmacy-data';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -27,7 +28,8 @@ export default function PharmacyDashboardPage() {
     const [otp, setOtp] = useState('');
     const [otpSent, setOtpSent] = useState(false);
     const [redeemAmount, setRedeemAmount] = useState('');
-    const [transactionHistory, setTransactionHistory] = useState<{ balance: number; transactions: Transaction[] }>({ balance: 0, transactions: [] });
+    const [patientTransactionHistory, setPatientTransactionHistory] = useState<{ balance: number; transactions: Transaction[] }>({ balance: 0, transactions: [] });
+    const [pharmacyData, setPharmacyData] = useState<{ balance: number; transactions: PharmacyTransaction[] }>({ balance: 0, transactions: [] });
     const [pharmacyDetails, setPharmacyDetails] = useState<any>(null);
 
 
@@ -42,6 +44,7 @@ export default function PharmacyDashboardPage() {
                 const allPharmacies = storedPharmacies ? JSON.parse(storedPharmacies) : initialPharmacies;
                 const myDetails = allPharmacies.find((p: any) => p.id === u.id);
                 setPharmacyDetails(myDetails);
+                setPharmacyData(getPharmacyData(u.id));
             }
         }
     }, []);
@@ -52,7 +55,7 @@ export default function PharmacyDashboardPage() {
 
         if (foundPatient) {
             setPatient(foundPatient);
-            setTransactionHistory(getTransactionHistory(foundPatient.id));
+            setPatientTransactionHistory(getTransactionHistory(foundPatient.id));
             setOtpSent(false);
             setOtp('');
             setRedeemAmount('');
@@ -94,16 +97,15 @@ export default function PharmacyDashboardPage() {
             return;
         }
 
-        if (amount > transactionHistory.balance) {
+        if (amount > patientTransactionHistory.balance) {
             toast({
                 title: "Insufficient Balance",
-                description: `Patient only has ₹${transactionHistory.balance.toFixed(2)} available.`,
+                description: `Patient only has ₹${patientTransactionHistory.balance.toFixed(2)} available.`,
                 variant: "destructive"
             });
             return;
         }
         
-        // In a real app, update the backend here.
         recordTransaction(patient.id, {
             type: 'debit',
             amount: amount,
@@ -116,14 +118,22 @@ export default function PharmacyDashboardPage() {
         const commission = finalAmount * 0.05; // Admin keeps 5%
         const pharmacyPayout = finalAmount - commission;
 
+        recordCommission(user.id, {
+            type: 'credit',
+            amount: pharmacyPayout,
+            description: `Commission from redemption by ${patient.name}`,
+            date: new Date(),
+        });
+
         toast({
             title: "Redemption Successful!",
             description: `₹${amount.toFixed(2)} redeemed. Pharmacy payout will be ₹${pharmacyPayout.toFixed(2)}.`,
             duration: 6000
         });
 
-        // Refresh patient data
+        // Refresh data
         handleSearchPatient();
+        setPharmacyData(getPharmacyData(user.id));
         setOtpSent(false);
         setOtp('');
         setRedeemAmount('');
@@ -139,7 +149,7 @@ export default function PharmacyDashboardPage() {
                 <p className="text-muted-foreground">Manage inventory and redeem patient health points.</p>
             </div>
             
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <Card className="shadow-sm">
                     <CardHeader className="flex flex-row items-center gap-4">
                         <Pill className="w-8 h-8 text-primary"/>
@@ -157,9 +167,53 @@ export default function PharmacyDashboardPage() {
 
                  <Card className="shadow-sm">
                     <CardHeader>
+                        <CardTitle>Collected Commissions</CardTitle>
+                        <CardDescription>Your total earnings from redemptions.</CardDescription>
+                    </CardHeader>
+                     <CardContent>
+                        <p className="text-4xl font-bold">₹{pharmacyData.balance.toFixed(2)}</p>
+                    </CardContent>
+                    <CardFooter>
+                         <Dialog>
+                            <DialogTrigger asChild>
+                                <Button variant="link" className="p-0 h-auto self-center">
+                                    <History className="mr-2"/> View History
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Commission History</DialogTitle>
+                                    <DialogDescription>A record of your collected commissions from patient redemptions.</DialogDescription>
+                                </DialogHeader>
+                                <div className="max-h-[50vh] overflow-y-auto -mx-6 px-6">
+                                    <ul className="space-y-4 py-4">
+                                        {pharmacyData.transactions.length > 0 ? (
+                                            pharmacyData.transactions.map((tx, index) => (
+                                                <li key={index} className="flex items-center justify-between">
+                                                    <div>
+                                                        <p className="font-medium">{tx.description}</p>
+                                                        <p className="text-xs text-muted-foreground mt-1">{format(new Date(tx.date), 'PP, p')}</p>
+                                                    </div>
+                                                    <span className={`font-semibold ${tx.type === 'credit' ? 'text-green-600' : 'text-destructive'}`}>
+                                                        {tx.type === 'credit' ? '+' : '-'} ₹{tx.amount.toFixed(2)}
+                                                    </span>
+                                                </li>
+                                            ))
+                                        ) : (
+                                            <p className="text-center text-muted-foreground py-4">No transactions yet.</p>
+                                        )}
+                                    </ul>
+                                </div>
+                            </DialogContent>
+                        </Dialog>
+                    </CardFooter>
+                </Card>
+
+                 <Card className="shadow-sm md:col-span-2 lg:col-span-1">
+                    <CardHeader>
                         <CardTitle>Redeem Health Points</CardTitle>
                         <CardDescription>
-                            Help patients pay for their medicines using their Health Points cashback.
+                            Help patients pay using their Health Points cashback.
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
@@ -186,7 +240,7 @@ export default function PharmacyDashboardPage() {
                                         <p className="font-semibold">{patient.name}</p>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-lg font-bold">₹{transactionHistory.balance.toFixed(2)}</p>
+                                        <p className="text-lg font-bold">₹{patientTransactionHistory.balance.toFixed(2)}</p>
                                         <p className="text-xs text-muted-foreground -mt-1">Available Balance</p>
                                     </div>
                                 </div>
@@ -194,7 +248,7 @@ export default function PharmacyDashboardPage() {
                                 <Dialog>
                                     <DialogTrigger asChild>
                                         <Button variant="link" className="p-0 h-auto text-sm mt-1">
-                                            <History className="mr-2"/> View History
+                                            <History className="mr-2"/> View Patient History
                                         </Button>
                                     </DialogTrigger>
                                     <DialogContent>
@@ -204,11 +258,11 @@ export default function PharmacyDashboardPage() {
                                         </DialogHeader>
                                         <div className="max-h-[50vh] overflow-y-auto -mx-6 px-6">
                                             <ul className="space-y-4 py-4">
-                                                {transactionHistory.transactions.map((tx, index) => (
+                                                {patientTransactionHistory.transactions.map((tx, index) => (
                                                     <li key={index} className="flex items-center justify-between">
                                                         <div>
                                                             <p className="font-medium">{tx.description}</p>
-                                                            <p className="text-xs text-muted-foreground mt-1">{format(tx.date, 'PP, p')}</p>
+                                                            <p className="text-xs text-muted-foreground mt-1">{format(new Date(tx.date), 'PP, p')}</p>
                                                         </div>
                                                         <span className={`font-semibold ${tx.type === 'credit' ? 'text-green-600' : 'text-destructive'}`}>
                                                             {tx.type === 'credit' ? '+' : '-'} ₹{tx.amount.toFixed(2)}
@@ -248,16 +302,16 @@ export default function PharmacyDashboardPage() {
                         )}
 
                     </CardContent>
-                    <CardFooter>
-                         <Alert variant="outline">
-                            <Banknote className="h-4 w-4" />
-                            <AlertTitle>Payout Information</AlertTitle>
-                            <AlertDescription>
-                                For each redemption, the final amount (after your pharmacy's discount) is transferred to the admin. You will receive 95% of this amount in your bank account, with the admin retaining a 5% commission. You only need to collect cash from patients for amounts not covered by Health Points.
-                            </AlertDescription>
-                        </Alert>
-                    </CardFooter>
                 </Card>
+                <div className="md:col-span-2 lg:col-span-3">
+                    <Alert variant="outline" className="w-full">
+                        <Banknote className="h-4 w-4" />
+                        <AlertTitle>Payout Information</AlertTitle>
+                        <AlertDescription>
+                            For each redemption, the final amount (after your pharmacy's discount) is transferred to the admin. You will receive 95% of this amount in your bank account, with the admin retaining a 5% commission. You only need to collect cash from patients for amounts not covered by Health Points.
+                        </AlertDescription>
+                    </Alert>
+                </div>
             </div>
         </div>
       </main>

@@ -70,7 +70,7 @@ export default function LabDashboardPage() {
                                     List your diagnostic services and manage patient requests.
                                 </CardDescription>
                             </div>
-                        </Header>
+                        </CardHeader>
                         <CardContent>
                              <p>Use the tools on this dashboard to manage your presence on HealthLink Hub.</p>
                         </CardContent>

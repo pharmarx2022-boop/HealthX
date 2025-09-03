@@ -1,38 +1,98 @@
 
+'use client';
+
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { User } from 'lucide-react';
+import { User, Calendar, Clock, Stethoscope, IndianRupee, RefreshCw } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { mockPatients } from '@/components/doctor/patient-list';
+import { format } from 'date-fns';
+import { Badge } from '@/components/ui/badge';
 
 export default function PatientDashboardPage() {
-  return (
-    <div className="flex flex-col min-h-screen">
-      <Header />
-      <main className="flex-1 bg-slate-50/50">
-        <div className="container mx-auto py-12">
-            <div className="mb-8">
-                <h1 className="text-3xl font-headline font-bold">Patient Dashboard</h1>
-                <p className="text-muted-foreground">Manage your appointments and health records.</p>
-            </div>
-            
-            <Card className="shadow-sm">
-                <CardHeader className="flex flex-row items-center gap-4">
-                    <User className="w-8 h-8 text-primary"/>
-                    <div>
-                        <CardTitle>Welcome!</CardTitle>
-                        <CardDescription>
-                            Book new appointments, view your upcoming visits, and manage your wallet.
-                        </CardDescription>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <p>Patient-specific content and tools will be displayed here, like upcoming appointments.</p>
-                </CardContent>
-            </Card>
+    const [myAppointments, setMyAppointments] = useState<any[]>([]);
 
+    useEffect(() => {
+        // In a real app, you'd fetch this for the logged-in user.
+        // Here, we'll use the persisted mock data and filter it.
+        const storedPatients = sessionStorage.getItem('mockPatients');
+        const allAppointments = storedPatients ? JSON.parse(storedPatients) : mockPatients;
+        // Let's assume the logged in patient is "Rohan Sharma" for this demo
+        setMyAppointments(allAppointments.filter((p: any) => p.name === 'Rohan Sharma')); 
+    }, []);
+
+    return (
+        <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-1 bg-slate-50/50">
+                <div className="container mx-auto py-12">
+                    <div className="mb-8">
+                        <h1 className="text-3xl font-headline font-bold">Patient Dashboard</h1>
+                        <p className="text-muted-foreground">Manage your appointments and health records.</p>
+                    </div>
+
+                    <Card className="shadow-sm">
+                        <CardHeader className="flex flex-row items-center gap-4">
+                            <User className="w-8 h-8 text-primary" />
+                            <div>
+                                <CardTitle>Welcome, Rohan Sharma!</CardTitle>
+                                <CardDescription>
+                                    Book new appointments, view your upcoming visits, and track your refunds.
+                                </CardDescription>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <h2 className="text-xl font-semibold mb-4">Your Appointments</h2>
+                            <div className="space-y-6">
+                                {myAppointments.length > 0 ? (
+                                    myAppointments.map(appt => (
+                                        <Card key={appt.id} className="overflow-hidden">
+                                            <CardHeader className="flex flex-row justify-between items-start bg-slate-50/70 p-4">
+                                                <div>
+                                                    <CardTitle className="text-lg font-headline">Consultation at {appt.clinic}</CardTitle>
+                                                    <CardDescription className="flex items-center gap-2 pt-1">
+                                                        <Calendar className="w-4 h-4"/> {format(new Date(appt.appointmentDate), 'EEEE, MMMM d, yyyy')}
+                                                        <Clock className="w-4 h-4 ml-2"/> {format(new Date(appt.appointmentDate), 'p')}
+                                                    </CardDescription>
+                                                </div>
+                                                <Badge variant={appt.status === 'done' ? 'secondary' : 'default'} className="capitalize">{appt.status}</Badge>
+                                            </CardHeader>
+                                            <CardContent className="p-4 grid grid-cols-2 gap-4">
+                                                <div className="flex items-center text-muted-foreground gap-3">
+                                                    <Stethoscope className="w-5 h-5 text-primary" />
+                                                    <div>
+                                                        <p className="font-medium text-foreground">Reason</p>
+                                                        <p>{appt.consultation}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center text-muted-foreground gap-3">
+                                                    <IndianRupee className="w-5 h-5 text-primary" />
+                                                     <div>
+                                                        <p className="font-medium text-foreground">Fee Paid</p>
+                                                        <p>₹{appt.consultationFee.toFixed(2)}</p>
+                                                    </div>
+                                                </div>
+                                                 <div className="flex items-center text-muted-foreground gap-3 col-span-2">
+                                                    <RefreshCw className="w-5 h-5 text-primary" />
+                                                     <div>
+                                                        <p className="font-medium text-foreground">Refund Status</p>
+                                                        <p>{appt.refundStatus}</p>
+                                                    </div>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    ))
+                                ) : (
+                                    <p>You have no upcoming appointments.</p>
+                                )}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                </div>
+            </main>
+            <Footer />
         </div>
-      </main>
-      <Footer />
-    </div>
-  );
+    );
 }

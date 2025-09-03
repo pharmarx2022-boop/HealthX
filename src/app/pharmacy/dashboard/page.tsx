@@ -94,7 +94,7 @@ export default function PharmacyDashboardPage() {
                              <CardDescription>
                                 Redeem Health Points for patients via OTP verification.
                             </CardDescription>
-                        </Header>
+                        </CardHeader>
                         <CardContent>
                            <RedemptionTool partnerType="pharmacy" />
                         </CardContent>
@@ -160,7 +160,7 @@ export default function PharmacyDashboardPage() {
                              <CardDescription>
                                 View your recent Health Point redemption history.
                             </CardDescription>
-                        </Header>
+                        </CardHeader>
                         <CardContent>
                            <div className="space-y-4">
                                 {mockTransactions.map(tx => (

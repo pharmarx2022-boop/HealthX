@@ -25,9 +25,6 @@ export function Header() {
           <Button asChild>
             <Link href="/register/patient">Sign Up</Link>
           </Button>
-          <Button variant="outline" asChild>
-            <Link href="/admin">Admin</Link>
-          </Button>
         </nav>
       </div>
     </header>

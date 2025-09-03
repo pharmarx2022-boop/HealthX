@@ -49,35 +49,17 @@ const doctorSchema = baseSchemaObject.extend({
 });
 
 const patientSchema = baseSchema;
-const agentSchema = baseSchema;
-
-const pharmacyAndLabSchemaObject = baseSchemaObject.extend({
-    businessName: z.string().min(2, { message: 'Business name is required.' }),
-    address: z.string().min(10, { message: 'Address is required.' }),
-});
-
-const pharmacySchema = pharmacyAndLabSchemaObject.refine(data => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-});
-const labSchema = pharmacySchema;
 
 const roleSchemas = {
   doctor: doctorSchema,
   patient: patientSchema,
-  agent: agentSchema,
-  pharmacy: pharmacySchema,
-  lab: labSchema,
 };
 
 type Role = keyof typeof roleSchemas;
 
-const roleTitles: Record<Role, string> = {
+const roleTitles: Record<string, string> = {
     doctor: "Doctor Registration",
     patient: "Create Patient Account",
-    pharmacy: "Pharmacy Registration",
-    lab: "Lab Registration",
-    agent: "Agent Registration"
 }
 
 export default function RegisterPage({ params }: { params: { role: Role } }) {
@@ -96,8 +78,6 @@ export default function RegisterPage({ params }: { params: { role: Role } }) {
       confirmPassword: '',
       registrationNumber: '',
       referralCode: '',
-      businessName: '',
-      address: '',
     },
   });
 
@@ -120,53 +100,29 @@ export default function RegisterPage({ params }: { params: { role: Role } }) {
   }
 
   const renderRoleSpecificFields = () => {
-    switch (role) {
-      case 'doctor':
-        return (
-          <>
-            <FormField control={form.control} name="registrationNumber" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Registration Number</FormLabel>
-                  <FormControl><Input placeholder="MCI12345" {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField control={form.control} name="referralCode" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Referral Code (Optional)</FormLabel>
-                  <FormControl><Input placeholder="REF123" {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </>
-        );
-      case 'pharmacy':
-      case 'lab':
-        return (
-            <>
-                <FormField control={form.control} name="businessName" render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Business Name</FormLabel>
-                    <FormControl><Input placeholder="My Health Store" {...field} /></FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-                <FormField control={form.control} name="address" render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Address</FormLabel>
-                    <FormControl><Input placeholder="123 Health St, Medtown" {...field} /></FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-            </>
-        )
-      default:
-        return null;
+    if (role === 'doctor') {
+      return (
+        <>
+          <FormField control={form.control} name="registrationNumber" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Registration Number</FormLabel>
+                <FormControl><Input placeholder="MCI12345" {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField control={form.control} name="referralCode" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Referral Code (Optional)</FormLabel>
+                <FormControl><Input placeholder="REF123" {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </>
+      );
     }
+    return null;
   };
 
   return (

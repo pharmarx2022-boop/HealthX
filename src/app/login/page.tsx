@@ -18,7 +18,7 @@ import { loginUser } from '@/lib/auth';
 const loginSchema = z.object({
   phone: z.string().min(1, { message: 'A valid phone number is required.' }),
   password: z.string().min(1, { message: 'Password is required.' }),
-  role: z.enum(['doctor', 'patient', 'pharmacy', 'lab', 'agent']),
+  role: z.enum(['doctor', 'patient']),
 });
 
 export default function LoginPage() {
@@ -78,9 +78,6 @@ export default function LoginPage() {
                         <SelectContent>
                           <SelectItem value="patient">Patient</SelectItem>
                           <SelectItem value="doctor">Doctor</SelectItem>
-                          <SelectItem value="pharmacy">Pharmacy</SelectItem>
-                          <SelectItem value="lab">Lab</SelectItem>
-                          <SelectItem value="agent">Agent</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

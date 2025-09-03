@@ -9,16 +9,18 @@ import { Stethoscope, MapPin, Calendar, Star, Loader2, MessageSquare, UserPlus }
 import Image from 'next/image';
 import { notFound, useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { initialDoctors, initialClinics } from '@/lib/mock-data';
+import { initialDoctors, initialClinics, mockPatientData } from '@/lib/mock-data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { BookingDialog } from '@/components/booking/booking-dialog';
 import { mockFamilyMembers } from '@/lib/family-members';
 import { useToast } from '@/hooks/use-toast';
+import { mockPatients } from '@/components/doctor/patient-list';
 
 const DOCTORS_KEY = 'doctorsData';
 const FAMILY_KEY = 'familyMembers';
 const CLINICS_KEY = 'mockClinics';
+const PATIENTS_KEY = 'mockPatients';
 
 type Clinic = typeof initialClinics[0];
 
@@ -32,10 +34,14 @@ export default function DoctorDetailPage() {
   const [familyMembers, setFamilyMembers] = useState(mockFamilyMembers);
   const [doctorClinics, setDoctorClinics] = useState<Clinic[]>([]);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [user, setUser] = useState<any | null>(null);
   
   useEffect(() => {
     setIsClient(true);
     if (typeof window !== 'undefined') {
+      const storedUser = sessionStorage.getItem('user');
+      setUser(storedUser ? JSON.parse(storedUser) : null);
+
       const storedDoctors = sessionStorage.getItem(DOCTORS_KEY);
       if (storedDoctors) {
         setDoctors(JSON.parse(storedDoctors));
@@ -81,10 +87,39 @@ export default function DoctorDetailPage() {
     ? (doctor.reviewsList.reduce((acc, review) => acc + review.rating, 0) / totalReviews).toFixed(1)
     : 'N/A';
 
-  const handleBookingConfirm = (patientId: string, clinicName: string, date: Date, time: string) => {
-     toast({
-      title: "Booking Confirmed!",
-      description: `Your appointment at ${clinicName} with Dr. ${doctor.name} on ${date.toDateString()} at ${time} has been booked.`,
+  const handleBookingConfirm = (patientId: string, clinicId: string, date: Date, time: string) => {
+    const clinic = doctorClinics.find(c => c.id === clinicId);
+    if (!clinic) return;
+
+    let patientName = "Yourself";
+    if(patientId !== 'self') {
+        const member = mockFamilyMembers.find(m => m.id === patientId) || mockPatientData.find(p => p.id === patientId);
+        if(member) patientName = member.name;
+    }
+
+    const newAppointment = {
+        id: `appt_${Date.now()}`,
+        name: patientName,
+        clinic: clinic.name,
+        doctorId: doctor.id,
+        agentId: user?.role === 'agent' ? user.id : null,
+        appointmentDate: new Date(date.getFullYear(), date.getMonth(), date.getDate(), parseInt(time.split(':')[0]), parseInt(time.split(':')[1].split(' ')[0])).toISOString(),
+        status: 'upcoming',
+        consultation: 'General Consultation',
+        notes: '',
+        consultationFee: clinic.consultationFee,
+        refundStatus: 'Not Refunded',
+        nextAppointmentDate: null,
+        reviewed: false
+    };
+
+    const allPatients = JSON.parse(sessionStorage.getItem(PATIENTS_KEY) || '[]');
+    const updatedPatients = [...allPatients, newAppointment];
+    sessionStorage.setItem(PATIENTS_KEY, JSON.stringify(updatedPatients));
+
+    toast({
+        title: "Booking Confirmed!",
+        description: `Your appointment at ${clinic.name} with Dr. ${doctor.name} on ${date.toDateString()} at ${time} has been booked.`,
     });
     setIsBookingOpen(false);
   };

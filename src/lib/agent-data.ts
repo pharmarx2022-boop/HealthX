@@ -68,3 +68,10 @@ export function convertPointsToCash(agentId: string) {
     const updatedTransactions = [...transactions, conversionTransaction];
     sessionStorage.setItem(key, JSON.stringify(updatedTransactions));
 }
+
+export function recordAgentCommission(agentId: string, transaction: Omit<AgentTransaction, 'date'> & { date: Date }) {
+    const key = TRANSACTIONS_KEY_PREFIX + agentId;
+    const history = getAgentData(agentId);
+    const updatedTransactions = [...history.transactions, transaction];
+    sessionStorage.setItem(key, JSON.stringify(updatedTransactions));
+}

@@ -17,6 +17,7 @@ import { useState, useEffect } from 'react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Calendar as CalendarPicker } from '@/components/ui/calendar';
 import { recordTransaction } from '@/lib/transactions';
+import { recordAgentCommission } from '@/lib/agent-data';
 
 export default function PatientDetailPage() {
   const params = useParams();
@@ -49,12 +50,28 @@ export default function PatientDetailPage() {
     if (!patient) return;
     
     // Credit Health Points to the patient
-    recordTransaction(patient.name.split(' ')[0].toLowerCase() + '_sharma', { // simple mapping for demo
+    const patientUserId = patient.name.split(' ')[0].toLowerCase() + '_sharma'; // simple mapping for demo
+    recordTransaction(patientUserId, {
         type: 'credit',
         amount: patient.consultationFee,
         description: `Cashback from consultation on ${format(new Date(patient.appointmentDate), 'PP')}`,
         date: new Date(),
     });
+
+    // If an agent booked this, credit commission to them
+    if(patient.agentId) {
+        const commissionAmount = patient.consultationFee * 0.05; // 5% commission for demo
+        recordAgentCommission(patient.agentId, {
+            type: 'credit',
+            amount: commissionAmount,
+            description: `Commission from booking for ${patient.name}`,
+            date: new Date(),
+        });
+        toast({
+            title: "Agent Commission Paid",
+            description: `A commission of ₹${commissionAmount.toFixed(2)} has been credited to agent ${patient.agentId}.`
+        });
+    }
     
     // Update patient status
     const updatedPatients = allPatients.map(p => {

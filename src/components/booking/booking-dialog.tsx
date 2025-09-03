@@ -46,7 +46,7 @@ interface BookingDialogProps {
     doctor: Doctor;
     clinics: Clinic[];
     familyMembers: FamilyMember[];
-    onConfirm: (patientId: string, clinicName: string, date: Date, time: string) => void;
+    onConfirm: (patientId: string, clinicId: string, date: Date, time: string) => void;
 }
 
 const calculateAge = (dob: string | Date) => {
@@ -116,7 +116,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
     
     const handleConfirm = () => {
         const patientId = userRole === 'agent' ? foundPatient.id : selectedPatientId;
-        if (patientId && selectedClinic && selectedDate && selectedTime) {
+        if (patientId && selectedClinicId && selectedDate && selectedTime) {
             
             if (userRole === 'agent') {
                 if (otp !== MOCK_OTP) {
@@ -125,7 +125,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                 }
             }
 
-            onConfirm(patientId, selectedClinic.name, selectedDate, selectedTime);
+            onConfirm(patientId, selectedClinicId, selectedDate, selectedTime);
         }
     };
     

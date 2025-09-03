@@ -195,7 +195,7 @@ export default function RegisterPage({ params }: { params: { role: Role } }) {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={form.handleSubmit(onSubmit)}>
+                      <AlertDialogAction onClick={() => form.handleSubmit(onSubmit)()}>
                         Continue
                       </AlertDialogAction>
                     </AlertDialogFooter>

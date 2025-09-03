@@ -4,7 +4,7 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { User, Calendar, Clock, Stethoscope, IndianRupee, RefreshCw, Bell, Star } from 'lucide-react';
+import { User, Calendar, Clock, Stethoscope, IndianRupee, RefreshCw, Bell, Star, Users } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { mockPatients } from '@/components/doctor/patient-list';
 import { initialDoctors } from '@/lib/mock-data';
@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { FamilyManager } from '@/components/patient/family-manager';
 
 const DOCTORS_KEY = 'doctorsData';
 
@@ -120,70 +121,91 @@ export default function PatientDashboardPage() {
                         </Alert>
                     )}
 
-                    <Card className="shadow-sm">
-                        <CardHeader className="flex flex-row items-center gap-4">
-                            <User className="w-8 h-8 text-primary" />
-                            <div>
-                                <CardTitle>Welcome, Rohan Sharma!</CardTitle>
-                                <CardDescription>
-                                    Book new appointments, view your upcoming visits, and track your refunds.
-                                </CardDescription>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <h2 className="text-xl font-semibold mb-4">Your Appointments</h2>
-                            <div className="space-y-6">
-                                {isClient && myAppointments.length > 0 ? (
-                                    myAppointments.map(appt => (
-                                        <Card key={appt.id} className="overflow-hidden">
-                                            <CardHeader className="flex flex-row justify-between items-start bg-slate-50/70 p-4">
-                                                <div>
-                                                    <CardTitle className="text-lg font-headline">Consultation at {appt.clinic}</CardTitle>
-                                                    <CardDescription className="flex items-center gap-2 pt-1">
-                                                        <Calendar className="w-4 h-4"/> {format(new Date(appt.appointmentDate), 'EEEE, MMMM d, yyyy')}
-                                                        <Clock className="w-4 h-4 ml-2"/> {format(new Date(appt.appointmentDate), 'p')}
-                                                    </CardDescription>
-                                                </div>
-                                                <Badge variant={appt.status === 'done' ? 'secondary' : 'default'} className="capitalize">{appt.status}</Badge>
-                                            </CardHeader>
-                                            <CardContent className="p-4 grid grid-cols-2 gap-4">
-                                                <div className="flex items-center text-muted-foreground gap-3">
-                                                    <Stethoscope className="w-5 h-5 text-primary" />
-                                                    <div>
-                                                        <p className="font-medium text-foreground">Reason</p>
-                                                        <p>{appt.consultation}</p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center text-muted-foreground gap-3">
-                                                    <IndianRupee className="w-5 h-5 text-primary" />
-                                                     <div>
-                                                        <p className="font-medium text-foreground">Fee Paid</p>
-                                                        <p>₹{appt.consultationFee.toFixed(2)}</p>
-                                                    </div>
-                                                </div>
-                                                 <div className="flex items-center text-muted-foreground gap-3 col-span-2">
-                                                    <RefreshCw className="w-5 h-5 text-primary" />
-                                                     <div>
-                                                        <p className="font-medium text-foreground">Refund Status</p>
-                                                        <p>{appt.refundStatus}</p>
-                                                    </div>
-                                                </div>
-                                            </CardContent>
-                                            {appt.status === 'done' && (
-                                                <CardFooter className="bg-slate-50/70 p-4 border-t">
-                                                    <Button variant="outline" onClick={() => openReviewDialog(appt)} disabled={appt.reviewed}>
-                                                        <Star className="mr-2"/> {appt.reviewed ? 'Review Submitted' : 'Leave a Review'}
-                                                    </Button>
-                                                </CardFooter>
-                                            )}
-                                        </Card>
-                                    ))
-                                ) : (
-                                    <p>You have no upcoming appointments.</p>
-                                )}
-                            </div>
-                        </CardContent>
-                    </Card>
+                    <div className="grid lg:grid-cols-3 gap-8">
+                        <div className="lg:col-span-2">
+                             <Card className="shadow-sm">
+                                <CardHeader className="flex flex-row items-center gap-4">
+                                    <User className="w-8 h-8 text-primary" />
+                                    <div>
+                                        <CardTitle>Welcome, Rohan Sharma!</CardTitle>
+                                        <CardDescription>
+                                            Book new appointments, view your upcoming visits, and track your refunds.
+                                        </CardDescription>
+                                    </div>
+                                </CardHeader>
+                                <CardContent>
+                                    <h2 className="text-xl font-semibold mb-4">Your Appointments</h2>
+                                    <div className="space-y-6">
+                                        {isClient && myAppointments.length > 0 ? (
+                                            myAppointments.map(appt => (
+                                                <Card key={appt.id} className="overflow-hidden">
+                                                    <CardHeader className="flex flex-row justify-between items-start bg-slate-50/70 p-4">
+                                                        <div>
+                                                            <CardTitle className="text-lg font-headline">Consultation at {appt.clinic}</CardTitle>
+                                                            <CardDescription className="flex items-center gap-2 pt-1">
+                                                                <Calendar className="w-4 h-4"/> {format(new Date(appt.appointmentDate), 'EEEE, MMMM d, yyyy')}
+                                                                <Clock className="w-4 h-4 ml-2"/> {format(new Date(appt.appointmentDate), 'p')}
+                                                            </CardDescription>
+                                                        </div>
+                                                        <Badge variant={appt.status === 'done' ? 'secondary' : 'default'} className="capitalize">{appt.status}</Badge>
+                                                    </CardHeader>
+                                                    <CardContent className="p-4 grid grid-cols-2 gap-4">
+                                                        <div className="flex items-center text-muted-foreground gap-3">
+                                                            <Stethoscope className="w-5 h-5 text-primary" />
+                                                            <div>
+                                                                <p className="font-medium text-foreground">Reason</p>
+                                                                <p>{appt.consultation}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center text-muted-foreground gap-3">
+                                                            <IndianRupee className="w-5 h-5 text-primary" />
+                                                            <div>
+                                                                <p className="font-medium text-foreground">Fee Paid</p>
+                                                                <p>₹{appt.consultationFee.toFixed(2)}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center text-muted-foreground gap-3 col-span-2">
+                                                            <RefreshCw className="w-5 h-5 text-primary" />
+                                                            <div>
+                                                                <p className="font-medium text-foreground">Refund Status</p>
+                                                                <p>{appt.refundStatus}</p>
+                                                            </div>
+                                                        </div>
+                                                    </CardContent>
+                                                    {appt.status === 'done' && (
+                                                        <CardFooter className="bg-slate-50/70 p-4 border-t">
+                                                            <Button variant="outline" onClick={() => openReviewDialog(appt)} disabled={appt.reviewed}>
+                                                                <Star className="mr-2"/> {appt.reviewed ? 'Review Submitted' : 'Leave a Review'}
+                                                            </Button>
+                                                        </CardFooter>
+                                                    )}
+                                                </Card>
+                                            ))
+                                        ) : (
+                                            <p>You have no upcoming appointments.</p>
+                                        )}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+                        <div className="lg:col-span-1">
+                            <Card className="shadow-sm">
+                                <CardHeader className="flex flex-row items-center gap-4">
+                                    <Users className="w-8 h-8 text-primary" />
+                                    <div>
+                                        <CardTitle>Family Members</CardTitle>
+                                        <CardDescription>
+                                            Manage profiles for your family.
+                                        </CardDescription>
+                                    </div>
+                                </CardHeader>
+                                <CardContent>
+                                    <FamilyManager />
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </div>
+
                 </div>
             </main>
             <Footer />

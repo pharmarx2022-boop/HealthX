@@ -5,23 +5,30 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Stethoscope, MapPin, Calendar, Star, Loader2, MessageSquare } from 'lucide-react';
+import { Stethoscope, MapPin, Calendar, Star, Loader2, MessageSquare, UserPlus } from 'lucide-react';
 import Image from 'next/image';
 import { notFound, useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { initialDoctors } from '@/lib/mock-data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import { BookingDialog } from '@/components/booking/booking-dialog';
+import { mockFamilyMembers } from '@/lib/family-members';
+import { useToast } from '@/hooks/use-toast';
 
 const DOCTORS_KEY = 'doctorsData';
-
+const FAMILY_KEY = 'familyMembers';
 
 export default function DoctorDetailPage() {
   const params = useParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
+  const { toast } = useToast();
+
   const [isClient, setIsClient] = useState(false);
   const [doctors, setDoctors] = useState(initialDoctors);
-
+  const [familyMembers, setFamilyMembers] = useState(mockFamilyMembers);
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
+  
   useEffect(() => {
     setIsClient(true);
     const storedDoctors = sessionStorage.getItem(DOCTORS_KEY);
@@ -30,10 +37,17 @@ export default function DoctorDetailPage() {
     } else {
       sessionStorage.setItem(DOCTORS_KEY, JSON.stringify(initialDoctors));
     }
+
+    const storedFamily = sessionStorage.getItem(FAMILY_KEY);
+     if (storedFamily) {
+      setFamilyMembers(JSON.parse(storedFamily));
+    } else {
+      sessionStorage.setItem(FAMILY_KEY, JSON.stringify(mockFamilyMembers));
+    }
   }, []);
 
   const doctor = doctors.find(d => d.id === id);
-
+  
   if (!isClient) {
     return (
         <div className="flex flex-col min-h-screen">
@@ -55,6 +69,15 @@ export default function DoctorDetailPage() {
   const averageRating = totalReviews > 0
     ? (doctor.reviewsList.reduce((acc, review) => acc + review.rating, 0) / totalReviews).toFixed(1)
     : 'N/A';
+
+  const handleBookingConfirm = (patientId: string, time: string) => {
+     toast({
+      title: "Booking Confirmed!",
+      description: `Your appointment with Dr. ${doctor.name} at ${time} has been booked.`,
+    });
+    setIsBookingOpen(false);
+  };
+
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -91,17 +114,9 @@ export default function DoctorDetailPage() {
                                 <h3 className="font-semibold mb-2">About Dr. {doctor.name.split(' ').pop()}</h3>
                                 <p className="text-muted-foreground">{doctor.bio}</p>
                             </div>
-                            <div>
-                                <h3 className="font-semibold mb-2">Available Today</h3>
-                                <div className="flex gap-2">
-                                    <Button variant="outline">10:00 AM</Button>
-                                    <Button variant="outline">11:00 AM</Button>
-                                    <Button>02:00 PM</Button>
-                                    <Button variant="outline">04:00 PM</Button>
-                                </div>
-                            </div>
-                            <Button size="lg" className="w-full mt-4">
-                                <Calendar className="mr-2"/> Confirm Booking
+                           
+                            <Button size="lg" className="w-full mt-4" onClick={() => setIsBookingOpen(true)}>
+                                <Calendar className="mr-2"/> Book Appointment
                             </Button>
                         </CardContent>
                     </div>
@@ -139,6 +154,14 @@ export default function DoctorDetailPage() {
         </div>
       </main>
       <Footer />
+      
+      <BookingDialog
+        isOpen={isBookingOpen}
+        onOpenChange={setIsBookingOpen}
+        doctor={doctor}
+        familyMembers={familyMembers}
+        onConfirm={handleBookingConfirm}
+      />
     </div>
   );
 }

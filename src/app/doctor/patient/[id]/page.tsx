@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Calendar as CalendarPicker } from '@/components/ui/calendar';
+import { recordTransaction } from '@/lib/transactions';
 
 export default function PatientDetailPage() {
   const params = useParams();
@@ -46,6 +47,16 @@ export default function PatientDetailPage() {
 
   const handleMarkAsComplete = () => {
     if (!patient) return;
+    
+    // Credit Health Points to the patient
+    recordTransaction(patient.name.split(' ')[0].toLowerCase() + '_sharma', { // simple mapping for demo
+        type: 'credit',
+        amount: patient.consultationFee,
+        description: `Cashback from consultation on ${format(new Date(patient.appointmentDate), 'PP')}`,
+        date: new Date(),
+    });
+    
+    // Update patient status
     const updatedPatients = allPatients.map(p => {
       if (p.id === id) {
         return { ...p, status: 'done', refundStatus: 'Refunded' };

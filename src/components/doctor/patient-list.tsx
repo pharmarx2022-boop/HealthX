@@ -4,6 +4,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon, Trash2, CalendarClock } from 'lucide-react';
+import Link from 'next/link';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -18,14 +19,14 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 
-const mockPatients = [
-  { id: '1', name: 'Rohan Sharma', clinic: 'Andheri', appointmentDate: '2024-08-15T10:00:00Z', status: 'upcoming' },
-  { id: '2', name: 'Priya Mehta', clinic: 'Dadar', appointmentDate: '2024-08-15T12:30:00Z', status: 'upcoming' },
-  { id: '3', name: 'Amit Singh', clinic: 'Bandra', appointmentDate: '2024-08-14T15:00:00Z', status: 'done' },
-  { id: '4', name: 'Sunita Patil', clinic: 'Andheri', appointmentDate: '2024-08-13T09:00:00Z', status: 'done' },
-  { id: '5', name: 'Karan Verma', clinic: 'Dadar', appointmentDate: '2024-08-16T11:00:00Z', status: 'upcoming' },
-  { id: '6', name: 'Anika Desai', clinic: 'Andheri', appointmentDate: '2024-08-12T16:00:00Z', status: 'done' },
-  { id: '7', name: 'Vikram Reddy', clinic: 'Bandra', appointmentDate: '2024-08-17T14:00:00Z', status: 'upcoming' },
+export const mockPatients = [
+  { id: '1', name: 'Rohan Sharma', clinic: 'Andheri', appointmentDate: '2024-08-15T10:00:00Z', status: 'upcoming', consultation: 'Follow-up for cardiology check-up.', notes: 'Patient has reported mild chest pain.' },
+  { id: '2', name: 'Priya Mehta', clinic: 'Dadar', appointmentDate: '2024-08-15T12:30:00Z', status: 'upcoming', consultation: 'Initial consultation for dermatology.', notes: 'Patient has a history of eczema.' },
+  { id: '3', name: 'Amit Singh', clinic: 'Bandra', appointmentDate: '2024-08-14T15:00:00Z', status: 'done', consultation: 'Annual health check-up.', notes: 'All reports are normal.' },
+  { id: '4', name: 'Sunita Patil', clinic: 'Andheri', appointmentDate: '2024-08-13T09:00:00Z', status: 'done', consultation: 'Post-operative follow-up.', notes: 'Wound healing well.' },
+  { id: '5', name: 'Karan Verma', clinic: 'Dadar', appointmentDate: '2024-08-16T11:00:00Z', status: 'upcoming', consultation: 'Vaccination appointment.', notes: '' },
+  { id: '6', name: 'Anika Desai', clinic: 'Andheri', appointmentDate: '2024-08-12T16:00:00Z', status: 'done', consultation: 'Consultation for fever.', notes: 'Prescribed medication for viral infection.' },
+  { id: '7', name: 'Vikram Reddy', clinic: 'Bandra', appointmentDate: '2024-08-17T14:00:00Z', status: 'upcoming', consultation: 'Physiotherapy session.', notes: 'Patient recovering from a sports injury.' },
 ];
 
 const clinics = ['All', 'Andheri', 'Dadar', 'Bandra'];
@@ -238,7 +239,7 @@ export function PatientList() {
                 <TableBody>
                     {filteredPatients.length > 0 ? (
                         filteredPatients.map(patient => (
-                            <TableRow key={patient.id} data-state={selectedRows.has(patient.id) && "selected"}>
+                            <TableRow key={patient.id} data-state={selectedRows.has(patient.id) ? "selected" : ""}>
                                 <TableCell>
                                     <Checkbox
                                         onCheckedChange={(checked) => handleSelectRow(patient.id, Boolean(checked))}
@@ -255,7 +256,9 @@ export function PatientList() {
                                     </Badge>
                                 </TableCell>
                                 <TableCell>
-                                    <Button variant="outline" size="sm">View Details</Button>
+                                    <Button asChild variant="outline" size="sm">
+                                        <Link href={`/doctor/patient/${patient.id}`}>View Details</Link>
+                                    </Button>
                                 </TableCell>
                             </TableRow>
                         ))

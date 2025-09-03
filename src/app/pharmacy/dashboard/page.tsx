@@ -162,7 +162,7 @@ export default function PharmacyDashboardPage() {
                              <CardDescription>
                                 View your recent Health Point redemption history.
                             </CardDescription>
-                        </CardHeader>
+                        </Header>
                         <CardContent>
                            <div className="space-y-4">
                                 {mockTransactions.map(tx => (

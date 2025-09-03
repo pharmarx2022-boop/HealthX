@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -66,8 +67,9 @@ const roleTitles: Record<Role, string> = {
     agent: "Agent Registration"
 }
 
-export default function RegisterPage({ params }: { params: { role: Role } }) {
-  const { role } = params;
+export default function RegisterPage() {
+  const params = useParams();
+  const role = (params.role as Role) || 'patient';
   const currentSchema = roleSchemas[role] || patientSchema;
 
   const form = useForm({

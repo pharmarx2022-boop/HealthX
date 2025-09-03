@@ -9,7 +9,7 @@ import { RedemptionTool } from '@/components/partner/redemption-tool';
 import { PartnerProfileForm } from '@/components/partner/partner-profile-form';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
@@ -44,6 +44,11 @@ const totalPointsCollected = mockTransactions.reduce((acc, tx) => acc + tx.amoun
 export default function PharmacyDashboardPage() {
     const { toast } = useToast();
     const [isRedeemDialogOpen, setIsRedeemDialogOpen] = useState(false);
+    const [isClient, setIsClient] = useState(false);
+
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
 
     const handleRedeemCash = () => {
         // In a real app, this would trigger a backend process.
@@ -164,7 +169,7 @@ export default function PharmacyDashboardPage() {
                                             <FileText className="w-5 h-5 text-primary" />
                                             <div>
                                                 <p className="font-semibold">Redeemed by {tx.patientName}</p>
-                                                <p className="text-sm text-muted-foreground">{format(new Date(tx.date), 'PP, p')}</p>
+                                                {isClient && <p className="text-sm text-muted-foreground">{format(new Date(tx.date), 'PP, p')}</p>}
                                             </div>
                                         </div>
                                         <div className="text-right">

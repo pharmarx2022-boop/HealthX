@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { format } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Link from 'next/link';
+import { AnalyticsDashboard } from '@/components/agent/analytics-dashboard';
 
 export default function AgentDashboardPage() {
     const { toast } = useToast();
@@ -55,6 +56,8 @@ export default function AgentDashboardPage() {
                         <h1 className="text-3xl font-headline font-bold">Agent Dashboard</h1>
                         <p className="text-muted-foreground">Book appointments and manage your commissions.</p>
                     </div>
+
+                    <AnalyticsDashboard />
                     
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                         <Card className="shadow-sm lg:col-span-2">

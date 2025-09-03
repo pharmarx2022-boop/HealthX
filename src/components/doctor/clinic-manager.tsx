@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -42,7 +42,7 @@ import {
 } from "@/components/ui/dialog"
 import { Checkbox } from '@/components/ui/checkbox';
 import Image from 'next/image';
-import { PlusCircle, Edit, Trash2, MapPin, Calendar, Clock } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, MapPin, Calendar, Clock, Upload } from 'lucide-react';
 
 const CLINICS_KEY = 'mockClinics';
 
@@ -76,7 +76,7 @@ const clinicSchema = z.object({
   doctorId: z.string(),
   name: z.string().min(1, 'Clinic name is required.'),
   location: z.string().min(1, 'Location is required.'),
-  image: z.string().url('A valid image URL is required.'),
+  image: z.string().min(1, 'A clinic picture is required.'),
   dataAiHint: z.string().optional(),
   days: z.array(z.string()).refine((value) => value.some((item) => item), {
     message: 'You have to select at least one day.',
@@ -145,6 +145,18 @@ export function ClinicManager() {
       }
   }, [editingClinic, user, form]);
 
+  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        form.setValue('image', reader.result as string);
+        form.clearErrors('image'); // Clear error after successful upload
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const onSubmit = (data: ClinicFormValues) => {
     let updatedClinics;
     if (editingClinic) {
@@ -188,10 +200,17 @@ export function ClinicManager() {
 
   const userClinics = isClient ? clinics.filter(c => c.doctorId === user?.id) : [];
 
+  const currentImage = form.watch('image');
+
   return (
     <div className="space-y-8">
         <div className="flex justify-end">
-             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+             <Dialog open={isDialogOpen} onOpenChange={(isOpen) => {
+                 setIsDialogOpen(isOpen);
+                 if (!isOpen) {
+                     setEditingClinic(null);
+                 }
+             }}>
                 <DialogTrigger asChild>
                     <Button onClick={() => { setEditingClinic(null); setIsDialogOpen(true); }}>
                         <PlusCircle className="mr-2" />
@@ -222,13 +241,34 @@ export function ClinicManager() {
                                     <FormMessage />
                                 </FormItem>
                             )} />
-                             <FormField control={form.control} name="image" render={({ field }) => (
+
+                            <FormField control={form.control} name="image" render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Clinic Picture URL</FormLabel>
-                                    <FormControl><Input placeholder="https://picsum.photos/400/300" {...field} /></FormControl>
+                                    <FormLabel>Clinic Picture</FormLabel>
+                                    <FormControl>
+                                        <div>
+                                            <Input 
+                                                id="image-upload"
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleImageUpload}
+                                                className="hidden" 
+                                            />
+                                            <label htmlFor="image-upload" className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full">
+                                                <Upload className="mr-2" />
+                                                Upload from Device
+                                            </label>
+                                        </div>
+                                    </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )} />
+                             
+                            {currentImage && (
+                                <div className="relative w-full aspect-[4/3] rounded-md overflow-hidden border">
+                                    <Image src={currentImage} alt="Clinic preview" fill style={{ objectFit: 'cover' }} />
+                                </div>
+                            )}
                             
                             <FormField
                                 control={form.control}
@@ -334,7 +374,7 @@ export function ClinicManager() {
                                     <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                                     <AlertDialogDescription>
                                         This action cannot be undone. This will permanently delete the clinic from your profile.
-                                    </AlertDialogDescription>
+                                    </                               AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -351,3 +391,5 @@ export function ClinicManager() {
     </div>
   );
 }
+
+    

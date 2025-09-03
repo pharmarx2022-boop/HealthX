@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { HeartPulse, Calendar, Menu, X, UserCircle, LogOut, Settings, Briefcase, Users, Pill, Beaker } from 'lucide-react';
+import { HeartPulse, Calendar, Menu, X, UserCircle, LogOut, Settings, Briefcase, Users, Pill, Beaker, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { useState, useEffect } from 'react';
@@ -55,7 +55,7 @@ export function Header() {
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href={`/${user.role}/dashboard`}>
+              <Link href={`/${user.role === 'admin' ? 'admin' : user.role + '/dashboard'}`}>
                 <UserCircle className="mr-2" />
                 <span>Dashboard</span>
               </Link>
@@ -121,7 +121,7 @@ export function Header() {
       return (
         <>
           <Button variant="ghost" asChild className="justify-start text-lg">
-            <Link href={`/${user.role}/dashboard`} onClick={() => setIsSheetOpen(false)}>
+            <Link href={`/${user.role === 'admin' ? 'admin' : user.role + '/dashboard'}`} onClick={() => setIsSheetOpen(false)}>
               <UserCircle className="mr-2" />
               Dashboard
             </Link>

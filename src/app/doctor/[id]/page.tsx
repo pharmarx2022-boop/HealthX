@@ -9,7 +9,7 @@ import { Stethoscope, MapPin, Calendar, Star, Loader2, MessageSquare, UserPlus }
 import Image from 'next/image';
 import { notFound, useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { initialDoctors } from '@/lib/mock-data';
+import { initialDoctors, initialClinics } from '@/lib/mock-data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { BookingDialog } from '@/components/booking/booking-dialog';
@@ -18,6 +18,9 @@ import { useToast } from '@/hooks/use-toast';
 
 const DOCTORS_KEY = 'doctorsData';
 const FAMILY_KEY = 'familyMembers';
+const CLINICS_KEY = 'mockClinics';
+
+type Clinic = typeof initialClinics[0];
 
 export default function DoctorDetailPage() {
   const params = useParams();
@@ -27,25 +30,32 @@ export default function DoctorDetailPage() {
   const [isClient, setIsClient] = useState(false);
   const [doctors, setDoctors] = useState(initialDoctors);
   const [familyMembers, setFamilyMembers] = useState(mockFamilyMembers);
+  const [doctorClinics, setDoctorClinics] = useState<Clinic[]>([]);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   
   useEffect(() => {
     setIsClient(true);
-    const storedDoctors = sessionStorage.getItem(DOCTORS_KEY);
-    if (storedDoctors) {
-      setDoctors(JSON.parse(storedDoctors));
-    } else {
-      sessionStorage.setItem(DOCTORS_KEY, JSON.stringify(initialDoctors));
-    }
+    if (typeof window !== 'undefined') {
+      const storedDoctors = sessionStorage.getItem(DOCTORS_KEY);
+      if (storedDoctors) {
+        setDoctors(JSON.parse(storedDoctors));
+      } else {
+        sessionStorage.setItem(DOCTORS_KEY, JSON.stringify(initialDoctors));
+      }
 
-    const storedFamily = sessionStorage.getItem(FAMILY_KEY);
-     if (storedFamily) {
-      setFamilyMembers(JSON.parse(storedFamily));
-    } else {
-      sessionStorage.setItem(FAMILY_KEY, JSON.stringify(mockFamilyMembers));
-      setFamilyMembers(mockFamilyMembers);
+      const storedFamily = sessionStorage.getItem(FAMILY_KEY);
+      if (storedFamily) {
+        setFamilyMembers(JSON.parse(storedFamily));
+      } else {
+        sessionStorage.setItem(FAMILY_KEY, JSON.stringify(mockFamilyMembers));
+        setFamilyMembers(mockFamilyMembers);
+      }
+
+      const storedClinics = sessionStorage.getItem(CLINICS_KEY);
+      const allClinics = storedClinics ? JSON.parse(storedClinics) : initialClinics;
+      setDoctorClinics(allClinics.filter((c: Clinic) => c.doctorId === id));
     }
-  }, []);
+  }, [id]);
 
   const doctor = doctors.find(d => d.id === id);
   
@@ -71,10 +81,10 @@ export default function DoctorDetailPage() {
     ? (doctor.reviewsList.reduce((acc, review) => acc + review.rating, 0) / totalReviews).toFixed(1)
     : 'N/A';
 
-  const handleBookingConfirm = (patientId: string, time: string) => {
+  const handleBookingConfirm = (patientId: string, clinicName: string, date: Date, time: string) => {
      toast({
       title: "Booking Confirmed!",
-      description: `Your appointment with Dr. ${doctor.name} at ${time} has been booked.`,
+      description: `Your appointment at ${clinicName} with Dr. ${doctor.name} on ${date.toDateString()} at ${time} has been booked.`,
     });
     setIsBookingOpen(false);
   };
@@ -160,6 +170,7 @@ export default function DoctorDetailPage() {
         isOpen={isBookingOpen}
         onOpenChange={setIsBookingOpen}
         doctor={doctor}
+        clinics={doctorClinics}
         familyMembers={familyMembers}
         onConfirm={handleBookingConfirm}
       />

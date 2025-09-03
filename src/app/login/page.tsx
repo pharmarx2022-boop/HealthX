@@ -14,7 +14,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 
 const loginSchema = z.object({
-  email: z.string().email({ message: 'Please enter a valid email.' }),
+  emailOrPhone: z.string().min(1, { message: 'Please enter a valid email or phone number.' }),
   password: z.string().min(1, { message: 'Password is required.' }),
   role: z.enum(['doctor', 'patient', 'pharmacy', 'lab', 'agent']),
 });
@@ -23,7 +23,7 @@ export default function LoginPage() {
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: '',
+      emailOrPhone: '',
       password: '',
       role: 'patient',
     },
@@ -72,12 +72,12 @@ export default function LoginPage() {
                 />
                 <FormField
                   control={form.control}
-                  name="email"
+                  name="emailOrPhone"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Email or Phone</FormLabel>
                       <FormControl>
-                        <Input placeholder="you@example.com" {...field} />
+                        <Input placeholder="you@example.com or 9876543210" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

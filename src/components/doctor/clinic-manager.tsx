@@ -42,7 +42,7 @@ import {
 } from "@/components/ui/dialog"
 import { Checkbox } from '@/components/ui/checkbox';
 import Image from 'next/image';
-import { PlusCircle, Edit, Trash2, MapPin, Calendar, Clock, Upload, X, ChevronsUpDown, Check } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, MapPin, Calendar, Clock, Upload, X, ChevronsUpDown, Check, IndianRupee } from 'lucide-react';
 import { initialClinics, mockPharmacies, mockLabs } from '@/lib/mock-data';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
@@ -60,6 +60,7 @@ const clinicSchema = z.object({
   location: z.string().min(1, 'Location is required.'),
   image: z.string().min(1, 'A clinic picture is required.'),
   dataAiHint: z.string().optional(),
+  consultationFee: z.coerce.number().positive('Fee must be a positive number.'),
   days: z.array(z.string()).refine((value) => value.some((item) => item), {
     message: 'You have to select at least one day.',
   }),
@@ -104,6 +105,7 @@ export function ClinicManager() {
         location: '',
         image: '',
         dataAiHint: 'clinic interior',
+        consultationFee: 0,
         days: [],
         slots: '',
         associatedPharmacyIds: [],
@@ -125,6 +127,7 @@ export function ClinicManager() {
             location: '',
             image: '',
             dataAiHint: 'clinic interior',
+            consultationFee: 0,
             days: [],
             slots: '',
             associatedPharmacyIds: [],
@@ -257,6 +260,14 @@ export function ClinicManager() {
                                     <Image src={currentImage} alt="Clinic preview" fill style={{ objectFit: 'cover' }} />
                                 </div>
                             )}
+
+                            <FormField control={form.control} name="consultationFee" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Consultation Fee (₹)</FormLabel>
+                                    <FormControl><Input type="number" placeholder="e.g., 1500" {...field} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
                             
                             <FormField
                                 control={form.control}
@@ -369,6 +380,13 @@ export function ClinicManager() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="flex-grow space-y-4">
+                        <div className="flex items-start gap-2">
+                             <IndianRupee className="w-4 h-4 mt-1 text-primary"/>
+                             <div>
+                                <h4 className="font-semibold">Consultation Fee</h4>
+                                <p className="text-sm text-muted-foreground">₹{clinic.consultationFee.toFixed(2)}</p>
+                             </div>
+                        </div>
                         <div className="flex items-start gap-2">
                              <Calendar className="w-4 h-4 mt-1 text-primary"/>
                              <div>
@@ -497,7 +515,3 @@ function MultiSelect({ options, selected, onChange, className, placeholder = "Se
     </Popover>
   );
 }
-
-    
-
-    

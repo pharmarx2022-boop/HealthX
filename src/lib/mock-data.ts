@@ -1,4 +1,5 @@
 
+
 export const initialDoctors = [
   {
     id: '1',
@@ -101,6 +102,7 @@ export const initialClinics = [
         dataAiHint: 'clinic exterior',
         days: ['Monday', 'Wednesday', 'Friday'],
         slots: '10:00 AM, 11:00 AM, 12:00 PM',
+        consultationFee: 1500,
         associatedPharmacyIds: ['pharm1', 'pharm2'],
         associatedLabIds: ['lab2'],
     },
@@ -113,6 +115,7 @@ export const initialClinics = [
         dataAiHint: 'clinic interior',
         days: ['Tuesday', 'Thursday'],
         slots: '03:00 PM, 04:00 PM, 05:00 PM',
+        consultationFee: 1200,
         associatedPharmacyIds: ['pharm3'],
         associatedLabIds: ['lab1', 'lab3'],
     }

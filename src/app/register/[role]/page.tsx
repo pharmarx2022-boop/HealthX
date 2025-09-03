@@ -27,20 +27,21 @@ import { useToast } from '@/hooks/use-toast';
 import { registerUser } from '@/lib/auth';
 
 
-const baseSchemaObject = z.object({
+const baseSchemaObject = {
   fullName: z.string().min(2, { message: 'Full name is required.' }),
   email: z.string().email({ message: 'A valid email is required.' }),
   phone: z.string().min(10, { message: 'A valid phone number is required.' }),
   password: z.string().min(8, { message: 'Password must be at least 8 characters.' }),
   confirmPassword: z.string(),
-});
+};
 
-const baseSchema = baseSchemaObject.refine(data => data.password === data.confirmPassword, {
+const baseSchema = z.object(baseSchemaObject).refine(data => data.password === data.confirmPassword, {
     message: "Passwords don't match",
     path: ["confirmPassword"],
 });
 
-const doctorSchema = baseSchemaObject.extend({
+const doctorSchema = z.object({
+  ...baseSchemaObject,
   registrationNumber: z.string().min(1, { message: 'Registration number is mandatory.' }),
   referralCode: z.string().optional(),
 }).refine(data => data.password === data.confirmPassword, {
@@ -53,6 +54,9 @@ const patientSchema = baseSchema;
 const roleSchemas = {
   doctor: doctorSchema,
   patient: patientSchema,
+  pharmacy: baseSchema,
+  lab: baseSchema,
+  agent: baseSchema
 };
 
 type Role = keyof typeof roleSchemas;
@@ -60,6 +64,9 @@ type Role = keyof typeof roleSchemas;
 const roleTitles: Record<string, string> = {
     doctor: "Doctor Registration",
     patient: "Create Patient Account",
+    pharmacy: "Pharmacy Registration",
+    lab: "Lab Registration",
+    agent: "Agent Registration",
 }
 
 export default function RegisterPage({ params }: { params: { role: Role } }) {

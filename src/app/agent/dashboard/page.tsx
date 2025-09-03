@@ -12,6 +12,7 @@ import { getAgentData, convertPointsToCash, type AgentTransaction } from '@/lib/
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import Link from 'next/link';
 
 export default function AgentDashboardPage() {
     const { toast } = useToast();
@@ -68,7 +69,9 @@ export default function AgentDashboardPage() {
                             </CardHeader>
                             <CardContent>
                                  <p className="text-lg font-semibold">Start booking appointments to earn Health Points!</p>
-                                <Button className="mt-4">Book a New Appointment</Button>
+                                <Button asChild className="mt-4">
+                                    <Link href="/book-appointment">Book a New Appointment</Link>
+                                </Button>
                             </CardContent>
                         </Card>
 

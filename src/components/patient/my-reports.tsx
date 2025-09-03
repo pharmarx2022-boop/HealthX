@@ -7,29 +7,7 @@ import { FileText, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
-const mockReports = [
-    {
-        id: 'report1',
-        name: 'Complete Blood Count (CBC)',
-        lab: 'Metropolis Labs',
-        date: '2024-08-20T09:00:00Z',
-        url: '/mock-reports/cbc-report.pdf'
-    },
-    {
-        id: 'report2',
-        name: 'Lipid Profile',
-        lab: 'Dr. Lal PathLabs',
-        date: '2024-08-18T14:30:00Z',
-        url: '/mock-reports/lipid-profile.pdf'
-    },
-    {
-        id: 'report3',
-        name: 'Thyroid Function Test',
-        lab: 'SRL Diagnostics',
-        date: '2024-08-15T11:00:00Z',
-        url: '/mock-reports/thyroid-test.pdf'
-    }
-];
+const mockReports: any[] = [];
 
 
 export function MyReports() {

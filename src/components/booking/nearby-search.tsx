@@ -5,15 +5,14 @@ import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Stethoscope, MapPin, Pill, FlaskConical, Loader2, AlertTriangle, Building, Link as LinkIcon, Search, PercentCircle } from 'lucide-react';
+import { Stethoscope, MapPin, Pill, Loader2, AlertTriangle, Building, Link as LinkIcon, Search, PercentCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { initialDoctors, mockLabs, initialClinics } from '@/lib/mock-data';
+import { initialDoctors, initialClinics } from '@/lib/mock-data';
 import { Badge } from '../ui/badge';
 
 // Types
 type Doctor = typeof initialDoctors[0];
-type Lab = typeof mockLabs[0];
 type Clinic = typeof initialClinics[0];
 
 
@@ -53,7 +52,7 @@ export function NearbySearch() {
 
   const searchResults = useMemo(() => {
     if (!searchTerm) {
-        return { doctors: initialDoctors, labs: mockLabs };
+        return { doctors: initialDoctors };
     }
 
     const lowerCaseSearchTerm = searchTerm.toLowerCase();
@@ -63,64 +62,10 @@ export function NearbySearch() {
         d.specialty.toLowerCase().includes(lowerCaseSearchTerm)
     );
 
-    const filteredLabs = mockLabs.filter(l => 
-        l.name.toLowerCase().includes(lowerCaseSearchTerm)
-    );
-
-    // Find doctors associated with filtered labs
-    const doctorsFromLabs = clinics.filter(c =>
-        (c.associatedLabIds ?? []).some(id => filteredLabs.some(l => l.id === id))
-    ).map(c => c.doctorId);
-
-    const associatedDoctorIds = new Set([...doctorsFromLabs]);
-    
-    initialDoctors.forEach(doc => {
-        if (associatedDoctorIds.has(doc.id)) {
-            if (!filteredDoctors.some(d => d.id === doc.id)) {
-                filteredDoctors.push(doc);
-            }
-        }
-    });
-    
-    // Find labs associated with filtered doctors
-    const associatedLabIds = new Set<string>();
-
-    clinics.forEach(clinic => {
-        if (filteredDoctors.some(doc => doc.id === clinic.doctorId)) {
-            clinic.associatedLabIds?.forEach(id => associatedLabIds.add(id));
-        }
-    });
-
-    mockLabs.forEach(lab => {
-        if (associatedLabIds.has(lab.id)) {
-            if (!filteredLabs.some(l => l.id === lab.id)) {
-                filteredLabs.push(lab);
-            }
-        }
-    });
-
-
-    return { doctors: filteredDoctors, labs: filteredLabs };
+    return { doctors: filteredDoctors };
 
   }, [searchTerm, clinics]);
   
-  
-  const getAssociatedItems = (doctorId: string) => {
-    const associatedLabs = new Set<Lab>();
-
-    clinics.forEach(clinic => {
-        if (clinic.doctorId === doctorId) {
-            clinic.associatedLabIds?.forEach(id => {
-                const lab = mockLabs.find(l => l.id === id);
-                if (lab) associatedLabs.add(lab);
-            });
-        }
-    });
-    return {
-        labs: Array.from(associatedLabs)
-    };
-  }
-
   const renderContent = () => {
     switch(status) {
         case 'loading':
@@ -138,7 +83,7 @@ export function NearbySearch() {
                 </div>
             )
         case 'success':
-            const { doctors, labs } = searchResults;
+            const { doctors } = searchResults;
             return (
                 <div className="space-y-8">
                     {doctors.length > 0 && (
@@ -146,7 +91,6 @@ export function NearbySearch() {
                             <h2 className="text-2xl font-headline font-bold mb-4 flex items-center gap-2"><Stethoscope/> Doctors</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {doctors.map((doctor) => {
-                                    const associations = getAssociatedItems(doctor.id);
                                     return (
                                         <Card key={doctor.id} className="overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col">
                                             <CardHeader className="flex-row gap-4 items-start">
@@ -165,14 +109,6 @@ export function NearbySearch() {
                                                 </div>
                                             </CardHeader>
                                             <CardContent className="flex-grow space-y-4">
-                                                {associations.labs.length > 0 && (
-                                                    <div>
-                                                        <h4 className="font-semibold mb-2 text-sm flex items-center gap-2"><LinkIcon/> Associated With</h4>
-                                                        <div className="flex flex-wrap gap-2">
-                                                            {associations.labs.map(l => <Badge key={l.id} variant="secondary" className="bg-sky-100 text-sky-800"><FlaskConical className="w-3 h-3 mr-1"/>{l.name}</Badge>)}
-                                                        </div>
-                                                    </div>
-                                                )}
                                             </CardContent>
                                             <CardFooter>
                                                 <Button asChild className="w-full mt-2">
@@ -187,35 +123,7 @@ export function NearbySearch() {
                             </div>
                         </section>
                     )}
-                      {labs.length > 0 && (
-                        <section>
-                            <h2 className="text-2xl font-headline font-bold mb-4 flex items-center gap-2"><FlaskConical/> Labs</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {labs.map((lab) => (
-                                    <Card key={lab.id} className="overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                                        <div className="relative w-full h-40">
-                                            <Image src={lab.image} alt={lab.name} fill style={{objectFit:"cover"}} data-ai-hint={lab.dataAiHint} />
-                                            <div className="absolute top-2 right-2 bg-primary text-primary-foreground text-xs font-bold py-1 px-2 rounded-full flex items-center gap-1">
-                                                <PercentCircle className="w-4 h-4" />
-                                                <span>Upto {lab.redemptionOffer}% off</span>
-                                            </div>
-                                        </div>
-                                        <CardHeader>
-                                            <CardTitle className="font-headline text-xl">{lab.name}</CardTitle>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <div className="flex items-center text-sm text-muted-foreground gap-2">
-                                                <MapPin className="w-4 h-4"/> 
-                                                <span>{lab.location} ({lab.distance})</span>
-                                            </div>
-                                            <Button className="w-full mt-4" variant="outline">View Services</Button>
-                                        </CardContent>
-                                    </Card>
-                                ))}
-                            </div>
-                        </section>
-                     )}
-                     {doctors.length === 0 && labs.length === 0 && (
+                     {doctors.length === 0 && (
                         <div className="text-center py-16 text-muted-foreground">
                             <p>No results found for "{searchTerm}".</p>
                         </div>
@@ -232,7 +140,7 @@ export function NearbySearch() {
         <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input 
-                placeholder="Search by doctor, specialty, or lab name..."
+                placeholder="Search by doctor or specialty..."
                 className="pl-10 text-base py-6"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}

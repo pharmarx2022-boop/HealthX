@@ -47,37 +47,6 @@ export const initialDoctors = [
 ];
 
 
-export const mockLabs = [
-    {
-        id: 'lab1',
-        name: 'Metropolis Labs',
-        location: 'Mumbai, IN',
-        distance: '3.5 km away',
-        image: 'https://picsum.photos/200/200',
-        dataAiHint: 'laboratory interior',
-        redemptionOffer: 30,
-    },
-    {
-        id: 'lab2',
-        name: 'Dr. Lal PathLabs',
-        location: 'Mumbai, IN',
-        distance: '4.1 km away',
-        image: 'https://picsum.photos/200/200',
-        dataAiHint: 'laboratory interior',
-        redemptionOffer: 35,
-    },
-     {
-        id: 'lab3',
-        name: 'SRL Diagnostics',
-        location: 'Mumbai, IN',
-        distance: '1.8 km away',
-        image: 'https://picsum.photos/200/200',
-        dataAiHint: 'laboratory interior',
-        redemptionOffer: 25,
-    }
-]
-
-
 export const initialClinics = [
     {
         id: 'clinic1',
@@ -89,8 +58,6 @@ export const initialClinics = [
         days: ['Monday', 'Wednesday', 'Friday'],
         slots: '10:00 AM, 11:00 AM, 12:00 PM',
         consultationFee: 1500,
-        associatedPharmacyIds: [],
-        associatedLabIds: ['lab2'],
     },
     {
         id: 'clinic2',
@@ -102,7 +69,5 @@ export const initialClinics = [
         days: ['Tuesday', 'Thursday'],
         slots: '03:00 PM, 04:00 PM, 05:00 PM',
         consultationFee: 1200,
-        associatedPharmacyIds: [],
-        associatedLabIds: ['lab1', 'lab3'],
     }
 ];

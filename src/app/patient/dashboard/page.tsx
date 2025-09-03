@@ -59,15 +59,7 @@ export default function PatientDashboardPage() {
             }));
         
         // Mock spending for demonstration purposes
-        const spending = [
-            {
-                type: 'Points Redeemed',
-                description: 'At Metropolis Labs',
-                amount: `- ₹450.00`,
-                date: new Date('2024-08-18T14:30:00Z'),
-                status: 'debited'
-            },
-        ];
+        const spending: any[] = [];
         
         const totalSpent = spending.reduce((acc, curr) => acc + parseFloat(curr.amount.replace('- ₹', '')), 0);
         const availableBalance = totalHealthPointsEarned - totalSpent;
@@ -254,7 +246,7 @@ export default function PatientDashboardPage() {
                                         <KeyRound className="h-4 w-4"/>
                                         <AlertTitle>How to Redeem?</AlertTitle>
                                         <AlertDescription>
-                                            Ask any partner lab to initiate a redemption. You will receive an OTP on your registered mobile to confirm the payment.
+                                            Ask any partner to initiate a redemption. You will receive an OTP on your registered mobile to confirm the payment.
                                         </AlertDescription>
                                     </Alert>
                                 </CardFooter>

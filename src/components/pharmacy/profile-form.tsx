@@ -9,7 +9,6 @@ import Image from 'next/image';
 import { Loader2, Upload, Percent } from 'lucide-react';
 import { initialPharmacies } from '@/lib/mock-data';
 import { Label } from '@/components/ui/label';
-import { FormDescription, FormMessage } from '../ui/form';
 
 const PHARMACIES_KEY = 'mockPharmacies';
 
@@ -158,19 +157,19 @@ export function PharmacyProfileForm() {
                     <Upload className="mr-2" />
                     Upload from Device
                 </label>
-                {errors.image && <FormMessage>{errors.image}</FormMessage>}
+                {errors.image && <p className="text-sm font-medium text-destructive mt-2">{errors.image}</p>}
             </div>
         </div>
         <div className="md:col-span-2 space-y-6">
             <div className="space-y-2">
                 <Label htmlFor="name">Pharmacy Name</Label>
                 <Input id="name" name="name" placeholder="e.g., Wellness Forever" value={profile.name} onChange={handleInputChange} />
-                {errors.name && <FormMessage>{errors.name}</FormMessage>}
+                {errors.name && <p className="text-sm font-medium text-destructive mt-2">{errors.name}</p>}
             </div>
              <div className="space-y-2">
                 <Label htmlFor="location">Location</Label>
                 <Input id="location" name="location" placeholder="e.g., Shop 5, Andheri West" value={profile.location} onChange={handleInputChange} />
-                {errors.location && <FormMessage>{errors.location}</FormMessage>}
+                {errors.location && <p className="text-sm font-medium text-destructive mt-2">{errors.location}</p>}
             </div>
              <div className="space-y-2">
                 <Label htmlFor="discount">Health Points Discount</Label>
@@ -178,8 +177,8 @@ export function PharmacyProfileForm() {
                     <Input id="discount" name="discount" type="number" placeholder="e.g. 15" value={profile.discount} onChange={handleInputChange} className="pl-8"/>
                     <Percent className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 </div>
-                <FormDescription>Minimum 15%. This is the discount patients get when they redeem Health Points at your pharmacy.</FormDescription>
-                {errors.discount && <FormMessage>{errors.discount}</FormMessage>}
+                <p className="text-sm text-muted-foreground">Minimum 15%. This is the discount patients get when they redeem Health Points at your pharmacy.</p>
+                {errors.discount && <p className="text-sm font-medium text-destructive mt-2">{errors.discount}</p>}
             </div>
             
             <Button type="submit" disabled={isSubmitting}>

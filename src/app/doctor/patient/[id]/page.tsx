@@ -48,7 +48,7 @@ export default function PatientDetailPage() {
     if (!patient) return;
     const updatedPatients = allPatients.map(p => {
       if (p.id === id) {
-        return { ...p, status: 'done', refundStatus: 'Processing' };
+        return { ...p, status: 'done', refundStatus: 'Refunded' };
       }
       return p;
     });
@@ -59,7 +59,7 @@ export default function PatientDetailPage() {
 
     toast({
         title: "Consultation Complete",
-        description: `Refund for ₹${patient?.consultationFee.toFixed(2)} has been initiated.`,
+        description: `Refund for ₹${patient?.consultationFee.toFixed(2)} initiated. An equal amount of Health Points has been credited to the patient.`,
     });
   };
 
@@ -231,9 +231,9 @@ export default function PatientDetailPage() {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
-                                <AlertDialogTitle>Consultation done & God bless you</AlertDialogTitle>
+                                <AlertDialogTitle>Confirm Consultation Completion</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    This will mark the consultation as complete and initiate a refund of ₹{patient.consultationFee.toFixed(2)} to the patient's original payment method. This action cannot be undone.
+                                    This will mark the consultation as complete. A refund of ₹{patient.consultationFee.toFixed(2)} will be issued to the patient's original payment method, and an equal amount of Health Points will be credited to their account. This action cannot be undone.
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>

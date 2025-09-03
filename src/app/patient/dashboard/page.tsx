@@ -4,7 +4,7 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { User, Calendar, Clock, Stethoscope, IndianRupee, RefreshCw, Bell, Star, Users } from 'lucide-react';
+import { User, Calendar, Clock, Stethoscope, IndianRupee, RefreshCw, Bell, Star, Users, Wallet } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { mockPatients } from '@/components/doctor/patient-list';
 import { initialDoctors } from '@/lib/mock-data';
@@ -40,6 +40,10 @@ export default function PatientDashboardPage() {
 
     const nextReminder = myAppointments.find(appt => appt.nextAppointmentDate);
     
+    const healthPoints = myAppointments
+        .filter(appt => appt.status === 'done' && appt.refundStatus === 'Refunded')
+        .reduce((total, appt) => total + appt.consultationFee, 0);
+
     const openReviewDialog = (appointment: any) => {
         setSelectedAppointment(appointment);
         setIsReviewOpen(true);
@@ -188,7 +192,22 @@ export default function PatientDashboardPage() {
                                 </CardContent>
                             </Card>
                         </div>
-                        <div className="lg:col-span-1">
+                        <div className="lg:col-span-1 space-y-8">
+                             <Card className="shadow-sm">
+                                <CardHeader className="flex flex-row items-center gap-4">
+                                    <Wallet className="w-8 h-8 text-primary" />
+                                    <div>
+                                        <CardTitle>Health Points</CardTitle>
+                                        <CardDescription>
+                                            Your cashback rewards.
+                                        </CardDescription>
+                                    </div>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="text-3xl font-bold">₹{healthPoints.toFixed(2)}</p>
+                                    <p className="text-sm text-muted-foreground mt-1">Use these points for future services.</p>
+                                </CardContent>
+                            </Card>
                             <Card className="shadow-sm">
                                 <CardHeader className="flex flex-row items-center gap-4">
                                     <Users className="w-8 h-8 text-primary" />

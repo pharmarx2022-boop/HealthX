@@ -12,45 +12,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
 import { Loader2, Upload } from 'lucide-react';
+import { initialDoctors } from '@/lib/mock-data';
 
 // This would typically come from a central store or API
 const DOCTORS_KEY = 'doctorsData';
 
-const initialDoctors = [
-  {
-    id: '1',
-    name: 'Dr. Anjali Sharma',
-    specialty: 'Cardiologist',
-    location: 'Mumbai, IN',
-    bio: 'Dr. Anjali Sharma is a renowned cardiologist with over 15 years of experience in treating complex heart conditions. She is known for her patient-centric approach and compassionate care.',
-    rating: 4.9,
-    reviews: 124,
-    image: 'https://picsum.photos/400/400',
-    dataAiHint: 'doctor portrait',
-  },
-  {
-    id: '2',
-    name: 'Dr. Vikram Singh',
-    specialty: 'Dermatologist',
-    location: 'Mumbai, IN',
-    bio: 'Dr. Vikram Singh is a leading dermatologist specializing in cosmetic and clinical dermatology. He is dedicated to providing personalized skin care solutions.',
-    rating: 4.8,
-    reviews: 98,
-    image: 'https://picsum.photos/400/400',
-    dataAiHint: 'doctor portrait',
-  },
-  {
-    id: '3',
-    name: 'Dr. Priya Patel',
-    specialty: 'Pediatrician',
-    location: 'Mumbai, IN',
-    bio: 'Dr. Priya Patel is a compassionate pediatrician committed to providing the highest quality of care for children from infancy through adolescence.',
-    rating: 4.9,
-    reviews: 150,
-    image: 'https://picsum.photos/400/400',
-    dataAiHint: 'doctor portrait',
-  },
-];
 
 const profileSchema = z.object({
   name: z.string().min(1, 'Full name is required.'),
@@ -245,4 +211,3 @@ export function ProfileForm() {
     </Form>
   );
 }
-

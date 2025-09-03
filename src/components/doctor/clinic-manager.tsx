@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, ChangeEvent } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
@@ -42,32 +42,14 @@ import {
 } from "@/components/ui/dialog"
 import { Checkbox } from '@/components/ui/checkbox';
 import Image from 'next/image';
-import { PlusCircle, Edit, Trash2, MapPin, Calendar, Clock, Upload } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, MapPin, Calendar, Clock, Upload, X, ChevronsUpDown } from 'lucide-react';
+import { initialClinics, mockPharmacies, mockLabs } from '@/lib/mock-data';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 const CLINICS_KEY = 'mockClinics';
-
-const initialClinics = [
-    {
-        id: 'clinic1',
-        doctorId: '1',
-        name: 'Andheri West Clinic',
-        location: '123 Health St, Andheri West, Mumbai',
-        image: 'https://picsum.photos/400/300',
-        dataAiHint: 'clinic exterior',
-        days: ['Monday', 'Wednesday', 'Friday'],
-        slots: '10:00 AM, 11:00 AM, 12:00 PM',
-    },
-    {
-        id: 'clinic2',
-        doctorId: '1',
-        name: 'Dadar East Clinic',
-        location: '456 Wellness Ave, Dadar East, Mumbai',
-        image: 'https://picsum.photos/400/300',
-        dataAiHint: 'clinic interior',
-        days: ['Tuesday', 'Thursday'],
-        slots: '03:00 PM, 04:00 PM, 05:00 PM',
-    }
-];
 
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as const;
 
@@ -82,6 +64,8 @@ const clinicSchema = z.object({
     message: 'You have to select at least one day.',
   }),
   slots: z.string().min(1, 'Please enter at least one time slot.'),
+  associatedPharmacyIds: z.array(z.string()).optional(),
+  associatedLabIds: z.array(z.string()).optional(),
 });
 
 type ClinicFormValues = z.infer<typeof clinicSchema>;
@@ -122,6 +106,8 @@ export function ClinicManager() {
         dataAiHint: 'clinic interior',
         days: [],
         slots: '',
+        associatedPharmacyIds: [],
+        associatedLabIds: [],
     },
   });
   
@@ -141,6 +127,8 @@ export function ClinicManager() {
             dataAiHint: 'clinic interior',
             days: [],
             slots: '',
+            associatedPharmacyIds: [],
+            associatedLabIds: [],
           });
       }
   }, [editingClinic, user, form]);
@@ -322,6 +310,40 @@ export function ClinicManager() {
                                     <FormMessage />
                                 </FormItem>
                             )} />
+
+                            <FormField
+                                control={form.control}
+                                name="associatedPharmacyIds"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-col">
+                                    <FormLabel>Associated Pharmacies</FormLabel>
+                                    <MultiSelect
+                                        options={mockPharmacies.map(p => ({ value: p.id, label: p.name }))}
+                                        selected={field.value ?? []}
+                                        onChange={field.onChange}
+                                        placeholder="Select pharmacies..."
+                                    />
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="associatedLabIds"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-col">
+                                    <FormLabel>Associated Labs</FormLabel>
+                                    <MultiSelect
+                                        options={mockLabs.map(l => ({ value: l.id, label: l.name }))}
+                                        selected={field.value ?? []}
+                                        onChange={field.onChange}
+                                        placeholder="Select labs..."
+                                    />
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
                            
                             <DialogFooter className="sticky bottom-0 bg-background pt-4">
                                 <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
@@ -389,6 +411,90 @@ export function ClinicManager() {
             )}
         </div>
     </div>
+  );
+}
+
+// MultiSelect Component
+interface MultiSelectProps {
+  options: { label: string; value: string }[];
+  selected: string[];
+  onChange: (selected: string[]) => void;
+  className?: string;
+  placeholder?: string;
+}
+
+function MultiSelect({ options, selected, onChange, className, placeholder = "Select..." }: MultiSelectProps) {
+  const [open, setOpen] = useState(false);
+
+  const handleUnselect = (item: string) => {
+    onChange(selected.filter((i) => i !== item));
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className={cn("w-full justify-between h-auto", className)}
+          onClick={() => setOpen(!open)}
+        >
+          <div className="flex gap-1 flex-wrap">
+            {selected.length > 0 ? (
+              options
+                .filter((option) => selected.includes(option.value))
+                .map((option) => (
+                  <Badge
+                    variant="secondary"
+                    key={option.value}
+                    className="mr-1"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleUnselect(option.value);
+                    }}
+                  >
+                    {option.label}
+                    <X className="ml-1 h-3 w-3" />
+                  </Badge>
+                ))
+            ) : (
+              <span className="text-muted-foreground font-normal">{placeholder}</span>
+            )}
+          </div>
+          <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+        <Command>
+          <CommandInput placeholder="Search..." />
+          <CommandEmpty>No options found.</CommandEmpty>
+          <CommandGroup className="max-h-64 overflow-auto">
+            {options.map((option) => (
+              <CommandItem
+                key={option.value}
+                onSelect={() => {
+                  onChange(
+                    selected.includes(option.value)
+                      ? selected.filter((item) => item !== option.value)
+                      : [...selected, option.value]
+                  );
+                  setOpen(true);
+                }}
+              >
+                <Check
+                  className={cn(
+                    "mr-2 h-4 w-4",
+                    selected.includes(option.value) ? "opacity-100" : "opacity-0"
+                  )}
+                />
+                {option.label}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 }
 

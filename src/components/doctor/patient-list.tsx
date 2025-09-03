@@ -86,7 +86,7 @@ export function PatientList() {
                     <Calendar
                         mode="single"
                         selected={filters.date ?? undefined}
-                        onSelect={(date) => handleFilterChange('date', date)}
+                        onSelect={(date) => handleFilterChange('date', date as Date | null)}
                         initialFocus
                     />
                 </PopoverContent>

@@ -15,6 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Separator } from '../ui/separator';
 
 
 export function Header() {
@@ -110,8 +111,8 @@ export function Header() {
       );
     }
     return (
-      <Button asChild>
-        <Link href="/login">Login / Register</Link>
+      <Button asChild variant="outline">
+        <Link href="/login?role=patient">Login / Register</Link>
       </Button>
     );
   };
@@ -175,7 +176,7 @@ export function Header() {
     }
     return (
       <Button asChild className="text-lg">
-        <Link href="/login" onClick={() => setIsSheetOpen(false)}>Login / Register</Link>
+        <Link href="/login?role=patient" onClick={() => setIsSheetOpen(false)}>Login / Register</Link>
       </Button>
     );
   };
@@ -192,8 +193,8 @@ export function Header() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-2">
-          <Button variant="ghost" asChild>
-            <Link href="/book-appointment"><Calendar />Book Appointment</Link>
+          <Button asChild>
+            <Link href="/book-appointment"><Calendar className="mr-2"/>Book Appointment</Link>
           </Button>
           <div className="h-6 border-l mx-2"></div>
           {renderAuthButtons()}
@@ -225,11 +226,12 @@ export function Header() {
                     </SheetClose>
                 </div>
                 <nav className="flex flex-col gap-4">
-                  <Button variant="ghost" asChild className="justify-start text-lg">
+                  <Button asChild className="justify-start text-lg">
                     <Link href="/book-appointment" onClick={() => setIsSheetOpen(false)}>
                       <Calendar className="mr-2"/>Book Appointment
                     </Link>
                   </Button>
+                  <Separator className="my-2"/>
                   {renderMobileAuthButtons()}
                 </nav>
               </div>

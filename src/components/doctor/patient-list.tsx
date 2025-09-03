@@ -225,9 +225,9 @@ export function PatientList() {
                         <TableHead className="w-12">
                             <Checkbox 
                                 onCheckedChange={(checked) => handleSelectAll(checked)}
-                                checked={isAllSelected}
-                                indeterminate={isIndeterminate}
+                                checked={isAllSelected || isIndeterminate}
                                 aria-label="Select all"
+                                ref={(el) => el && (el.indeterminate = isIndeterminate)}
                             />
                         </TableHead>
                         <TableHead>Patient Name</TableHead>

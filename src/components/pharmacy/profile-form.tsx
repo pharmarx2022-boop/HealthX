@@ -174,7 +174,7 @@ export function PharmacyProfileForm() {
              <div className="space-y-2">
                 <Label htmlFor="discount">Health Points Discount</Label>
                 <div className="relative">
-                    <Input id="discount" name="discount" type="number" placeholder="e.g. 15" value={profile.discount} onChange={handleInputChange} className="pl-8"/>
+                    <Input id="discount" name="discount" type="number" placeholder="e.g. 15" value={profile.discount} onChange={handleInputChange} className="pl-8" min="15" />
                     <Percent className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 </div>
                 <p className="text-sm text-muted-foreground">Minimum 15%. This is the discount patients get when they redeem Health Points at your pharmacy.</p>

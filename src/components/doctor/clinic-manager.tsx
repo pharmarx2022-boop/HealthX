@@ -432,7 +432,7 @@ export function ClinicManager() {
                                     <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                                     <AlertDialogDescription>
                                         This action cannot be undone. This will permanently delete the clinic from your profile.
-                                    </                               AlertDialogDescription>
+                                    </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -533,3 +533,5 @@ function MultiSelect({ options, selected, onChange, className, placeholder = "Se
     </Popover>
   );
 }
+
+    

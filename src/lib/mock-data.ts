@@ -71,3 +71,27 @@ export const initialClinics = [
         consultationFee: 1200,
     }
 ];
+
+export const initialPharmacies = [
+    {
+        id: 'pharm1',
+        name: 'Wellness Forever Pharmacy',
+        location: 'Shop 5, Andheri West',
+        image: 'https://picsum.photos/400/300',
+        acceptsHealthPoints: true,
+    },
+    {
+        id: 'pharm2',
+        name: 'Apollo Pharmacy',
+        location: 'Main Road, Dadar',
+        image: 'https://picsum.photos/400/300',
+        acceptsHealthPoints: true,
+    },
+    {
+        id: 'pharm3',
+        name: 'Noble Medical',
+        location: 'Linking Road, Bandra',
+        image: 'https://picsum.photos/400/300',
+        acceptsHealthPoints: false,
+    }
+];

@@ -8,12 +8,13 @@ import { Input } from '@/components/ui/input';
 import { Stethoscope, MapPin, Pill, Loader2, AlertTriangle, Building, Link as LinkIcon, Search, PercentCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { initialDoctors, initialClinics } from '@/lib/mock-data';
+import { initialDoctors, initialClinics, initialPharmacies } from '@/lib/mock-data';
 import { Badge } from '../ui/badge';
 
 // Types
 type Doctor = typeof initialDoctors[0];
 type Clinic = typeof initialClinics[0];
+type Pharmacy = typeof initialPharmacies[0];
 
 
 export function NearbySearch() {
@@ -23,11 +24,15 @@ export function NearbySearch() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isClient, setIsClient] = useState(false);
   const [clinics, setClinics] = useState<Clinic[]>([]);
+  const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
 
   useEffect(() => {
     setIsClient(true);
     const storedClinics = sessionStorage.getItem('mockClinics');
     setClinics(storedClinics ? JSON.parse(storedClinics) : initialClinics);
+
+    const storedPharmacies = sessionStorage.getItem('mockPharmacies');
+    setPharmacies(storedPharmacies ? JSON.parse(storedPharmacies) : initialPharmacies);
 
     if (typeof window !== 'undefined' && 'geolocation' in navigator) {
         setStatus('loading');
@@ -52,7 +57,7 @@ export function NearbySearch() {
 
   const searchResults = useMemo(() => {
     if (!searchTerm) {
-        return { doctors: initialDoctors };
+        return { doctors: initialDoctors, pharmacies: initialPharmacies };
     }
 
     const lowerCaseSearchTerm = searchTerm.toLowerCase();
@@ -62,9 +67,13 @@ export function NearbySearch() {
         d.specialty.toLowerCase().includes(lowerCaseSearchTerm)
     );
 
-    return { doctors: filteredDoctors };
+    const filteredPharmacies = initialPharmacies.filter(p =>
+        p.name.toLowerCase().includes(lowerCaseSearchTerm)
+    );
 
-  }, [searchTerm, clinics]);
+    return { doctors: filteredDoctors, pharmacies: filteredPharmacies };
+
+  }, [searchTerm, clinics, pharmacies]);
   
   const renderContent = () => {
     switch(status) {
@@ -83,7 +92,7 @@ export function NearbySearch() {
                 </div>
             )
         case 'success':
-            const { doctors } = searchResults;
+            const { doctors, pharmacies } = searchResults;
             return (
                 <div className="space-y-8">
                     {doctors.length > 0 && (
@@ -123,7 +132,37 @@ export function NearbySearch() {
                             </div>
                         </section>
                     )}
-                     {doctors.length === 0 && (
+
+                    {pharmacies.length > 0 && (
+                         <section>
+                            <h2 className="text-2xl font-headline font-bold mb-4 flex items-center gap-2"><Pill/> Pharmacies</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {pharmacies.map((pharmacy) => (
+                                    <Card key={pharmacy.id} className="overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                                        <CardHeader>
+                                            <div className="relative w-full h-40 rounded-lg overflow-hidden">
+                                                 <Image src={pharmacy.image} alt={pharmacy.name} fill style={{objectFit:"cover"}} data-ai-hint="pharmacy exterior" />
+                                            </div>
+                                             <CardTitle className="font-headline text-xl pt-4">{pharmacy.name}</CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <div className="flex items-center text-muted-foreground gap-2">
+                                                <MapPin className="w-4 h-4"/> 
+                                                <span>{pharmacy.location}</span>
+                                            </div>
+                                            {pharmacy.acceptsHealthPoints && (
+                                                <Badge className="mt-4" variant="secondary">
+                                                    <PercentCircle className="mr-2 text-primary" /> Accepts Health Points
+                                                </Badge>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+                        </section>
+                    )}
+
+                     {(doctors.length === 0 && pharmacies.length === 0) && (
                         <div className="text-center py-16 text-muted-foreground">
                             <p>No results found for "{searchTerm}".</p>
                         </div>
@@ -140,7 +179,7 @@ export function NearbySearch() {
         <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input 
-                placeholder="Search by doctor or specialty..."
+                placeholder="Search by doctor, specialty, pharmacy..."
                 className="pl-10 text-base py-6"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}

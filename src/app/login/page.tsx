@@ -20,9 +20,9 @@ const loginSchema = z.object({
   otp: z.string().optional(),
 });
 
-type Role = 'doctor' | 'patient' | 'agent' | 'admin';
+type Role = 'doctor' | 'patient' | 'agent' | 'admin' | 'pharmacy';
 
-const ALL_ROLES: Role[] = ['doctor', 'patient', 'agent', 'admin'];
+const ALL_ROLES: Role[] = ['doctor', 'patient', 'agent', 'admin', 'pharmacy'];
 
 function isValidRole(role: any): role is Role {
     return ALL_ROLES.includes(role);

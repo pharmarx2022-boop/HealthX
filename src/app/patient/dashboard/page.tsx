@@ -5,7 +5,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { User, Calendar, Clock, Stethoscope, IndianRupee, RefreshCw, Bell, Star, Users, Wallet, QrCode, KeyRound, History } from 'lucide-react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { mockPatients } from '@/components/doctor/patient-list';
 import { initialDoctors } from '@/lib/mock-data';
 import { format } from 'date-fns';
@@ -31,6 +31,9 @@ export default function PatientDashboardPage() {
     const [selectedAppointment, setSelectedAppointment] = useState<any | null>(null);
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState('');
+    const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
+    const videoRef = useRef<HTMLVideoElement>(null);
+
 
     useEffect(() => {
         setIsClient(true);
@@ -41,6 +44,38 @@ export default function PatientDashboardPage() {
         // Let's assume the logged in patient is "Rohan Sharma" for this demo
         setMyAppointments(allAppointments.filter((p: any) => p.name === 'Rohan Sharma')); 
     }, []);
+
+    useEffect(() => {
+        if (redeemStep !== 'scan') return;
+
+        const getCameraPermission = async () => {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({video: true});
+            setHasCameraPermission(true);
+    
+            if (videoRef.current) {
+              videoRef.current.srcObject = stream;
+            }
+          } catch (error) {
+            console.error('Error accessing camera:', error);
+            setHasCameraPermission(false);
+            toast({
+              variant: 'destructive',
+              title: 'Camera Access Denied',
+              description: 'Please enable camera permissions in your browser settings to use this feature.',
+            });
+          }
+        };
+    
+        getCameraPermission();
+
+        return () => {
+            if (videoRef.current && videoRef.current.srcObject) {
+                const stream = videoRef.current.srcObject as MediaStream;
+                stream.getTracks().forEach(track => track.stop());
+            }
+        }
+    }, [redeemStep, toast]);
 
     const nextReminder = myAppointments.find(appt => appt.nextAppointmentDate && !isNaN(new Date(appt.nextAppointmentDate).getTime()));
     
@@ -353,10 +388,18 @@ export default function PatientDashboardPage() {
                                     Point your camera at the pharmacy or lab's QR code to proceed with the payment.
                                 </DialogDescription>
                             </DialogHeader>
-                            <div className="py-4">
-                                <div className="aspect-square bg-slate-900 rounded-lg flex items-center justify-center">
-                                    <p className="text-slate-500">Mock Camera View</p>
+                            <div className="py-4 space-y-4">
+                                <div className="aspect-square bg-slate-900 rounded-lg flex items-center justify-center overflow-hidden">
+                                     <video ref={videoRef} className="w-full h-full object-cover" autoPlay muted playsInline />
                                 </div>
+                                {hasCameraPermission === false && (
+                                     <Alert variant="destructive">
+                                        <AlertTitle>Camera Access Required</AlertTitle>
+                                        <AlertDescription>
+                                            Please allow camera access in your browser settings to use this feature.
+                                        </AlertDescription>
+                                    </Alert>
+                                )}
                             </div>
                             <DialogFooter>
                                 <Button variant="outline" onClick={() => setRedeemStep('initial')}>Back</Button>

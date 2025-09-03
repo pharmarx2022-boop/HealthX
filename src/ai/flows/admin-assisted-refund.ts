@@ -52,6 +52,28 @@ const refundVerificationPrompt = ai.definePrompt({
   Verification Result: `,
 });
 
+// Mock database
+const MOCK_USER_DATA: Record<string, { consultationHistory: string[], walletBalance: number }> = {
+    'user_abc123': {
+        consultationHistory: [
+            'Consulted Dr. Sharma for cardiology on 2023-10-15. Paid ₹1200.',
+            'Follow-up with Dr. Sharma on 2023-10-22. Paid ₹800.',
+            'Consulted Dr. Singh for dermatology on 2023-11-05. Paid ₹1500.'
+        ],
+        walletBalance: 250,
+    },
+    'user_def456': {
+        consultationHistory: ['No recent consultations.'],
+        walletBalance: 1000,
+    },
+    'user_ghi789': {
+        consultationHistory: [
+            'Consulted Dr. Patel for pediatrics on 2023-11-10. Paid ₹900.',
+        ],
+        walletBalance: 50,
+    }
+}
+
 const getUserConsultationHistory = ai.defineTool({
   name: 'getUserConsultationHistory',
   description: 'Retrieves a summary of the user consultation history.',
@@ -61,9 +83,11 @@ const getUserConsultationHistory = ai.defineTool({
   outputSchema: z.string(),
 },
 async (input) => {
-    // TODO: Replace with actual implementation to fetch consultation history
-    // For now, return a placeholder
-    return `User ${input.userId} has a history of 5 consultations in the past month.`
+    const userData = MOCK_USER_DATA[input.userId];
+    if (userData) {
+      return userData.consultationHistory.join(' ');
+    }
+    return `No consultation history found for user ${input.userId}.`;
   }
 );
 
@@ -76,9 +100,8 @@ const getUserWalletBalance = ai.defineTool({
   outputSchema: z.number(),
 },
 async (input) => {
-    // TODO: Replace with actual implementation to fetch wallet balance
-    // For now, return a placeholder
-    return 150;
+    const userData = MOCK_USER_DATA[input.userId];
+    return userData?.walletBalance ?? 0;
   }
 );
 

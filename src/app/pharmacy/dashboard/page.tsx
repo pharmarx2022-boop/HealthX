@@ -40,7 +40,6 @@ const mockTransactions = [
 
 const totalPointsCollected = mockTransactions.reduce((acc, tx) => acc + tx.amount, 0);
 
-
 export default function PharmacyDashboardPage() {
     const { toast } = useToast();
     const [isRedeemDialogOpen, setIsRedeemDialogOpen] = useState(false);
@@ -198,8 +197,6 @@ export default function PharmacyDashboardPage() {
                     </CardContent>
                 </Card>
             </div>
-
-
         </div>
       </main>
       <Footer />

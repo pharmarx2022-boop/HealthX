@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Stethoscope, User, Briefcase, Pill, Beaker, Shield } from 'lucide-react';
+import { Stethoscope, User, Briefcase, Pill, Beaker } from 'lucide-react';
 
 const roles = [
   {
@@ -37,12 +37,6 @@ const roles = [
     description: 'Manage lab reports and redeem Health Points for patients.',
     loginLink: '/login?role=lab',
   },
-  {
-    name: 'Admin',
-    icon: Shield,
-    description: 'Oversee the entire platform, manage users, and handle approvals.',
-    loginLink: '/login?role=admin',
-  }
 ];
 
 export function RoleCards() {

@@ -5,7 +5,17 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,6 +23,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
+import { useToast } from '@/hooks/use-toast';
 
 const baseSchemaObject = z.object({
   fullName: z.string().min(2, { message: 'Full name is required.' }),
@@ -67,10 +78,10 @@ const roleTitles: Record<Role, string> = {
     agent: "Agent Registration"
 }
 
-export default function RegisterPage() {
-  const params = useParams();
-  const role = (params.role as Role) || 'patient';
+export default function RegisterPage({ params }: { params: { role: Role } }) {
+  const { role } = params;
   const currentSchema = roleSchemas[role] || patientSchema;
+  const { toast } = useToast();
 
   const form = useForm({
     resolver: zodResolver(currentSchema),
@@ -90,6 +101,10 @@ export default function RegisterPage() {
   function onSubmit(values: z.infer<typeof currentSchema>) {
     console.log({ role, ...values });
     // Handle registration logic
+    toast({
+        title: "Account Created!",
+        description: `Your ${role} account has been successfully created.`,
+    });
   }
 
   const renderRoleSpecificFields = () => {
@@ -191,7 +206,26 @@ export default function RegisterPage() {
 
                 {renderRoleSpecificFields()}
                 
-                <Button type="submit" className="w-full !mt-6">Create Account</Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button type="button" className="w-full !mt-6">Create Account</Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Confirm Registration?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Please review your information before creating your account.
+                        Are you sure you want to proceed?
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={form.handleSubmit(onSubmit)}>
+                        Continue
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </form>
             </Form>
             <div className="mt-6 text-center text-sm">

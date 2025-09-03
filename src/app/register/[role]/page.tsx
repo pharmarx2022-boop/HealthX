@@ -18,6 +18,10 @@ const baseSchema = z.object({
   email: z.string().email({ message: 'A valid email is required.' }),
   phone: z.string().min(10, { message: 'A valid phone number is required.' }),
   password: z.string().min(8, { message: 'Password must be at least 8 characters.' }),
+  confirmPassword: z.string(),
+}).refine(data => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
 });
 
 const doctorSchema = baseSchema.extend({
@@ -138,6 +142,28 @@ export default function RegisterPage({ params }: { params: { role: Role } }) {
                 <FormField control={form.control} name="password" render={({ field }) => (
                     <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
+
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirm Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="password"
+                          placeholder="••••••••"
+                          {...field}
+                          onPaste={(e) => {
+                            e.preventDefault();
+                            return false;
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 {renderRoleSpecificFields()}
                 

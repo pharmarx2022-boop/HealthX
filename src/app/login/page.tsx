@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -41,7 +42,10 @@ export default function LoginPage() {
             title: "Login Successful!",
             description: "Welcome back to HealthLink Hub.",
         });
-        router.push('/');
+        if (typeof window !== 'undefined') {
+            sessionStorage.setItem('user', JSON.stringify(user));
+        }
+        router.push(`/${values.role}/dashboard`);
     } else {
         toast({
             title: "Login Failed",

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -6,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Stethoscope, MapPin, Calendar, Clock, Pill, FlaskConical, Loader2, AlertTriangle } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 const doctors = [
   {
@@ -150,8 +152,10 @@ export function NearbySearch() {
                                         <Clock className="w-4 h-4"/>
                                         <span>Available Today</span>
                                     </div>
-                                    <Button className="w-full mt-2">
-                                        <Calendar className="mr-2"/> Book Appointment
+                                    <Button asChild className="w-full mt-2">
+                                        <Link href={`/doctor/${doctor.id}`}>
+                                            <Calendar className="mr-2"/> Book Appointment
+                                        </Link>
                                     </Button>
                                 </CardContent>
                                 </Card>

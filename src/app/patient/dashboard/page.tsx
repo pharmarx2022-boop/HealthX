@@ -17,8 +17,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { FamilyManager } from '@/components/patient/family-manager';
 import { MyReports } from '@/components/patient/my-reports';
+import { getTransactionHistory } from '@/lib/transactions';
 
 const DOCTORS_KEY = 'doctorsData';
+const PATIENTS_KEY = 'mockPatients';
 
 export default function PatientDashboardPage() {
     const { toast } = useToast();
@@ -35,41 +37,18 @@ export default function PatientDashboardPage() {
         setIsClient(true);
         // In a real app, you'd fetch this for the logged-in user.
         // Here, we'll use the persisted mock data and filter it.
-        const storedPatients = sessionStorage.getItem('mockPatients');
+        const storedPatients = sessionStorage.getItem(PATIENTS_KEY);
         const allAppointments = storedPatients ? JSON.parse(storedPatients) : mockPatients;
         // Let's assume the logged in patient is "Rohan Sharma" for this demo
-        setMyAppointments(allAppointments.filter((p: any) => p.name === 'Rohan Sharma')); 
+        setMyAppointments(allAppointments.filter((p: any) => p.name === 'Rohan Sharma'));
     }, []);
 
     const nextReminder = myAppointments.find(appt => appt.nextAppointmentDate && !isNaN(new Date(appt.nextAppointmentDate).getTime()));
-    
-    const totalHealthPointsEarned = myAppointments
-        .filter(appt => appt.status === 'done' && appt.refundStatus === 'Refunded')
-        .reduce((total, appt) => total + appt.consultationFee, 0);
 
     const transactionHistory = useMemo(() => {
-        const earnings = myAppointments
-            .filter(appt => appt.status === 'done' && appt.refundStatus === 'Refunded')
-            .map(appt => ({
-                type: 'Cashback Earned',
-                description: `From consultation on ${format(new Date(appt.appointmentDate), 'PP')}`,
-                amount: `+ ₹${appt.consultationFee.toFixed(2)}`,
-                date: new Date(appt.appointmentDate),
-                status: 'credited'
-            }));
-        
-        // Mock spending for demonstration purposes
-        const spending: any[] = [];
-        
-        const totalSpent = spending.reduce((acc, curr) => acc + parseFloat(curr.amount.replace('- ₹', '')), 0);
-        const availableBalance = totalHealthPointsEarned - totalSpent;
-
-        return {
-            balance: availableBalance > 0 ? availableBalance : 0,
-            transactions: [...earnings, ...spending].sort((a, b) => b.date.getTime() - a.date.getTime()),
-        }
-
-    }, [myAppointments, totalHealthPointsEarned]);
+        if (!isClient) return { balance: 0, transactions: [] };
+        return getTransactionHistory('rohan_sharma');
+    }, [isClient, myAppointments]);
 
 
     const openReviewDialog = (appointment: any) => {
@@ -113,7 +92,7 @@ export default function PatientDashboardPage() {
         const updatedAppointments = myAppointments.map(appt => 
             appt.id === selectedAppointment.id ? { ...appt, reviewed: true } : appt
         );
-        const allStoredAppointments = JSON.parse(sessionStorage.getItem('mockPatients') || '[]');
+        const allStoredAppointments = JSON.parse(sessionStorage.getItem(PATIENTS_KEY) || '[]');
         const finalAppointments = allStoredAppointments.map((appt: any) => {
             if (appt.id === selectedAppointment.id) {
                 return { ...appt, reviewed: true };
@@ -121,7 +100,7 @@ export default function PatientDashboardPage() {
             return appt;
         });
 
-        sessionStorage.setItem('mockPatients', JSON.stringify(finalAppointments));
+        sessionStorage.setItem(PATIENTS_KEY, JSON.stringify(finalAppointments));
         setMyAppointments(updatedAppointments);
 
         toast({
@@ -236,7 +215,6 @@ export default function PatientDashboardPage() {
                                 <CardContent>
                                     <p className="text-3xl font-bold">₹{transactionHistory.balance.toFixed(2)}</p>
                                     <p className="text-sm text-muted-foreground mt-1">Available to redeem.</p>
-                                    <p className="text-sm text-muted-foreground">Total cashback earned: ₹{totalHealthPointsEarned.toFixed(2)}</p>
                                 </CardContent>
                                 <CardFooter className="flex flex-col gap-2">
                                     <Button variant="link" className="p-0 h-auto" onClick={() => setIsHistoryOpen(true)}>
@@ -325,18 +303,21 @@ export default function PatientDashboardPage() {
                     </DialogHeader>
                     <div className="max-h-[60vh] overflow-y-auto -mx-6 px-6">
                         <ul className="space-y-4 py-4">
-                            {transactionHistory.transactions.map((tx, index) => (
-                                <li key={index} className="flex items-center justify-between">
-                                    <div>
-                                        <p className="font-medium">{tx.type}</p>
-                                        <p className="text-sm text-muted-foreground">{tx.description}</p>
-                                         <p className="text-xs text-muted-foreground mt-1">{format(tx.date, 'PP, p')}</p>
-                                    </div>
-                                    <span className={`font-semibold ${tx.status === 'credited' ? 'text-green-600' : 'text-destructive'}`}>
-                                        {tx.amount}
-                                    </span>
-                                </li>
-                            ))}
+                             {transactionHistory.transactions.length > 0 ? (
+                                transactionHistory.transactions.map((tx, index) => (
+                                    <li key={index} className="flex items-center justify-between">
+                                        <div>
+                                            <p className="font-medium">{tx.description}</p>
+                                            <p className="text-xs text-muted-foreground mt-1">{format(tx.date, 'PP, p')}</p>
+                                        </div>
+                                        <span className={`font-semibold ${tx.type === 'credit' ? 'text-green-600' : 'text-destructive'}`}>
+                                            {tx.type === 'credit' ? '+' : '-'} ₹{tx.amount.toFixed(2)}
+                                        </span>
+                                    </li>
+                                ))
+                             ) : (
+                                <p className="text-sm text-muted-foreground text-center py-4">No transactions yet.</p>
+                             )}
                         </ul>
                     </div>
                 </DialogContent>

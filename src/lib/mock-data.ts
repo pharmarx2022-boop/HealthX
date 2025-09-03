@@ -79,6 +79,7 @@ export const initialPharmacies = [
         location: 'Shop 5, Andheri West',
         image: 'https://picsum.photos/400/300',
         acceptsHealthPoints: true,
+        discount: 15,
     },
     {
         id: 'pharm2',
@@ -86,6 +87,7 @@ export const initialPharmacies = [
         location: 'Main Road, Dadar',
         image: 'https://picsum.photos/400/300',
         acceptsHealthPoints: true,
+        discount: 20,
     },
     {
         id: 'pharm3',
@@ -93,5 +95,11 @@ export const initialPharmacies = [
         location: 'Linking Road, Bandra',
         image: 'https://picsum.photos/400/300',
         acceptsHealthPoints: false,
+        discount: 0,
     }
+];
+
+export const mockPatientData = [
+    { id: 'rohan_sharma', name: 'Rohan Sharma', phone: '9876543210' },
+    { id: 'priya_mehta', name: 'Priya Mehta', phone: '9876543211' },
 ];

@@ -17,8 +17,12 @@ export function loginWithOtp(phone: string, otp: string, role: string) {
             userId = '1';
             break;
         case 'patient':
-             // Assuming patient Rohan Sharma has id '1' in mockPatients
-            userId = 'rohan_sharma'; 
+             // Assuming patient Rohan Sharma has id 'rohan_sharma' in mockPatientData
+            userId = 'rohan_sharma';
+            break;
+        case 'pharmacy':
+            // Using a static ID for the first pharmacy for demo purposes
+            userId = 'pharm1';
             break;
         default:
             userId = `${role}_${phone.slice(-4)}`;

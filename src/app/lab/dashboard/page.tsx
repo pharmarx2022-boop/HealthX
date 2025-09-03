@@ -1,12 +1,18 @@
 
+'use client';
+
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FlaskConical, Edit, History, FileText, Wallet } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { FlaskConical, Edit, History, FileText, Wallet, Banknote, ArrowRight } from 'lucide-react';
 import { RedemptionTool } from '@/components/partner/redemption-tool';
 import { PartnerProfileForm } from '@/components/partner/partner-profile-form';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
 
 
 const mockTransactions = [
@@ -29,6 +35,20 @@ const mockTransactions = [
 const totalPointsCollected = mockTransactions.reduce((acc, tx) => acc + tx.amount, 0);
 
 export default function LabDashboardPage() {
+    const { toast } = useToast();
+    const [isRedeemDialogOpen, setIsRedeemDialogOpen] = useState(false);
+
+    const handleRedeemCash = () => {
+        // In a real app, this would trigger a backend process.
+        // For this demo, we'll just show a success message.
+        toast({
+            title: "Redemption Request Submitted!",
+            description: `₹${(totalPointsCollected * 0.95).toFixed(2)} will be transferred to your bank account within 3-5 business days.`
+        });
+        // We could also add this to a transaction list and reset the balance.
+        setIsRedeemDialogOpen(false);
+    }
+    
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
@@ -66,7 +86,7 @@ export default function LabDashboardPage() {
                            <RedemptionTool partnerType="lab" />
                         </CardContent>
                     </Card>
-
+                    
                     <Card className="shadow-sm">
                         <CardHeader className="flex flex-row items-center gap-4">
                             <Wallet className="w-8 h-8 text-primary"/>
@@ -80,6 +100,42 @@ export default function LabDashboardPage() {
                         <CardContent>
                            <p className="text-3xl font-bold">₹{totalPointsCollected.toFixed(2)}</p>
                         </CardContent>
+                        <CardFooter>
+                             <Dialog open={isRedeemDialogOpen} onOpenChange={setIsRedeemDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <Button className="w-full">
+                                        <Banknote className="mr-2"/> Redeem for Cash
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Redeem Points for Cash</DialogTitle>
+                                        <DialogDescription>
+                                            Review the details below. A 5% platform fee will be deducted from the total amount.
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <div className="space-y-4 py-4">
+                                        <div className="flex justify-between items-center p-3 rounded-lg bg-slate-100">
+                                            <span className="text-muted-foreground">Total Points Balance</span>
+                                            <span className="font-bold text-lg">₹{totalPointsCollected.toFixed(2)}</span>
+                                        </div>
+                                         <div className="flex justify-between items-center p-3 rounded-lg bg-slate-100">
+                                            <span className="text-muted-foreground">Admin Commission (5%)</span>
+                                            <span className="font-medium text-destructive">- ₹{(totalPointsCollected * 0.05).toFixed(2)}</span>
+                                        </div>
+                                         <div className="flex justify-between items-center p-4 rounded-lg bg-green-100 text-green-800 border border-green-200">
+                                            <span className="font-semibold">Final Cash Payout</span>
+                                            <span className="font-bold text-xl">₹{(totalPointsCollected * 0.95).toFixed(2)}</span>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground text-center">Funds will be transferred to your registered bank account.</p>
+                                    </div>
+                                    <DialogFooter>
+                                        <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
+                                        <Button onClick={handleRedeemCash}>Confirm Redemption</Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
+                        </CardFooter>
                     </Card>
 
                     <Card className="shadow-sm">
@@ -91,7 +147,7 @@ export default function LabDashboardPage() {
                              <CardDescription>
                                 View your recent Health Point redemption history.
                             </CardDescription>
-                        </Header>
+                        </CardHeader>
                         <CardContent>
                            <div className="space-y-4">
                                 {mockTransactions.map(tx => (

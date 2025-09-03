@@ -61,8 +61,11 @@ export function NearbySearch() {
   }, []);
 
   const searchResults = useMemo(() => {
+    const allPharmacies = pharmacies.filter(p => p.acceptsHealthPoints && p.discount >= 15);
+    const allLabs = labs.filter(l => l.acceptsHealthPoints && l.discount >= 30);
+
     if (!searchTerm) {
-        return { doctors: initialDoctors, pharmacies: initialPharmacies, labs: initialLabs };
+        return { doctors: initialDoctors, pharmacies: allPharmacies, labs: allLabs };
     }
 
     const lowerCaseSearchTerm = searchTerm.toLowerCase();
@@ -72,11 +75,11 @@ export function NearbySearch() {
         d.specialty.toLowerCase().includes(lowerCaseSearchTerm)
     );
 
-    const filteredPharmacies = initialPharmacies.filter(p =>
+    const filteredPharmacies = allPharmacies.filter(p =>
         p.name.toLowerCase().includes(lowerCaseSearchTerm)
     );
     
-    const filteredLabs = initialLabs.filter(l =>
+    const filteredLabs = allLabs.filter(l =>
         l.name.toLowerCase().includes(lowerCaseSearchTerm)
     );
 

@@ -38,7 +38,7 @@ export default function PatientDetailPage() {
   }, []);
   
   useEffect(() => {
-    if (patient?.nextAppointmentDate) {
+    if (patient?.nextAppointmentDate && !isNaN(new Date(patient.nextAppointmentDate).getTime())) {
         setNextAppointment(new Date(patient.nextAppointmentDate));
     }
   }, [patient]);
@@ -192,7 +192,7 @@ export default function PatientDetailPage() {
                   <BellPlus className="w-5 h-5 text-primary"/> 
                   <div>
                     <p className="font-medium text-foreground">
-                        {patient.nextAppointmentDate 
+                        {patient.nextAppointmentDate && !isNaN(new Date(patient.nextAppointmentDate).getTime())
                             ? `Next check-up scheduled for: ${format(new Date(patient.nextAppointmentDate), 'PPP')}` 
                             : "No reminder set."
                         }

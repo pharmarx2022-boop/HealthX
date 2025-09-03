@@ -36,7 +36,7 @@ export async function adminAssistedRefund(input: AdminAssistedRefundInput): Prom
 
 const refundVerificationPrompt = ai.definePrompt({
   name: 'refundVerificationPrompt',
-  input: {schema: AdminAssistedRefundInputSchema},
+  input: {schema: z.object({ ...AdminAssistedRefundInputSchema.shape, consultationHistorySummary: z.string(), walletBalance: z.number() })},
   output: {schema: AdminAssistedRefundOutputSchema},
   prompt: `You are an administrative assistant helping to verify refund requests.
 

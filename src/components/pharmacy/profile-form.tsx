@@ -1,28 +1,24 @@
 
 'use client';
 
-import { useState, useEffect, ChangeEvent } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import Image from 'next/image';
 import { Loader2, Upload, Percent } from 'lucide-react';
 import { initialPharmacies } from '@/lib/mock-data';
+import { Label } from '@/components/ui/label';
+import { FormDescription, FormMessage } from '../ui/form';
 
 const PHARMACIES_KEY = 'mockPharmacies';
 
-const profileSchema = z.object({
-  name: z.string().min(1, 'Pharmacy name is required.'),
-  location: z.string().min(1, 'Location is required.'),
-  image: z.string().min(1, 'A pharmacy picture is required.'),
-  discount: z.coerce.number().min(15, 'Discount must be at least 15%.').max(100, 'Discount cannot exceed 100%.'),
-});
-
-type ProfileFormValues = z.infer<typeof profileSchema>;
+type PharmacyProfile = {
+  name: string;
+  location: string;
+  image: string;
+  discount: number;
+};
 
 export function PharmacyProfileForm() {
   const { toast } = useToast();
@@ -30,6 +26,15 @@ export function PharmacyProfileForm() {
   const [user, setUser] = useState<any>(null);
   const [pharmacies, setPharmacies] = useState(initialPharmacies);
   
+  const [profile, setProfile] = useState<PharmacyProfile>({
+    name: '',
+    location: '',
+    image: '',
+    discount: 15,
+  });
+  const [errors, setErrors] = useState<Partial<Record<keyof PharmacyProfile, string>>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     setIsClient(true);
     if (typeof window !== 'undefined') {
@@ -49,40 +54,60 @@ export function PharmacyProfileForm() {
 
   const pharmacyData = pharmacies.find(p => p.id === user?.id);
 
-  const form = useForm<ProfileFormValues>({
-    resolver: zodResolver(profileSchema),
-    defaultValues: {
-      name: '',
-      location: '',
-      image: '',
-      discount: 15,
-    },
-  });
-
   useEffect(() => {
     if (pharmacyData) {
-      form.reset(pharmacyData);
+      setProfile({
+          name: pharmacyData.name,
+          location: pharmacyData.location,
+          image: pharmacyData.image,
+          discount: pharmacyData.discount,
+      });
     }
-  }, [pharmacyData, form]);
+  }, [pharmacyData]);
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setProfile(prev => ({ ...prev, [name]: name === 'discount' ? parseFloat(value) || 0 : value }));
+    if (errors[name as keyof PharmacyProfile]) {
+        setErrors(prev => ({...prev, [name]: undefined}));
+    }
+  };
   
   const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        form.setValue('image', reader.result as string);
-        form.clearErrors('image');
+        setProfile(prev => ({...prev, image: reader.result as string}));
+        if (errors.image) {
+            setErrors(prev => ({...prev, image: undefined}));
+        }
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const onSubmit = (data: ProfileFormValues) => {
-    if (!pharmacyData) return;
+  const validate = () => {
+      const newErrors: Partial<Record<keyof PharmacyProfile, string>> = {};
+      if (!profile.name) newErrors.name = 'Pharmacy name is required.';
+      if (!profile.location) newErrors.location = 'Location is required.';
+      if (!profile.image) newErrors.image = 'A pharmacy picture is required.';
+      if (profile.discount < 15) newErrors.discount = 'Discount must be at least 15%.';
+      if (profile.discount > 100) newErrors.discount = 'Discount cannot exceed 100%.';
+      
+      setErrors(newErrors);
+      return Object.keys(newErrors).length === 0;
+  };
 
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (!validate() || !pharmacyData) return;
+
+    setIsSubmitting(true);
+    
     const updatedPharmacies = pharmacies.map(p => {
         if (p.id === pharmacyData.id) {
-            return { ...p, ...data };
+            return { ...p, ...profile };
         }
         return p;
     });
@@ -90,10 +115,13 @@ export function PharmacyProfileForm() {
     sessionStorage.setItem(PHARMACIES_KEY, JSON.stringify(updatedPharmacies));
     setPharmacies(updatedPharmacies);
 
-    toast({
-      title: 'Profile Updated!',
-      description: 'Your pharmacy details have been saved successfully.',
-    });
+    setTimeout(() => {
+        toast({
+            title: 'Profile Updated!',
+            description: 'Your pharmacy details have been saved successfully.',
+        });
+        setIsSubmitting(false);
+    }, 500); // Simulate network delay
   };
   
   if (!isClient || !pharmacyData) {
@@ -105,94 +133,60 @@ export function PharmacyProfileForm() {
     );
   }
 
-  const currentImage = form.watch('image');
-
   return (
-    <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="grid md:grid-cols-3 gap-8">
-            <div className="md:col-span-1">
-                <h3 className="font-semibold mb-2">Pharmacy Picture</h3>
-                <div className="relative w-full aspect-square rounded-lg overflow-hidden border">
-                    {currentImage ? (
-                        <Image src={currentImage} alt="Pharmacy Preview" fill style={{objectFit:"cover"}} data-ai-hint="pharmacy exterior" />
-                    ) : (
-                        <div className="bg-slate-100 h-full w-full flex items-center justify-center text-muted-foreground text-sm">
-                            No Image
-                        </div>
-                    )}
+    <form onSubmit={handleSubmit} className="grid md:grid-cols-3 gap-8">
+        <div className="md:col-span-1">
+            <h3 className="font-semibold mb-2">Pharmacy Picture</h3>
+            <div className="relative w-full aspect-square rounded-lg overflow-hidden border">
+                {profile.image ? (
+                    <Image src={profile.image} alt="Pharmacy Preview" fill style={{objectFit:"cover"}} data-ai-hint="pharmacy exterior" />
+                ) : (
+                    <div className="bg-slate-100 h-full w-full flex items-center justify-center text-muted-foreground text-sm">
+                        No Image
+                    </div>
+                )}
+            </div>
+            <div className="mt-4">
+                <Input 
+                    id="image-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden" 
+                />
+                <label htmlFor="image-upload" className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full">
+                    <Upload className="mr-2" />
+                    Upload from Device
+                </label>
+                {errors.image && <FormMessage>{errors.image}</FormMessage>}
+            </div>
+        </div>
+        <div className="md:col-span-2 space-y-6">
+            <div className="space-y-2">
+                <Label htmlFor="name">Pharmacy Name</Label>
+                <Input id="name" name="name" placeholder="e.g., Wellness Forever" value={profile.name} onChange={handleInputChange} />
+                {errors.name && <FormMessage>{errors.name}</FormMessage>}
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="location">Location</Label>
+                <Input id="location" name="location" placeholder="e.g., Shop 5, Andheri West" value={profile.location} onChange={handleInputChange} />
+                {errors.location && <FormMessage>{errors.location}</FormMessage>}
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="discount">Health Points Discount</Label>
+                <div className="relative">
+                    <Input id="discount" name="discount" type="number" placeholder="e.g. 15" value={profile.discount} onChange={handleInputChange} className="pl-8"/>
+                    <Percent className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 </div>
-                <FormField control={form.control} name="image" render={() => (
-                    <FormItem className="mt-4">
-                        <FormControl>
-                            <div>
-                                <Input 
-                                    id="image-upload"
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleImageUpload}
-                                    className="hidden" 
-                                />
-                                <label htmlFor="image-upload" className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full">
-                                    <Upload className="mr-2" />
-                                    Upload from Device
-                                </label>
-                            </div>
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                )} />
+                <FormDescription>Minimum 15%. This is the discount patients get when they redeem Health Points at your pharmacy.</FormDescription>
+                {errors.discount && <FormMessage>{errors.discount}</FormMessage>}
             </div>
-            <div className="md:col-span-2 space-y-6">
-                <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Pharmacy Name</FormLabel>
-                        <FormControl>
-                            <Input placeholder="e.g., Wellness Forever" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="location"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Location</FormLabel>
-                        <FormControl>
-                            <Input placeholder="e.g., Shop 5, Andheri West" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="discount"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Health Points Discount</FormLabel>
-                        <div className="relative">
-                             <FormControl>
-                                <Input type="number" placeholder="e.g. 15" {...field} className="pl-8"/>
-                            </FormControl>
-                            <Percent className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        </div>
-                        <FormDescription>Minimum 15%. This is the discount patients get when they redeem Health Points at your pharmacy.</FormDescription>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                
-                <Button type="submit" disabled={form.formState.isSubmitting}>
-                    {form.formState.isSubmitting && <Loader2 className="animate-spin mr-2" />}
-                    Save Changes
-                </Button>
-            </div>
-        </form>
-    </Form>
+            
+            <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="animate-spin mr-2" />}
+                Save Changes
+            </Button>
+        </div>
+    </form>
   );
 }

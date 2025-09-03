@@ -1,5 +1,14 @@
 
 
+export type MockReport = {
+    id: string;
+    patientId: string;
+    name: string;
+    lab: string;
+    date: string;
+    file: string; // URL or path to the file
+};
+
 export const initialDoctors = [
   {
     id: '1',
@@ -123,3 +132,6 @@ export const mockPatientData = [
     { id: 'rohan_sharma', name: 'Rohan Sharma', phone: '9876543210' },
     { id: 'priya_mehta', name: 'Priya Mehta', phone: '9876543211' },
 ];
+
+
+export const mockReports: MockReport[] = [];

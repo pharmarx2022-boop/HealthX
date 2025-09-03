@@ -47,6 +47,7 @@ export default function PatientDashboardPage() {
 
     const transactionHistory = useMemo(() => {
         if (!isClient) return { balance: 0, transactions: [] };
+        // Assuming user id is 'rohan_sharma' for demo
         return getTransactionHistory('rohan_sharma');
     }, [isClient, myAppointments]);
 

@@ -7,10 +7,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Beaker, Search, User, Wallet, History, BadgePercent, Banknote, IndianRupee } from 'lucide-react';
+import { Beaker, Search, User, Wallet, History, BadgePercent, Banknote, IndianRupee, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useMemo, useEffect } from 'react';
-import { initialLabs, mockPatientData } from '@/lib/mock-data';
+import { initialLabs, mockPatientData, mockReports, type MockReport } from '@/lib/mock-data';
 import { getTransactionHistory, recordTransaction, type Transaction } from '@/lib/transactions';
 import { getLabData, recordCommission, type LabTransaction } from '@/lib/lab-data';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
@@ -19,6 +19,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const LABS_KEY = 'mockLabs';
 const PATIENTS_KEY = 'mockPatientsData';
+const REPORTS_KEY = 'mockReports';
 
 export default function LabDashboardPage() {
     const { toast } = useToast();
@@ -31,6 +32,8 @@ export default function LabDashboardPage() {
     const [patientTransactionHistory, setPatientTransactionHistory] = useState<{ balance: number; transactions: Transaction[] }>({ balance: 0, transactions: [] });
     const [labData, setLabData] = useState<{ balance: number; transactions: LabTransaction[] }>({ balance: 0, transactions: [] });
     const [labDetails, setLabDetails] = useState<any>(null);
+    const [reportFile, setReportFile] = useState<File | null>(null);
+    const [reportName, setReportName] = useState('');
 
 
     useEffect(() => {
@@ -45,6 +48,9 @@ export default function LabDashboardPage() {
                 const myDetails = allLabs.find((p: any) => p.id === u.id);
                 setLabDetails(myDetails);
                 setLabData(getLabData(u.id));
+            }
+             if (!sessionStorage.getItem(REPORTS_KEY)) {
+                sessionStorage.setItem(REPORTS_KEY, JSON.stringify(mockReports));
             }
         }
     }, []);
@@ -147,6 +153,38 @@ export default function LabDashboardPage() {
         setOtpSent(false);
         setOtp('');
         setTotalBill('');
+    };
+
+    const handleUploadReport = () => {
+        if (!reportFile || !reportName) {
+            toast({
+                title: "Upload Failed",
+                description: "Please select a file and enter a report name.",
+                variant: "destructive"
+            });
+            return;
+        }
+        
+        const allReports = JSON.parse(sessionStorage.getItem(REPORTS_KEY) || '[]');
+        const newReport: MockReport = {
+            id: `rep${Date.now()}`,
+            patientId: patient.id,
+            name: reportName,
+            lab: labDetails.name,
+            date: new Date().toISOString(),
+            file: 'mock.pdf' // In a real app, this would be a URL to the uploaded file
+        };
+        
+        const updatedReports = [...allReports, newReport];
+        sessionStorage.setItem(REPORTS_KEY, JSON.stringify(updatedReports));
+
+        toast({
+            title: "Report Uploaded!",
+            description: `"${reportName}" has been uploaded for ${patient.name}.`
+        });
+
+        setReportFile(null);
+        setReportName('');
     }
 
   return (
@@ -171,7 +209,7 @@ export default function LabDashboardPage() {
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <p>Report uploads and other lab-specific tools will be available here.</p>
+                        <p>Upload reports and process patient payments using the tools below.</p>
                     </CardContent>
                 </Card>
 
@@ -219,15 +257,15 @@ export default function LabDashboardPage() {
                     </CardFooter>
                 </Card>
 
-                 <Card className="shadow-sm md:col-span-2 lg:col-span-1">
+                 <Card className="shadow-sm md:col-span-2 lg:col-span-3 row-start-2">
                     <CardHeader>
-                        <CardTitle>Process Patient Bill</CardTitle>
+                        <CardTitle>Patient Tools</CardTitle>
                         <CardDescription>
-                            Help patients pay using their Health Points.
+                            Find a patient to process bills or upload reports.
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                        <div className="space-y-2">
+                        <div className="space-y-2 max-w-sm">
                            <Label htmlFor="patientPhone">Patient Phone Number</Label>
                            <div className="flex gap-2">
                                 <Input 
@@ -244,58 +282,82 @@ export default function LabDashboardPage() {
                         </div>
 
                         {patient && labDetails && (
-                            <Card className="bg-slate-50 p-4">
-                                <div className="flex items-start justify-between">
+                            <Card className="bg-slate-50 p-6">
+                                <div className="flex flex-col md:flex-row md:items-start justify-between">
                                     <div className="flex items-center gap-3">
                                         <User className="text-primary"/>
-                                        <p className="font-semibold">{patient.name}</p>
+                                        <div>
+                                            <p className="font-semibold text-lg">{patient.name}</p>
+                                             <Button variant="link" className="p-0 h-auto text-sm" onClick={() => setPatient(null)}>
+                                                Search for another patient
+                                            </Button>
+                                        </div>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="text-lg font-bold">₹{patientTransactionHistory.balance.toFixed(2)}</p>
+                                    <div className="text-left md:text-right mt-4 md:mt-0">
+                                        <p className="text-xl font-bold">₹{patientTransactionHistory.balance.toFixed(2)}</p>
                                         <p className="text-xs text-muted-foreground -mt-1">Available Balance</p>
                                     </div>
                                 </div>
-                                <Button variant="link" className="p-0 h-auto text-sm mt-1" onClick={() => setPatient(null)}>
-                                   Search for another patient
-                                </Button>
-                                
-                                {!otpSent ? (
-                                     <Button className="w-full mt-4" onClick={handleSendOtp}>Send OTP to Patient</Button>
-                                ) : (
-                                    <div className="mt-4 pt-4 border-t space-y-4">
-                                        <Alert variant="default" className="bg-primary/10 border-primary/20">
-                                            <BadgePercent className="h-4 w-4 text-primary" />
-                                            <AlertTitle>Your Redemption Offer: {labDetails.discount}%</AlertTitle>
-                                            <AlertDescription>
-                                                The patient can pay {labDetails.discount}% of their bill using Health Points.
-                                            </AlertDescription>
-                                        </Alert>
+                               
+                               <div className="grid md:grid-cols-2 gap-8 mt-6">
+                                    {/* Redeem Points Section */}
+                                    <div className="space-y-4">
+                                        <h3 className="font-semibold text-lg border-b pb-2">Process Bill</h3>
+                                         {!otpSent ? (
+                                             <Button className="w-full mt-4" onClick={handleSendOtp}>Send OTP to Patient</Button>
+                                        ) : (
+                                            <div className="mt-4 space-y-4">
+                                                <Alert variant="default" className="bg-primary/10 border-primary/20">
+                                                    <BadgePercent className="h-4 w-4 text-primary" />
+                                                    <AlertTitle>Your Redemption Offer: {labDetails.discount}%</AlertTitle>
+                                                    <AlertDescription>
+                                                        The patient can pay {labDetails.discount}% of their bill using Health Points.
+                                                    </AlertDescription>
+                                                </Alert>
 
-                                        <div>
-                                            <Label htmlFor="totalBill">Total Bill Amount (₹)</Label>
-                                            <Input id="totalBill" placeholder="e.g., 1000" type="number" value={totalBill} onChange={(e) => setTotalBill(e.target.value)}/>
-                                        </div>
+                                                <div>
+                                                    <Label htmlFor="totalBill">Total Bill Amount (₹)</Label>
+                                                    <Input id="totalBill" placeholder="e.g., 1000" type="number" value={totalBill} onChange={(e) => setTotalBill(e.target.value)}/>
+                                                </div>
 
-                                        {calculatedAmounts.pointsToPay > 0 && (
-                                            <div className="space-y-2 text-sm">
-                                                <div className="flex justify-between">
-                                                    <span className="text-muted-foreground">Pay with Health Points:</span>
-                                                    <span className="font-medium">₹{calculatedAmounts.pointsToPay.toFixed(2)}</span>
+                                                {calculatedAmounts.pointsToPay > 0 && (
+                                                    <div className="space-y-2 text-sm p-3 bg-white rounded-md border">
+                                                        <div className="flex justify-between">
+                                                            <span className="text-muted-foreground">Pay with Health Points:</span>
+                                                            <span className="font-medium">₹{calculatedAmounts.pointsToPay.toFixed(2)}</span>
+                                                        </div>
+                                                        <div className="flex justify-between font-semibold">
+                                                            <span className="text-muted-foreground">Pay with Cash:</span>
+                                                            <span className="font-medium">₹{calculatedAmounts.cashToPay.toFixed(2)}</span>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                <div>
+                                                    <Label htmlFor="otp">Enter 6-Digit OTP</Label>
+                                                    <Input id="otp" placeholder="Enter OTP from patient" value={otp} onChange={(e) => setOtp(e.target.value)} />
                                                 </div>
-                                                <div className="flex justify-between font-semibold">
-                                                    <span className="text-muted-foreground">Pay with Cash:</span>
-                                                    <span className="font-medium">₹{calculatedAmounts.cashToPay.toFixed(2)}</span>
-                                                </div>
+                                                <Button className="w-full" onClick={handleRedeem}>Confirm Payment</Button>
                                             </div>
                                         )}
-
-                                         <div>
-                                            <Label htmlFor="otp">Enter 6-Digit OTP</Label>
-                                            <Input id="otp" placeholder="Enter OTP from patient" value={otp} onChange={(e) => setOtp(e.target.value)} />
-                                        </div>
-                                        <Button className="w-full" onClick={handleRedeem}>Confirm Payment</Button>
                                     </div>
-                                )}
+
+                                     {/* Upload Report Section */}
+                                    <div className="space-y-4">
+                                        <h3 className="font-semibold text-lg border-b pb-2">Upload Report</h3>
+                                        <div>
+                                            <Label htmlFor="reportName">Report Name</Label>
+                                            <Input id="reportName" placeholder="e.g., Blood Test Report" value={reportName} onChange={(e) => setReportName(e.target.value)} />
+                                        </div>
+                                        <div>
+                                            <Label htmlFor="reportFile">Report File</Label>
+                                            <Input id="reportFile" type="file" onChange={(e) => setReportFile(e.target.files?.[0] || null)} />
+                                        </div>
+                                         <Button className="w-full" onClick={handleUploadReport}>
+                                            <Upload className="mr-2"/> Upload Report
+                                        </Button>
+                                    </div>
+                               </div>
                             </Card>
                         )}
 

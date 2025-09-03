@@ -6,12 +6,31 @@ import { Button } from "@/components/ui/button";
 import { FileText, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { useState, useEffect } from "react";
+import { mockReports as initialReports, type MockReport } from "@/lib/mock-data";
 
-const mockReports: any[] = [];
-
+const REPORTS_KEY = 'mockReports';
 
 export function MyReports() {
     const { toast } = useToast();
+    const [myReports, setMyReports] = useState<MockReport[]>([]);
+    const [user, setUser] = useState<any | null>(null);
+
+    useEffect(() => {
+        const storedUser = sessionStorage.getItem('user');
+        if (storedUser) {
+            const u = JSON.parse(storedUser);
+            setUser(u);
+
+            const allReports = JSON.parse(sessionStorage.getItem(REPORTS_KEY) || '[]');
+            setMyReports(allReports.filter((r: MockReport) => r.patientId === u.id));
+        } else {
+             if (!sessionStorage.getItem(REPORTS_KEY)) {
+                sessionStorage.setItem(REPORTS_KEY, JSON.stringify(initialReports));
+            }
+        }
+    }, []);
+
 
     const handleDownload = (reportName: string) => {
         toast({
@@ -31,8 +50,8 @@ export function MyReports() {
             </CardHeader>
             <CardContent>
                 <div className="space-y-4">
-                    {mockReports.length > 0 ? (
-                        mockReports.map(report => (
+                    {myReports.length > 0 ? (
+                        myReports.map(report => (
                             <div key={report.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-50/70 border">
                                 <div className="flex items-center gap-3">
                                     <FileText className="w-6 h-6 text-primary" />

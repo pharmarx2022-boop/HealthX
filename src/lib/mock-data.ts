@@ -47,36 +47,6 @@ export const initialDoctors = [
 ];
 
 
-export const mockPharmacies = [
-    {
-        id: 'pharm1',
-        name: 'Wellness Forever',
-        location: 'Mumbai, IN',
-        distance: '1.2 km away',
-        image: 'https://picsum.photos/200/200',
-        dataAiHint: 'pharmacy storefront',
-        redemptionOffer: 15,
-    },
-    {
-        id: 'pharm2',
-        name: 'Apollo Pharmacy',
-        location: 'Mumbai, IN',
-        distance: '2.8 km away',
-        image: 'https://picsum.photos/200/200',
-        dataAiHint: 'pharmacy storefront',
-        redemptionOffer: 20,
-    },
-    {
-        id: 'pharm3',
-        name: 'Noble Plus Pharmacy',
-        location: 'Mumbai, IN',
-        distance: '3.5 km away',
-        image: 'https://picsum.photos/200/200',
-        dataAiHint: 'pharmacy storefront',
-        redemptionOffer: 18,
-    }
-]
-
 export const mockLabs = [
     {
         id: 'lab1',
@@ -119,7 +89,7 @@ export const initialClinics = [
         days: ['Monday', 'Wednesday', 'Friday'],
         slots: '10:00 AM, 11:00 AM, 12:00 PM',
         consultationFee: 1500,
-        associatedPharmacyIds: ['pharm1', 'pharm2'],
+        associatedPharmacyIds: [],
         associatedLabIds: ['lab2'],
     },
     {
@@ -132,7 +102,7 @@ export const initialClinics = [
         days: ['Tuesday', 'Thursday'],
         slots: '03:00 PM, 04:00 PM, 05:00 PM',
         consultationFee: 1200,
-        associatedPharmacyIds: ['pharm3'],
+        associatedPharmacyIds: [],
         associatedLabIds: ['lab1', 'lab3'],
     }
 ];

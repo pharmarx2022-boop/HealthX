@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { KeyRound } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { mockPharmacies, mockLabs } from '@/lib/mock-data';
+import { mockLabs } from '@/lib/mock-data';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogClose, DialogFooter } from '@/components/ui/dialog';
 
 const redemptionSchema = z.object({
@@ -21,7 +21,7 @@ const redemptionSchema = z.object({
 });
 
 interface RedemptionToolProps {
-    partnerType: 'pharmacy' | 'lab';
+    partnerType: 'lab';
 }
 
 // Mock patient data for demonstration
@@ -32,7 +32,6 @@ const mockPatientWallets: Record<string, { name: string, healthPoints: number }>
 
 // Mock partner data - in a real app this would be fetched for the logged in partner
 const MOCK_PARTNER_DATA = {
-    pharmacy: mockPharmacies[1], // Apollo Pharmacy (20% offer)
     lab: mockLabs[1], // Dr. Lal PathLabs (35% offer)
 }
 

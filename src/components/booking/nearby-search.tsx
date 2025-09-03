@@ -8,12 +8,11 @@ import { Input } from '@/components/ui/input';
 import { Stethoscope, MapPin, Pill, FlaskConical, Loader2, AlertTriangle, Building, Link as LinkIcon, Search, PercentCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { initialDoctors, mockPharmacies, mockLabs, initialClinics } from '@/lib/mock-data';
+import { initialDoctors, mockLabs, initialClinics } from '@/lib/mock-data';
 import { Badge } from '../ui/badge';
 
 // Types
 type Doctor = typeof initialDoctors[0];
-type Pharmacy = typeof mockPharmacies[0];
 type Lab = typeof mockLabs[0];
 type Clinic = typeof initialClinics[0];
 
@@ -54,7 +53,7 @@ export function NearbySearch() {
 
   const searchResults = useMemo(() => {
     if (!searchTerm) {
-        return { doctors: initialDoctors, pharmacies: mockPharmacies, labs: mockLabs };
+        return { doctors: initialDoctors, labs: mockLabs };
     }
 
     const lowerCaseSearchTerm = searchTerm.toLowerCase();
@@ -64,24 +63,16 @@ export function NearbySearch() {
         d.specialty.toLowerCase().includes(lowerCaseSearchTerm)
     );
 
-    const filteredPharmacies = mockPharmacies.filter(p => 
-        p.name.toLowerCase().includes(lowerCaseSearchTerm)
-    );
-
     const filteredLabs = mockLabs.filter(l => 
         l.name.toLowerCase().includes(lowerCaseSearchTerm)
     );
 
-    // Find doctors associated with filtered pharmacies/labs
-    const doctorsFromPharmacies = clinics.filter(c => 
-        (c.associatedPharmacyIds ?? []).some(id => filteredPharmacies.some(p => p.id === id))
-    ).map(c => c.doctorId);
-
+    // Find doctors associated with filtered labs
     const doctorsFromLabs = clinics.filter(c =>
         (c.associatedLabIds ?? []).some(id => filteredLabs.some(l => l.id === id))
     ).map(c => c.doctorId);
 
-    const associatedDoctorIds = new Set([...doctorsFromPharmacies, ...doctorsFromLabs]);
+    const associatedDoctorIds = new Set([...doctorsFromLabs]);
     
     initialDoctors.forEach(doc => {
         if (associatedDoctorIds.has(doc.id)) {
@@ -91,22 +82,12 @@ export function NearbySearch() {
         }
     });
     
-    // Find pharmacies/labs associated with filtered doctors
-    const associatedPharmacyIds = new Set<string>();
+    // Find labs associated with filtered doctors
     const associatedLabIds = new Set<string>();
 
     clinics.forEach(clinic => {
         if (filteredDoctors.some(doc => doc.id === clinic.doctorId)) {
-            clinic.associatedPharmacyIds?.forEach(id => associatedPharmacyIds.add(id));
             clinic.associatedLabIds?.forEach(id => associatedLabIds.add(id));
-        }
-    });
-
-    mockPharmacies.forEach(pharm => {
-        if (associatedPharmacyIds.has(pharm.id)) {
-            if (!filteredPharmacies.some(p => p.id === pharm.id)) {
-                filteredPharmacies.push(pharm);
-            }
         }
     });
 
@@ -119,21 +100,16 @@ export function NearbySearch() {
     });
 
 
-    return { doctors: filteredDoctors, pharmacies: filteredPharmacies, labs: filteredLabs };
+    return { doctors: filteredDoctors, labs: filteredLabs };
 
   }, [searchTerm, clinics]);
   
   
   const getAssociatedItems = (doctorId: string) => {
-    const associatedPharmacies = new Set<Pharmacy>();
     const associatedLabs = new Set<Lab>();
 
     clinics.forEach(clinic => {
         if (clinic.doctorId === doctorId) {
-            clinic.associatedPharmacyIds?.forEach(id => {
-                const pharmacy = mockPharmacies.find(p => p.id === id);
-                if (pharmacy) associatedPharmacies.add(pharmacy);
-            });
             clinic.associatedLabIds?.forEach(id => {
                 const lab = mockLabs.find(l => l.id === id);
                 if (lab) associatedLabs.add(lab);
@@ -141,7 +117,6 @@ export function NearbySearch() {
         }
     });
     return {
-        pharmacies: Array.from(associatedPharmacies),
         labs: Array.from(associatedLabs)
     };
   }
@@ -163,7 +138,7 @@ export function NearbySearch() {
                 </div>
             )
         case 'success':
-            const { doctors, pharmacies, labs } = searchResults;
+            const { doctors, labs } = searchResults;
             return (
                 <div className="space-y-8">
                     {doctors.length > 0 && (
@@ -190,11 +165,10 @@ export function NearbySearch() {
                                                 </div>
                                             </CardHeader>
                                             <CardContent className="flex-grow space-y-4">
-                                                {(associations.pharmacies.length > 0 || associations.labs.length > 0) && (
+                                                {associations.labs.length > 0 && (
                                                     <div>
                                                         <h4 className="font-semibold mb-2 text-sm flex items-center gap-2"><LinkIcon/> Associated With</h4>
                                                         <div className="flex flex-wrap gap-2">
-                                                            {associations.pharmacies.map(p => <Badge key={p.id} variant="secondary" className="bg-emerald-100 text-emerald-800"><Pill className="w-3 h-3 mr-1"/>{p.name}</Badge>)}
                                                             {associations.labs.map(l => <Badge key={l.id} variant="secondary" className="bg-sky-100 text-sky-800"><FlaskConical className="w-3 h-3 mr-1"/>{l.name}</Badge>)}
                                                         </div>
                                                     </div>
@@ -213,34 +187,6 @@ export function NearbySearch() {
                             </div>
                         </section>
                     )}
-                     {pharmacies.length > 0 && (
-                        <section>
-                            <h2 className="text-2xl font-headline font-bold mb-4 flex items-center gap-2"><Pill/> Pharmacies</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {pharmacies.map((pharmacy) => (
-                                    <Card key={pharmacy.id} className="overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                                        <div className="relative w-full h-40">
-                                            <Image src={pharmacy.image} alt={pharmacy.name} fill style={{objectFit:"cover"}} data-ai-hint={pharmacy.dataAiHint} />
-                                             <div className="absolute top-2 right-2 bg-primary text-primary-foreground text-xs font-bold py-1 px-2 rounded-full flex items-center gap-1">
-                                                <PercentCircle className="w-4 h-4" />
-                                                <span>Upto {pharmacy.redemptionOffer}% off</span>
-                                            </div>
-                                        </div>
-                                        <CardHeader>
-                                            <CardTitle className="font-headline text-xl">{pharmacy.name}</CardTitle>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <div className="flex items-center text-sm text-muted-foreground gap-2">
-                                                <MapPin className="w-4 h-4"/> 
-                                                <span>{pharmacy.location} ({pharmacy.distance})</span>
-                                            </div>
-                                            <Button className="w-full mt-4" variant="outline">View Details</Button>
-                                        </CardContent>
-                                    </Card>
-                                ))}
-                            </div>
-                        </section>
-                     )}
                       {labs.length > 0 && (
                         <section>
                             <h2 className="text-2xl font-headline font-bold mb-4 flex items-center gap-2"><FlaskConical/> Labs</h2>
@@ -269,7 +215,7 @@ export function NearbySearch() {
                             </div>
                         </section>
                      )}
-                     {doctors.length === 0 && pharmacies.length === 0 && labs.length === 0 && (
+                     {doctors.length === 0 && labs.length === 0 && (
                         <div className="text-center py-16 text-muted-foreground">
                             <p>No results found for "{searchTerm}".</p>
                         </div>
@@ -286,7 +232,7 @@ export function NearbySearch() {
         <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input 
-                placeholder="Search by doctor, specialty, pharmacy, or lab name..."
+                placeholder="Search by doctor, specialty, or lab name..."
                 className="pl-10 text-base py-6"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}

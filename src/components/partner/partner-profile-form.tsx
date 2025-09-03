@@ -11,9 +11,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import Image from 'next/image';
 import { Loader2, Upload, Percent } from 'lucide-react';
-import { mockPharmacies, mockLabs } from '@/lib/mock-data';
+import { mockLabs } from '@/lib/mock-data';
 
-const PHARMACIES_KEY = 'mockPharmacies';
 const LABS_KEY = 'mockLabs';
 
 const profileSchema = z.object({
@@ -26,7 +25,7 @@ const profileSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
 interface PartnerProfileFormProps {
-    partnerType: 'pharmacy' | 'lab';
+    partnerType: 'lab';
 }
 
 export function PartnerProfileForm({ partnerType }: PartnerProfileFormProps) {
@@ -34,8 +33,8 @@ export function PartnerProfileForm({ partnerType }: PartnerProfileFormProps) {
   const [isClient, setIsClient] = useState(false);
   const [user, setUser] = useState<any>(null);
   
-  const PARTNERS_KEY = partnerType === 'pharmacy' ? PHARMACIES_KEY : LABS_KEY;
-  const initialData = partnerType === 'pharmacy' ? mockPharmacies : mockLabs;
+  const PARTNERS_KEY = LABS_KEY;
+  const initialData = mockLabs;
 
   const [partners, setPartners] = useState(initialData);
   

@@ -2,9 +2,36 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Pill, Edit } from 'lucide-react';
+import { Pill, Edit, History, FileText } from 'lucide-react';
 import { RedemptionTool } from '@/components/partner/redemption-tool';
 import { PartnerProfileForm } from '@/components/partner/partner-profile-form';
+import { format } from 'date-fns';
+import { Badge } from '@/components/ui/badge';
+
+
+const mockTransactions = [
+    {
+        id: 'tx1',
+        patientName: 'Rohan Sharma',
+        date: '2024-08-22T14:30:00Z',
+        amount: 150.00,
+        status: 'Success'
+    },
+    {
+        id: 'tx2',
+        patientName: 'Priya Mehta',
+        date: '2024-08-21T18:00:00Z',
+        amount: 75.50,
+        status: 'Success'
+    },
+    {
+        id: 'tx3',
+        patientName: 'Amit Singh',
+        date: '2024-08-20T11:15:00Z',
+        amount: 220.00,
+        status: 'Success'
+    }
+];
 
 export default function PharmacyDashboardPage() {
   return (
@@ -43,6 +70,37 @@ export default function PharmacyDashboardPage() {
                         </CardHeader>
                         <CardContent>
                            <RedemptionTool partnerType="pharmacy" />
+                        </CardContent>
+                    </Card>
+
+                     <Card className="shadow-sm">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <History className="w-6 h-6 text-primary"/>
+                                Health Point Transactions
+                            </CardTitle>
+                             <CardDescription>
+                                View your recent Health Point redemption history.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                           <div className="space-y-4">
+                                {mockTransactions.map(tx => (
+                                    <div key={tx.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-50/70 border">
+                                        <div className="flex items-center gap-3">
+                                            <FileText className="w-5 h-5 text-primary" />
+                                            <div>
+                                                <p className="font-semibold">Redeemed by {tx.patientName}</p>
+                                                <p className="text-sm text-muted-foreground">{format(new Date(tx.date), 'PP, p')}</p>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                             <p className="font-semibold text-green-600">₹{tx.amount.toFixed(2)}</p>
+                                             <Badge variant="secondary" className="mt-1">{tx.status}</Badge>
+                                        </div>
+                                    </div>
+                                ))}
+                           </div>
                         </CardContent>
                     </Card>
                 </div>

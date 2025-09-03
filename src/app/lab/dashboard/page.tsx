@@ -2,9 +2,30 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FlaskConical, Edit } from 'lucide-react';
+import { FlaskConical, Edit, History, FileText } from 'lucide-react';
 import { RedemptionTool } from '@/components/partner/redemption-tool';
 import { PartnerProfileForm } from '@/components/partner/partner-profile-form';
+import { format } from 'date-fns';
+import { Badge } from '@/components/ui/badge';
+
+
+const mockTransactions = [
+    {
+        id: 'tx1',
+        patientName: 'Rohan Sharma',
+        date: '2024-08-18T14:30:00Z',
+        amount: 450.00,
+        status: 'Success'
+    },
+    {
+        id: 'tx2',
+        patientName: 'Anika Desai',
+        date: '2024-08-17T10:00:00Z',
+        amount: 320.50,
+        status: 'Success'
+    }
+];
+
 
 export default function LabDashboardPage() {
   return (
@@ -28,7 +49,7 @@ export default function LabDashboardPage() {
                                     List your diagnostic services and manage patient requests.
                                 </CardDescription>
                             </div>
-                        </CardHeader>
+                        </Header>
                         <CardContent>
                              <p>Use the tools on this dashboard to manage your presence on HealthLink Hub.</p>
                         </CardContent>
@@ -44,6 +65,38 @@ export default function LabDashboardPage() {
                            <RedemptionTool partnerType="lab" />
                         </CardContent>
                     </Card>
+
+                    <Card className="shadow-sm">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <History className="w-6 h-6 text-primary"/>
+                                Health Point Transactions
+                            </CardTitle>
+                             <CardDescription>
+                                View your recent Health Point redemption history.
+                            </CardDescription>
+                        </Header>
+                        <CardContent>
+                           <div className="space-y-4">
+                                {mockTransactions.map(tx => (
+                                    <div key={tx.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-50/70 border">
+                                        <div className="flex items-center gap-3">
+                                            <FileText className="w-5 h-5 text-primary" />
+                                            <div>
+                                                <p className="font-semibold">Redeemed by {tx.patientName}</p>
+                                                <p className="text-sm text-muted-foreground">{format(new Date(tx.date), 'PP, p')}</p>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                             <p className="font-semibold text-green-600">₹{tx.amount.toFixed(2)}</p>
+                                             <Badge variant="secondary" className="mt-1">{tx.status}</Badge>
+                                        </div>
+                                    </div>
+                                ))}
+                           </div>
+                        </CardContent>
+                    </Card>
+
                 </div>
 
                 <Card className="shadow-sm">

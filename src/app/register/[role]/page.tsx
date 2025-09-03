@@ -13,27 +13,38 @@ import { Input } from '@/components/ui/input';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 
-const baseSchema = z.object({
+const baseSchemaObject = z.object({
   fullName: z.string().min(2, { message: 'Full name is required.' }),
   email: z.string().email({ message: 'A valid email is required.' }),
   phone: z.string().min(10, { message: 'A valid phone number is required.' }),
   password: z.string().min(8, { message: 'Password must be at least 8 characters.' }),
   confirmPassword: z.string(),
+});
+
+const baseSchema = baseSchemaObject.refine(data => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+});
+
+const doctorSchema = baseSchemaObject.extend({
+  registrationNumber: z.string().min(1, { message: 'Registration number is mandatory.' }),
+  referralCode: z.string().optional(),
 }).refine(data => data.password === data.confirmPassword, {
     message: "Passwords don't match",
     path: ["confirmPassword"],
 });
 
-const doctorSchema = baseSchema.extend({
-  registrationNumber: z.string().min(1, { message: 'Registration number is mandatory.' }),
-  referralCode: z.string().optional(),
-});
-
 const patientSchema = baseSchema;
 const agentSchema = baseSchema;
-const pharmacySchema = baseSchema.extend({
+
+const pharmacyAndLabSchemaObject = baseSchemaObject.extend({
     businessName: z.string().min(2, { message: 'Business name is required.' }),
     address: z.string().min(10, { message: 'Address is required.' }),
+});
+
+const pharmacySchema = pharmacyAndLabSchemaObject.refine(data => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
 });
 const labSchema = pharmacySchema;
 

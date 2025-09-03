@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -87,7 +86,7 @@ export function DoctorSearch() {
           {doctors.map((doctor) => (
             <Card key={doctor.id} className="overflow-hidden hover:shadow-xl transition-shadow duration-300">
               <div className="relative w-full h-48">
-                  <Image src={doctor.image} alt={`Dr. ${doctor.name}`} layout="fill" objectFit="cover" data-ai-hint={doctor.dataAiHint} />
+                  <Image src={doctor.image} alt={`Dr. ${doctor.name}`} fill objectFit="cover" data-ai-hint={doctor.dataAiHint} />
               </div>
               <CardHeader>
                 <CardTitle className="font-headline text-xl">{doctor.name}</CardTitle>

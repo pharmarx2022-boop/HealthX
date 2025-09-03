@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -17,7 +16,7 @@ import { useRouter } from 'next/navigation';
 import { loginUser } from '@/lib/auth';
 
 const loginSchema = z.object({
-  phone: z.string().min(10, { message: 'A valid phone number is required.' }),
+  phone: z.string().min(1, { message: 'A valid phone number is required.' }),
   password: z.string().min(1, { message: 'Password is required.' }),
   role: z.enum(['doctor', 'patient', 'pharmacy', 'lab', 'agent']),
 });

@@ -3,6 +3,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Stethoscope } from 'lucide-react';
+import { PatientList } from '@/components/doctor/patient-list';
 
 export default function DoctorDashboardPage() {
   return (
@@ -26,7 +27,7 @@ export default function DoctorDashboardPage() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <p>Doctor-specific content and tools will be displayed here, such as an appointment calendar.</p>
+                    <PatientList />
                 </CardContent>
             </Card>
 

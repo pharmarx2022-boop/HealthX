@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -20,9 +21,9 @@ const loginSchema = z.object({
   otp: z.string().optional(),
 });
 
-type Role = 'doctor' | 'patient' | 'agent' | 'admin' | 'pharmacy';
+type Role = 'doctor' | 'patient' | 'agent' | 'admin' | 'pharmacy' | 'lab';
 
-const ALL_ROLES: Role[] = ['doctor', 'patient', 'agent', 'admin', 'pharmacy'];
+const ALL_ROLES: Role[] = ['doctor', 'patient', 'agent', 'admin', 'pharmacy', 'lab'];
 
 function isValidRole(role: any): role is Role {
     return ALL_ROLES.includes(role);

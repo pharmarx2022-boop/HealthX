@@ -99,6 +99,26 @@ export const initialPharmacies = [
     }
 ];
 
+export const initialLabs = [
+    {
+        id: 'lab1',
+        name: 'Metropolis Lab',
+        location: 'Near Andheri Station',
+        image: 'https://picsum.photos/400/300',
+        acceptsHealthPoints: true,
+        discount: 30,
+    },
+    {
+        id: 'lab2',
+        name: 'Dr. Lal PathLabs',
+        location: 'Near Dadar Circle',
+        image: 'https://picsum.photos/400/300',
+        acceptsHealthPoints: true,
+        discount: 35,
+    }
+];
+
+
 export const mockPatientData = [
     { id: 'rohan_sharma', name: 'Rohan Sharma', phone: '9876543210' },
     { id: 'priya_mehta', name: 'Priya Mehta', phone: '9876543211' },

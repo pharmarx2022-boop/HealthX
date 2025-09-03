@@ -5,16 +5,17 @@ import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Stethoscope, MapPin, Pill, Loader2, AlertTriangle, Building, Link as LinkIcon, Search, PercentCircle } from 'lucide-react';
+import { Stethoscope, MapPin, Pill, Loader2, AlertTriangle, Building, Link as LinkIcon, Search, PercentCircle, Beaker } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { initialDoctors, initialClinics, initialPharmacies } from '@/lib/mock-data';
+import { initialDoctors, initialClinics, initialPharmacies, initialLabs } from '@/lib/mock-data';
 import { Badge } from '../ui/badge';
 
 // Types
 type Doctor = typeof initialDoctors[0];
 type Clinic = typeof initialClinics[0];
 type Pharmacy = typeof initialPharmacies[0];
+type Lab = typeof initialLabs[0];
 
 
 export function NearbySearch() {
@@ -25,6 +26,7 @@ export function NearbySearch() {
   const [isClient, setIsClient] = useState(false);
   const [clinics, setClinics] = useState<Clinic[]>([]);
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
+  const [labs, setLabs] = useState<Lab[]>([]);
 
   useEffect(() => {
     setIsClient(true);
@@ -33,6 +35,9 @@ export function NearbySearch() {
 
     const storedPharmacies = sessionStorage.getItem('mockPharmacies');
     setPharmacies(storedPharmacies ? JSON.parse(storedPharmacies) : initialPharmacies);
+    
+    const storedLabs = sessionStorage.getItem('mockLabs');
+    setLabs(storedLabs ? JSON.parse(storedLabs) : initialLabs);
 
     if (typeof window !== 'undefined' && 'geolocation' in navigator) {
         setStatus('loading');
@@ -57,7 +62,7 @@ export function NearbySearch() {
 
   const searchResults = useMemo(() => {
     if (!searchTerm) {
-        return { doctors: initialDoctors, pharmacies: initialPharmacies };
+        return { doctors: initialDoctors, pharmacies: initialPharmacies, labs: initialLabs };
     }
 
     const lowerCaseSearchTerm = searchTerm.toLowerCase();
@@ -70,10 +75,14 @@ export function NearbySearch() {
     const filteredPharmacies = initialPharmacies.filter(p =>
         p.name.toLowerCase().includes(lowerCaseSearchTerm)
     );
+    
+    const filteredLabs = initialLabs.filter(l =>
+        l.name.toLowerCase().includes(lowerCaseSearchTerm)
+    );
 
-    return { doctors: filteredDoctors, pharmacies: filteredPharmacies };
+    return { doctors: filteredDoctors, pharmacies: filteredPharmacies, labs: filteredLabs };
 
-  }, [searchTerm, clinics, pharmacies]);
+  }, [searchTerm, clinics, pharmacies, labs]);
   
   const renderContent = () => {
     switch(status) {
@@ -92,7 +101,7 @@ export function NearbySearch() {
                 </div>
             )
         case 'success':
-            const { doctors, pharmacies } = searchResults;
+            const { doctors, pharmacies, labs } = searchResults;
             return (
                 <div className="space-y-8">
                     {doctors.length > 0 && (
@@ -161,8 +170,37 @@ export function NearbySearch() {
                             </div>
                         </section>
                     )}
+                    
+                     {labs.length > 0 && (
+                         <section>
+                            <h2 className="text-2xl font-headline font-bold mb-4 flex items-center gap-2"><Beaker/> Labs</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {labs.map((lab) => (
+                                    <Card key={lab.id} className="overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                                        <CardHeader>
+                                            <div className="relative w-full h-40 rounded-lg overflow-hidden">
+                                                 <Image src={lab.image} alt={lab.name} fill style={{objectFit:"cover"}} data-ai-hint="lab exterior" />
+                                            </div>
+                                             <CardTitle className="font-headline text-xl pt-4">{lab.name}</CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <div className="flex items-center text-muted-foreground gap-2">
+                                                <MapPin className="w-4 h-4"/> 
+                                                <span>{lab.location}</span>
+                                            </div>
+                                            {lab.acceptsHealthPoints && (
+                                                <Badge className="mt-4" variant="secondary">
+                                                    <PercentCircle className="mr-2 text-primary" /> Accepts Health Points
+                                                </Badge>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+                        </section>
+                    )}
 
-                     {(doctors.length === 0 && pharmacies.length === 0) && (
+                     {(doctors.length === 0 && pharmacies.length === 0 && labs.length === 0) && (
                         <div className="text-center py-16 text-muted-foreground">
                             <p>No results found for "{searchTerm}".</p>
                         </div>
@@ -179,7 +217,7 @@ export function NearbySearch() {
         <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input 
-                placeholder="Search by doctor, specialty, pharmacy..."
+                placeholder="Search by doctor, specialty, pharmacy, lab..."
                 className="pl-10 text-base py-6"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}

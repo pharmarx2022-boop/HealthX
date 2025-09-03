@@ -24,6 +24,10 @@ export function loginWithOtp(phone: string, otp: string, role: string) {
             // Using a static ID for the first pharmacy for demo purposes
             userId = 'pharm1';
             break;
+        case 'lab':
+            // Using a static ID for the first lab for demo purposes
+            userId = 'lab1';
+            break;
         default:
             userId = `${role}_${phone.slice(-4)}`;
     }

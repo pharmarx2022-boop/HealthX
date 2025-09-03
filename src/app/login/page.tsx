@@ -1,7 +1,7 @@
-
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -14,29 +14,48 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { loginUser } from '@/lib/auth';
+import { loginWithOtp } from '@/lib/auth';
 
 const loginSchema = z.object({
-  phone: z.string().min(1, { message: 'A valid phone number is required.' }),
-  password: z.string().min(1, { message: 'Password is required.' }),
+  phone: z.string().min(10, { message: 'A valid 10-digit phone number is required.' }).max(10, { message: 'A valid 10-digit phone number is required.' }),
+  otp: z.string().optional(),
   role: z.enum(['doctor', 'patient', 'pharmacy', 'lab', 'agent']),
 });
 
 export default function LoginPage() {
   const { toast } = useToast();
   const router = useRouter();
+  const [otpSent, setOtpSent] = useState(false);
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       phone: '',
-      password: '',
+      otp: '',
       role: 'patient',
     },
   });
 
+  const handleSendOtp = () => {
+    const phone = form.getValues('phone');
+    if (phone.length === 10) {
+      setOtpSent(true);
+      toast({
+        title: "OTP Sent!",
+        description: "A one-time password has been sent to your mobile.",
+      });
+    } else {
+        form.setError("phone", { type: "manual", message: "Please enter a valid 10-digit phone number." })
+    }
+  };
+
   function onSubmit(values: z.infer<typeof loginSchema>) {
-    const user = loginUser(values.phone, values.password, values.role);
+    if (!otpSent) {
+        handleSendOtp();
+        return;
+    }
+
+    const user = loginWithOtp(values.phone, values.otp!, values.role);
     if (user) {
         toast({
             title: "Login Successful!",
@@ -49,7 +68,7 @@ export default function LoginPage() {
     } else {
         toast({
             title: "Login Failed",
-            description: "Invalid credentials or role. Please try again.",
+            description: "Invalid OTP or role. Please try again.",
             variant: "destructive",
         })
     }
@@ -61,8 +80,8 @@ export default function LoginPage() {
       <main className="flex-1 flex items-center justify-center py-12 px-4">
         <Card className="w-full max-w-md mx-auto shadow-lg">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-headline">Welcome Back!</CardTitle>
-            <CardDescription>Sign in to your HealthLink Hub account</CardDescription>
+            <CardTitle className="text-2xl font-headline">Welcome!</CardTitle>
+            <CardDescription>Sign in or create an account with your mobile number.</CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...form}>
@@ -96,43 +115,37 @@ export default function LoginPage() {
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Phone</FormLabel>
+                      <FormLabel>Phone Number</FormLabel>
                       <FormControl>
-                        <Input type="tel" placeholder="9876543210" {...field} />
+                        <Input type="tel" placeholder="9876543210" {...field} disabled={otpSent} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="flex justify-between items-center">
-                        <FormLabel>Password</FormLabel>
-                        <Link href="#" className="text-sm text-primary hover:underline">
-                          Forgot password?
-                        </Link>
-                      </div>
-                      <FormControl>
-                        <Input type="password" placeholder="••••••••" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                
+                {otpSent && (
+                  <FormField
+                    control={form.control}
+                    name="otp"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>OTP</FormLabel>
+                        <FormControl>
+                          <Input type="text" placeholder="Enter the 6-digit OTP" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+                
                 <Button type="submit" className="w-full">
-                  Login
+                  {otpSent ? 'Verify OTP & Login' : 'Send OTP'}
                 </Button>
+                {otpSent && <Button type="button" variant="link" className="w-full" onClick={() => setOtpSent(false)}>Change Number</Button>}
               </form>
             </Form>
-            <div className="mt-6 text-center text-sm">
-              Don&apos;t have an account?{' '}
-              <Link href="/register/patient" className="text-primary hover:underline font-medium">
-                Register
-              </Link>
-            </div>
           </CardContent>
         </Card>
       </main>

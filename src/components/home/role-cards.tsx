@@ -10,35 +10,30 @@ const roles = [
     name: 'Doctor',
     icon: Stethoscope,
     description: 'Manage your appointments, clinics, and patient interactions with ease.',
-    registerLink: '/register/doctor',
     loginLink: '/login',
   },
   {
     name: 'Patient',
     icon: User,
     description: 'Book appointments, manage your health, and utilize wallet rewards.',
-    registerLink: '/register/patient',
     loginLink: '/login',
   },
   {
     name: 'Pharmacy',
     icon: Pill,
     description: 'List your offers and connect with patients through our wallet system.',
-    registerLink: '/register/pharmacy',
     loginLink: '/login',
   },
   {
     name: 'Lab',
     icon: FlaskConical,
     description: 'Expand your reach by offering services to our growing user base.',
-    registerLink: '/register/lab',
     loginLink: '/login',
   },
   {
     name: 'Agent',
     icon: Briefcase,
     description: 'Book appointments for others and earn commissions for your efforts.',
-    registerLink: '/register/agent',
     loginLink: '/login',
   },
 ];
@@ -63,11 +58,8 @@ export function RoleCards() {
               </CardHeader>
               <CardContent className="flex-grow flex items-end w-full px-6 pb-6">
                 <div className="w-full flex flex-col sm:flex-row gap-2">
-                    <Button asChild className="w-full" variant="secondary">
-                        <Link href={role.loginLink}>Login</Link>
-                    </Button>
                     <Button asChild className="w-full">
-                        <Link href={role.registerLink}>Register</Link>
+                        <Link href={role.loginLink}>Login / Register</Link>
                     </Button>
                 </div>
               </CardContent>

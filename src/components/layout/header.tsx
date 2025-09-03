@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -50,11 +49,8 @@ export function Header() {
     }
     return (
       <>
-        <Button variant="ghost" asChild>
-          <Link href="/login">Login</Link>
-        </Button>
         <Button asChild>
-          <Link href="/register/patient">Register</Link>
+          <Link href="/login">Login / Register</Link>
         </Button>
       </>
     );
@@ -79,11 +75,8 @@ export function Header() {
     }
     return (
       <>
-        <Button variant="ghost" asChild className="justify-start text-lg">
-          <Link href="/login" onClick={() => setIsSheetOpen(false)}>Login</Link>
-        </Button>
         <Button asChild className="text-lg">
-          <Link href="/register/patient" onClick={() => setIsSheetOpen(false)}>Register</Link>
+          <Link href="/login" onClick={() => setIsSheetOpen(false)}>Login / Register</Link>
         </Button>
       </>
     );

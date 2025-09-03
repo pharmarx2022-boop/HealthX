@@ -1,7 +1,7 @@
 
 'use client';
 
-import { notFound } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,8 +12,10 @@ import { mockPatients } from '@/components/doctor/patient-list';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 
-export default function PatientDetailPage({ params }: { params: { id: string } }) {
-  const patient = mockPatients.find(p => p.id === params.id);
+export default function PatientDetailPage() {
+  const params = useParams();
+  const id = Array.isArray(params.id) ? params.id[0] : params.id;
+  const patient = mockPatients.find(p => p.id === id);
 
   if (!patient) {
     notFound();

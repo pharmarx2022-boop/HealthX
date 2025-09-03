@@ -26,10 +26,15 @@ import {
   DialogClose,
   DialogFooter
 } from "@/components/ui/dialog"
-import { PlusCircle, Edit, Trash2, User } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, CalendarIcon } from 'lucide-react';
 import { mockFamilyMembers } from '@/lib/family-members';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Separator } from '../ui/separator';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { Calendar } from '../ui/calendar';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 const FAMILY_KEY = 'familyMembers';
 
@@ -37,17 +42,30 @@ const memberSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(1, 'Name is required.'),
   relationship: z.string().min(1, 'Relationship is required.'),
-  age: z.coerce.number().positive('Age must be a positive number.').int(),
+  dob: z.date({
+    required_error: "A date of birth is required.",
+  }),
+  sex: z.string().min(1, "Sex is required.")
 });
 
 type FamilyMemberFormValues = z.infer<typeof memberSchema>;
 
+const calculateAge = (dob: Date) => {
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+        age--;
+    }
+    return age;
+};
+
 export function FamilyManager() {
   const { toast } = useToast();
   const [isClient, setIsClient] = useState(false);
-  const [familyMembers, setFamilyMembers] = useState<FamilyMemberFormValues[]>([]);
+  const [familyMembers, setFamilyMembers] = useState<(Omit<FamilyMemberFormValues, 'dob'> & { dob: string })[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingMember, setEditingMember] = useState<FamilyMemberFormValues | null>(null);
+  const [editingMember, setEditingMember] = useState<(Omit<FamilyMemberFormValues, 'dob'> & { dob: string }) | null>(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -66,19 +84,23 @@ export function FamilyManager() {
       id: '',
       name: '',
       relationship: '',
-      age: 0,
+      sex: '',
     },
   });
   
   useEffect(() => {
       if(editingMember) {
-          form.reset(editingMember);
+          form.reset({
+              ...editingMember,
+              dob: new Date(editingMember.dob)
+          });
       } else {
           form.reset({
             id: '',
             name: '',
             relationship: '',
-            age: 0,
+            dob: undefined,
+            sex: ''
           });
       }
   }, [editingMember, form]);
@@ -86,14 +108,19 @@ export function FamilyManager() {
 
   const onSubmit = (data: FamilyMemberFormValues) => {
     let updatedFamily;
+    const dataWithDobString = {
+        ...data,
+        dob: data.dob.toISOString().split('T')[0] // Store date as YYYY-MM-DD
+    };
+
     if (editingMember) {
-      updatedFamily = familyMembers.map(m => m.id === editingMember.id ? { ...m, ...data } : m);
+      updatedFamily = familyMembers.map(m => m.id === editingMember.id ? { ...m, ...dataWithDobString } : m);
        toast({
         title: 'Member Updated!',
         description: `${data.name}'s details have been saved.`,
       });
     } else {
-      const newMember = { ...data, id: `family${Date.now()}` };
+      const newMember = { ...dataWithDobString, id: `family${Date.now()}` };
       updatedFamily = [...familyMembers, newMember];
        toast({
         title: 'Member Added!',
@@ -107,7 +134,7 @@ export function FamilyManager() {
     setIsDialogOpen(false);
   };
   
-  const handleEdit = (member: FamilyMemberFormValues) => {
+  const handleEdit = (member: (Omit<FamilyMemberFormValues, 'dob'> & { dob: string })) => {
     setEditingMember(member);
     setIsDialogOpen(true);
   }
@@ -161,13 +188,72 @@ export function FamilyManager() {
                                 <FormMessage />
                             </FormItem>
                         )} />
-                        <FormField control={form.control} name="age" render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Age</FormLabel>
-                                <FormControl><Input type="number" placeholder="e.g., 34" {...field} /></FormControl>
+
+                        <FormField
+                            control={form.control}
+                            name="dob"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                <FormLabel>Date of birth</FormLabel>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                    <FormControl>
+                                        <Button
+                                        variant={"outline"}
+                                        className={cn(
+                                            "w-full pl-3 text-left font-normal",
+                                            !field.value && "text-muted-foreground"
+                                        )}
+                                        >
+                                        {field.value ? (
+                                            format(field.value, "PPP")
+                                        ) : (
+                                            <span>Pick a date</span>
+                                        )}
+                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                        </Button>
+                                    </FormControl>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="start">
+                                    <Calendar
+                                        mode="single"
+                                        selected={field.value}
+                                        onSelect={field.onChange}
+                                        disabled={(date) =>
+                                        date > new Date() || date < new Date("1900-01-01")
+                                        }
+                                        initialFocus
+                                    />
+                                    </PopoverContent>
+                                </Popover>
                                 <FormMessage />
-                            </FormItem>
-                        )} />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="sex"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Sex</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select sex" />
+                                    </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="Male">Male</SelectItem>
+                                        <SelectItem value="Female">Female</SelectItem>
+                                        <SelectItem value="Other">Other</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        
                         <DialogFooter className="pt-4">
                             <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
                             <Button type="submit">{editingMember ? 'Save Changes' : 'Add Member'}</Button>
@@ -189,7 +275,7 @@ export function FamilyManager() {
                         </Avatar>
                         <div>
                             <p className="font-medium">{member.name}</p>
-                            <p className="text-sm text-muted-foreground">{member.relationship}, {member.age} years</p>
+                            <p className="text-sm text-muted-foreground">{member.relationship}, {calculateAge(new Date(member.dob))} years old</p>
                         </div>
                     </div>
                     <div className="flex gap-1">

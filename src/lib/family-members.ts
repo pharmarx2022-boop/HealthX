@@ -4,12 +4,14 @@ export const mockFamilyMembers = [
     id: 'family1',
     name: 'Anita Sharma',
     relationship: 'Spouse',
-    age: 34,
+    dob: '1989-07-20',
+    sex: 'Female',
   },
   {
     id: 'family2',
     name: 'Arjun Sharma',
     relationship: 'Son',
-    age: 8,
+    dob: '2016-02-15',
+    sex: 'Male',
   },
 ];

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon, Trash2, CalendarClock } from 'lucide-react';
 
@@ -37,6 +37,7 @@ export function PatientList() {
   const { toast } = useToast();
   const [patients, setPatients] = useState(mockPatients);
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
+  const [isClient, setIsClient] = useState(false);
   const [filters, setFilters] = useState({
     name: '',
     clinic: 'All',
@@ -44,6 +45,10 @@ export function PatientList() {
     day: 'All',
     status: 'All',
   });
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const handleFilterChange = (key: keyof typeof filters, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value }));
@@ -61,8 +66,8 @@ export function PatientList() {
     });
   }, [filters, patients]);
 
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
+  const handleSelectAll = (checked: boolean | 'indeterminate') => {
+    if (checked === true) {
       setSelectedRows(new Set(filteredPatients.map(p => p.id)));
     } else {
       setSelectedRows(new Set());
@@ -99,6 +104,7 @@ export function PatientList() {
 
   const numSelected = selectedRows.size;
   const isAllSelected = numSelected > 0 && numSelected === filteredPatients.length;
+  const isIndeterminate = numSelected > 0 && numSelected < filteredPatients.length;
 
   return (
     <div className="space-y-6">
@@ -217,8 +223,8 @@ export function PatientList() {
                     <TableRow>
                         <TableHead className="w-12">
                             <Checkbox 
-                                onCheckedChange={(checked) => handleSelectAll(Boolean(checked))}
-                                checked={isAllSelected}
+                                onCheckedChange={(checked) => handleSelectAll(checked)}
+                                checked={isAllSelected ? true : (isIndeterminate ? 'indeterminate' : false)}
                                 aria-label="Select all"
                             />
                         </TableHead>
@@ -242,7 +248,7 @@ export function PatientList() {
                                 </TableCell>
                                 <TableCell className="font-medium">{patient.name}</TableCell>
                                 <TableCell>{patient.clinic}</TableCell>
-                                <TableCell>{format(new Date(patient.appointmentDate), 'PP, p')}</TableCell>
+                                <TableCell>{isClient ? format(new Date(patient.appointmentDate), 'PP, p') : ''}</TableCell>
                                 <TableCell>
                                     <Badge variant={patient.status === 'done' ? 'secondary' : 'default'}>
                                         {patient.status}

@@ -17,7 +17,7 @@ import { useRouter } from 'next/navigation';
 import { loginUser } from '@/lib/auth';
 
 const loginSchema = z.object({
-  emailOrPhone: z.string().min(1, { message: 'Please enter a valid email or phone number.' }),
+  phone: z.string().min(10, { message: 'A valid phone number is required.' }),
   password: z.string().min(1, { message: 'Password is required.' }),
   role: z.enum(['doctor', 'patient', 'pharmacy', 'lab', 'agent']),
 });
@@ -29,14 +29,14 @@ export default function LoginPage() {
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      emailOrPhone: '',
+      phone: '',
       password: '',
       role: 'patient',
     },
   });
 
   function onSubmit(values: z.infer<typeof loginSchema>) {
-    const user = loginUser(values.emailOrPhone, values.password, values.role);
+    const user = loginUser(values.phone, values.password, values.role);
     if (user) {
         toast({
             title: "Login Successful!",
@@ -90,12 +90,12 @@ export default function LoginPage() {
                 />
                 <FormField
                   control={form.control}
-                  name="emailOrPhone"
+                  name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email or Phone</FormLabel>
+                      <FormLabel>Phone</FormLabel>
                       <FormControl>
-                        <Input placeholder="you@example.com or 9876543210" {...field} />
+                        <Input type="tel" placeholder="9876543210" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

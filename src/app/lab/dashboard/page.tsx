@@ -43,7 +43,7 @@ export default function LabDashboardPage() {
         // For this demo, we'll just show a success message.
         toast({
             title: "Redemption Request Submitted!",
-            description: `₹${(totalPointsCollected * 0.95).toFixed(2)} will be transferred to your bank account within 3-5 business days.`
+            description: `₹${(totalPointsCollected * 0.05).toFixed(2)} will be transferred to your bank account within 3-5 business days.`
         });
         // We could also add this to a transaction list and reset the balance.
         setIsRedeemDialogOpen(false);
@@ -111,7 +111,7 @@ export default function LabDashboardPage() {
                                     <DialogHeader>
                                         <DialogTitle>Redeem Points for Cash</DialogTitle>
                                         <DialogDescription>
-                                            Review the details below. A 5% platform fee will be deducted from the total amount.
+                                            Review the details below. A 95% platform fee will be deducted from the total amount.
                                         </DialogDescription>
                                     </DialogHeader>
                                     <div className="space-y-4 py-4">
@@ -120,12 +120,12 @@ export default function LabDashboardPage() {
                                             <span className="font-bold text-lg">₹{totalPointsCollected.toFixed(2)}</span>
                                         </div>
                                          <div className="flex justify-between items-center p-3 rounded-lg bg-slate-100">
-                                            <span className="text-muted-foreground">Admin Commission (5%)</span>
-                                            <span className="font-medium text-destructive">- ₹{(totalPointsCollected * 0.05).toFixed(2)}</span>
+                                            <span className="text-muted-foreground">Admin Commission (95%)</span>
+                                            <span className="font-medium text-destructive">- ₹{(totalPointsCollected * 0.95).toFixed(2)}</span>
                                         </div>
                                          <div className="flex justify-between items-center p-4 rounded-lg bg-green-100 text-green-800 border border-green-200">
                                             <span className="font-semibold">Final Cash Payout</span>
-                                            <span className="font-bold text-xl">₹{(totalPointsCollected * 0.95).toFixed(2)}</span>
+                                            <span className="font-bold text-xl">₹{(totalPointsCollected * 0.05).toFixed(2)}</span>
                                         </div>
                                         <p className="text-xs text-muted-foreground text-center">Funds will be transferred to your registered bank account.</p>
                                     </div>

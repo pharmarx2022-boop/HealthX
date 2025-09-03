@@ -38,7 +38,7 @@ export default function PatientDashboardPage() {
         setMyAppointments(allAppointments.filter((p: any) => p.name === 'Rohan Sharma')); 
     }, []);
 
-    const nextReminder = myAppointments.find(appt => appt.nextAppointmentDate);
+    const nextReminder = myAppointments.find(appt => appt.nextAppointmentDate && !isNaN(new Date(appt.nextAppointmentDate).getTime()));
     
     const healthPoints = myAppointments
         .filter(appt => appt.status === 'done' && appt.refundStatus === 'Refunded')

@@ -42,7 +42,7 @@ import {
 } from "@/components/ui/dialog"
 import { Checkbox } from '@/components/ui/checkbox';
 import Image from 'next/image';
-import { PlusCircle, Edit, Trash2, MapPin, Calendar, Clock, Upload, X, ChevronsUpDown } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, MapPin, Calendar, Clock, Upload, X, ChevronsUpDown, Check } from 'lucide-react';
 import { initialClinics, mockPharmacies, mockLabs } from '@/lib/mock-data';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
@@ -497,5 +497,7 @@ function MultiSelect({ options, selected, onChange, className, placeholder = "Se
     </Popover>
   );
 }
+
+    
 
     

@@ -9,9 +9,10 @@ export function Hero() {
         fill
         className="object-cover"
         data-ai-hint="healthcare team"
+        priority
       />
       <div className="absolute inset-0 bg-black/50" />
-      <div className="relative container mx-auto text-center">
+      <div className="relative container mx-auto text-center px-4">
         <h1 className="text-4xl md:text-6xl font-headline font-bold mb-4">
           Your Health, Connected.
         </h1>

@@ -45,13 +45,13 @@ const roles = [
 
 export function RoleCards() {
   return (
-    <section className="py-20 md:py-24">
-      <div className="container mx-auto">
+    <section className="py-16 md:py-24 bg-slate-50/50">
+      <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-headline font-bold">Who Are You?</h2>
           <p className="text-lg text-muted-foreground mt-2">Choose your role to get started.</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {roles.map((role) => (
             <Card key={role.name} className="flex flex-col text-center items-center hover:shadow-xl transition-shadow duration-300">
               <CardHeader className="items-center">
@@ -61,7 +61,7 @@ export function RoleCards() {
                 <CardTitle className="font-headline">{role.name}</CardTitle>
                 <CardDescription className="px-4">{role.description}</CardDescription>
               </CardHeader>
-              <CardContent className="flex-grow flex items-end">
+              <CardContent className="flex-grow flex items-end w-full px-6 pb-6">
                 <Button asChild className="w-full" variant="secondary">
                   <Link href={role.link}>{role.cta}</Link>
                 </Button>

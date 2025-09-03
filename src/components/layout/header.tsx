@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { HeartPulse, Calendar, Menu, X, UserCircle, LogOut, Settings, Briefcase } from 'lucide-react';
+import { HeartPulse, Calendar, Menu, X, UserCircle, LogOut, Settings, Briefcase, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { useState, useEffect } from 'react';
@@ -76,6 +76,14 @@ export function Header() {
                     </DropdownMenuItem>
                 </>
              )}
+             {user.role === 'patient' && (
+                <DropdownMenuItem asChild>
+                    <Link href="/patient/dashboard">
+                        <Users className="mr-2" />
+                        <span>Family Members</span>
+                    </Link>
+                </DropdownMenuItem>
+             )}
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
               <LogOut className="mr-2" />
@@ -117,6 +125,14 @@ export function Header() {
                     </Link>
                 </Button>
             </>
+           )}
+           {user.role === 'patient' && (
+                <Button variant="ghost" asChild className="justify-start text-lg">
+                    <Link href="/patient/dashboard" onClick={() => setIsSheetOpen(false)}>
+                        <Users className="mr-2" />
+                        Family Members
+                    </Link>
+                </Button>
            )}
           <Button variant="ghost" className="justify-start text-lg" onClick={handleLogout}>
             <LogOut className="mr-2" />

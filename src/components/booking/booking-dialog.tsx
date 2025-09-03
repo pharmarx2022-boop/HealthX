@@ -21,6 +21,7 @@ type FamilyMember = {
     id: string;
     name: string;
     relationship: string;
+    dob: string;
 };
 
 interface BookingDialogProps {
@@ -30,6 +31,17 @@ interface BookingDialogProps {
     familyMembers: FamilyMember[];
     onConfirm: (patientId: string, time: string) => void;
 }
+
+const calculateAge = (dob: string | Date) => {
+    const dobDate = typeof dob === 'string' ? new Date(dob) : dob;
+    const today = new Date();
+    let age = today.getFullYear() - dobDate.getFullYear();
+    const m = today.getMonth() - dobDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) {
+        age--;
+    }
+    return age;
+};
 
 export function BookingDialog({ isOpen, onOpenChange, doctor, familyMembers, onConfirm }: BookingDialogProps) {
     const [selectedPatientId, setSelectedPatientId] = useState('self');
@@ -86,7 +98,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, familyMembers, onC
                                             <AvatarImage src={`https://i.pravatar.cc/150?u=${member.name}`} alt={member.name} />
                                             <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
                                         </Avatar>
-                                        <span>{member.name} ({member.relationship})</span>
+                                        <span>{member.name} ({member.relationship}, {calculateAge(member.dob)} yrs)</span>
                                     </Label>
                                 </div>
                             ))}

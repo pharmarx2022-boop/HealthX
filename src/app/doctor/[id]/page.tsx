@@ -26,7 +26,7 @@ export default function DoctorDetailPage() {
 
   const [isClient, setIsClient] = useState(false);
   const [doctors, setDoctors] = useState(initialDoctors);
-  const [familyMembers, setFamilyMembers] = useState(mockFamilyMembers.map(m => ({...m, age: 0}))); // age will be calculated
+  const [familyMembers, setFamilyMembers] = useState(mockFamilyMembers);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   
   useEffect(() => {
@@ -43,7 +43,7 @@ export default function DoctorDetailPage() {
       setFamilyMembers(JSON.parse(storedFamily));
     } else {
       sessionStorage.setItem(FAMILY_KEY, JSON.stringify(mockFamilyMembers));
-      setFamilyMembers(mockFamilyMembers.map(m => ({...m, age: 0})));
+      setFamilyMembers(mockFamilyMembers);
     }
   }, []);
 

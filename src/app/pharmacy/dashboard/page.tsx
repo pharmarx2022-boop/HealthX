@@ -106,28 +106,29 @@ export default function PharmacyDashboardPage() {
             return;
         }
         
+        const discountAmount = amount * (pharmacyDetails.discount / 100);
+        const finalAmountToPatient = amount - discountAmount;
+        
         recordTransaction(patient.id, {
             type: 'debit',
             amount: amount,
-            description: `Redeemed at ${pharmacyDetails.name}`,
+            description: `Redeemed at ${pharmacyDetails.name} (Discounted value: ₹${finalAmountToPatient.toFixed(2)})`,
             date: new Date(),
         });
         
-        const discountAmount = amount * (pharmacyDetails.discount / 100);
-        const finalAmount = amount - discountAmount;
-        const commission = finalAmount * 0.05; // Admin keeps 5%
-        const pharmacyPayout = finalAmount - commission;
+        const commission = finalAmountToPatient * 0.05; // Admin keeps 5%
+        const pharmacyPayout = finalAmountToPatient - commission;
 
         recordCommission(user.id, {
             type: 'credit',
             amount: pharmacyPayout,
-            description: `Commission from redemption by ${patient.name}`,
+            description: `Points from redemption by ${patient.name}`,
             date: new Date(),
         });
 
         toast({
             title: "Redemption Successful!",
-            description: `₹${amount.toFixed(2)} redeemed. Pharmacy payout will be ₹${pharmacyPayout.toFixed(2)}.`,
+            description: `₹${amount.toFixed(2)} redeemed from patient. You have collected ₹${pharmacyPayout.toFixed(2)} in Health Points.`,
             duration: 6000
         });
 
@@ -167,7 +168,7 @@ export default function PharmacyDashboardPage() {
 
                  <Card className="shadow-sm">
                     <CardHeader>
-                        <CardTitle>Collected Commissions</CardTitle>
+                        <CardTitle>Collected Health Points</CardTitle>
                         <CardDescription>Your total earnings from redemptions.</CardDescription>
                     </CardHeader>
                      <CardContent>
@@ -183,7 +184,7 @@ export default function PharmacyDashboardPage() {
                             <DialogContent>
                                 <DialogHeader>
                                     <DialogTitle>Commission History</DialogTitle>
-                                    <DialogDescription>A record of your collected commissions from patient redemptions.</DialogDescription>
+                                    <DialogDescription>A record of your collected Health Points from patient redemptions.</DialogDescription>
                                 </DialogHeader>
                                 <div className="max-h-[50vh] overflow-y-auto -mx-6 px-6">
                                     <ul className="space-y-4 py-4">
@@ -306,9 +307,9 @@ export default function PharmacyDashboardPage() {
                 <div className="md:col-span-2 lg:col-span-3">
                     <Alert variant="outline" className="w-full">
                         <Banknote className="h-4 w-4" />
-                        <AlertTitle>Payout Information</AlertTitle>
+                        <AlertTitle>How Redemption Works</AlertTitle>
                         <AlertDescription>
-                            For each redemption, the final amount (after your pharmacy's discount) is transferred to the admin. You will receive 95% of this amount in your bank account, with the admin retaining a 5% commission. You only need to collect cash from patients for amounts not covered by Health Points.
+                            When a patient redeems Health Points, the value (after your pharmacy's discount) is transferred to your "Collected Health Points" balance, minus a 5% admin commission. You can request a cash payout of your collected points from the admin. You only need to collect cash from patients for amounts not covered by Health Points.
                         </AlertDescription>
                     </Alert>
                 </div>

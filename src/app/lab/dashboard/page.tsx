@@ -25,7 +25,9 @@ export default function LabDashboardPage() {
     const { toast } = useToast();
     const [user, setUser] = useState<any | null>(null);
     const [patientPhone, setPatientPhone] = useState('');
+    const [uploadPatientPhone, setUploadPatientPhone] = useState('');
     const [patient, setPatient] = useState<any | null>(null);
+    const [uploadPatient, setUploadPatient] = useState<any | null>(null);
     const [otp, setOtp] = useState('');
     const [otpSent, setOtpSent] = useState(false);
     const [totalBill, setTotalBill] = useState('');
@@ -52,26 +54,36 @@ export default function LabDashboardPage() {
              if (!sessionStorage.getItem(REPORTS_KEY)) {
                 sessionStorage.setItem(REPORTS_KEY, JSON.stringify(mockReports));
             }
+            if (!sessionStorage.getItem(PATIENTS_KEY)) {
+                sessionStorage.setItem(PATIENTS_KEY, JSON.stringify(mockPatientData));
+            }
         }
     }, []);
 
-    const handleSearchPatient = () => {
+    const handleSearchPatient = (phone: string, type: 'payment' | 'upload') => {
         const allPatients = JSON.parse(sessionStorage.getItem(PATIENTS_KEY) || JSON.stringify(mockPatientData));
-        const foundPatient = allPatients.find((p: any) => p.phone === patientPhone);
+        const foundPatient = allPatients.find((p: any) => p.phone === phone);
 
         if (foundPatient) {
-            setPatient(foundPatient);
-            setPatientTransactionHistory(getTransactionHistory(foundPatient.id));
-            setOtpSent(false);
-            setOtp('');
-            setTotalBill('');
+            if (type === 'payment') {
+                setPatient(foundPatient);
+                setPatientTransactionHistory(getTransactionHistory(foundPatient.id));
+                setOtpSent(false);
+                setOtp('');
+                setTotalBill('');
+            } else {
+                setUploadPatient(foundPatient);
+                setReportFile(null);
+                setReportName('');
+            }
         } else {
             toast({
                 title: "Patient Not Found",
                 description: "No patient found with that phone number.",
                 variant: "destructive"
             });
-            setPatient(null);
+            if (type === 'payment') setPatient(null);
+            if (type === 'upload') setUploadPatient(null);
         }
     };
     
@@ -149,7 +161,8 @@ export default function LabDashboardPage() {
         });
 
         // Refresh data
-        handleSearchPatient();
+        setPatient(null);
+        setPatientPhone('');
         setLabData(getLabData(user.id));
         setOtpSent(false);
         setOtp('');
@@ -169,7 +182,7 @@ export default function LabDashboardPage() {
         const allReports = JSON.parse(sessionStorage.getItem(REPORTS_KEY) || '[]');
         const newReport: MockReport = {
             id: `rep${Date.now()}`,
-            patientId: patient.id,
+            patientId: uploadPatient.id,
             name: reportName,
             lab: labDetails.name,
             date: new Date().toISOString(),
@@ -181,9 +194,11 @@ export default function LabDashboardPage() {
 
         toast({
             title: "Report Uploaded!",
-            description: `"${reportName}" has been uploaded for ${patient.name}.`
+            description: `"${reportName}" has been uploaded for ${uploadPatient.name}.`
         });
 
+        setUploadPatient(null);
+        setUploadPatientPhone('');
         setReportFile(null);
         setReportName('');
     }
@@ -198,154 +213,125 @@ export default function LabDashboardPage() {
                 <p className="text-muted-foreground">Manage lab tests and process patient payments.</p>
             </div>
             
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <Card className="shadow-sm">
-                    <CardHeader className="flex flex-row items-center gap-4">
-                        <Beaker className="w-8 h-8 text-primary"/>
-                        <div>
-                            <CardTitle>Welcome, {labDetails?.name || 'Lab'}!</CardTitle>
+            <div className="grid lg:grid-cols-3 gap-8 items-start">
+                <div className="lg:col-span-2 grid gap-8">
+                     <Card className="shadow-sm">
+                        <CardHeader>
+                            <CardTitle>Process Patient Bill</CardTitle>
                             <CardDescription>
-                                Use this portal to manage your operations.
+                                Help patients pay using their Health Points.
                             </CardDescription>
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <p>Upload reports and process patient payments using the tools below.</p>
-                    </CardContent>
-                </Card>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="space-y-2 max-w-sm">
+                            <Label htmlFor="patientPhone">Patient Phone Number</Label>
+                            <div className="flex gap-2">
+                                    <Input 
+                                        id="patientPhone" 
+                                        placeholder="Enter 10-digit number" 
+                                        value={patientPhone}
+                                        onChange={(e) => setPatientPhone(e.target.value)}
+                                        disabled={!!patient}
+                                    />
+                                    <Button onClick={() => handleSearchPatient(patientPhone, 'payment')} disabled={!!patient}>
+                                        <Search className="mr-2"/> Search
+                                    </Button>
+                            </div>
+                            </div>
 
-                 <Card className="shadow-sm">
-                    <CardHeader>
-                        <CardTitle>Collected Health Points</CardTitle>
-                        <CardDescription>Points collected from patient bills.</CardDescription>
-                    </CardHeader>
-                     <CardContent>
-                        <p className="text-4xl font-bold">₹{labData.balance.toFixed(2)}</p>
-                    </CardContent>
-                    <CardFooter>
-                         <Dialog>
-                            <DialogTrigger asChild>
-                                <Button variant="link" className="p-0 h-auto self-center">
-                                    <History className="mr-2"/> View Collection History
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>Collection History</DialogTitle>
-                                    <DialogDescription>A record of Health Points collected from patient bills.</DialogDescription>
-                                </DialogHeader>
-                                <div className="max-h-[50vh] overflow-y-auto -mx-6 px-6">
-                                    <ul className="space-y-4 py-4">
-                                        {labData.transactions.length > 0 ? (
-                                            labData.transactions.map((tx, index) => (
-                                                <li key={index} className="flex items-center justify-between">
-                                                    <div>
-                                                        <p className="font-medium">{tx.description}</p>
-                                                        <p className="text-xs text-muted-foreground mt-1">{format(new Date(tx.date), 'PP, p')}</p>
+                            {patient && labDetails && (
+                                <Card className="bg-slate-50 p-6">
+                                    <div className="flex flex-col md:flex-row md:items-start justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <User className="text-primary"/>
+                                            <div>
+                                                <p className="font-semibold text-lg">{patient.name}</p>
+                                                <Button variant="link" className="p-0 h-auto text-sm" onClick={() => { setPatient(null); setPatientPhone(''); }}>
+                                                    Search for another patient
+                                                </Button>
+                                            </div>
+                                        </div>
+                                        <div className="text-left md:text-right mt-4 md:mt-0">
+                                            <p className="text-xl font-bold">₹{patientTransactionHistory.balance.toFixed(2)}</p>
+                                            <p className="text-xs text-muted-foreground -mt-1">Available Balance</p>
+                                        </div>
+                                    </div>
+                                
+                                    {!otpSent ? (
+                                        <Button className="w-full mt-4" onClick={handleSendOtp}>Send OTP to Patient</Button>
+                                    ) : (
+                                        <div className="mt-4 pt-4 border-t space-y-4">
+                                            <Alert variant="default" className="bg-primary/10 border-primary/20">
+                                                <BadgePercent className="h-4 w-4 text-primary" />
+                                                <AlertTitle>Your Redemption Offer: {labDetails.discount}%</AlertTitle>
+                                                <AlertDescription>
+                                                    The patient can pay {labDetails.discount}% of their bill using Health Points.
+                                                </AlertDescription>
+                                            </Alert>
+
+                                            <div>
+                                                <Label htmlFor="totalBill">Total Bill Amount (₹)</Label>
+                                                <Input id="totalBill" placeholder="e.g., 1000" type="number" value={totalBill} onChange={(e) => setTotalBill(e.target.value)}/>
+                                            </div>
+
+                                            {calculatedAmounts.pointsToPay > 0 && (
+                                                <div className="space-y-2 text-sm p-3 bg-white rounded-md border">
+                                                    <div className="flex justify-between">
+                                                        <span className="text-muted-foreground">Pay with Health Points:</span>
+                                                        <span className="font-medium">₹{calculatedAmounts.pointsToPay.toFixed(2)}</span>
                                                     </div>
-                                                    <span className={`font-semibold ${tx.type === 'credit' ? 'text-green-600' : 'text-destructive'}`}>
-                                                        {tx.type === 'credit' ? '+' : '-'} ₹{tx.amount.toFixed(2)}
-                                                    </span>
-                                                </li>
-                                            ))
-                                        ) : (
-                                            <p className="text-center text-muted-foreground py-4">No transactions yet.</p>
-                                        )}
-                                    </ul>
+                                                    <div className="flex justify-between font-semibold">
+                                                        <span className="text-muted-foreground">Pay with Cash:</span>
+                                                        <span className="font-medium">₹{calculatedAmounts.cashToPay.toFixed(2)}</span>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            <div>
+                                                <Label htmlFor="otp">Enter 6-Digit OTP</Label>
+                                                <Input id="otp" placeholder="Enter OTP from patient" value={otp} onChange={(e) => setOtp(e.target.value)} />
+                                            </div>
+                                            <Button className="w-full" onClick={handleRedeem}>Confirm Payment</Button>
+                                        </div>
+                                    )}
+                                </Card>
+                            )}
+
+                        </CardContent>
+                    </Card>
+                    <Card className="shadow-sm">
+                        <CardHeader>
+                            <CardTitle>Upload Patient Report</CardTitle>
+                            <CardDescription>Find a patient to upload their lab report.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="space-y-2 max-w-sm">
+                                <Label htmlFor="uploadPatientPhone">Patient Phone Number</Label>
+                                <div className="flex gap-2">
+                                    <Input 
+                                        id="uploadPatientPhone" 
+                                        placeholder="Enter 10-digit number" 
+                                        value={uploadPatientPhone}
+                                        onChange={(e) => setUploadPatientPhone(e.target.value)}
+                                        disabled={!!uploadPatient}
+                                    />
+                                    <Button onClick={() => handleSearchPatient(uploadPatientPhone, 'upload')} disabled={!!uploadPatient}>
+                                        <Search className="mr-2"/> Search
+                                    </Button>
                                 </div>
-                            </DialogContent>
-                        </Dialog>
-                    </CardFooter>
-                </Card>
-
-                 <Card className="shadow-sm md:col-span-2 lg:col-span-3 row-start-2">
-                    <CardHeader>
-                        <CardTitle>Patient Tools</CardTitle>
-                        <CardDescription>
-                            Find a patient to process bills or upload reports.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="space-y-2 max-w-sm">
-                           <Label htmlFor="patientPhone">Patient Phone Number</Label>
-                           <div className="flex gap-2">
-                                <Input 
-                                    id="patientPhone" 
-                                    placeholder="Enter 10-digit number" 
-                                    value={patientPhone}
-                                    onChange={(e) => setPatientPhone(e.target.value)}
-                                    disabled={!!patient}
-                                />
-                                <Button onClick={handleSearchPatient} disabled={!!patient}>
-                                    <Search className="mr-2"/> Search
-                                </Button>
-                           </div>
-                        </div>
-
-                        {patient && labDetails && (
-                            <Card className="bg-slate-50 p-6">
-                                <div className="flex flex-col md:flex-row md:items-start justify-between">
-                                    <div className="flex items-center gap-3">
+                            </div>
+                             {uploadPatient && (
+                                <Card className="bg-slate-50 p-6">
+                                    <div className="flex items-center gap-3 mb-4">
                                         <User className="text-primary"/>
                                         <div>
-                                            <p className="font-semibold text-lg">{patient.name}</p>
-                                             <Button variant="link" className="p-0 h-auto text-sm" onClick={() => setPatient(null)}>
+                                            <p className="font-semibold text-lg">{uploadPatient.name}</p>
+                                            <Button variant="link" className="p-0 h-auto text-sm" onClick={() => { setUploadPatient(null); setUploadPatientPhone(''); }}>
                                                 Search for another patient
                                             </Button>
                                         </div>
                                     </div>
-                                    <div className="text-left md:text-right mt-4 md:mt-0">
-                                        <p className="text-xl font-bold">₹{patientTransactionHistory.balance.toFixed(2)}</p>
-                                        <p className="text-xs text-muted-foreground -mt-1">Available Balance</p>
-                                    </div>
-                                </div>
-                               
-                               <div className="grid md:grid-cols-2 gap-8 mt-6">
-                                    {/* Redeem Points Section */}
                                     <div className="space-y-4">
-                                        <h3 className="font-semibold text-lg border-b pb-2">Process Bill</h3>
-                                         {!otpSent ? (
-                                             <Button className="w-full mt-4" onClick={handleSendOtp}>Send OTP to Patient</Button>
-                                        ) : (
-                                            <div className="mt-4 space-y-4">
-                                                <Alert variant="default" className="bg-primary/10 border-primary/20">
-                                                    <BadgePercent className="h-4 w-4 text-primary" />
-                                                    <AlertTitle>Your Redemption Offer: {labDetails.discount}%</AlertTitle>
-                                                    <AlertDescription>
-                                                        The patient can pay {labDetails.discount}% of their bill using Health Points.
-                                                    </AlertDescription>
-                                                </Alert>
-
-                                                <div>
-                                                    <Label htmlFor="totalBill">Total Bill Amount (₹)</Label>
-                                                    <Input id="totalBill" placeholder="e.g., 1000" type="number" value={totalBill} onChange={(e) => setTotalBill(e.target.value)}/>
-                                                </div>
-
-                                                {calculatedAmounts.pointsToPay > 0 && (
-                                                    <div className="space-y-2 text-sm p-3 bg-white rounded-md border">
-                                                        <div className="flex justify-between">
-                                                            <span className="text-muted-foreground">Pay with Health Points:</span>
-                                                            <span className="font-medium">₹{calculatedAmounts.pointsToPay.toFixed(2)}</span>
-                                                        </div>
-                                                        <div className="flex justify-between font-semibold">
-                                                            <span className="text-muted-foreground">Pay with Cash:</span>
-                                                            <span className="font-medium">₹{calculatedAmounts.cashToPay.toFixed(2)}</span>
-                                                        </div>
-                                                    </div>
-                                                )}
-
-                                                <div>
-                                                    <Label htmlFor="otp">Enter 6-Digit OTP</Label>
-                                                    <Input id="otp" placeholder="Enter OTP from patient" value={otp} onChange={(e) => setOtp(e.target.value)} />
-                                                </div>
-                                                <Button className="w-full" onClick={handleRedeem}>Confirm Payment</Button>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                     {/* Upload Report Section */}
-                                    <div className="space-y-4">
-                                        <h3 className="font-semibold text-lg border-b pb-2">Upload Report</h3>
                                         <div>
                                             <Label htmlFor="reportName">Report Name</Label>
                                             <Input id="reportName" placeholder="e.g., Blood Test Report" value={reportName} onChange={(e) => setReportName(e.target.value)} />
@@ -354,18 +340,72 @@ export default function LabDashboardPage() {
                                             <Label htmlFor="reportFile">Report File</Label>
                                             <Input id="reportFile" type="file" onChange={(e) => setReportFile(e.target.files?.[0] || null)} />
                                         </div>
-                                         <Button className="w-full" onClick={handleUploadReport}>
-                                            <Upload className="mr-2"/> Upload Report
+                                        <Button className="w-full" onClick={handleUploadReport}>
+                                            <Upload className="mr-2"/> Upload Report for {uploadPatient.name}
                                         </Button>
                                     </div>
-                               </div>
-                            </Card>
-                        )}
+                                </Card>
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
+                <div className="lg:col-span-1 space-y-8">
+                    <Card className="shadow-sm">
+                        <CardHeader className="flex flex-row items-center gap-4">
+                            <Beaker className="w-8 h-8 text-primary"/>
+                            <div>
+                                <CardTitle>Welcome, {labDetails?.name || 'Lab'}!</CardTitle>
+                                <CardDescription>
+                                    Use this portal to manage your operations.
+                                </CardDescription>
+                            </div>
+                        </CardHeader>
+                    </Card>
 
-                    </CardContent>
-                </Card>
-                <div className="md:col-span-2 lg:col-span-3">
-                    <Alert variant="outline" className="w-full">
+                    <Card className="shadow-sm">
+                        <CardHeader>
+                            <CardTitle>Collected Health Points</CardTitle>
+                            <CardDescription>Points collected from patient bills.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-4xl font-bold">₹{labData.balance.toFixed(2)}</p>
+                        </CardContent>
+                        <CardFooter>
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button variant="link" className="p-0 h-auto self-center">
+                                        <History className="mr-2"/> View Collection History
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Collection History</DialogTitle>
+                                        <DialogDescription>A record of Health Points collected from patient bills.</DialogDescription>
+                                    </DialogHeader>
+                                    <div className="max-h-[50vh] overflow-y-auto -mx-6 px-6">
+                                        <ul className="space-y-4 py-4">
+                                            {labData.transactions.length > 0 ? (
+                                                labData.transactions.map((tx, index) => (
+                                                    <li key={index} className="flex items-center justify-between">
+                                                        <div>
+                                                            <p className="font-medium">{tx.description}</p>
+                                                            <p className="text-xs text-muted-foreground mt-1">{format(new Date(tx.date), 'PP, p')}</p>
+                                                        </div>
+                                                        <span className={`font-semibold ${tx.type === 'credit' ? 'text-green-600' : 'text-destructive'}`}>
+                                                            {tx.type === 'credit' ? '+' : '-'} ₹{tx.amount.toFixed(2)}
+                                                        </span>
+                                                    </li>
+                                                ))
+                                            ) : (
+                                                <p className="text-center text-muted-foreground py-4">No transactions yet.</p>
+                                            )}
+                                        </ul>
+                                    </div>
+                                </DialogContent>
+                            </Dialog>
+                        </CardFooter>
+                    </Card>
+                     <Alert variant="outline" className="w-full">
                         <Banknote className="h-4 w-4" />
                         <AlertTitle>How Payments Work</AlertTitle>
                         <AlertDescription>

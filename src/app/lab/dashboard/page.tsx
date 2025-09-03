@@ -115,6 +115,7 @@ export default function LabDashboardPage() {
         }
 
         const { pointsToPay } = calculatedAmounts;
+        const commissionAmount = pointsToPay * 0.95; // Lab gets 95%
 
         if (pointsToPay > patientTransactionHistory.balance) {
             toast({
@@ -136,8 +137,8 @@ export default function LabDashboardPage() {
         // Credit points to lab
         recordCommission(user.id, {
             type: 'credit',
-            amount: pointsToPay,
-            description: `Health Points collected from ${patient.name}`,
+            amount: commissionAmount,
+            description: `Commission from ${patient.name}'s bill`,
             date: new Date(),
         });
 

@@ -2,8 +2,9 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Pill } from 'lucide-react';
+import { Pill, Edit } from 'lucide-react';
 import { RedemptionTool } from '@/components/partner/redemption-tool';
+import { PartnerProfileForm } from '@/components/partner/partner-profile-form';
 
 export default function PharmacyDashboardPage() {
   return (
@@ -16,31 +17,48 @@ export default function PharmacyDashboardPage() {
                 <p className="text-muted-foreground">Manage your pharmacy's offers and wallet rules.</p>
             </div>
             
-            <div className="grid md:grid-cols-2 gap-8">
-                <Card className="shadow-sm">
+             <div className="grid lg:grid-cols-2 gap-8">
+                <div className="space-y-8">
+                    <Card className="shadow-sm">
+                        <CardHeader className="flex flex-row items-center gap-4">
+                            <Pill className="w-8 h-8 text-primary"/>
+                            <div>
+                                <CardTitle>Welcome, Pharmacy Partner!</CardTitle>
+                                <CardDescription>
+                                    Manage your inventory, list offers, and connect with patients.
+                                </CardDescription>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <p>Use the tools on this dashboard to manage your presence on HealthLink Hub.</p>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="shadow-sm">
+                        <CardHeader>
+                            <CardTitle>Collect Health Points</CardTitle>
+                             <CardDescription>
+                                Redeem Health Points for patients via OTP verification.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                           <RedemptionTool partnerType="pharmacy" />
+                        </CardContent>
+                    </Card>
+                </div>
+
+                 <Card className="shadow-sm">
                     <CardHeader className="flex flex-row items-center gap-4">
-                        <Pill className="w-8 h-8 text-primary"/>
+                        <Edit className="w-8 h-8 text-primary"/>
                         <div>
-                            <CardTitle>Welcome, Pharmacy Partner!</CardTitle>
+                            <CardTitle>Manage Your Listing</CardTitle>
                             <CardDescription>
-                                Manage your inventory, list offers, and connect with patients.
+                                Update your public profile and redemption offers.
                             </CardDescription>
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <p>Pharmacy-specific content and tools will be displayed here.</p>
-                    </CardContent>
-                </Card>
-
-                <Card className="shadow-sm">
-                    <CardHeader>
-                        <CardTitle>Collect Health Points</CardTitle>
-                         <CardDescription>
-                            Redeem Health Points for patients via OTP verification.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                       <RedemptionTool partnerType="pharmacy" />
+                        <PartnerProfileForm partnerType="pharmacy" />
                     </CardContent>
                 </Card>
             </div>

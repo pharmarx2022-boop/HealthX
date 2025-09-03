@@ -2,8 +2,9 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FlaskConical } from 'lucide-react';
+import { FlaskConical, Edit } from 'lucide-react';
 import { RedemptionTool } from '@/components/partner/redemption-tool';
+import { PartnerProfileForm } from '@/components/partner/partner-profile-form';
 
 export default function LabDashboardPage() {
   return (
@@ -16,33 +17,50 @@ export default function LabDashboardPage() {
                 <p className="text-muted-foreground">Manage your lab's services and offers.</p>
             </div>
             
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid lg:grid-cols-2 gap-8">
+                <div className="space-y-8">
+                    <Card className="shadow-sm">
+                        <CardHeader className="flex flex-row items-center gap-4">
+                            <FlaskConical className="w-8 h-8 text-primary"/>
+                            <div>
+                                <CardTitle>Welcome, Lab Partner!</CardTitle>
+                                <CardDescription>
+                                    List your diagnostic services and manage patient requests.
+                                </CardDescription>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                             <p>Use the tools on this dashboard to manage your presence on HealthLink Hub.</p>
+                        </CardContent>
+                    </Card>
+                     <Card className="shadow-sm">
+                        <CardHeader>
+                            <CardTitle>Collect Health Points</CardTitle>
+                             <CardDescription>
+                                Redeem Health Points for patients via OTP verification.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                           <RedemptionTool partnerType="lab" />
+                        </CardContent>
+                    </Card>
+                </div>
+
                 <Card className="shadow-sm">
                     <CardHeader className="flex flex-row items-center gap-4">
-                        <FlaskConical className="w-8 h-8 text-primary"/>
+                        <Edit className="w-8 h-8 text-primary"/>
                         <div>
-                            <CardTitle>Welcome, Lab Partner!</CardTitle>
+                            <CardTitle>Manage Your Listing</CardTitle>
                             <CardDescription>
-                                List your diagnostic services and manage patient requests.
+                                Update your public profile and redemption offers.
                             </CardDescription>
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <p>Lab-specific content and tools will be displayed here.</p>
+                        <PartnerProfileForm partnerType="lab" />
                     </CardContent>
                 </Card>
 
-                 <Card className="shadow-sm">
-                    <CardHeader>
-                        <CardTitle>Collect Health Points</CardTitle>
-                         <CardDescription>
-                            Redeem Health Points for patients via OTP verification.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                       <RedemptionTool partnerType="lab" />
-                    </CardContent>
-                </Card>
             </div>
 
 

@@ -1,3 +1,4 @@
+
 // A simple in-memory store for users
 const users: any[] = [];
 export const MOCK_OTP = '123456';
@@ -9,11 +10,27 @@ export function loginWithOtp(phone: string, otp: string, role: string) {
         return null;
     }
 
+    // Assign a static ID for demo purposes based on role
+    let userId;
+    switch(role) {
+        case 'doctor':
+            userId = '1';
+            break;
+        case 'patient':
+             // Assuming patient Rohan Sharma has id '1' in mockPatients
+            userId = 'rohan_sharma'; 
+            break;
+        default:
+            userId = `${role}_${phone.slice(-4)}`;
+    }
+
+
     // Find user or create a new one
     let user = users.find(u => u.phone === phone && u.role === role);
     
     if (!user) {
         user = { 
+            id: userId,
             phone,
             role, 
             fullName: `User ${phone.slice(-4)}`, // Mock name

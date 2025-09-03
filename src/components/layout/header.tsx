@@ -1,11 +1,21 @@
+
 'use client';
 
 import Link from 'next/link';
-import { HeartPulse, Calendar, Menu, X, UserCircle, LogOut } from 'lucide-react';
+import { HeartPulse, Calendar, Menu, X, UserCircle, LogOut, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
 
 export function Header() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -32,27 +42,45 @@ export function Header() {
 
   const renderAuthButtons = () => {
     if (user) {
+      const roleDisplayName = user.role.charAt(0).toUpperCase() + user.role.slice(1);
       return (
-        <>
-          <Button variant="ghost" asChild>
-            <Link href={`/${user.role}/dashboard`}>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost">
               <UserCircle className="mr-2" />
-              {user.role.charAt(0).toUpperCase() + user.role.slice(1)} Dashboard
-            </Link>
-          </Button>
-          <Button variant="ghost" onClick={handleLogout}>
-            <LogOut className="mr-2" />
-            Logout
-          </Button>
-        </>
+              {roleDisplayName} Account
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href={`/${user.role}/dashboard`}>
+                <UserCircle className="mr-2" />
+                <span>Dashboard</span>
+              </Link>
+            </DropdownMenuItem>
+             {user.role === 'doctor' && (
+                <DropdownMenuItem asChild>
+                    <Link href="/doctor/profile">
+                        <Settings className="mr-2" />
+                        <span>Manage Profile</span>
+                    </Link>
+                </DropdownMenuItem>
+             )}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleLogout}>
+              <LogOut className="mr-2" />
+              <span>Logout</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       );
     }
     return (
-      <>
-        <Button asChild>
-          <Link href="/login">Login / Register</Link>
-        </Button>
-      </>
+      <Button asChild>
+        <Link href="/login">Login / Register</Link>
+      </Button>
     );
   };
   
@@ -66,6 +94,14 @@ export function Header() {
               Dashboard
             </Link>
           </Button>
+           {user.role === 'doctor' && (
+             <Button variant="ghost" asChild className="justify-start text-lg">
+                <Link href="/doctor/profile" onClick={() => setIsSheetOpen(false)}>
+                    <Settings className="mr-2" />
+                    Manage Profile
+                </Link>
+            </Button>
+           )}
           <Button variant="ghost" className="justify-start text-lg" onClick={handleLogout}>
             <LogOut className="mr-2" />
             Logout
@@ -74,11 +110,9 @@ export function Header() {
       );
     }
     return (
-      <>
-        <Button asChild className="text-lg">
-          <Link href="/login" onClick={() => setIsSheetOpen(false)}>Login / Register</Link>
-        </Button>
-      </>
+      <Button asChild className="text-lg">
+        <Link href="/login" onClick={() => setIsSheetOpen(false)}>Login / Register</Link>
+      </Button>
     );
   };
 

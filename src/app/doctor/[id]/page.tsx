@@ -5,11 +5,14 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Stethoscope, MapPin, Calendar, Clock, Star } from 'lucide-react';
+import { Stethoscope, MapPin, Calendar, Star, Loader2 } from 'lucide-react';
 import Image from 'next/image';
-import { notFound } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
-const doctors = [
+const DOCTORS_KEY = 'doctorsData';
+
+const initialDoctors = [
   {
     id: '1',
     name: 'Dr. Anjali Sharma',
@@ -45,8 +48,36 @@ const doctors = [
   },
 ];
 
-export default function DoctorDetailPage({ params }: { params: { id: string } }) {
-  const doctor = doctors.find(d => d.id === params.id);
+export default function DoctorDetailPage() {
+  const params = useParams();
+  const id = Array.isArray(params.id) ? params.id[0] : params.id;
+  const [isClient, setIsClient] = useState(false);
+  const [doctors, setDoctors] = useState(initialDoctors);
+
+  useEffect(() => {
+    setIsClient(true);
+    const storedDoctors = sessionStorage.getItem(DOCTORS_KEY);
+    if (storedDoctors) {
+      setDoctors(JSON.parse(storedDoctors));
+    } else {
+      sessionStorage.setItem(DOCTORS_KEY, JSON.stringify(initialDoctors));
+    }
+  }, []);
+
+  const doctor = doctors.find(d => d.id === id);
+
+  if (!isClient) {
+    return (
+        <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-1 bg-slate-50/50 flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-primary"/>
+                <p className="ml-4 text-muted-foreground">Loading doctor profile...</p>
+            </main>
+            <Footer />
+        </div>
+    );
+  }
 
   if (!doctor) {
     notFound();

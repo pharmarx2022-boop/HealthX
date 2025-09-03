@@ -2,7 +2,7 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Pill, Edit, History, FileText } from 'lucide-react';
+import { Pill, Edit, History, FileText, Wallet } from 'lucide-react';
 import { RedemptionTool } from '@/components/partner/redemption-tool';
 import { PartnerProfileForm } from '@/components/partner/partner-profile-form';
 import { format } from 'date-fns';
@@ -32,6 +32,9 @@ const mockTransactions = [
         status: 'Success'
     }
 ];
+
+const totalPointsCollected = mockTransactions.reduce((acc, tx) => acc + tx.amount, 0);
+
 
 export default function PharmacyDashboardPage() {
   return (
@@ -73,6 +76,21 @@ export default function PharmacyDashboardPage() {
                         </CardContent>
                     </Card>
 
+                    <Card className="shadow-sm">
+                        <CardHeader className="flex flex-row items-center gap-4">
+                            <Wallet className="w-8 h-8 text-primary"/>
+                            <div>
+                                <CardTitle>Points Collected</CardTitle>
+                                <CardDescription>
+                                    Total Health Points accumulated from patients.
+                                </CardDescription>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                           <p className="text-3xl font-bold">₹{totalPointsCollected.toFixed(2)}</p>
+                        </CardContent>
+                    </Card>
+
                      <Card className="shadow-sm">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
@@ -82,7 +100,7 @@ export default function PharmacyDashboardPage() {
                              <CardDescription>
                                 View your recent Health Point redemption history.
                             </CardDescription>
-                        </CardHeader>
+                        </Header>
                         <CardContent>
                            <div className="space-y-4">
                                 {mockTransactions.map(tx => (

@@ -2,7 +2,7 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FlaskConical, Edit, History, FileText } from 'lucide-react';
+import { FlaskConical, Edit, History, FileText, Wallet } from 'lucide-react';
 import { RedemptionTool } from '@/components/partner/redemption-tool';
 import { PartnerProfileForm } from '@/components/partner/partner-profile-form';
 import { format } from 'date-fns';
@@ -26,6 +26,7 @@ const mockTransactions = [
     }
 ];
 
+const totalPointsCollected = mockTransactions.reduce((acc, tx) => acc + tx.amount, 0);
 
 export default function LabDashboardPage() {
   return (
@@ -60,9 +61,24 @@ export default function LabDashboardPage() {
                              <CardDescription>
                                 Redeem Health Points for patients via OTP verification.
                             </CardDescription>
-                        </CardHeader>
+                        </Header>
                         <CardContent>
                            <RedemptionTool partnerType="lab" />
+                        </CardContent>
+                    </Card>
+
+                    <Card className="shadow-sm">
+                        <CardHeader className="flex flex-row items-center gap-4">
+                            <Wallet className="w-8 h-8 text-primary"/>
+                            <div>
+                                <CardTitle>Points Collected</CardTitle>
+                                <CardDescription>
+                                    Total Health Points accumulated from patients.
+                                </CardDescription>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                           <p className="text-3xl font-bold">₹{totalPointsCollected.toFixed(2)}</p>
                         </CardContent>
                     </Card>
 

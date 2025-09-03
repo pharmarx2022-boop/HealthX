@@ -161,7 +161,7 @@ export function NearbySearch() {
                                             </div>
                                             {pharmacy.acceptsHealthPoints && (
                                                 <Badge className="mt-4" variant="secondary">
-                                                    <PercentCircle className="mr-2 text-primary" /> Accepts Health Points
+                                                    <PercentCircle className="mr-2 text-primary" /> Accepts Health Points ({pharmacy.discount}%)
                                                 </Badge>
                                             )}
                                         </CardContent>
@@ -190,7 +190,7 @@ export function NearbySearch() {
                                             </div>
                                             {lab.acceptsHealthPoints && (
                                                 <Badge className="mt-4" variant="secondary">
-                                                    <PercentCircle className="mr-2 text-primary" /> Accepts Health Points
+                                                    <PercentCircle className="mr-2 text-primary" /> Accepts Health Points ({lab.discount}%)
                                                 </Badge>
                                             )}
                                         </CardContent>

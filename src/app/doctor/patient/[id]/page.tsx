@@ -19,6 +19,7 @@ export default function PatientDetailPage() {
   const params = useParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const { toast } = useToast();
+  const [isClient, setIsClient] = useState(false);
 
   // We need to manage patient state locally to reflect changes
   const [allPatients, setAllPatients] = useState(mockPatients);
@@ -26,6 +27,7 @@ export default function PatientDetailPage() {
   
   // This ensures we have the latest patient data if the user navigates back and forth
   useEffect(() => {
+    setIsClient(true);
     const storedPatients = sessionStorage.getItem('mockPatients');
     if (storedPatients) {
       setAllPatients(JSON.parse(storedPatients));
@@ -95,11 +97,11 @@ export default function PatientDetailPage() {
                 <h3 className="font-semibold text-lg border-b pb-2">Appointment Details</h3>
                 <div className="flex items-center text-muted-foreground gap-3">
                   <Calendar className="w-5 h-5 text-primary"/> 
-                  <span>{format(new Date(patient.appointmentDate), 'EEEE, MMMM d, yyyy')}</span>
+                  <span>{isClient ? format(new Date(patient.appointmentDate), 'EEEE, MMMM d, yyyy') : ''}</span>
                 </div>
                 <div className="flex items-center text-muted-foreground gap-3">
                   <Clock className="w-5 h-5 text-primary"/> 
-                  <span>{format(new Date(patient.appointmentDate), 'p')}</span>
+                  <span>{isClient ? format(new Date(patient.appointmentDate), 'p') : ''}</span>
                 </div>
                  <div className="flex items-center text-muted-foreground gap-3">
                   <Stethoscope className="w-5 h-5 text-primary"/> 

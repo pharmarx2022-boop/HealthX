@@ -11,6 +11,10 @@ export const initialDoctors = [
     reviews: 124,
     image: 'https://picsum.photos/400/400',
     dataAiHint: 'doctor portrait',
+    reviewsList: [
+        { patientName: 'Rohan Sharma', rating: 5, comment: 'Dr. Sharma was fantastic. Very thorough and took the time to explain everything clearly.' },
+        { patientName: 'Sunita Patil', rating: 4, comment: 'Good experience, the wait time was a bit long but the consultation was worth it.' },
+    ]
   },
   {
     id: '2',
@@ -22,6 +26,9 @@ export const initialDoctors = [
     reviews: 98,
     image: 'https://picsum.photos/400/400',
     dataAiHint: 'doctor portrait',
+    reviewsList: [
+        { patientName: 'Priya Mehta', rating: 5, comment: 'Excellent doctor! Solved my skin issue that had been bothering me for months.' },
+    ]
   },
   {
     id: '3',
@@ -33,6 +40,9 @@ export const initialDoctors = [
     reviews: 150,
     image: 'https://picsum.photos/400/400',
     dataAiHint: 'doctor portrait',
+    reviewsList: [
+        { patientName: 'Amit Singh', rating: 5, comment: 'Dr. Patel is wonderful with kids. My son felt very comfortable with her.' },
+    ]
   },
 ];
 

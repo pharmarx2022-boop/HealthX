@@ -5,11 +5,13 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Stethoscope, MapPin, Calendar, Star, Loader2 } from 'lucide-react';
+import { Stethoscope, MapPin, Calendar, Star, Loader2, MessageSquare } from 'lucide-react';
 import Image from 'next/image';
 import { notFound, useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { initialDoctors } from '@/lib/mock-data';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
 
 const DOCTORS_KEY = 'doctorsData';
 
@@ -48,6 +50,11 @@ export default function DoctorDetailPage() {
   if (!doctor) {
     notFound();
   }
+  
+  const totalReviews = doctor.reviewsList?.length ?? 0;
+  const averageRating = totalReviews > 0
+    ? (doctor.reviewsList.reduce((acc, review) => acc + review.rating, 0) / totalReviews).toFixed(1)
+    : 'N/A';
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -70,9 +77,9 @@ export default function DoctorDetailPage() {
                             <div className="flex items-center gap-4 pt-2">
                                 <div className="flex items-center gap-1 text-amber-500">
                                     <Star className="w-5 h-5 fill-current" />
-                                    <span className="font-bold">{doctor.rating}</span>
+                                    <span className="font-bold">{averageRating}</span>
                                 </div>
-                                <span className="text-muted-foreground">({doctor.reviews} reviews)</span>
+                                <span className="text-muted-foreground">({totalReviews} reviews)</span>
                             </div>
                         </CardHeader>
                         <CardContent className="space-y-6">
@@ -99,6 +106,35 @@ export default function DoctorDetailPage() {
                         </CardContent>
                     </div>
                 </div>
+                 <Separator className="my-0"/>
+                 <CardContent className="p-6">
+                    <h3 className="text-xl font-semibold mb-4">Patient Reviews</h3>
+                    {doctor.reviewsList && doctor.reviewsList.length > 0 ? (
+                        <div className="space-y-6">
+                            {doctor.reviewsList.map((review, index) => (
+                                <div key={index} className="flex gap-4">
+                                    <Avatar>
+                                        <AvatarImage src={`https://i.pravatar.cc/150?u=${review.patientName}`} alt={review.patientName} />
+                                        <AvatarFallback>{review.patientName.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1">
+                                        <div className="flex justify-between items-center">
+                                            <p className="font-semibold">{review.patientName}</p>
+                                            <div className="flex items-center gap-1 text-amber-500">
+                                                 {[...Array(5)].map((_, i) => (
+                                                    <Star key={i} className={`w-4 h-4 ${i < review.rating ? 'fill-current' : 'text-gray-300'}`} />
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <p className="text-muted-foreground mt-1">{review.comment}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className="text-muted-foreground">No reviews yet.</p>
+                    )}
+                 </CardContent>
             </Card>
         </div>
       </main>

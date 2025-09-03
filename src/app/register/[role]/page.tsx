@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,6 +25,8 @@ import { Input } from '@/components/ui/input';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { useToast } from '@/hooks/use-toast';
+import { registerUser } from '@/lib/auth';
+
 
 const baseSchemaObject = z.object({
   fullName: z.string().min(2, { message: 'Full name is required.' }),
@@ -82,6 +85,7 @@ export default function RegisterPage({ params }: { params: { role: Role } }) {
   const { role } = params;
   const currentSchema = roleSchemas[role] || patientSchema;
   const { toast } = useToast();
+  const router = useRouter();
 
   const form = useForm({
     resolver: zodResolver(currentSchema),
@@ -99,12 +103,21 @@ export default function RegisterPage({ params }: { params: { role: Role } }) {
   });
 
   function onSubmit(values: z.infer<typeof currentSchema>) {
-    console.log({ role, ...values });
-    // Handle registration logic
-    toast({
-        title: "Account Created!",
-        description: `Your ${role} account has been successfully created.`,
-    });
+    const success = registerUser({...values, role});
+    
+    if(success) {
+      toast({
+          title: "Account Created!",
+          description: `Your ${role} account has been successfully created.`,
+      });
+      router.push('/login');
+    } else {
+        toast({
+            title: "Registration Failed",
+            description: `An account with this email or phone already exists.`,
+            variant: "destructive",
+        });
+    }
   }
 
   const renderRoleSpecificFields = () => {

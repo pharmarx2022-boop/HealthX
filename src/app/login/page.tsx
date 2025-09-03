@@ -12,6 +12,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
+import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
+import { loginUser } from '@/lib/auth';
 
 const loginSchema = z.object({
   emailOrPhone: z.string().min(1, { message: 'Please enter a valid email or phone number.' }),
@@ -20,6 +23,9 @@ const loginSchema = z.object({
 });
 
 export default function LoginPage() {
+  const { toast } = useToast();
+  const router = useRouter();
+
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -30,8 +36,20 @@ export default function LoginPage() {
   });
 
   function onSubmit(values: z.infer<typeof loginSchema>) {
-    console.log(values);
-    // Handle login logic here
+    const user = loginUser(values.emailOrPhone, values.password, values.role);
+    if (user) {
+        toast({
+            title: "Login Successful!",
+            description: "Welcome back to HealthLink Hub.",
+        });
+        router.push('/');
+    } else {
+        toast({
+            title: "Login Failed",
+            description: "Invalid credentials or role. Please try again.",
+            variant: "destructive",
+        })
+    }
   }
 
   return (

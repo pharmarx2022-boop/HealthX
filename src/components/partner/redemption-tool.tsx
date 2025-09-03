@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { IndianRupee } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { mockPharmacies, mockLabs } from '@/lib/mock-data';
 
 const redemptionSchema = z.object({
   patientId: z.string().min(1, 'Patient ID is required.'),
@@ -29,12 +30,20 @@ const mockPatientWallets: Record<string, { name: string, healthPoints: number }>
     'jane_doe': { name: 'Jane Doe', healthPoints: 1200 },
 };
 
+// Mock partner data - in a real app this would be fetched for the logged in partner
+const MOCK_PARTNER_DATA = {
+    pharmacy: mockPharmacies[1], // Apollo Pharmacy (20% offer)
+    lab: mockLabs[1], // Dr. Lal PathLabs (35% offer)
+}
+
+
 export function RedemptionTool({ partnerType }: RedemptionToolProps) {
   const [step, setStep] = useState<'initial' | 'confirm'>('initial');
   const [redemptionDetails, setRedemptionDetails] = useState<any>(null);
   const { toast } = useToast();
 
-  const redemptionLimit = partnerType === 'pharmacy' ? 0.15 : 0.30;
+  const partnerData = MOCK_PARTNER_DATA[partnerType];
+  const redemptionLimit = (partnerData.redemptionOffer || 0) / 100;
   const partnerName = partnerType.charAt(0).toUpperCase() + partnerType.slice(1);
 
   const form = useForm<z.infer<typeof redemptionSchema>>({

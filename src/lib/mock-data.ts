@@ -55,6 +55,7 @@ export const mockPharmacies = [
         distance: '1.2 km away',
         image: 'https://picsum.photos/200/200',
         dataAiHint: 'pharmacy storefront',
+        redemptionOffer: 15,
     },
     {
         id: 'pharm2',
@@ -63,6 +64,7 @@ export const mockPharmacies = [
         distance: '2.8 km away',
         image: 'https://picsum.photos/200/200',
         dataAiHint: 'pharmacy storefront',
+        redemptionOffer: 20,
     },
     {
         id: 'pharm3',
@@ -71,6 +73,7 @@ export const mockPharmacies = [
         distance: '3.5 km away',
         image: 'https://picsum.photos/200/200',
         dataAiHint: 'pharmacy storefront',
+        redemptionOffer: 18,
     }
 ]
 
@@ -82,6 +85,7 @@ export const mockLabs = [
         distance: '3.5 km away',
         image: 'https://picsum.photos/200/200',
         dataAiHint: 'laboratory interior',
+        redemptionOffer: 30,
     },
     {
         id: 'lab2',
@@ -90,6 +94,7 @@ export const mockLabs = [
         distance: '4.1 km away',
         image: 'https://picsum.photos/200/200',
         dataAiHint: 'laboratory interior',
+        redemptionOffer: 35,
     },
      {
         id: 'lab3',
@@ -98,6 +103,7 @@ export const mockLabs = [
         distance: '1.8 km away',
         image: 'https://picsum.photos/200/200',
         dataAiHint: 'laboratory interior',
+        redemptionOffer: 25,
     }
 ]
 

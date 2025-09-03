@@ -365,7 +365,7 @@ export default function PatientDashboardPage() {
                             <DialogHeader>
                                 <DialogTitle>Redeem Your Health Points</DialogTitle>
                                 <DialogDescription>
-                                    You can redeem up to 15% of your bill at pharmacies and up to 30% at labs.
+                                    You can redeem up to a certain percentage of your bill at partner pharmacies and labs. Check their listing for the offer.
                                 </DialogDescription>
                             </DialogHeader>
                             <div className="grid grid-cols-2 gap-4 py-4">

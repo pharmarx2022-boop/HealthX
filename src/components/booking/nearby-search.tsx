@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Stethoscope, MapPin, Pill, FlaskConical, Loader2, AlertTriangle, Building, Link as LinkIcon, Search } from 'lucide-react';
+import { Stethoscope, MapPin, Pill, FlaskConical, Loader2, AlertTriangle, Building, Link as LinkIcon, Search, PercentCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { initialDoctors, mockPharmacies, mockLabs, initialClinics } from '@/lib/mock-data';
@@ -221,6 +221,10 @@ export function NearbySearch() {
                                     <Card key={pharmacy.id} className="overflow-hidden hover:shadow-xl transition-shadow duration-300">
                                         <div className="relative w-full h-40">
                                             <Image src={pharmacy.image} alt={pharmacy.name} fill style={{objectFit:"cover"}} data-ai-hint={pharmacy.dataAiHint} />
+                                             <div className="absolute top-2 right-2 bg-primary text-primary-foreground text-xs font-bold py-1 px-2 rounded-full flex items-center gap-1">
+                                                <PercentCircle className="w-4 h-4" />
+                                                <span>Upto {pharmacy.redemptionOffer}% off</span>
+                                            </div>
                                         </div>
                                         <CardHeader>
                                             <CardTitle className="font-headline text-xl">{pharmacy.name}</CardTitle>
@@ -245,6 +249,10 @@ export function NearbySearch() {
                                     <Card key={lab.id} className="overflow-hidden hover:shadow-xl transition-shadow duration-300">
                                         <div className="relative w-full h-40">
                                             <Image src={lab.image} alt={lab.name} fill style={{objectFit:"cover"}} data-ai-hint={lab.dataAiHint} />
+                                            <div className="absolute top-2 right-2 bg-primary text-primary-foreground text-xs font-bold py-1 px-2 rounded-full flex items-center gap-1">
+                                                <PercentCircle className="w-4 h-4" />
+                                                <span>Upto {lab.redemptionOffer}% off</span>
+                                            </div>
                                         </div>
                                         <CardHeader>
                                             <CardTitle className="font-headline text-xl">{lab.name}</CardTitle>

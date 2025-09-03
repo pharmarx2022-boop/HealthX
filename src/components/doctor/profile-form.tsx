@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Upload } from 'lucide-react';
 
 // This would typically come from a central store or API
 const DOCTORS_KEY = 'doctorsData';
@@ -57,7 +57,7 @@ const profileSchema = z.object({
   specialty: z.string().min(1, 'Specialty is required.'),
   location: z.string().min(1, 'Location is required.'),
   bio: z.string().min(1, 'A short bio is required.'),
-  image: z.string().url('Please enter a valid image URL.'),
+  image: z.string().min(1, 'A profile picture is required.'),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -104,6 +104,18 @@ export function ProfileForm() {
       form.reset(doctorData);
     }
   }, [doctorData, form]);
+  
+  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        form.setValue('image', reader.result as string);
+        form.clearErrors('image'); // Clear error after successful upload
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const onSubmit = (data: ProfileFormValues) => {
     if (!doctorData) return;
@@ -148,7 +160,26 @@ export function ProfileForm() {
                     </div>
                 )}
             </div>
-            <p className="text-xs text-muted-foreground mt-2">Update the image URL in the form to change your picture.</p>
+             <FormField control={form.control} name="image" render={({ field }) => (
+                <FormItem className="mt-4">
+                    <FormControl>
+                        <div>
+                            <Input 
+                                id="image-upload"
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageUpload}
+                                className="hidden" 
+                            />
+                            <label htmlFor="image-upload" className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full">
+                                <Upload className="mr-2" />
+                                Upload from Device
+                            </label>
+                        </div>
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+            )} />
         </div>
         <div className="md:col-span-2">
             <Form {...form}>
@@ -205,20 +236,7 @@ export function ProfileForm() {
                     </FormItem>
                 )}
                 />
-                 <FormField
-                control={form.control}
-                name="image"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Profile Picture URL</FormLabel>
-                    <FormControl>
-                        <Input placeholder="https://picsum.photos/400/400" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-
+                
                 <Button type="submit" disabled={form.formState.isSubmitting}>
                     {form.formState.isSubmitting && <Loader2 className="animate-spin mr-2" />}
                     Save Changes

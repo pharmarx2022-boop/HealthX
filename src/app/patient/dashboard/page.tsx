@@ -4,7 +4,7 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { User, Calendar, Clock, Stethoscope, IndianRupee, RefreshCw, Bell, Star, Users, Wallet, QrCode, KeyRound, History } from 'lucide-react';
+import { User, Calendar, Clock, Stethoscope, IndianRupee, RefreshCw, Bell, Star, Users, Wallet, QrCode, KeyRound, History, FileText } from 'lucide-react';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { mockPatients } from '@/components/doctor/patient-list';
 import { initialDoctors } from '@/lib/mock-data';
@@ -16,7 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { FamilyManager } from '@/components/patient/family-manager';
-import { Separator } from '@/components/ui/separator';
+import { MyReports } from '@/components/patient/my-reports';
 
 const DOCTORS_KEY = 'doctorsData';
 
@@ -205,7 +205,7 @@ export default function PatientDashboardPage() {
                     )}
 
                     <div className="grid lg:grid-cols-3 gap-8">
-                        <div className="lg:col-span-2">
+                        <div className="lg:col-span-2 space-y-8">
                              <Card className="shadow-sm">
                                 <CardHeader className="flex flex-row items-center gap-4">
                                     <User className="w-8 h-8 text-primary" />
@@ -270,6 +270,7 @@ export default function PatientDashboardPage() {
                                     </div>
                                 </CardContent>
                             </Card>
+                             <MyReports />
                         </div>
                         <div className="lg:col-span-1 space-y-8">
                              <Card className="shadow-sm">

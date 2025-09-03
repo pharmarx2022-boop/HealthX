@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -9,32 +9,56 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { useToast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { loginWithOtp, MOCK_OTP } from '@/lib/auth';
 
 const loginSchema = z.object({
   phone: z.string().min(10, { message: 'A valid 10-digit phone number is required.' }).max(10, { message: 'A valid 10-digit phone number is required.' }),
   otp: z.string().optional(),
-  role: z.enum(['doctor', 'patient', 'pharmacy', 'lab', 'agent', 'admin']),
 });
+
+type Role = 'doctor' | 'patient' | 'pharmacy' | 'lab' | 'agent' | 'admin';
+
+const ALL_ROLES: Role[] = ['doctor', 'patient', 'pharmacy', 'lab', 'agent', 'admin'];
+
+function isValidRole(role: any): role is Role {
+    return ALL_ROLES.includes(role);
+}
+
 
 export default function LoginPage() {
   const { toast } = useToast();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [otpSent, setOtpSent] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       phone: '',
       otp: '',
-      role: 'patient',
     },
   });
+
+  useEffect(() => {
+    const roleFromQuery = searchParams.get('role');
+    if (isValidRole(roleFromQuery)) {
+        setSelectedRole(roleFromQuery);
+    } else {
+        // Redirect or show an error if the role is invalid/missing
+        toast({
+            title: "Invalid Role",
+            description: "Please select a role from the homepage.",
+            variant: "destructive",
+        });
+        router.push('/');
+    }
+  }, [searchParams, router, toast]);
+
 
   const handleSendOtp = () => {
     const phone = form.getValues('phone');
@@ -50,12 +74,21 @@ export default function LoginPage() {
   };
 
   function onSubmit(values: z.infer<typeof loginSchema>) {
+    if (!selectedRole) {
+        toast({
+            title: "Login Failed",
+            description: "No role selected. Please go back to the homepage and select a role.",
+            variant: "destructive",
+        });
+        return;
+    }
+
     if (!otpSent) {
         handleSendOtp();
         return;
     }
 
-    const user = loginWithOtp(values.phone, values.otp!, values.role);
+    const user = loginWithOtp(values.phone, values.otp!, selectedRole);
     if (user) {
         toast({
             title: "Login Successful!",
@@ -65,19 +98,21 @@ export default function LoginPage() {
             sessionStorage.setItem('user', JSON.stringify(user));
         }
         
-        if(values.role === 'admin') {
+        if(selectedRole === 'admin') {
             router.push('/admin');
         } else {
-            router.push(`/${values.role}/dashboard`);
+            router.push(`/${selectedRole}/dashboard`);
         }
     } else {
         toast({
             title: "Login Failed",
-            description: "Invalid OTP or role. Please try again.",
+            description: "Invalid OTP. Please try again.",
             variant: "destructive",
         })
     }
   }
+  
+  const roleDisplayName = selectedRole ? selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1) : '';
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -85,37 +120,13 @@ export default function LoginPage() {
       <main className="flex-1 flex items-center justify-center py-12 px-4">
         <Card className="w-full max-w-md mx-auto shadow-lg">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-headline">Welcome!</CardTitle>
-            <CardDescription>Sign in or create an account with your mobile number.</CardDescription>
+            <CardTitle className="text-2xl font-headline">{roleDisplayName} Login</CardTitle>
+            <CardDescription>Sign in with your mobile number to continue.</CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="role"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>I am a...</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select your role" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="patient">Patient</SelectItem>
-                          <SelectItem value="doctor">Doctor</SelectItem>
-                           <SelectItem value="pharmacy">Pharmacy</SelectItem>
-                          <SelectItem value="lab">Lab</SelectItem>
-                          <SelectItem value="agent">Agent</SelectItem>
-                          <SelectItem value="admin">Admin</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                
                 <FormField
                   control={form.control}
                   name="phone"
@@ -152,6 +163,9 @@ export default function LoginPage() {
                 {otpSent && <Button type="button" variant="link" className="w-full" onClick={() => setOtpSent(false)}>Change Number</Button>}
               </form>
             </Form>
+            <div className="mt-4 text-center text-sm">
+                Not a {roleDisplayName}? <Link href="/" className="underline">Go back</Link>
+            </div>
           </CardContent>
         </Card>
       </main>

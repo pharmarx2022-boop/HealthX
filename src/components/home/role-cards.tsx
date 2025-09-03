@@ -10,31 +10,31 @@ const roles = [
     name: 'Doctor',
     icon: Stethoscope,
     description: 'Manage your appointments, clinics, and patient interactions with ease.',
-    loginLink: '/login',
+    loginLink: '/login?role=doctor',
   },
   {
     name: 'Patient',
     icon: User,
     description: 'Book appointments, manage your health, and utilize wallet rewards.',
-    loginLink: '/login',
+    loginLink: '/login?role=patient',
   },
   {
     name: 'Pharmacy',
     icon: Pill,
     description: 'List your offers and connect with patients through our wallet system.',
-    loginLink: '/login',
+    loginLink: '/login?role=pharmacy',
   },
   {
     name: 'Lab',
     icon: FlaskConical,
     description: 'Expand your reach by offering services to our growing user base.',
-    loginLink: '/login',
+    loginLink: '/login?role=lab',
   },
   {
     name: 'Agent',
     icon: Briefcase,
     description: 'Book appointments for others and earn commissions for your efforts.',
-    loginLink: '/login',
+    loginLink: '/login?role=agent',
   },
 ];
 

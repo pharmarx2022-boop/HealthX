@@ -1,6 +1,6 @@
 
 import Link from 'next/link';
-import { HeartPulse } from 'lucide-react';
+import { HeartPulse, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export function Header() {
@@ -13,7 +13,11 @@ export function Header() {
             HealthLink Hub
           </span>
         </Link>
-        <nav className="flex items-center gap-4">
+        <nav className="flex items-center gap-2">
+          <Button variant="ghost" asChild>
+            <Link href="/book-appointment"><Calendar />Book Appointment</Link>
+          </Button>
+          <div className="h-6 border-l mx-2"></div>
           <Button variant="ghost" asChild>
             <Link href="/login">Login</Link>
           </Button>

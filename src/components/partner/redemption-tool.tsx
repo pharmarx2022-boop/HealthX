@@ -10,9 +10,10 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { IndianRupee } from 'lucide-react';
+import { KeyRound } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { mockPharmacies, mockLabs } from '@/lib/mock-data';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 
 const redemptionSchema = z.object({
   phone: z.string().min(10, 'A valid 10-digit phone number is required.').max(10, 'A valid 10-digit phone number is required.'),
@@ -40,6 +41,7 @@ const MOCK_PARTNER_DATA = {
 export function RedemptionTool({ partnerType }: RedemptionToolProps) {
   const [step, setStep] = useState<'initial' | 'confirm'>('initial');
   const [redemptionDetails, setRedemptionDetails] = useState<any>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const partnerData = MOCK_PARTNER_DATA[partnerType];
@@ -56,7 +58,6 @@ export function RedemptionTool({ partnerType }: RedemptionToolProps) {
   });
 
   const handleInitiateRedemption = (values: z.infer<typeof redemptionSchema>) => {
-    // Use phone number as the key to look up patient data
     const patientData = mockPatientWallets[values.phone];
 
     if (!patientData) {
@@ -88,9 +89,8 @@ export function RedemptionTool({ partnerType }: RedemptionToolProps) {
   };
 
   const handleConfirmPayment = () => {
-    // In a real app, you would verify the OTP here.
     const otp = form.getValues('otp');
-    if (otp === '123456') { // Mock OTP
+    if (otp === '123456') { 
         toast({
             title: "Payment Successful!",
             description: `₹${redemptionDetails.redeemAmount.toFixed(2)} redeemed. Final amount of ₹${redemptionDetails.finalAmount.toFixed(2)} collected.`,
@@ -98,6 +98,7 @@ export function RedemptionTool({ partnerType }: RedemptionToolProps) {
         form.reset();
         setStep('initial');
         setRedemptionDetails(null);
+        setIsDialogOpen(false);
     } else {
         toast({
             title: "Invalid OTP",
@@ -108,93 +109,113 @@ export function RedemptionTool({ partnerType }: RedemptionToolProps) {
   }
 
   return (
-    <div>
-      {step === 'initial' && (
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleInitiateRedemption)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Patient's Mobile Number</FormLabel>
-                  <FormControl>
-                    <Input type="tel" placeholder="e.g., 9876543210" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="totalBill"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Total Bill Amount (₹)</FormLabel>
-                  <FormControl>
-                    <Input type="number" placeholder="e.g., 1000" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit" className="w-full">
-              Initiate Redemption
+    <Dialog open={isDialogOpen} onOpenChange={(isOpen) => {
+        setIsDialogOpen(isOpen);
+        if(!isOpen) {
+            setStep('initial');
+            form.reset();
+        }
+    }}>
+        <DialogTrigger asChild>
+             <Button variant="outline" className="h-full flex-col gap-2">
+                <KeyRound className="w-8 h-8"/>
+                <span>Pay with OTP</span>
             </Button>
-          </form>
-        </Form>
-      )}
-
-      {step === 'confirm' && redemptionDetails && (
-         <Card className="bg-slate-50/70 border-dashed">
-            <CardHeader>
-                <CardTitle>Confirm Payment</CardTitle>
-                <CardDescription>Verify details and enter OTP from patient.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <div className="flex justify-between">
-                    <span className="text-muted-foreground">Patient:</span>
-                    <span className="font-medium">{redemptionDetails.patientName}</span>
-                </div>
-                 <div className="flex justify-between">
-                    <span className="text-muted-foreground">Total Bill:</span>
-                    <span className="font-medium">₹{redemptionDetails.totalBill.toFixed(2)}</span>
-                </div>
-                 <div className="flex justify-between text-destructive">
-                    <span className="text-destructive/80">Points Redeemed:</span>
-                    <span className="font-medium">- ₹{redemptionDetails.redeemAmount.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-primary font-bold text-lg border-t pt-4">
-                    <span>Final Amount to Pay:</span>
-                    <span>₹{redemptionDetails.finalAmount.toFixed(2)}</span>
-                </div>
-                <p className="text-xs text-center text-muted-foreground pt-2">
-                    Patient can redeem up to {redemptionLimit * 100}% of the bill at this {partnerName}.
-                </p>
-                <Form {...form}>
-                    <form className="space-y-4">
-                         <FormField
+        </DialogTrigger>
+        <DialogContent>
+             {step === 'initial' && (
+                <>
+                    <DialogHeader>
+                        <DialogTitle>Redeem via OTP</DialogTitle>
+                        <DialogDescription>
+                            Enter patient's mobile and bill amount to send an OTP.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(handleInitiateRedemption)} className="space-y-4 pt-4">
+                            <FormField
                             control={form.control}
-                            name="otp"
+                            name="phone"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Enter 6-Digit OTP</FormLabel>
+                                <FormLabel>Patient's Mobile Number</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="123456" {...field} />
+                                    <Input type="tel" placeholder="e.g., 9876543210" {...field} />
                                 </FormControl>
                                 <FormMessage />
                                 </FormItem>
                             )}
-                        />
-                    </form>
-                </Form>
-            </CardContent>
-            <CardFooter className="flex gap-2">
-                <Button variant="outline" className="w-full" onClick={() => setStep('initial')}>Cancel</Button>
-                <Button className="w-full" onClick={handleConfirmPayment}>Confirm Payment</Button>
-            </CardFooter>
-         </Card>
-      )}
-    </div>
+                            />
+                            <FormField
+                            control={form.control}
+                            name="totalBill"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Total Bill Amount (₹)</FormLabel>
+                                <FormControl>
+                                    <Input type="number" placeholder="e.g., 1000" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+                            <DialogFooter>
+                                <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
+                                <Button type="submit">Initiate Redemption</Button>
+                            </DialogFooter>
+                        </form>
+                    </Form>
+                </>
+             )}
+             {step === 'confirm' && redemptionDetails && (
+                <>
+                    <DialogHeader>
+                        <DialogTitle>Confirm Payment</DialogTitle>
+                        <DialogDescription>Verify details and enter OTP from patient.</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div className="flex justify-between">
+                            <span className="text-muted-foreground">Patient:</span>
+                            <span className="font-medium">{redemptionDetails.patientName}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-muted-foreground">Total Bill:</span>
+                            <span className="font-medium">₹{redemptionDetails.totalBill.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-destructive">
+                            <span className="text-destructive/80">Points Redeemed:</span>
+                            <span className="font-medium">- ₹{redemptionDetails.redeemAmount.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-primary font-bold text-lg border-t pt-4">
+                            <span>Final Amount to Pay:</span>
+                            <span>₹{redemptionDetails.finalAmount.toFixed(2)}</span>
+                        </div>
+                        <p className="text-xs text-center text-muted-foreground pt-2">
+                            Patient can redeem up to {redemptionLimit * 100}% of the bill at this {partnerName}.
+                        </p>
+                        <Form {...form}>
+                             <FormField
+                                control={form.control}
+                                name="otp"
+                                render={({ field }) => (
+                                    <FormItem>
+                                    <FormLabel>Enter 6-Digit OTP</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="123456" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </Form>
+                    </div>
+                     <DialogFooter>
+                        <Button variant="outline" onClick={() => setStep('initial')}>Back</Button>
+                        <Button onClick={handleConfirmPayment}>Confirm Payment</Button>
+                    </DialogFooter>
+                </>
+             )}
+        </DialogContent>
+    </Dialog>
   );
 }

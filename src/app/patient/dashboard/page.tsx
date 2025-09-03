@@ -4,10 +4,10 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { User, Calendar, Clock, Stethoscope, IndianRupee, RefreshCw, Bell, Star, Users, Wallet, QrCode, KeyRound, History, FileText } from 'lucide-react';
+import { User, Calendar, Clock, Stethoscope, IndianRupee, RefreshCw, Bell, Star, Users, Wallet, QrCode, KeyRound, History, FileText, Loader2, Store } from 'lucide-react';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { mockPatients } from '@/components/doctor/patient-list';
-import { initialDoctors } from '@/lib/mock-data';
+import { initialDoctors, mockPharmacies } from '@/lib/mock-data';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -17,6 +17,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { FamilyManager } from '@/components/patient/family-manager';
 import { MyReports } from '@/components/patient/my-reports';
+import Image from 'next/image';
+import { Input } from '@/components/ui/input';
 
 const DOCTORS_KEY = 'doctorsData';
 
@@ -26,12 +28,14 @@ export default function PatientDashboardPage() {
     const [isClient, setIsClient] = useState(false);
     const [isReviewOpen, setIsReviewOpen] = useState(false);
     const [isRedeemOpen, setIsRedeemOpen] = useState(false);
-    const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-    const [redeemStep, setRedeemStep] = useState<'initial' | 'scan'>('initial');
+    const [redeemStep, setRedeemStep] = useState<'initial' | 'scan' | 'confirmScan'>('initial');
     const [selectedAppointment, setSelectedAppointment] = useState<any | null>(null);
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState('');
     const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
+    const [isScanning, setIsScanning] = useState(false);
+    const [scannedPartner, setScannedPartner] = useState<any | null>(null);
+    const [billAmount, setBillAmount] = useState('');
     const videoRef = useRef<HTMLVideoElement>(null);
 
 
@@ -69,13 +73,25 @@ export default function PatientDashboardPage() {
     
         getCameraPermission();
 
-        return () => {
-            if (videoRef.current && videoRef.current.srcObject) {
-                const stream = videoRef.current.srcObject as MediaStream;
-                stream.getTracks().forEach(track => track.stop());
+        // Simulate scanning
+        if(hasCameraPermission !== false) {
+            setIsScanning(true);
+            const scanTimeout = setTimeout(() => {
+                // Mock scanning the first pharmacy
+                setScannedPartner(mockPharmacies[0]);
+                setRedeemStep('confirmScan');
+                setIsScanning(false);
+            }, 3000);
+
+            return () => {
+                clearTimeout(scanTimeout);
+                if (videoRef.current && videoRef.current.srcObject) {
+                    const stream = videoRef.current.srcObject as MediaStream;
+                    stream.getTracks().forEach(track => track.stop());
+                }
             }
         }
-    }, [redeemStep, toast]);
+    }, [redeemStep, toast, hasCameraPermission]);
 
     const nextReminder = myAppointments.find(appt => appt.nextAppointmentDate && !isNaN(new Date(appt.nextAppointmentDate).getTime()));
     
@@ -182,6 +198,25 @@ export default function PatientDashboardPage() {
 
         setIsReviewOpen(false);
     };
+
+    const handleRedeem = () => {
+        const bill = parseFloat(billAmount);
+        if (!bill || bill <= 0) {
+            toast({ title: 'Invalid amount', description: 'Please enter a valid bill amount.', variant: 'destructive'});
+            return;
+        }
+
+        const maxRedeemable = bill * (scannedPartner.redemptionOffer / 100);
+        const redeemAmount = Math.min(transactionHistory.balance, maxRedeemable);
+        const finalAmount = bill - redeemAmount;
+
+        toast({
+            title: 'Payment Successful',
+            description: `Paid ₹${redeemAmount.toFixed(2)} with Health Points. Final bill: ₹${finalAmount.toFixed(2)}.`
+        });
+        setIsRedeemOpen(false);
+        setBillAmount('');
+    }
 
     return (
         <div className="flex flex-col min-h-screen">
@@ -387,12 +422,16 @@ export default function PatientDashboardPage() {
                             <DialogHeader>
                                 <DialogTitle>Scan QR Code</DialogTitle>
                                 <DialogDescription>
-                                    Point your camera at the pharmacy or lab's QR code to proceed with the payment.
+                                    Point your camera at the partner's QR code to proceed with the payment.
                                 </DialogDescription>
                             </DialogHeader>
                             <div className="py-4 space-y-4">
-                                <div className="aspect-square bg-slate-900 rounded-lg flex items-center justify-center overflow-hidden">
+                                <div className="aspect-square bg-slate-900 rounded-lg flex items-center justify-center overflow-hidden relative">
                                      <video ref={videoRef} className="w-full h-full object-cover" autoPlay muted playsInline />
+                                     {isScanning && <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 text-white">
+                                        <Loader2 className="w-10 h-10 animate-spin mb-4"/>
+                                        <p>Scanning...</p>
+                                     </div>}
                                 </div>
                                 {hasCameraPermission === false && (
                                      <Alert variant="destructive">
@@ -405,6 +444,54 @@ export default function PatientDashboardPage() {
                             </div>
                             <DialogFooter>
                                 <Button variant="outline" onClick={() => setRedeemStep('initial')}>Back</Button>
+                            </DialogFooter>
+                        </>
+                    )}
+                    {redeemStep === 'confirmScan' && scannedPartner && (
+                        <>
+                            <DialogHeader>
+                                <DialogTitle>Confirm Payment</DialogTitle>
+                                <DialogDescription>
+                                    You are about to pay at <strong>{scannedPartner.name}</strong>.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="py-4 space-y-4">
+                                <Card>
+                                    <CardContent className="p-4 flex items-center gap-4">
+                                        <Image src={scannedPartner.image} alt={scannedPartner.name} width={64} height={64} className="rounded-md" />
+                                        <div>
+                                            <p className="font-bold">{scannedPartner.name}</p>
+                                            <p className="text-sm text-muted-foreground">{scannedPartner.location}</p>
+                                            <p className="text-sm font-semibold text-primary mt-1">Upto {scannedPartner.redemptionOffer}% of bill can be paid with points.</p>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                                <div>
+                                    <label htmlFor="billAmount" className="font-medium">Enter Total Bill Amount (₹)</label>
+                                    <Input id="billAmount" type="number" placeholder="e.g., 500" value={billAmount} onChange={e => setBillAmount(e.target.value)} className="mt-2" />
+                                </div>
+                                {parseFloat(billAmount) > 0 && (
+                                    <Card className="bg-slate-50 border-dashed">
+                                        <CardContent className="p-4 space-y-2">
+                                             <div className="flex justify-between text-sm">
+                                                <span className="text-muted-foreground">Your Balance:</span>
+                                                <span className="font-medium">₹{transactionHistory.balance.toFixed(2)}</span>
+                                            </div>
+                                             <div className="flex justify-between text-sm">
+                                                <span className="text-muted-foreground">Points to be Redeemed:</span>
+                                                <span className="font-medium text-destructive">- ₹{Math.min(transactionHistory.balance, parseFloat(billAmount) * (scannedPartner.redemptionOffer / 100)).toFixed(2)}</span>
+                                            </div>
+                                             <div className="flex justify-between font-bold text-base border-t pt-2 mt-2">
+                                                <span>Final Amount:</span>
+                                                <span>₹{(parseFloat(billAmount) - Math.min(transactionHistory.balance, parseFloat(billAmount) * (scannedPartner.redemptionOffer / 100))).toFixed(2)}</span>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                )}
+                            </div>
+                            <DialogFooter>
+                                <Button variant="outline" onClick={() => setRedeemStep('initial')}>Cancel</Button>
+                                <Button onClick={handleRedeem}>Confirm & Pay</Button>
                             </DialogFooter>
                         </>
                     )}
@@ -440,5 +527,4 @@ export default function PatientDashboardPage() {
             </Dialog>
         </div>
     );
-
-    
+}

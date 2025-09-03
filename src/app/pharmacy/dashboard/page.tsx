@@ -4,7 +4,7 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Pill, Edit, History, FileText, Wallet, Banknote } from 'lucide-react';
+import { Pill, Edit, History, FileText, Wallet, Banknote, QrCode } from 'lucide-react';
 import { RedemptionTool } from '@/components/partner/redemption-tool';
 import { PartnerProfileForm } from '@/components/partner/partner-profile-form';
 import { format } from 'date-fns';
@@ -13,6 +13,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { QrCodeDialog } from '@/components/partner/qr-code-dialog';
 
 const mockTransactions = [
     {
@@ -92,11 +93,12 @@ export default function PharmacyDashboardPage() {
                         <CardHeader>
                             <CardTitle>Collect Health Points</CardTitle>
                              <CardDescription>
-                                Redeem Health Points for patients via OTP verification.
+                                Redeem Health Points for patients via OTP or QR Code.
                             </CardDescription>
-                        </CardHeader>
-                        <CardContent>
+                        </Header>
+                        <CardContent className="grid grid-cols-2 gap-4">
                            <RedemptionTool partnerType="pharmacy" />
+                           <QrCodeDialog partnerType="pharmacy" />
                         </CardContent>
                     </Card>
                     

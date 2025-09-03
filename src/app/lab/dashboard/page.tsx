@@ -4,7 +4,7 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { FlaskConical, Edit, History, FileText, Wallet, Banknote, ArrowRight } from 'lucide-react';
+import { FlaskConical, Edit, History, FileText, Wallet, Banknote, ArrowRight, QrCode } from 'lucide-react';
 import { RedemptionTool } from '@/components/partner/redemption-tool';
 import { PartnerProfileForm } from '@/components/partner/partner-profile-form';
 import { format } from 'date-fns';
@@ -13,6 +13,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { QrCodeDialog } from '@/components/partner/qr-code-dialog';
 
 
 const mockTransactions = [
@@ -37,17 +38,6 @@ const totalPointsCollected = mockTransactions.reduce((acc, tx) => acc + tx.amoun
 export default function LabDashboardPage() {
     const { toast } = useToast();
     const [isRedeemDialogOpen, setIsRedeemDialogOpen] = useState(false);
-
-    const handleRedeemCash = () => {
-        // In a real app, this would trigger a backend process.
-        // For this demo, we'll just show a success message.
-        toast({
-            title: "Redemption Request Submitted!",
-            description: `₹${(totalPointsCollected * 0.05).toFixed(2)} will be transferred to your bank account within 3-5 business days.`
-        });
-        // We could also add this to a transaction list and reset the balance.
-        setIsRedeemDialogOpen(false);
-    }
     
   return (
     <div className="flex flex-col min-h-screen">
@@ -79,11 +69,12 @@ export default function LabDashboardPage() {
                         <CardHeader>
                             <CardTitle>Collect Health Points</CardTitle>
                              <CardDescription>
-                                Redeem Health Points for patients via OTP verification.
+                                Redeem Health Points for patients via OTP or QR Code.
                             </CardDescription>
                         </Header>
-                        <CardContent>
+                        <CardContent className="grid grid-cols-2 gap-4">
                            <RedemptionTool partnerType="lab" />
+                           <QrCodeDialog partnerType="lab" />
                         </CardContent>
                     </Card>
                     
@@ -131,7 +122,13 @@ export default function LabDashboardPage() {
                                     </div>
                                     <DialogFooter>
                                         <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
-                                        <Button onClick={handleRedeemCash}>Confirm Redemption</Button>
+                                        <Button onClick={() => {
+                                            toast({
+                                                title: "Redemption Request Submitted!",
+                                                description: `₹${(totalPointsCollected * 0.05).toFixed(2)} will be transferred to your bank account within 3-5 business days.`
+                                            });
+                                            setIsRedeemDialogOpen(false);
+                                        }}>Confirm Redemption</Button>
                                     </DialogFooter>
                                 </DialogContent>
                             </Dialog>

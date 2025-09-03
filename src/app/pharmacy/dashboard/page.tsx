@@ -98,7 +98,7 @@ export default function PharmacyDashboardPage() {
                         </Header>
                         <CardContent className="grid grid-cols-2 gap-4">
                            <RedemptionTool partnerType="pharmacy" />
-                           <QrCodeDialog partnerType="pharmacy" />
+                            <QrCodeDialog partnerId="pharm1" partnerName="Wellness Forever Pharmacy" />
                         </CardContent>
                     </Card>
                     
@@ -126,7 +126,7 @@ export default function PharmacyDashboardPage() {
                                     <DialogHeader>
                                         <DialogTitle>Redeem Points for Cash</DialogTitle>
                                         <DialogDescription>
-                                            Review the details below. A 95% platform fee will be deducted from the total amount.
+                                            Review the details below. A 95% admin commission will be deducted from the total amount.
                                         </DialogDescription>
                                     </DialogHeader>
                                     <div className="space-y-4 py-4">

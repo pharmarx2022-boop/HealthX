@@ -9,11 +9,10 @@ import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { KeyRound } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { mockPharmacies, mockLabs } from '@/lib/mock-data';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogClose, DialogFooter } from '@/components/ui/dialog';
 
 const redemptionSchema = z.object({
   phone: z.string().min(10, 'A valid 10-digit phone number is required.').max(10, 'A valid 10-digit phone number is required.'),
@@ -117,9 +116,9 @@ export function RedemptionTool({ partnerType }: RedemptionToolProps) {
         }
     }}>
         <DialogTrigger asChild>
-             <Button variant="outline" className="h-full flex-col gap-2">
-                <KeyRound className="w-8 h-8"/>
-                <span>Pay with OTP</span>
+             <Button className="w-full">
+                <KeyRound className="mr-2"/>
+                Redeem via OTP
             </Button>
         </DialogTrigger>
         <DialogContent>

@@ -4,16 +4,15 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { FlaskConical, Edit, History, FileText, Wallet, Banknote, ArrowRight, QrCode } from 'lucide-react';
+import { FlaskConical, Edit, History, FileText, Wallet, Banknote } from 'lucide-react';
 import { RedemptionTool } from '@/components/partner/redemption-tool';
 import { PartnerProfileForm } from '@/components/partner/partner-profile-form';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { QrCodeDialog } from '@/components/partner/qr-code-dialog';
 
 
 const mockTransactions = [
@@ -38,6 +37,11 @@ const totalPointsCollected = mockTransactions.reduce((acc, tx) => acc + tx.amoun
 export default function LabDashboardPage() {
     const { toast } = useToast();
     const [isRedeemDialogOpen, setIsRedeemDialogOpen] = useState(false);
+    const [isClient, setIsClient] = useState(false);
+
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
     
   return (
     <div className="flex flex-col min-h-screen">
@@ -69,12 +73,11 @@ export default function LabDashboardPage() {
                         <CardHeader>
                             <CardTitle>Collect Health Points</CardTitle>
                              <CardDescription>
-                                Redeem Health Points for patients via OTP or QR Code.
+                                Redeem Health Points for patients via OTP.
                             </CardDescription>
                         </Header>
-                        <CardContent className="grid grid-cols-2 gap-4">
+                        <CardContent>
                            <RedemptionTool partnerType="lab" />
-                           <QrCodeDialog partnerType="lab" />
                         </CardContent>
                     </Card>
                     
@@ -102,7 +105,7 @@ export default function LabDashboardPage() {
                                     <DialogHeader>
                                         <DialogTitle>Redeem Points for Cash</DialogTitle>
                                         <DialogDescription>
-                                            Review the details below. A 95% platform fee will be deducted from the total amount.
+                                            Review the details below. A 95% admin commission will be deducted from the total amount.
                                         </DialogDescription>
                                     </DialogHeader>
                                     <div className="space-y-4 py-4">
@@ -153,7 +156,7 @@ export default function LabDashboardPage() {
                                             <FileText className="w-5 h-5 text-primary" />
                                             <div>
                                                 <p className="font-semibold">Redeemed by {tx.patientName}</p>
-                                                <p className="text-sm text-muted-foreground">{format(new Date(tx.date), 'PP, p')}</p>
+                                                {isClient && <p className="text-sm text-muted-foreground">{format(new Date(tx.date), 'PP, p')}</p>}
                                             </div>
                                         </div>
                                         <div className="text-right">

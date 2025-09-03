@@ -98,6 +98,7 @@ export function PatientList() {
 
 
   const numSelected = selectedRows.size;
+  const isAllSelected = numSelected > 0 && numSelected === filteredPatients.length;
 
   return (
     <div className="space-y-6">
@@ -217,8 +218,7 @@ export function PatientList() {
                         <TableHead className="w-12">
                             <Checkbox 
                                 onCheckedChange={(checked) => handleSelectAll(Boolean(checked))}
-                                checked={numSelected > 0 && numSelected === filteredPatients.length}
-                                indeterminate={numSelected > 0 && numSelected < filteredPatients.length}
+                                checked={isAllSelected}
                                 aria-label="Select all"
                             />
                         </TableHead>

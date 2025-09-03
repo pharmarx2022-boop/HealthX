@@ -4,6 +4,7 @@ import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Stethoscope } from 'lucide-react';
 import { PatientList } from '@/components/doctor/patient-list';
+import { AnalyticsDashboard } from '@/components/doctor/analytics-dashboard';
 
 export default function DoctorDashboardPage() {
   return (
@@ -15,14 +16,16 @@ export default function DoctorDashboardPage() {
                 <h1 className="text-3xl font-headline font-bold">Doctor Dashboard</h1>
                 <p className="text-muted-foreground">Manage your appointments and patient interactions.</p>
             </div>
+
+            <AnalyticsDashboard />
             
-            <Card className="shadow-sm">
+            <Card className="shadow-sm mt-8">
                 <CardHeader className="flex flex-row items-center gap-4">
                     <Stethoscope className="w-8 h-8 text-primary"/>
                     <div>
-                        <CardTitle>Welcome, Doctor!</CardTitle>
+                        <CardTitle>Patient Appointments</CardTitle>
                         <CardDescription>
-                           Here you can manage your schedule, view patient records, and handle consultations.
+                           View, manage, and filter your patient list.
                         </CardDescription>
                     </div>
                 </CardHeader>

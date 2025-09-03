@@ -13,6 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
 
 const mockPatients = [
   { id: '1', name: 'Rohan Sharma', clinic: 'Andheri', appointmentDate: '2024-08-15T10:00:00Z', status: 'upcoming' },
@@ -56,55 +57,68 @@ export function PatientList() {
 
   return (
     <div className="space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 p-4 border rounded-lg bg-slate-50/50">
-            <Input 
-                placeholder="Patient Name..."
-                value={filters.name}
-                onChange={(e) => handleFilterChange('name', e.target.value)}
-            />
-            <Select value={filters.clinic} onValueChange={(value) => handleFilterChange('clinic', value)}>
-                <SelectTrigger><SelectValue placeholder="Clinic" /></SelectTrigger>
-                <SelectContent>
-                    {clinics.map(clinic => <SelectItem key={clinic} value={clinic}>{clinic}</SelectItem>)}
-                </SelectContent>
-            </Select>
-
-            <Popover>
-                <PopoverTrigger asChild>
-                <Button
-                    variant={"outline"}
-                    className={cn(
-                        "justify-start text-left font-normal",
-                        !filters.date && "text-muted-foreground"
-                    )}
-                >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {filters.date ? format(filters.date, "PPP") : <span>Pick a date</span>}
-                </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                    <Calendar
-                        mode="single"
-                        selected={filters.date ?? undefined}
-                        onSelect={(date) => handleFilterChange('date', date as Date | null)}
-                        initialFocus
-                    />
-                </PopoverContent>
-            </Popover>
-
-            <Select value={filters.day} onValueChange={(value) => handleFilterChange('day', value)}>
-                <SelectTrigger><SelectValue placeholder="Day" /></SelectTrigger>
-                <SelectContent>
-                    {days.map(day => <SelectItem key={day} value={day}>{day}</SelectItem>)}
-                </SelectContent>
-            </Select>
-
-            <Select value={filters.status} onValueChange={(value) => handleFilterChange('status', value)}>
-                <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
-                <SelectContent>
-                    {consultationStatuses.map(status => <SelectItem key={status} value={status}>{status}</SelectItem>)}
-                </SelectContent>
-            </Select>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 p-4 border rounded-lg bg-slate-50/50 items-end">
+            <div className="space-y-2">
+                <Label htmlFor="patientName">Filter by Name</Label>
+                <Input 
+                    id="patientName"
+                    placeholder="Patient Name..."
+                    value={filters.name}
+                    onChange={(e) => handleFilterChange('name', e.target.value)}
+                />
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="clinic">Filter by Clinic</Label>
+                <Select value={filters.clinic} onValueChange={(value) => handleFilterChange('clinic', value)}>
+                    <SelectTrigger id="clinic"><SelectValue placeholder="Clinic" /></SelectTrigger>
+                    <SelectContent>
+                        {clinics.map(clinic => <SelectItem key={clinic} value={clinic}>{clinic}</SelectItem>)}
+                    </SelectContent>
+                </Select>
+            </div>
+            <div className="space-y-2">
+                <Label>Filter by Date</Label>
+                <Popover>
+                    <PopoverTrigger asChild>
+                    <Button
+                        variant={"outline"}
+                        className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !filters.date && "text-muted-foreground"
+                        )}
+                    >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {filters.date ? format(filters.date, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                        <Calendar
+                            mode="single"
+                            selected={filters.date ?? undefined}
+                            onSelect={(date) => handleFilterChange('date', date as Date | null)}
+                            initialFocus
+                        />
+                    </PopoverContent>
+                </Popover>
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="day">Filter by Day</Label>
+                <Select value={filters.day} onValueChange={(value) => handleFilterChange('day', value)}>
+                    <SelectTrigger id="day"><SelectValue placeholder="Day" /></SelectTrigger>
+                    <SelectContent>
+                        {days.map(day => <SelectItem key={day} value={day}>{day}</SelectItem>)}
+                    </SelectContent>
+                </Select>
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="status">Filter by Status</Label>
+                <Select value={filters.status} onValueChange={(value) => handleFilterChange('status', value)}>
+                    <SelectTrigger id="status"><SelectValue placeholder="Status" /></SelectTrigger>
+                    <SelectContent>
+                        {consultationStatuses.map(status => <SelectItem key={status} value={status}>{status}</SelectItem>)}
+                    </SelectContent>
+                </Select>
+            </div>
         </div>
         
         <div className="border rounded-lg overflow-hidden">

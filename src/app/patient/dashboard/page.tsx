@@ -61,15 +61,15 @@ export default function PatientDashboardPage() {
                         <CardContent>
                             <h2 className="text-xl font-semibold mb-4">Your Appointments</h2>
                             <div className="space-y-6">
-                                {myAppointments.length > 0 ? (
+                                {isClient && myAppointments.length > 0 ? (
                                     myAppointments.map(appt => (
                                         <Card key={appt.id} className="overflow-hidden">
                                             <CardHeader className="flex flex-row justify-between items-start bg-slate-50/70 p-4">
                                                 <div>
                                                     <CardTitle className="text-lg font-headline">Consultation at {appt.clinic}</CardTitle>
                                                     <CardDescription className="flex items-center gap-2 pt-1">
-                                                        <Calendar className="w-4 h-4"/> {isClient ? format(new Date(appt.appointmentDate), 'EEEE, MMMM d, yyyy') : ''}
-                                                        <Clock className="w-4 h-4 ml-2"/> {isClient ? format(new Date(appt.appointmentDate), 'p') : ''}
+                                                        <Calendar className="w-4 h-4"/> {format(new Date(appt.appointmentDate), 'EEEE, MMMM d, yyyy')}
+                                                        <Clock className="w-4 h-4 ml-2"/> {format(new Date(appt.appointmentDate), 'p')}
                                                     </CardDescription>
                                                 </div>
                                                 <Badge variant={appt.status === 'done' ? 'secondary' : 'default'} className="capitalize">{appt.status}</Badge>

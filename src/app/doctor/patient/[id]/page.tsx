@@ -1,7 +1,7 @@
 
 'use client';
 
-import { notFound, useParams } from 'next/navigation';
+import { useParams, notFound } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -45,6 +45,7 @@ export default function PatientDetailPage() {
 
 
   const handleMarkAsComplete = () => {
+    if (!patient) return;
     const updatedPatients = allPatients.map(p => {
       if (p.id === id) {
         return { ...p, status: 'done', refundStatus: 'Processing' };
@@ -58,7 +59,7 @@ export default function PatientDetailPage() {
 
     toast({
         title: "Consultation Complete",
-        description: `Refund for ₹${patient?.consultationFee} has been initiated.`,
+        description: `Refund for ₹${patient?.consultationFee.toFixed(2)} has been initiated.`,
     });
   };
 
@@ -88,9 +89,7 @@ export default function PatientDetailPage() {
     });
   }
 
-  if (!patient) {
-    // This can happen if the page is loaded directly and state is not yet synced.
-    // A loading state or a redirect could be useful here in a real app.
+  if (!isClient) {
     return (
         <div className="flex flex-col min-h-screen">
             <Header />
@@ -100,6 +99,13 @@ export default function PatientDetailPage() {
             <Footer />
         </div>
     );
+  }
+
+  if (!patient) {
+    // This can happen if the page is loaded directly and state is not yet synced.
+    // A loading state or a redirect could be useful here in a real app.
+    notFound();
+    return null;
   }
 
   return (
@@ -133,11 +139,11 @@ export default function PatientDetailPage() {
                 <h3 className="font-semibold text-lg border-b pb-2">Appointment Details</h3>
                 <div className="flex items-center text-muted-foreground gap-3">
                   <Calendar className="w-5 h-5 text-primary"/> 
-                  <span>{isClient ? format(new Date(patient.appointmentDate), 'EEEE, MMMM d, yyyy') : ''}</span>
+                  <span>{format(new Date(patient.appointmentDate), 'EEEE, MMMM d, yyyy')}</span>
                 </div>
                 <div className="flex items-center text-muted-foreground gap-3">
                   <Clock className="w-5 h-5 text-primary"/> 
-                  <span>{isClient ? format(new Date(patient.appointmentDate), 'p') : ''}</span>
+                  <span>{format(new Date(patient.appointmentDate), 'p')}</span>
                 </div>
                  <div className="flex items-center text-muted-foreground gap-3">
                   <Stethoscope className="w-5 h-5 text-primary"/> 
@@ -187,7 +193,7 @@ export default function PatientDetailPage() {
                   <div>
                     <p className="font-medium text-foreground">
                         {patient.nextAppointmentDate 
-                            ? `Next check-up scheduled for: ${isClient ? format(new Date(patient.nextAppointmentDate), 'PPP') : ''}` 
+                            ? `Next check-up scheduled for: ${format(new Date(patient.nextAppointmentDate), 'PPP')}` 
                             : "No reminder set."
                         }
                     </p>
@@ -225,7 +231,7 @@ export default function PatientDetailPage() {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
-                                <AlertDialogTitle>Complete Consultation?</AlertDialogTitle>
+                                <AlertDialogTitle>Consultation done & God bless you</AlertDialogTitle>
                                 <AlertDialogDescription>
                                     This will mark the consultation as complete and initiate a refund of ₹{patient.consultationFee.toFixed(2)} to the patient's original payment method. This action cannot be undone.
                                 </AlertDialogDescription>

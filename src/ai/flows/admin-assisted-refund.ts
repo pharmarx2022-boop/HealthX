@@ -43,11 +43,11 @@ const refundVerificationPrompt = ai.definePrompt({
   Based on the user's consultation history, current wallet balance, and the refund reason, determine if the refund amount is appropriate. Display a approval message to the admin regarding the approval.
 
   User ID: {{{userId}}}
-  Refund Amount: {{{refundAmount}}}
+  Refund Amount: ₹{{{refundAmount}}}
   Reason: {{{reason}}}
 
   Consultation History: {{{consultationHistorySummary}}}
-  Wallet Balance: {{{walletBalance}}}
+  Wallet Balance: ₹{{{walletBalance}}}
 
   Verification Result: `,
 });

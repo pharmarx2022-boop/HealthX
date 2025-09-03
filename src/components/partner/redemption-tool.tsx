@@ -25,7 +25,7 @@ interface RedemptionToolProps {
 
 // Mock patient data for demonstration
 const mockPatientWallets: Record<string, { name: string, healthPoints: number }> = {
-    'rohan_sharma': { name: 'Rohan Sharma', healthPoints: 7450 },
+    'rohan_sharma': { name: 'Rohan Sharma', healthPoints: 7450 - 150 - 450 }, // Using the calculated balance from patient dashboard
     'jane_doe': { name: 'Jane Doe', healthPoints: 1200 },
 };
 
@@ -47,12 +47,13 @@ export function RedemptionTool({ partnerType }: RedemptionToolProps) {
   });
 
   const handleInitiateRedemption = (values: z.infer<typeof redemptionSchema>) => {
-    const patientData = mockPatientWallets[values.patientId];
+    // Use 'rohan_sharma' as the key to look up patient data
+    const patientData = mockPatientWallets[values.patientId.toLowerCase()];
 
     if (!patientData) {
         toast({
             title: 'Patient Not Found',
-            description: 'The entered Patient ID does not exist.',
+            description: 'The entered Patient ID does not exist. Try "rohan_sharma".',
             variant: 'destructive',
         });
         return;
@@ -73,7 +74,7 @@ export function RedemptionTool({ partnerType }: RedemptionToolProps) {
 
      toast({
         title: "OTP Sent to Patient",
-        description: `An OTP has been sent to ${patientData.name}. Please enter it to confirm.`,
+        description: `An OTP has been sent to ${patientData.name}. For testing, the OTP is 123456.`,
     });
   };
 

@@ -220,12 +220,12 @@ export default function PatientDetailPage() {
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <Button size="lg">
-                               <BadgeCheck className="mr-2"/> Mark as Complete & Initiate Refund
+                               <BadgeCheck className="mr-2"/> Consultation done & God bless you
                             </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
-                                <AlertDialogTitle>Confirm Action</AlertDialogTitle>
+                                <AlertDialogTitle>Complete Consultation?</AlertDialogTitle>
                                 <AlertDialogDescription>
                                     This will mark the consultation as complete and initiate a refund of ₹{patient.consultationFee.toFixed(2)} to the patient's original payment method. This action cannot be undone.
                                 </AlertDialogDescription>

@@ -14,12 +14,12 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { loginWithOtp } from '@/lib/auth';
+import { loginWithOtp, MOCK_OTP } from '@/lib/auth';
 
 const loginSchema = z.object({
   phone: z.string().min(10, { message: 'A valid 10-digit phone number is required.' }).max(10, { message: 'A valid 10-digit phone number is required.' }),
   otp: z.string().optional(),
-  role: z.enum(['doctor', 'patient', 'pharmacy', 'lab', 'agent']),
+  role: z.enum(['doctor', 'patient', 'pharmacy', 'lab', 'agent', 'admin']),
 });
 
 export default function LoginPage() {
@@ -42,7 +42,7 @@ export default function LoginPage() {
       setOtpSent(true);
       toast({
         title: "OTP Sent!",
-        description: "A one-time password has been sent to your mobile.",
+        description: `For testing purposes, your OTP is: ${MOCK_OTP}`,
       });
     } else {
         form.setError("phone", { type: "manual", message: "Please enter a valid 10-digit phone number." })
@@ -64,7 +64,12 @@ export default function LoginPage() {
         if (typeof window !== 'undefined') {
             sessionStorage.setItem('user', JSON.stringify(user));
         }
-        router.push(`/${values.role}/dashboard`);
+        
+        if(values.role === 'admin') {
+            router.push('/admin');
+        } else {
+            router.push(`/${values.role}/dashboard`);
+        }
     } else {
         toast({
             title: "Login Failed",
@@ -104,6 +109,7 @@ export default function LoginPage() {
                            <SelectItem value="pharmacy">Pharmacy</SelectItem>
                           <SelectItem value="lab">Lab</SelectItem>
                           <SelectItem value="agent">Agent</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

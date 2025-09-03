@@ -1,6 +1,6 @@
 // A simple in-memory store for users
 const users: any[] = [];
-const MOCK_OTP = '123456';
+export const MOCK_OTP = '123456';
 
 export function loginWithOtp(phone: string, otp: string, role: string) {
     // In a real app, you'd verify the OTP against a secure service.

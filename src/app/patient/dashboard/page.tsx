@@ -4,16 +4,19 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { User, Calendar, Clock, Stethoscope, IndianRupee, RefreshCw } from 'lucide-react';
+import { User, Calendar, Clock, Stethoscope, IndianRupee, RefreshCw, Bell } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { mockPatients } from '@/components/doctor/patient-list';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function PatientDashboardPage() {
     const [myAppointments, setMyAppointments] = useState<any[]>([]);
+    const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
+        setIsClient(true);
         // In a real app, you'd fetch this for the logged-in user.
         // Here, we'll use the persisted mock data and filter it.
         const storedPatients = sessionStorage.getItem('mockPatients');
@@ -21,6 +24,8 @@ export default function PatientDashboardPage() {
         // Let's assume the logged in patient is "Rohan Sharma" for this demo
         setMyAppointments(allAppointments.filter((p: any) => p.name === 'Rohan Sharma')); 
     }, []);
+
+    const nextReminder = myAppointments.find(appt => appt.nextAppointmentDate);
 
     return (
         <div className="flex flex-col min-h-screen">
@@ -31,6 +36,17 @@ export default function PatientDashboardPage() {
                         <h1 className="text-3xl font-headline font-bold">Patient Dashboard</h1>
                         <p className="text-muted-foreground">Manage your appointments and health records.</p>
                     </div>
+
+                    {isClient && nextReminder && (
+                        <Alert className="mb-8 bg-primary/10 border-primary/20 text-primary-foreground">
+                            <Bell className="h-5 w-5 text-primary"/>
+                            <AlertTitle className="font-bold text-primary">Next Appointment Reminder</AlertTitle>
+                            <AlertDescription className="text-primary/80">
+                                Your doctor has scheduled a follow-up for you on{' '}
+                                <strong className="font-semibold">{format(new Date(nextReminder.nextAppointmentDate), 'EEEE, MMMM d, yyyy')}</strong>.
+                            </AlertDescription>
+                        </Alert>
+                    )}
 
                     <Card className="shadow-sm">
                         <CardHeader className="flex flex-row items-center gap-4">
@@ -52,8 +68,8 @@ export default function PatientDashboardPage() {
                                                 <div>
                                                     <CardTitle className="text-lg font-headline">Consultation at {appt.clinic}</CardTitle>
                                                     <CardDescription className="flex items-center gap-2 pt-1">
-                                                        <Calendar className="w-4 h-4"/> {format(new Date(appt.appointmentDate), 'EEEE, MMMM d, yyyy')}
-                                                        <Clock className="w-4 h-4 ml-2"/> {format(new Date(appt.appointmentDate), 'p')}
+                                                        <Calendar className="w-4 h-4"/> {isClient ? format(new Date(appt.appointmentDate), 'EEEE, MMMM d, yyyy') : ''}
+                                                        <Clock className="w-4 h-4 ml-2"/> {isClient ? format(new Date(appt.appointmentDate), 'p') : ''}
                                                     </CardDescription>
                                                 </div>
                                                 <Badge variant={appt.status === 'done' ? 'secondary' : 'default'} className="capitalize">{appt.status}</Badge>

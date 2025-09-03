@@ -20,13 +20,13 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useToast } from '@/hooks/use-toast';
 
 export const mockPatients = [
-  { id: '1', name: 'Rohan Sharma', clinic: 'Andheri', appointmentDate: '2024-08-15T10:00:00Z', status: 'upcoming', consultation: 'Follow-up for cardiology check-up.', notes: 'Patient has reported mild chest pain.', consultationFee: 1200, refundStatus: 'Not Refunded' },
-  { id: '2', name: 'Priya Mehta', clinic: 'Dadar', appointmentDate: '2024-08-15T12:30:00Z', status: 'upcoming', consultation: 'Initial consultation for dermatology.', notes: 'Patient has a history of eczema.', consultationFee: 1500, refundStatus: 'Not Refunded' },
-  { id: '3', name: 'Amit Singh', clinic: 'Bandra', appointmentDate: '2024-08-14T15:00:00Z', status: 'done', consultation: 'Annual health check-up.', notes: 'All reports are normal.', consultationFee: 800, refundStatus: 'Refunded' },
-  { id: '4', name: 'Sunita Patil', clinic: 'Andheri', appointmentDate: '2024-08-13T09:00:00Z', status: 'done', consultation: 'Post-operative follow-up.', notes: 'Wound healing well.', consultationFee: 950, refundStatus: 'Refunded' },
-  { id: '5', name: 'Karan Verma', clinic: 'Dadar', appointmentDate: '2024-08-16T11:00:00Z', status: 'upcoming', consultation: 'Vaccination appointment.', notes: '', consultationFee: 500, refundStatus: 'Not Refunded' },
-  { id: '6', name: 'Anika Desai', clinic: 'Andheri', appointmentDate: '2024-08-12T16:00:00Z', status: 'done', consultation: 'Consultation for fever.', notes: 'Prescribed medication for viral infection.', consultationFee: 700, refundStatus: 'Refunded' },
-  { id: '7', name: 'Vikram Reddy', clinic: 'Bandra', appointmentDate: '2024-08-17T14:00:00Z', status: 'upcoming', consultation: 'Physiotherapy session.', notes: 'Patient recovering from a sports injury.', consultationFee: 1800, refundStatus: 'Not Refunded' },
+  { id: '1', name: 'Rohan Sharma', clinic: 'Andheri', appointmentDate: '2024-08-15T10:00:00Z', status: 'upcoming', consultation: 'Follow-up for cardiology check-up.', notes: 'Patient has reported mild chest pain.', consultationFee: 1200, refundStatus: 'Not Refunded', nextAppointmentDate: null },
+  { id: '2', name: 'Priya Mehta', clinic: 'Dadar', appointmentDate: '2024-08-15T12:30:00Z', status: 'upcoming', consultation: 'Initial consultation for dermatology.', notes: 'Patient has a history of eczema.', consultationFee: 1500, refundStatus: 'Not Refunded', nextAppointmentDate: null },
+  { id: '3', name: 'Amit Singh', clinic: 'Bandra', appointmentDate: '2024-08-14T15:00:00Z', status: 'done', consultation: 'Annual health check-up.', notes: 'All reports are normal.', consultationFee: 800, refundStatus: 'Refunded', nextAppointmentDate: '2025-08-14T15:00:00Z' },
+  { id: '4', name: 'Sunita Patil', clinic: 'Andheri', appointmentDate: '2024-08-13T09:00:00Z', status: 'done', consultation: 'Post-operative follow-up.', notes: 'Wound healing well.', consultationFee: 950, refundStatus: 'Refunded', nextAppointmentDate: null },
+  { id: '5', name: 'Karan Verma', clinic: 'Dadar', appointmentDate: '2024-08-16T11:00:00Z', status: 'upcoming', consultation: 'Vaccination appointment.', notes: '', consultationFee: 500, refundStatus: 'Not Refunded', nextAppointmentDate: null },
+  { id: '6', name: 'Anika Desai', clinic: 'Andheri', appointmentDate: '2024-08-12T16:00:00Z', status: 'done', consultation: 'Consultation for fever.', notes: 'Prescribed medication for viral infection.', consultationFee: 700, refundStatus: 'Refunded', nextAppointmentDate: '2024-09-12T16:00:00Z' },
+  { id: '7', name: 'Vikram Reddy', clinic: 'Bandra', appointmentDate: '2024-08-17T14:00:00Z', status: 'upcoming', consultation: 'Physiotherapy session.', notes: 'Patient recovering from a sports injury.', consultationFee: 1800, refundStatus: 'Not Refunded', nextAppointmentDate: null },
 ];
 
 const clinics = ['All', 'Andheri', 'Dadar', 'Bandra'];
@@ -49,6 +49,16 @@ export function PatientList() {
 
   useEffect(() => {
     setIsClient(true);
+    // Persist mock data to session storage on initial load
+    if (typeof window !== 'undefined' && !sessionStorage.getItem('mockPatients')) {
+      sessionStorage.setItem('mockPatients', JSON.stringify(mockPatients));
+    }
+    
+    // Load data from session storage if it exists
+    const storedPatients = sessionStorage.getItem('mockPatients');
+    if (storedPatients) {
+      setPatients(JSON.parse(storedPatients));
+    }
   }, []);
 
   const handleFilterChange = (key: keyof typeof filters, value: any) => {
@@ -86,7 +96,9 @@ export function PatientList() {
   };
 
   const handleBulkCancel = () => {
-    setPatients(patients.filter(p => !selectedRows.has(p.id)));
+    const updatedPatients = patients.filter(p => !selectedRows.has(p.id));
+    setPatients(updatedPatients);
+    sessionStorage.setItem('mockPatients', JSON.stringify(updatedPatients));
     toast({
         title: "Appointments Canceled",
         description: `${selectedRows.size} appointment(s) have been successfully canceled.`
@@ -225,9 +237,8 @@ export function PatientList() {
                         <TableHead className="w-12">
                             <Checkbox 
                                 onCheckedChange={(checked) => handleSelectAll(checked)}
-                                checked={isAllSelected || isIndeterminate}
+                                checked={isAllSelected || (isIndeterminate ? 'indeterminate' : false)}
                                 aria-label="Select all"
-                                ref={(el) => el && (el.indeterminate = isIndeterminate)}
                             />
                         </TableHead>
                         <TableHead>Patient Name</TableHead>

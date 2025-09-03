@@ -6,7 +6,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, User, Calendar, Clock, Stethoscope, FileText, MessageSquare, CreditCard, RefreshCw, BadgeCheck } from 'lucide-react';
+import { ArrowLeft, User, Calendar, Clock, Stethoscope, FileText, MessageSquare, CreditCard, RefreshCw, BadgeCheck, BellPlus } from 'lucide-react';
 import Link from 'next/link';
 import { mockPatients } from '@/components/doctor/patient-list';
 import { Badge } from '@/components/ui/badge';
@@ -14,12 +14,15 @@ import { format } from 'date-fns';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { Calendar as CalendarPicker } from '@/components/ui/calendar';
 
 export default function PatientDetailPage() {
   const params = useParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const { toast } = useToast();
   const [isClient, setIsClient] = useState(false);
+  const [nextAppointment, setNextAppointment] = useState<Date | undefined>(undefined);
 
   // We need to manage patient state locally to reflect changes
   const [allPatients, setAllPatients] = useState(mockPatients);
@@ -33,6 +36,13 @@ export default function PatientDetailPage() {
       setAllPatients(JSON.parse(storedPatients));
     }
   }, []);
+  
+  useEffect(() => {
+    if (patient?.nextAppointmentDate) {
+        setNextAppointment(new Date(patient.nextAppointmentDate));
+    }
+  }, [patient]);
+
 
   const handleMarkAsComplete = () => {
     const updatedPatients = allPatients.map(p => {
@@ -51,6 +61,32 @@ export default function PatientDetailPage() {
         description: `Refund for ₹${patient?.consultationFee} has been initiated.`,
     });
   };
+
+  const handleSetReminder = () => {
+    if (!nextAppointment) {
+        toast({
+            title: "No date selected",
+            description: "Please select a date for the next appointment reminder.",
+            variant: "destructive",
+        });
+        return;
+    }
+
+    const updatedPatients = allPatients.map(p => {
+      if (p.id === id) {
+        return { ...p, nextAppointmentDate: nextAppointment.toISOString() };
+      }
+      return p;
+    });
+
+    setAllPatients(updatedPatients);
+    sessionStorage.setItem('mockPatients', JSON.stringify(updatedPatients));
+
+    toast({
+        title: "Reminder Set",
+        description: `Patient will be reminded for their appointment on ${format(nextAppointment, 'PPP')}.`,
+    });
+  }
 
   if (!patient) {
     // This can happen if the page is loaded directly and state is not yet synced.
@@ -141,6 +177,40 @@ export default function PatientDetailPage() {
                   <div>
                     <p className="font-medium text-foreground">Refund Status</p>
                     <p>{patient.refundStatus}</p>
+                  </div>
+                </div>
+              </div>
+               <div className="space-y-6 md:col-span-2">
+                <h3 className="font-semibold text-lg border-b pb-2">Next Appointment Reminder</h3>
+                 <div className="flex items-center text-muted-foreground gap-3">
+                  <BellPlus className="w-5 h-5 text-primary"/> 
+                  <div>
+                    <p className="font-medium text-foreground">
+                        {patient.nextAppointmentDate 
+                            ? `Next check-up scheduled for: ${isClient ? format(new Date(patient.nextAppointmentDate), 'PPP') : ''}` 
+                            : "No reminder set."
+                        }
+                    </p>
+                    <div className="flex items-center gap-4 mt-2">
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button variant="outline">
+                                    <Calendar className="mr-2"/>
+                                    {nextAppointment ? format(nextAppointment, 'PPP') : 'Select Date'}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0">
+                                <CalendarPicker
+                                    mode="single"
+                                    selected={nextAppointment}
+                                    onSelect={setNextAppointment}
+                                    initialFocus
+                                    disabled={(date) => date < new Date()}
+                                />
+                            </PopoverContent>
+                        </Popover>
+                        <Button onClick={handleSetReminder}>Set Reminder</Button>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -72,6 +72,17 @@ export default function RegisterPage({ params }: { params: { role: Role } }) {
 
   const form = useForm({
     resolver: zodResolver(currentSchema),
+    defaultValues: {
+      fullName: '',
+      email: '',
+      phone: '',
+      password: '',
+      confirmPassword: '',
+      registrationNumber: '',
+      referralCode: '',
+      businessName: '',
+      address: '',
+    },
   });
 
   function onSubmit(values: z.infer<typeof currentSchema>) {

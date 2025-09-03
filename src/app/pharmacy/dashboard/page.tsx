@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Pill, Search, User, Wallet, History, BadgePercent, Banknote } from 'lucide-react';
+import { Pill, Search, User, Wallet, History, BadgePercent, Banknote, IndianRupee } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useMemo, useEffect } from 'react';
 import { initialPharmacies, mockPatientData } from '@/lib/mock-data';
@@ -27,7 +27,7 @@ export default function PharmacyDashboardPage() {
     const [patient, setPatient] = useState<any | null>(null);
     const [otp, setOtp] = useState('');
     const [otpSent, setOtpSent] = useState(false);
-    const [redeemAmount, setRedeemAmount] = useState('');
+    const [totalBill, setTotalBill] = useState('');
     const [patientTransactionHistory, setPatientTransactionHistory] = useState<{ balance: number; transactions: Transaction[] }>({ balance: 0, transactions: [] });
     const [pharmacyData, setPharmacyData] = useState<{ balance: number; transactions: PharmacyTransaction[] }>({ balance: 0, transactions: [] });
     const [pharmacyDetails, setPharmacyDetails] = useState<any>(null);
@@ -58,7 +58,7 @@ export default function PharmacyDashboardPage() {
             setPatientTransactionHistory(getTransactionHistory(foundPatient.id));
             setOtpSent(false);
             setOtp('');
-            setRedeemAmount('');
+            setTotalBill('');
         } else {
             toast({
                 title: "Patient Not Found",
@@ -77,6 +77,17 @@ export default function PharmacyDashboardPage() {
         });
     }
 
+    const calculatedAmounts = useMemo(() => {
+        const bill = parseFloat(totalBill);
+        if (!bill || isNaN(bill) || !pharmacyDetails) {
+            return { pointsToPay: 0, cashToPay: 0 };
+        }
+        const pointsToPay = bill * (pharmacyDetails.discount / 100);
+        const cashToPay = bill - pointsToPay;
+        return { pointsToPay, cashToPay };
+    }, [totalBill, pharmacyDetails]);
+
+
     const handleRedeem = () => {
         if (otp !== '123456') {
             toast({
@@ -87,48 +98,46 @@ export default function PharmacyDashboardPage() {
             return;
         }
 
-        const amount = parseFloat(redeemAmount);
-        if (isNaN(amount) || amount <= 0) {
+        const bill = parseFloat(totalBill);
+        if (isNaN(bill) || bill <= 0) {
             toast({
                 title: "Invalid Amount",
-                description: "Please enter a valid amount to redeem.",
+                description: "Please enter a valid total bill amount.",
                 variant: "destructive"
             });
             return;
         }
 
-        if (amount > patientTransactionHistory.balance) {
+        const { pointsToPay } = calculatedAmounts;
+
+        if (pointsToPay > patientTransactionHistory.balance) {
             toast({
                 title: "Insufficient Balance",
-                description: `Patient only has ₹${patientTransactionHistory.balance.toFixed(2)} available.`,
+                description: `Patient needs ₹${pointsToPay.toFixed(2)} in Health Points but only has ₹${patientTransactionHistory.balance.toFixed(2)}.`,
                 variant: "destructive"
             });
             return;
         }
         
-        const discountAmount = amount * (pharmacyDetails.discount / 100);
-        const finalAmountToPatient = amount - discountAmount;
-        
+        // Debit points from patient
         recordTransaction(patient.id, {
             type: 'debit',
-            amount: amount,
-            description: `Redeemed at ${pharmacyDetails.name} (Discounted value: ₹${finalAmountToPatient.toFixed(2)})`,
+            amount: pointsToPay,
+            description: `Paid for bill at ${pharmacyDetails.name}`,
             date: new Date(),
         });
         
-        const commission = finalAmountToPatient * 0.05; // Admin keeps 5%
-        const pharmacyPayout = finalAmountToPatient - commission;
-
+        // Credit points to pharmacy
         recordCommission(user.id, {
             type: 'credit',
-            amount: pharmacyPayout,
-            description: `Points from redemption by ${patient.name}`,
+            amount: pointsToPay,
+            description: `Health Points collected from ${patient.name}`,
             date: new Date(),
         });
 
         toast({
-            title: "Redemption Successful!",
-            description: `₹${amount.toFixed(2)} redeemed from patient. You have collected ₹${pharmacyPayout.toFixed(2)} in Health Points.`,
+            title: "Payment Successful!",
+            description: `₹${pointsToPay.toFixed(2)} collected in Health Points. Please collect ₹${calculatedAmounts.cashToPay.toFixed(2)} in cash.`,
             duration: 6000
         });
 
@@ -137,7 +146,7 @@ export default function PharmacyDashboardPage() {
         setPharmacyData(getPharmacyData(user.id));
         setOtpSent(false);
         setOtp('');
-        setRedeemAmount('');
+        setTotalBill('');
     }
 
   return (
@@ -147,7 +156,7 @@ export default function PharmacyDashboardPage() {
         <div className="container mx-auto py-12">
             <div className="mb-8">
                 <h1 className="text-3xl font-headline font-bold">Pharmacy Dashboard</h1>
-                <p className="text-muted-foreground">Manage inventory and redeem patient health points.</p>
+                <p className="text-muted-foreground">Manage inventory and process patient payments.</p>
             </div>
             
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -169,7 +178,7 @@ export default function PharmacyDashboardPage() {
                  <Card className="shadow-sm">
                     <CardHeader>
                         <CardTitle>Collected Health Points</CardTitle>
-                        <CardDescription>Your total earnings from redemptions.</CardDescription>
+                        <CardDescription>Points collected from patient bills.</CardDescription>
                     </CardHeader>
                      <CardContent>
                         <p className="text-4xl font-bold">₹{pharmacyData.balance.toFixed(2)}</p>
@@ -178,13 +187,13 @@ export default function PharmacyDashboardPage() {
                          <Dialog>
                             <DialogTrigger asChild>
                                 <Button variant="link" className="p-0 h-auto self-center">
-                                    <History className="mr-2"/> View History
+                                    <History className="mr-2"/> View Collection History
                                 </Button>
                             </DialogTrigger>
                             <DialogContent>
                                 <DialogHeader>
-                                    <DialogTitle>Commission History</DialogTitle>
-                                    <DialogDescription>A record of your collected Health Points from patient redemptions.</DialogDescription>
+                                    <DialogTitle>Collection History</DialogTitle>
+                                    <DialogDescription>A record of Health Points collected from patient bills.</DialogDescription>
                                 </DialogHeader>
                                 <div className="max-h-[50vh] overflow-y-auto -mx-6 px-6">
                                     <ul className="space-y-4 py-4">
@@ -212,9 +221,9 @@ export default function PharmacyDashboardPage() {
 
                  <Card className="shadow-sm md:col-span-2 lg:col-span-1">
                     <CardHeader>
-                        <CardTitle>Redeem Health Points</CardTitle>
+                        <CardTitle>Process Patient Bill</CardTitle>
                         <CardDescription>
-                            Help patients pay using their Health Points cashback.
+                            Help patients pay using their Health Points.
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
@@ -226,8 +235,9 @@ export default function PharmacyDashboardPage() {
                                     placeholder="Enter 10-digit number" 
                                     value={patientPhone}
                                     onChange={(e) => setPatientPhone(e.target.value)}
+                                    disabled={!!patient}
                                 />
-                                <Button onClick={handleSearchPatient}>
+                                <Button onClick={handleSearchPatient} disabled={!!patient}>
                                     <Search className="mr-2"/> Search
                                 </Button>
                            </div>
@@ -245,36 +255,9 @@ export default function PharmacyDashboardPage() {
                                         <p className="text-xs text-muted-foreground -mt-1">Available Balance</p>
                                     </div>
                                 </div>
-                                
-                                <Dialog>
-                                    <DialogTrigger asChild>
-                                        <Button variant="link" className="p-0 h-auto text-sm mt-1">
-                                            <History className="mr-2"/> View Patient History
-                                        </Button>
-                                    </DialogTrigger>
-                                    <DialogContent>
-                                        <DialogHeader>
-                                            <DialogTitle>Transaction History for {patient.name}</DialogTitle>
-                                            <DialogDescription>A record of Health Point earnings and redemptions.</DialogDescription>
-                                        </DialogHeader>
-                                        <div className="max-h-[50vh] overflow-y-auto -mx-6 px-6">
-                                            <ul className="space-y-4 py-4">
-                                                {patientTransactionHistory.transactions.map((tx, index) => (
-                                                    <li key={index} className="flex items-center justify-between">
-                                                        <div>
-                                                            <p className="font-medium">{tx.description}</p>
-                                                            <p className="text-xs text-muted-foreground mt-1">{format(new Date(tx.date), 'PP, p')}</p>
-                                                        </div>
-                                                        <span className={`font-semibold ${tx.type === 'credit' ? 'text-green-600' : 'text-destructive'}`}>
-                                                            {tx.type === 'credit' ? '+' : '-'} ₹{tx.amount.toFixed(2)}
-                                                        </span>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    </DialogContent>
-                                </Dialog>
-
+                                <Button variant="link" className="p-0 h-auto text-sm mt-1" onClick={() => setPatient(null)}>
+                                   Search for another patient
+                                </Button>
                                 
                                 {!otpSent ? (
                                      <Button className="w-full mt-4" onClick={handleSendOtp}>Send OTP to Patient</Button>
@@ -282,21 +265,35 @@ export default function PharmacyDashboardPage() {
                                     <div className="mt-4 pt-4 border-t space-y-4">
                                         <Alert variant="default" className="bg-primary/10 border-primary/20">
                                             <BadgePercent className="h-4 w-4 text-primary" />
-                                            <AlertTitle>Discount Applied</AlertTitle>
+                                            <AlertTitle>Your Redemption Offer: {pharmacyDetails.discount}%</AlertTitle>
                                             <AlertDescription>
-                                                This transaction will include your pharmacy's discount of <strong>{pharmacyDetails.discount}%</strong> on the redeemed amount.
+                                                The patient can pay {pharmacyDetails.discount}% of their bill using Health Points.
                                             </AlertDescription>
                                         </Alert>
 
                                         <div>
-                                            <Label htmlFor="redeemAmount">Amount to Redeem (₹)</Label>
-                                            <Input id="redeemAmount" placeholder="e.g., 500" type="number" value={redeemAmount} onChange={(e) => setRedeemAmount(e.target.value)}/>
+                                            <Label htmlFor="totalBill">Total Bill Amount (₹)</Label>
+                                            <Input id="totalBill" placeholder="e.g., 1000" type="number" value={totalBill} onChange={(e) => setTotalBill(e.target.value)}/>
                                         </div>
+
+                                        {calculatedAmounts.pointsToPay > 0 && (
+                                            <div className="space-y-2 text-sm">
+                                                <div className="flex justify-between">
+                                                    <span className="text-muted-foreground">Pay with Health Points:</span>
+                                                    <span className="font-medium">₹{calculatedAmounts.pointsToPay.toFixed(2)}</span>
+                                                </div>
+                                                <div className="flex justify-between font-semibold">
+                                                    <span className="text-muted-foreground">Pay with Cash:</span>
+                                                    <span className="font-medium">₹{calculatedAmounts.cashToPay.toFixed(2)}</span>
+                                                </div>
+                                            </div>
+                                        )}
+
                                          <div>
                                             <Label htmlFor="otp">Enter 6-Digit OTP</Label>
                                             <Input id="otp" placeholder="Enter OTP from patient" value={otp} onChange={(e) => setOtp(e.target.value)} />
                                         </div>
-                                        <Button className="w-full" onClick={handleRedeem}>Confirm & Redeem</Button>
+                                        <Button className="w-full" onClick={handleRedeem}>Confirm Payment</Button>
                                     </div>
                                 )}
                             </Card>
@@ -307,9 +304,9 @@ export default function PharmacyDashboardPage() {
                 <div className="md:col-span-2 lg:col-span-3">
                     <Alert variant="outline" className="w-full">
                         <Banknote className="h-4 w-4" />
-                        <AlertTitle>How Redemption Works</AlertTitle>
+                        <AlertTitle>How Payments Work</AlertTitle>
                         <AlertDescription>
-                            When a patient redeems Health Points, the value (after your pharmacy's discount) is transferred to your "Collected Health Points" balance, minus a 5% admin commission. You can request a cash payout of your collected points from the admin. You only need to collect cash from patients for amounts not covered by Health Points.
+                          Enter the patient's total bill amount. The system calculates how much they can pay with Health Points based on your discount. The patient pays the rest in cash. The Health Points you collect are added to your balance, which you can request as a cash payout from the admin (minus a 5% admin fee).
                         </AlertDescription>
                     </Alert>
                 </div>

@@ -89,6 +89,7 @@ export const initialPharmacies = [
         image: 'https://picsum.photos/400/300',
         acceptsHealthPoints: true,
         discount: 15,
+        whatsappNumber: '919876543210'
     },
     {
         id: 'pharm2',
@@ -97,6 +98,7 @@ export const initialPharmacies = [
         image: 'https://picsum.photos/400/300',
         acceptsHealthPoints: true,
         discount: 20,
+        whatsappNumber: '919876543211'
     },
     {
         id: 'pharm3',
@@ -105,6 +107,7 @@ export const initialPharmacies = [
         image: 'https://picsum.photos/400/300',
         acceptsHealthPoints: false,
         discount: 0,
+        whatsappNumber: '919876543212'
     }
 ];
 
@@ -116,6 +119,7 @@ export const initialLabs = [
         image: 'https://picsum.photos/400/300',
         acceptsHealthPoints: true,
         discount: 30,
+        whatsappNumber: '919876543213'
     },
     {
         id: 'lab2',
@@ -124,6 +128,7 @@ export const initialLabs = [
         image: 'https://picsum.photos/400/300',
         acceptsHealthPoints: true,
         discount: 35,
+        whatsappNumber: '919876543214'
     }
 ];
 

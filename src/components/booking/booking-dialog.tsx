@@ -238,7 +238,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                     Complete the steps below to confirm your booking.
                 </DialogDescription>
             </DialogHeader>
-            <div className="space-y-6 py-4">
+            <div className="space-y-6 py-4 pr-2 max-h-[60vh] overflow-y-auto">
                 {userRole === 'health-coordinator' ? renderHealthCoordinatorPatientFinder() : renderPatientSelector()}
 
                 <div className={cn(!foundPatient && userRole === 'health-coordinator' && "opacity-50 pointer-events-none")}>

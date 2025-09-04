@@ -5,7 +5,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Stethoscope, MapPin, Calendar, Star, Loader2, MessageSquare, UserPlus, Clock, Briefcase, Link as LinkIcon, CreditCard } from 'lucide-react';
+import { Stethoscope, MapPin, Calendar, Star, Loader2, MessageSquare, UserPlus, Clock, Briefcase, Link as LinkIcon, CreditCard, Globe } from 'lucide-react';
 import Image from 'next/image';
 import { notFound, useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -142,7 +142,7 @@ export default function DoctorDetailPage() {
                             <CardDescription className="flex items-center justify-center md:justify-start gap-2 pt-2 text-base">
                                 <Stethoscope className="w-5 h-5 text-primary" /> <span>{doctor.specialty}</span>
                             </CardDescription>
-                             <div className="flex items-center justify-center md:justify-start gap-4 text-muted-foreground mt-3">
+                             <div className="flex items-center justify-center md:justify-start gap-4 text-muted-foreground mt-3 flex-wrap">
                                 <div className="flex items-center gap-2">
                                     <Briefcase className="w-5 h-5"/> 
                                     <span>{doctor.experience} years experience</span>
@@ -152,6 +152,17 @@ export default function DoctorDetailPage() {
                                     <MapPin className="w-5 h-5"/> 
                                     <span>{doctor.location}</span>
                                 </div>
+                                {doctor.website && (
+                                     <>
+                                        <Separator orientation="vertical" className="h-5" />
+                                        <div className="flex items-center gap-2">
+                                            <Globe className="w-5 h-5"/> 
+                                            <a href={doctor.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                                                Website
+                                            </a>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                             <div className="flex items-center justify-center md:justify-start gap-4 pt-3">
                                 <div className="flex items-center gap-1 text-amber-500">

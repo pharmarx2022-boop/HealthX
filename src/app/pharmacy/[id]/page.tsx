@@ -5,7 +5,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MapPin, Star, Loader2, PercentCircle, Link as LinkIcon } from 'lucide-react';
+import { MapPin, Star, Loader2, PercentCircle, Link as LinkIcon, Globe } from 'lucide-react';
 import Image from 'next/image';
 import { notFound, useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -88,12 +88,20 @@ export default function PharmacyDetailPage() {
                 </div>
                 <CardHeader>
                     <CardTitle className="font-headline text-3xl">{pharmacy.name}</CardTitle>
-                    <div className="flex items-center gap-4 pt-2">
+                    <div className="flex items-center gap-4 pt-2 flex-wrap">
                         <div className="flex items-center gap-1 text-amber-500">
                             <Star className="w-5 h-5 fill-current" />
                             <span className="font-bold">{averageRating}</span>
+                             <span className="text-muted-foreground text-sm ml-1">({totalReviews} reviews)</span>
                         </div>
-                        <span className="text-muted-foreground">({totalReviews} reviews)</span>
+                         {pharmacy.website && (
+                            <div className="flex items-center gap-2">
+                                <Globe className="w-5 h-5 text-muted-foreground"/> 
+                                <a href={pharmacy.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                                    Website
+                                </a>
+                            </div>
+                        )}
                     </div>
                 </CardHeader>
                 <CardContent className="space-y-6">

@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import Image from 'next/image';
-import { Loader2, Upload, Percent, Phone, Copy } from 'lucide-react';
+import { Loader2, Upload, Percent, Phone, Copy, Link } from 'lucide-react';
 import { initialLabs } from '@/lib/mock-data';
 
 const LABS_KEY = 'mockLabs';
@@ -22,6 +22,7 @@ const profileSchema = z.object({
   discount: z.coerce.number().min(30, 'Discount must be at least 30%.').max(100, 'Discount cannot exceed 100%.'),
   whatsappNumber: z.string().min(10, 'A valid phone number is required.'),
   referralCode: z.string().optional(),
+  website: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -62,6 +63,7 @@ export function LabProfileForm() {
       discount: 30,
       whatsappNumber: '',
       referralCode: '',
+      website: '',
     },
   });
 
@@ -200,6 +202,18 @@ export function LabProfileForm() {
                             </div>
                         </FormControl>
                          <FormMessage />
+                    </FormItem>
+                )} />
+                 <FormField control={form.control} name="website" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Website URL</FormLabel>
+                        <FormControl>
+                            <div className="relative">
+                                 <Input type="url" placeholder="https://your-website.com" {...field} className="pl-8"/>
+                                 <Link className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            </div>
+                        </FormControl>
+                        <FormMessage />
                     </FormItem>
                 )} />
                 <FormField control={form.control} name="discount" render={({ field }) => (

@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
-import { Loader2, Upload, Briefcase } from 'lucide-react';
+import { Loader2, Upload, Briefcase, Link } from 'lucide-react';
 import { initialDoctors } from '@/lib/mock-data';
 
 const DOCTORS_KEY = 'doctorsData';
@@ -23,6 +23,7 @@ const profileSchema = z.object({
   bio: z.string().min(1, 'A short bio is required.'),
   image: z.string().min(1, 'A profile picture is required.'),
   experience: z.coerce.number().min(0, 'Experience must be a positive number.'),
+  website: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -41,6 +42,7 @@ export function ProfileForm() {
       bio: '',
       image: '',
       experience: 0,
+      website: '',
     },
   });
 
@@ -203,6 +205,18 @@ export function ProfileForm() {
                     </FormItem>
                 )}
             />
+             <FormField control={form.control} name="website" render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Website URL</FormLabel>
+                    <FormControl>
+                        <div className="relative">
+                            <Input type="url" placeholder="https://your-website.com" {...field} className="pl-8"/>
+                            <Link className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        </div>
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+            )} />
             <FormField
                 control={form.control}
                 name="bio"

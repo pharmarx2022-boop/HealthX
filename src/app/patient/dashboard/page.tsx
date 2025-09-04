@@ -17,12 +17,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { FamilyManager } from '@/components/patient/family-manager';
 import { MyReports } from '@/components/patient/my-reports';
-import { getTransactionHistory } from '@/lib/transactions';
+import { getTransactionHistory, type Transaction } from '@/lib/transactions';
 
 const DOCTORS_KEY = 'doctorsData';
 const PATIENTS_KEY = 'mockPatients';
 const LABS_KEY = 'mockLabs';
 const PHARMACIES_KEY = 'mockPharmacies';
+const TRANSACTIONS_KEY_PREFIX = 'transactions_';
+
 
 type ReviewTarget = {
     type: 'doctor' | 'lab' | 'pharmacy';
@@ -40,27 +42,32 @@ export default function PatientDashboardPage() {
     const [reviewTarget, setReviewTarget] = useState<ReviewTarget | null>(null);
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState('');
+    const [user, setUser] = useState<any | null>(null);
 
 
     useEffect(() => {
         setIsClient(true);
-        // In a real app, you'd fetch this for the logged-in user.
-        // Here, we'll use the persisted mock data and filter it.
-        const storedPatients = sessionStorage.getItem(PATIENTS_KEY);
-        const allAppointments = storedPatients ? JSON.parse(storedPatients) : mockPatients;
-        // Let's assume the logged in patient is "Rohan Sharma" for this demo
-        setMyAppointments(allAppointments.filter((p: any) => p.name === 'Rohan Sharma'));
+        if(typeof window !== 'undefined') {
+            const storedUser = sessionStorage.getItem('user');
+            if (storedUser) {
+                const u = JSON.parse(storedUser);
+                setUser(u);
+                
+                const storedPatients = sessionStorage.getItem(PATIENTS_KEY);
+                const allAppointments = storedPatients ? JSON.parse(storedPatients) : mockPatients;
+                setMyAppointments(allAppointments.filter((p: any) => p.name === u.fullName || (u.fullName === 'Rohan Sharma' && p.name === 'Rohan Sharma')));
+            }
+        }
     }, [isClient, isReviewOpen]); // Re-check appointments when review dialog closes
 
     const nextReminder = myAppointments.find(appt => appt.nextAppointmentDate && !isNaN(new Date(appt.nextAppointmentDate).getTime()));
 
     const transactionHistory = useMemo(() => {
-        if (!isClient) return { balance: 0, transactions: [], reviewedTransactionIds: new Set() };
-        // Assuming user id is 'rohan_sharma' for demo
-        const history = getTransactionHistory('rohan_sharma');
+        if (!isClient || !user) return { balance: 0, transactions: [], reviewedTransactionIds: new Set() };
+        const history = getTransactionHistory(user.id);
         const reviewedIds = new Set(history.transactions.filter(tx => tx.reviewed).map(tx => tx.id));
         return { ...history, reviewedTransactionIds: reviewedIds };
-    }, [isClient, isReviewOpen]);
+    }, [isClient, user, isReviewOpen]);
 
 
     const openReviewDialog = (target: ReviewTarget) => {
@@ -71,7 +78,7 @@ export default function PatientDashboardPage() {
     };
     
     const handleSubmitReview = () => {
-        if (!reviewTarget || rating === 0 || !comment) {
+        if (!reviewTarget || rating === 0 || !comment || !user) {
             toast({
                 title: "Incomplete Review",
                 description: "Please provide a rating and a comment.",
@@ -81,7 +88,7 @@ export default function PatientDashboardPage() {
         }
 
         const newReview = {
-            patientName: "Rohan Sharma", // Hardcoded for demo
+            patientName: user.fullName,
             rating,
             comment,
         };
@@ -98,7 +105,6 @@ export default function PatientDashboardPage() {
             });
             sessionStorage.setItem(DOCTORS_KEY, JSON.stringify(updatedDoctors));
 
-            // Update appointment to prevent another review, using the correct transactionId
             const allStoredAppointments = JSON.parse(sessionStorage.getItem(PATIENTS_KEY) || '[]');
             const finalAppointments = allStoredAppointments.map((appt: any) => {
                 if (appt.id === reviewTarget.transactionId) {
@@ -107,10 +113,9 @@ export default function PatientDashboardPage() {
                 return appt;
             });
             sessionStorage.setItem(PATIENTS_KEY, JSON.stringify(finalAppointments));
-            setMyAppointments(finalAppointments.filter((p: any) => p.name === 'Rohan Sharma'));
+            setMyAppointments(finalAppointments.filter((p: any) => p.name === user.fullName));
 
         } else {
-             // Handle Lab or Pharmacy review
             const key = reviewTarget.type === 'lab' ? LABS_KEY : PHARMACIES_KEY;
             const initialData = reviewTarget.type === 'lab' ? initialLabs : initialPharmacies;
             
@@ -126,9 +131,10 @@ export default function PatientDashboardPage() {
             sessionStorage.setItem(key, JSON.stringify(updatedPartners));
 
             // Mark transaction as reviewed
-            const allUserTransactions = getTransactionHistory('rohan_sharma').transactions;
+            const userTransactionsKey = TRANSACTIONS_KEY_PREFIX + user.id;
+            const allUserTransactions: Transaction[] = JSON.parse(sessionStorage.getItem(userTransactionsKey) || '[]');
             const updatedTransactions = allUserTransactions.map(tx => tx.id === reviewTarget.transactionId ? {...tx, reviewed: true} : tx);
-            sessionStorage.setItem(`transactions_rohan_sharma`, JSON.stringify(updatedTransactions));
+            sessionStorage.setItem(userTransactionsKey, JSON.stringify(updatedTransactions));
         }
 
         toast({
@@ -155,7 +161,6 @@ export default function PatientDashboardPage() {
                 toast({ title: 'Error sharing appointment', description: 'Could not share appointment details.', variant: 'destructive' });
             }
         } else {
-            // Fallback for browsers that don't support the Web Share API
             try {
                 await navigator.clipboard.writeText(shareText);
                 toast({ title: 'Copied to Clipboard!', description: 'Appointment details have been copied.' });
@@ -193,7 +198,7 @@ export default function PatientDashboardPage() {
                                 <CardHeader className="flex flex-row items-center gap-4">
                                     <User className="w-8 h-8 text-primary" />
                                     <div>
-                                        <CardTitle>Welcome, Rohan Sharma!</CardTitle>
+                                        <CardTitle>Welcome, {user?.fullName || 'Patient'}!</CardTitle>
                                         <CardDescription>
                                             Book new appointments, view your upcoming visits, and track your refunds.
                                         </CardDescription>
@@ -361,7 +366,7 @@ export default function PatientDashboardPage() {
                              {transactionHistory.transactions.length > 0 ? (
                                 transactionHistory.transactions.map((tx) => {
                                     const isDebit = tx.type === 'debit';
-                                    const canReview = isDebit && (tx.partnerType === 'lab' || tx.partnerType === 'pharmacy') && !transactionHistory.reviewedTransactionIds.has(tx.id!);
+                                    const canReview = isDebit && (tx.partnerType === 'lab' || tx.partnerType === 'pharmacy') && !tx.reviewed;
                                     
                                     return (
                                     <li key={tx.id} className="flex items-start justify-between">
@@ -397,3 +402,5 @@ export default function PatientDashboardPage() {
         </div>
     );
 }
+
+    

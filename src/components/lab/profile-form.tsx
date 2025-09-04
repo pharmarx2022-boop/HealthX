@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import Image from 'next/image';
-import { Loader2, Upload, Percent, Phone, Copy, Link, MapPin } from 'lucide-react';
+import { Loader2, Upload, Percent, Phone, Copy, Link as LinkIcon, MapPin } from 'lucide-react';
 import { initialLabs } from '@/lib/mock-data';
 
 const LABS_KEY = 'mockLabs';
@@ -29,30 +29,8 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export function LabProfileForm() {
   const { toast } = useToast();
-  const [isClient, setIsClient] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const [labs, setLabs] = useState(initialLabs);
-
-  useEffect(() => {
-    setIsClient(true);
-    if (typeof window !== 'undefined') {
-      const storedUser = sessionStorage.getItem('user');
-      if (storedUser) {
-        const u = JSON.parse(storedUser);
-        setUser(u);
-        form.setValue('referralCode', u.referralCode);
-      }
-
-      const storedLabs = sessionStorage.getItem(LABS_KEY);
-      if (!storedLabs) {
-        sessionStorage.setItem(LABS_KEY, JSON.stringify(initialLabs));
-      } else {
-        setLabs(JSON.parse(storedLabs));
-      }
-    }
-  }, []);
-
-  const labData = labs.find(p => p.id === user?.id);
+  const [isLoading, setIsLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -68,13 +46,29 @@ export function LabProfileForm() {
   });
 
   useEffect(() => {
-    if (labData) {
-      form.reset(labData);
+    if (typeof window !== 'undefined') {
+      const storedUser = sessionStorage.getItem('user');
+      const u = storedUser ? JSON.parse(storedUser) : null;
+      setUserId(u?.id);
+
+      const storedLabs = sessionStorage.getItem(LABS_KEY);
+      const allLabs = storedLabs ? JSON.parse(storedLabs) : initialLabs;
+      
+      if (!storedLabs) {
+        sessionStorage.setItem(LABS_KEY, JSON.stringify(initialLabs));
+      }
+
+      const labData = allLabs.find((d: any) => d.id === u?.id);
+      
+      if (labData) {
+        form.reset(labData);
+      }
+       if (u) {
+        form.setValue('referralCode', u.referralCode);
+      }
+      setIsLoading(false);
     }
-     if (user) {
-      form.setValue('referralCode', user.referralCode);
-    }
-  }, [labData, user, form]);
+  }, [form]);
 
   const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -89,17 +83,19 @@ export function LabProfileForm() {
   };
 
   const onSubmit = (data: ProfileFormValues) => {
-    if (!labData) return;
+    if (!userId) return;
 
-    const updatedLabs = labs.map(p => {
-        if (p.id === labData.id) {
+    const storedLabs = sessionStorage.getItem(LABS_KEY);
+    const allLabs = storedLabs ? JSON.parse(storedLabs) : initialLabs;
+
+    const updatedLabs = allLabs.map(p => {
+        if (p.id === userId) {
             return { ...p, ...data };
         }
         return p;
     });
 
     sessionStorage.setItem(LABS_KEY, JSON.stringify(updatedLabs));
-    setLabs(updatedLabs);
 
     toast({
       title: 'Profile Updated!',
@@ -107,22 +103,23 @@ export function LabProfileForm() {
     });
   };
   
-  if (!isClient || !labData) {
+  const copyToClipboard = () => {
+    const referralCode = form.getValues('referralCode');
+    if(!referralCode) return;
+    navigator.clipboard.writeText(referralCode);
+    toast({
+        title: "Copied to Clipboard!",
+        description: "Your referral code has been copied."
+    })
+  }
+
+  if (isLoading) {
     return (
         <div className="flex items-center justify-center py-12">
             <Loader2 className="animate-spin text-primary"/>
             <p className="ml-4 text-muted-foreground">Loading profile...</p>
         </div>
     );
-  }
-
-  const copyToClipboard = () => {
-    if(!user?.referralCode) return;
-    navigator.clipboard.writeText(user.referralCode);
-    toast({
-        title: "Copied to Clipboard!",
-        description: "Your referral code has been copied."
-    })
   }
 
   const currentImage = form.watch('image');
@@ -239,3 +236,5 @@ export function LabProfileForm() {
     </Form>
   );
 }
+
+    

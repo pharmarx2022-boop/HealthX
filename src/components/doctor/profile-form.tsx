@@ -14,9 +14,7 @@ import Image from 'next/image';
 import { Loader2, Upload, Briefcase } from 'lucide-react';
 import { initialDoctors } from '@/lib/mock-data';
 
-// This would typically come from a central store or API
 const DOCTORS_KEY = 'doctorsData';
-
 
 const profileSchema = z.object({
   name: z.string().min(1, 'Full name is required.'),
@@ -31,29 +29,8 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export function ProfileForm() {
   const { toast } = useToast();
-  const [isClient, setIsClient] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const [doctors, setDoctors] = useState(initialDoctors);
-  
-  // Initialize sessionStorage on client mount
-  useEffect(() => {
-    setIsClient(true);
-    if (typeof window !== 'undefined') {
-      const storedUser = sessionStorage.getItem('user');
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
-
-      const storedDoctors = sessionStorage.getItem(DOCTORS_KEY);
-      if (!storedDoctors) {
-        sessionStorage.setItem(DOCTORS_KEY, JSON.stringify(initialDoctors));
-      } else {
-        setDoctors(JSON.parse(storedDoctors));
-      }
-    }
-  }, []);
-
-  const doctorData = doctors.find(d => d.id === (user?.id || '1'));
+  const [isLoading, setIsLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -68,43 +45,61 @@ export function ProfileForm() {
   });
 
   useEffect(() => {
-    if (doctorData) {
-      form.reset(doctorData);
+    if (typeof window !== 'undefined') {
+      const storedUser = sessionStorage.getItem('user');
+      const u = storedUser ? JSON.parse(storedUser) : null;
+      setUserId(u?.id || '1'); // Fallback to '1' for demo if no user
+
+      const storedDoctors = sessionStorage.getItem(DOCTORS_KEY);
+      const allDoctors = storedDoctors ? JSON.parse(storedDoctors) : initialDoctors;
+      
+      if (!storedDoctors) {
+        sessionStorage.setItem(DOCTORS_KEY, JSON.stringify(initialDoctors));
+      }
+
+      const doctorData = allDoctors.find((d: any) => d.id === (u?.id || '1'));
+      
+      if (doctorData) {
+        form.reset(doctorData);
+      }
+      setIsLoading(false);
     }
-  }, [doctorData, form]);
-  
+  }, [form]);
+
   const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
         form.setValue('image', reader.result as string);
-        form.clearErrors('image'); // Clear error after successful upload
+        form.clearErrors('image');
       };
       reader.readAsDataURL(file);
     }
   };
 
   const onSubmit = (data: ProfileFormValues) => {
-    if (!doctorData) return;
+    if (!userId) return;
 
-    const updatedDoctors = doctors.map(d => {
-        if (d.id === doctorData.id) {
+    const storedDoctors = sessionStorage.getItem(DOCTORS_KEY);
+    const allDoctors = storedDoctors ? JSON.parse(storedDoctors) : initialDoctors;
+
+    const updatedDoctors = allDoctors.map((d: any) => {
+        if (d.id === userId) {
             return { ...d, ...data };
         }
         return d;
     });
 
     sessionStorage.setItem(DOCTORS_KEY, JSON.stringify(updatedDoctors));
-    setDoctors(updatedDoctors);
 
     toast({
       title: 'Profile Updated!',
       description: 'Your changes have been saved successfully.',
     });
   };
-  
-  if (!isClient || !doctorData) {
+
+  if (isLoading) {
     return (
         <div className="flex items-center justify-center py-12">
             <Loader2 className="animate-spin text-primary"/>

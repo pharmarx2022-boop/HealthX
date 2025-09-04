@@ -51,8 +51,10 @@ export function NearbySearch() {
     
     const storedLabs = sessionStorage.getItem('mockLabs');
     setLabs(storedLabs ? JSON.parse(storedLabs) : initialLabs);
+  }, []);
 
-    if (typeof window !== 'undefined' && 'geolocation' in navigator) {
+  const handleLocationRequest = () => {
+     if (typeof window !== 'undefined' && 'geolocation' in navigator) {
         setStatus('loading');
         navigator.geolocation.getCurrentPosition(
             (position) => {
@@ -71,7 +73,7 @@ export function NearbySearch() {
         setError('Geolocation is not supported by your browser.');
         setStatus('error');
     }
-  }, []);
+  }
 
   const searchResults = useMemo(() => {
     const allPharmacies = pharmacies.filter(p => p.acceptsHealthPoints && p.discount >= 15);
@@ -102,6 +104,14 @@ export function NearbySearch() {
   
   const renderContent = () => {
     switch(status) {
+        case 'idle':
+            return (
+                <div className="text-center py-12">
+                    <Button size="lg" onClick={handleLocationRequest}>
+                        <MapPin className="mr-2" /> Find Services Near Me
+                    </Button>
+                </div>
+            )
         case 'loading':
             return (
                 <div className="text-center text-muted-foreground py-12">
@@ -120,6 +130,15 @@ export function NearbySearch() {
             const { doctors, pharmacies, labs } = searchResults;
             return (
                 <div className="space-y-8">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                        <Input 
+                            placeholder="Search by doctor, specialty, pharmacy, lab..."
+                            className="pl-10 text-base py-6"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
                     {doctors.length > 0 && (
                         <section>
                             <h2 className="text-2xl font-headline font-bold mb-4 flex items-center gap-2"><Stethoscope/> Doctors</h2>
@@ -246,15 +265,6 @@ export function NearbySearch() {
 
   return (
     <div className="space-y-8">
-        <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input 
-                placeholder="Search by doctor, specialty, pharmacy, lab..."
-                className="pl-10 text-base py-6"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-            />
-        </div>
         {renderContent()}
     </div>
   );

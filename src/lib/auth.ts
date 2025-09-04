@@ -3,6 +3,11 @@
 const users: any[] = [];
 export const MOCK_OTP = '123456';
 
+const generateReferralCode = () => {
+    return `HLH-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+}
+
+
 export function loginWithOtp(phone: string, otp: string, role: string) {
     // In a real app, you'd verify the OTP against a secure service.
     // Here, we'll just check against a mock OTP.
@@ -12,6 +17,8 @@ export function loginWithOtp(phone: string, otp: string, role: string) {
 
     // Assign a static ID for demo purposes based on role
     let userId;
+    let referralCode = null;
+
     switch(role) {
         case 'doctor':
             userId = '1';
@@ -23,10 +30,16 @@ export function loginWithOtp(phone: string, otp: string, role: string) {
         case 'pharmacy':
             // Using a static ID for the first pharmacy for demo purposes
             userId = 'pharm1';
+            referralCode = generateReferralCode();
             break;
         case 'lab':
             // Using a static ID for the first lab for demo purposes
             userId = 'lab1';
+            referralCode = generateReferralCode();
+            break;
+        case 'agent':
+            userId = 'agent_1';
+            referralCode = generateReferralCode();
             break;
         default:
             userId = `${role}_${phone.slice(-4)}`;
@@ -41,6 +54,7 @@ export function loginWithOtp(phone: string, otp: string, role: string) {
             id: userId,
             phone,
             role, 
+            referralCode,
             fullName: `User ${phone.slice(-4)}`, // Mock name
             email: `${phone}@example.com` // Mock email
         };

@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import Image from 'next/image';
-import { Loader2, Upload, Percent, Phone } from 'lucide-react';
+import { Loader2, Upload, Percent, Phone, Copy } from 'lucide-react';
 import { initialPharmacies } from '@/lib/mock-data';
 
 const PHARMACIES_KEY = 'mockPharmacies';
@@ -21,6 +21,7 @@ const profileSchema = z.object({
   image: z.string().min(1, 'A pharmacy picture is required.'),
   discount: z.coerce.number().min(15, 'Discount must be at least 15%.').max(100, 'Discount cannot exceed 100%.'),
   whatsappNumber: z.string().min(10, 'A valid phone number is required.'),
+  referralCode: z.string().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -36,7 +37,8 @@ export function PharmacyProfileForm() {
     if (typeof window !== 'undefined') {
       const storedUser = sessionStorage.getItem('user');
       if (storedUser) {
-        setUser(JSON.parse(storedUser));
+        const u = JSON.parse(storedUser);
+        setUser(u);
       }
 
       const storedPharmacies = sessionStorage.getItem(PHARMACIES_KEY);
@@ -58,6 +60,7 @@ export function PharmacyProfileForm() {
       image: '',
       discount: 15,
       whatsappNumber: '',
+      referralCode: '',
     },
   });
 
@@ -65,7 +68,10 @@ export function PharmacyProfileForm() {
     if (pharmacyData) {
       form.reset(pharmacyData);
     }
-  }, [pharmacyData, form]);
+    if (user) {
+      form.setValue('referralCode', user.referralCode);
+    }
+  }, [pharmacyData, user, form]);
 
   const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -106,6 +112,15 @@ export function PharmacyProfileForm() {
         </div>
     );
   }
+
+  const copyToClipboard = () => {
+    if(!user?.referralCode) return;
+    navigator.clipboard.writeText(user.referralCode);
+    toast({
+        title: "Copied to Clipboard!",
+        description: "Your referral code has been copied."
+    })
+  }
   
   const currentImage = form.watch('image');
 
@@ -145,6 +160,21 @@ export function PharmacyProfileForm() {
                 )} />
             </div>
             <div className="md:col-span-2 space-y-6">
+                 <FormField control={form.control} name="referralCode" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Your Referral Code</FormLabel>
+                        <div className="flex items-center gap-2">
+                            <FormControl>
+                                <Input readOnly {...field} />
+                            </FormControl>
+                             <Button type="button" variant="outline" size="icon" onClick={copyToClipboard}>
+                                <Copy className="h-4 w-4" />
+                            </Button>
+                        </div>
+                        <FormMessage />
+                    </FormItem>
+                )} />
+
                  <FormField control={form.control} name="name" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Pharmacy Name</FormLabel>

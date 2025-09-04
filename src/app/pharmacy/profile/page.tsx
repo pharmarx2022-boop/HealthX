@@ -19,7 +19,7 @@ export default function PharmacyProfilePage() {
                 <CardHeader>
                     <CardTitle>Edit Your Pharmacy Details</CardTitle>
                     <CardDescription>
-                        This information will be visible to patients searching for nearby pharmacies.
+                        Use your referral code to onboard new partners and earn commissions. This information will be visible to patients searching for nearby pharmacies.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>

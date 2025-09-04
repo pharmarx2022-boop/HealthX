@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { HeartPulse, Calendar, Menu, X, UserCircle, LogOut, Settings, Briefcase, Users, Pill, Beaker, Shield } from 'lucide-react';
+import { HeartPulse, Calendar, Menu, X, UserCircle, LogOut, Settings, Briefcase, Users, Pill, Beaker, Shield, Gift } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { useState, useEffect } from 'react';
@@ -85,6 +85,14 @@ export function Header() {
                     </Link>
                 </DropdownMenuItem>
              )}
+             {user.role === 'agent' && (
+                <DropdownMenuItem asChild>
+                    <Link href="/agent/profile">
+                        <Gift className="mr-2" />
+                        <span>Referral Code</span>
+                    </Link>
+                </DropdownMenuItem>
+             )}
              {user.role === 'pharmacy' && (
                 <DropdownMenuItem asChild>
                     <Link href="/pharmacy/profile">
@@ -151,6 +159,14 @@ export function Header() {
                     </Link>
                 </Button>
            )}
+           {user.role === 'agent' && (
+              <Button variant="ghost" asChild className="justify-start text-lg">
+                  <Link href="/agent/profile" onClick={() => setIsSheetOpen(false)}>
+                      <Gift className="mr-2" />
+                      Referral Code
+                  </Link>
+              </Button>
+            )}
            {user.role === 'pharmacy' && (
                 <Button variant="ghost" asChild className="justify-start text-lg">
                     <Link href="/pharmacy/profile" onClick={() => setIsSheetOpen(false)}>

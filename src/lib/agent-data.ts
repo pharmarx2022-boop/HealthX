@@ -10,23 +10,49 @@ export type AgentTransaction = {
     date: string | Date;
 }
 
-const mockInitialTransactions: AgentTransaction[] = [
-    {
-        type: 'credit',
-        amount: 50,
-        description: 'Commission from booking for Rohan Sharma',
-        date: new Date('2024-07-20T10:00:00Z'),
-    },
-    {
-        type: 'credit',
-        amount: 75,
-        description: 'Commission from booking for Priya Mehta',
-        date: new Date('2024-07-21T11:30:00Z'),
-    }
-];
+// MOCK DATA: Simulate that this agent has completed 10 bookings to trigger referral reward for their referrer
+const mockInitialTransactions: AgentTransaction[] = Array.from({ length: 10 }, (_, i) => ({
+    type: 'credit' as 'credit',
+    amount: 50 + i,
+    description: `Commission from booking #${i+1}`,
+    date: new Date(`2024-07-${i+1}T10:00:00Z`),
+}));
+
 
 function initializeTransactions(agentId: string): AgentTransaction[] {
     const key = TRANSACTIONS_KEY_PREFIX + agentId;
+    // In a real app, you would check if this agent was referred and if their referrer's reward is pending
+    // For demo, we will assume agent_1 was referred by pharm1
+    if(agentId === 'agent_1') {
+        const rewardDetails = {
+            referrerId: 'pharm1',
+            referredUserId: 'agent_1',
+            type: 'agent',
+            status: 'pending',
+            rewardAmount: 200,
+            milestone: 10, // 10 bookings needed
+            currentProgress: 10,
+        };
+        // Check if milestone is reached
+        if (rewardDetails.currentProgress >= rewardDetails.milestone && rewardDetails.status === 'pending') {
+            console.log(`Agent ${agentId} reached the referral milestone. Crediting referrer ${rewardDetails.referrerId}.`);
+            // This would call a backend function. We simulate it here.
+            // In a real app, this would be a server-side check.
+             import('./commission-wallet').then(wallet => {
+                wallet.recordCommission(rewardDetails.referrerId, {
+                    type: 'credit',
+                    amount: rewardDetails.rewardAmount,
+                    description: `Referral bonus for new agent: ${agentId}`,
+                    date: new Date(),
+                    status: 'success'
+                });
+            });
+            // Update referral status to completed
+            rewardDetails.status = 'completed';
+        }
+    }
+
+
     sessionStorage.setItem(key, JSON.stringify(mockInitialTransactions));
     return mockInitialTransactions;
 }

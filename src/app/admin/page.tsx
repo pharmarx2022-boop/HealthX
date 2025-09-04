@@ -3,6 +3,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { RefundTool } from '@/components/admin/refund-tool';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { WithdrawalRequests } from '@/components/admin/withdrawal-requests';
 
 export default function AdminPage() {
   return (
@@ -15,17 +16,30 @@ export default function AdminPage() {
                 <p className="text-muted-foreground">Manage users, approvals, and refunds.</p>
             </div>
             
-            <Card className="shadow-sm">
-                <CardHeader>
-                    <CardTitle>AI-Assisted Refund Tool</CardTitle>
-                    <CardDescription>
-                        Use this tool to quickly verify user refund requests by looking up consultation history and wallet balance.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <RefundTool />
-                </CardContent>
-            </Card>
+            <div className="grid lg:grid-cols-2 gap-8 items-start">
+                <Card className="shadow-sm">
+                    <CardHeader>
+                        <CardTitle>AI-Assisted Refund Tool</CardTitle>
+                        <CardDescription>
+                            Use this tool to quickly verify user refund requests by looking up consultation history and wallet balance.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <RefundTool />
+                    </CardContent>
+                </Card>
+                 <Card className="shadow-sm">
+                    <CardHeader>
+                        <CardTitle>Commission Withdrawal Requests</CardTitle>
+                        <CardDescription>
+                           Approve or reject requests from partners to withdraw their referral commissions.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <WithdrawalRequests />
+                    </CardContent>
+                </Card>
+            </div>
 
         </div>
       </main>

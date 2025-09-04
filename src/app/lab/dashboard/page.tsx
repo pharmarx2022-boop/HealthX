@@ -7,12 +7,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Beaker, Search, User, Wallet, History, BadgePercent, Banknote, IndianRupee, Upload } from 'lucide-react';
+import { Beaker, Search, User, Wallet, History, BadgePercent, Banknote, IndianRupee, Upload, Gift } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useMemo, useEffect } from 'react';
 import { initialLabs, mockPatientData, mockReports, type MockReport } from '@/lib/mock-data';
 import { getTransactionHistory, recordTransaction, type Transaction } from '@/lib/transactions';
 import { getLabData, recordCommission, type LabTransaction } from '@/lib/lab-data';
+import { getCommissionWalletData, requestWithdrawal, type CommissionTransaction } from '@/lib/commission-wallet';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -33,6 +34,7 @@ export default function LabDashboardPage() {
     const [totalBill, setTotalBill] = useState('');
     const [patientTransactionHistory, setPatientTransactionHistory] = useState<{ balance: number; transactions: Transaction[] }>({ balance: 0, transactions: [] });
     const [labData, setLabData] = useState<{ balance: number; transactions: LabTransaction[] }>({ balance: 0, transactions: [] });
+    const [commissionWallet, setCommissionWallet] = useState<{ balance: number; transactions: CommissionTransaction[] }>({ balance: 0, transactions: [] });
     const [labDetails, setLabDetails] = useState<any>(null);
     const [reportFile, setReportFile] = useState<File | null>(null);
     const [reportName, setReportName] = useState('');
@@ -50,6 +52,7 @@ export default function LabDashboardPage() {
                 const myDetails = allLabs.find((p: any) => p.id === u.id);
                 setLabDetails(myDetails);
                 setLabData(getLabData(u.id));
+                setCommissionWallet(getCommissionWalletData(u.id));
             }
              if (!sessionStorage.getItem(REPORTS_KEY)) {
                 sessionStorage.setItem(REPORTS_KEY, JSON.stringify(mockReports));
@@ -201,6 +204,20 @@ export default function LabDashboardPage() {
         setUploadPatientPhone('');
         setReportFile(null);
         setReportName('');
+    }
+
+    const handleWithdrawalRequest = () => {
+        const withdrawalAmount = commissionWallet.balance;
+         if (withdrawalAmount <= 0) {
+            toast({
+                title: "No Commission to Withdraw",
+                description: "You have no commission balance to withdraw.",
+                variant: "destructive"
+            });
+            return;
+        }
+        requestWithdrawal(user.id, labDetails.name, withdrawalAmount);
+        setCommissionWallet(getCommissionWalletData(user.id));
     }
 
   return (
@@ -398,6 +415,52 @@ export default function LabDashboardPage() {
                                                 ))
                                             ) : (
                                                 <p className="text-center text-muted-foreground py-4">No transactions yet.</p>
+                                            )}
+                                        </ul>
+                                    </div>
+                                </DialogContent>
+                            </Dialog>
+                        </CardFooter>
+                    </Card>
+                     <Card className="shadow-sm">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><Gift/> Referral Commissions</CardTitle>
+                            <CardDescription>Your earnings from referring new partners.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-4xl font-bold">₹{isClient ? commissionWallet.balance.toFixed(2) : '0.00'}</p>
+                        </CardContent>
+                        <CardFooter className="flex-col items-start gap-4">
+                            <Button className="w-full" onClick={handleWithdrawalRequest} disabled={!isClient || commissionWallet.balance <= 0}>
+                                <Banknote className="mr-2"/> Request Withdrawal
+                            </Button>
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button variant="link" className="p-0 h-auto self-center">
+                                        <History className="mr-2"/> View Commission History
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Commission History</DialogTitle>
+                                        <DialogDescription>A record of your referral earnings and withdrawals.</DialogDescription>
+                                    </DialogHeader>
+                                    <div className="max-h-[50vh] overflow-y-auto -mx-6 px-6">
+                                        <ul className="space-y-4 py-4">
+                                            {isClient && commissionWallet.transactions.length > 0 ? (
+                                                commissionWallet.transactions.map((tx, index) => (
+                                                    <li key={index} className="flex items-center justify-between">
+                                                        <div>
+                                                            <p className="font-medium">{tx.description}</p>
+                                                            <p className="text-xs text-muted-foreground mt-1">{format(new Date(tx.date), 'PP, p')}</p>
+                                                        </div>
+                                                        <span className={`font-semibold capitalize ${tx.type === 'credit' ? 'text-green-600' : 'text-destructive'}`}>
+                                                            {tx.type === 'credit' ? '+' : '-'} ₹{tx.amount.toFixed(2)} <span className="text-muted-foreground">({tx.status})</span>
+                                                        </span>
+                                                    </li>
+                                                ))
+                                            ) : (
+                                                <p className="text-center text-muted-foreground py-4">No commission transactions yet.</p>
                                             )}
                                         </ul>
                                     </div>

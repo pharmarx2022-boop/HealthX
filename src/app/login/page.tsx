@@ -107,14 +107,12 @@ export default function LoginPage() {
         // Add a welcome notification
         addNotification(user.id, isNewUser ? 'Welcome to HealthLink Hub! Your account is ready.' : 'You have successfully logged in.');
         
-        if (isNewUser && user.status === 'pending') {
+        if (user.status === 'pending') {
              toast({
-                title: "Registration Submitted",
-                description: "Your account is now pending admin approval. You will be notified once it's active.",
+                title: "Account Pending Approval",
+                description: "Your account is active for viewing and profile updates, but some features are disabled until admin approval.",
                 duration: 9000,
             });
-            router.push('/');
-            return;
         }
 
         if(selectedRole === 'admin') {

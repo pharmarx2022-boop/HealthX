@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, ChangeEvent } from 'react';
@@ -187,6 +188,7 @@ export function ClinicManager() {
   const userClinics = isClient ? clinics.filter(c => c.doctorId === user?.id) : [];
 
   const currentImage = form.watch('image');
+  const isApproved = user?.status === 'approved';
 
   return (
     <div className="space-y-8">

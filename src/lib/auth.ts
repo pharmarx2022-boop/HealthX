@@ -116,10 +116,7 @@ export function loginWithOtp(email: string, otp: string, role: string, referralC
     } else {
         console.log('Existing user logging in:', user);
     }
-
-    if (user.status === 'pending') {
-        return { user: null, error: "Your account is pending admin approval.", isNewUser: false };
-    }
+    
     if (user.status === 'rejected') {
         return { user: null, error: "Your registration has been rejected.", isNewUser: false };
     }

@@ -64,7 +64,7 @@ export function Header() {
              {user.role === 'doctor' && (
                 <>
                     <DropdownMenuItem asChild>
-                        <Link href="/doctor/profile">
+                        <Link href="/doctor/dashboard#profile">
                             <Settings className="mr-2" />
                             <span>Manage Profile</span>
                         </Link>
@@ -138,7 +138,7 @@ export function Header() {
            {user.role === 'doctor' && (
              <>
                 <Button variant="ghost" asChild className="justify-start text-lg">
-                    <Link href="/doctor/profile" onClick={() => setIsSheetOpen(false)}>
+                    <Link href="/doctor/dashboard#profile" onClick={() => setIsSheetOpen(false)}>
                         <Settings className="mr-2" />
                         Manage Profile
                     </Link>

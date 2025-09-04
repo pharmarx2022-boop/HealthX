@@ -117,9 +117,9 @@ export function ProfileForm() {
 
   return (
     <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="grid md:grid-cols-3 gap-8">
-            <div className="md:col-span-1">
-                <h3 className="font-semibold mb-2">Profile Picture</h3>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+             <div>
+                <h3 className="font-semibold mb-2 text-sm">Profile Picture</h3>
                 <div className="relative w-full aspect-square rounded-lg overflow-hidden border">
                     {currentImage ? (
                         <Image src={currentImage} alt="Profile Preview" fill style={{objectFit:"cover"}} data-ai-hint="doctor portrait" />
@@ -130,7 +130,7 @@ export function ProfileForm() {
                     )}
                 </div>
                 <FormField control={form.control} name="image" render={({ field }) => (
-                    <FormItem className="mt-4">
+                    <FormItem className="mt-2">
                         <FormControl>
                             <div>
                                 <Input 
@@ -140,9 +140,9 @@ export function ProfileForm() {
                                     onChange={handleImageUpload}
                                     className="hidden" 
                                 />
-                                <label htmlFor="image-upload" className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full">
-                                    <Upload className="mr-2" />
-                                    Upload from Device
+                                <label htmlFor="image-upload" className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 w-full">
+                                    <Upload className="mr-2 h-4 w-4" />
+                                    Upload
                                 </label>
                             </div>
                         </FormControl>
@@ -150,83 +150,82 @@ export function ProfileForm() {
                     </FormItem>
                 )} />
             </div>
-            <div className="md:col-span-2 space-y-6">
+            
+            <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Full Name</FormLabel>
+                    <FormControl>
+                        <Input placeholder="e.g., Dr. Anjali Sharma" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
+            <div className="grid grid-cols-2 gap-4">
                 <FormField
                     control={form.control}
-                    name="name"
+                    name="specialty"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Full Name</FormLabel>
+                        <FormLabel>Specialty</FormLabel>
                         <FormControl>
-                            <Input placeholder="e.g., Dr. Anjali Sharma" {...field} />
+                            <Input placeholder="e.g., Cardiologist" {...field} />
                         </FormControl>
                         <FormMessage />
                         </FormItem>
                     )}
                 />
-                <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                        control={form.control}
-                        name="specialty"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Specialty</FormLabel>
+                <FormField
+                    control={form.control}
+                    name="experience"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Experience</FormLabel>
                             <FormControl>
-                                <Input placeholder="e.g., Cardiologist" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="experience"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Years of Experience</FormLabel>
-                             <FormControl>
-                                <div className="relative">
-                                    <Input type="number" placeholder="e.g., 15" {...field} className="pl-8"/>
-                                    <Briefcase className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                </div>
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </div>
-                <FormField
-                    control={form.control}
-                    name="location"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Location</FormLabel>
-                        <FormControl>
-                            <Input placeholder="e.g., Mumbai, IN" {...field} />
+                            <div className="relative">
+                                <Input type="number" placeholder="e.g., 15" {...field} className="pl-8"/>
+                                <Briefcase className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            </div>
                         </FormControl>
                         <FormMessage />
                         </FormItem>
                     )}
                 />
-                <FormField
-                    control={form.control}
-                    name="bio"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Bio / Experience</FormLabel>
-                        <FormControl>
-                            <Textarea rows={5} placeholder="Tell patients a little about yourself..." {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                
-                <Button type="submit" disabled={form.formState.isSubmitting}>
-                    {form.formState.isSubmitting && <Loader2 className="animate-spin mr-2" />}
-                    Save Changes
-                </Button>
             </div>
+            <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Location</FormLabel>
+                    <FormControl>
+                        <Input placeholder="e.g., Mumbai, IN" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="bio"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Bio / Experience</FormLabel>
+                    <FormControl>
+                        <Textarea rows={4} placeholder="Tell patients a little about yourself..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
+            
+            <Button type="submit" disabled={form.formState.isSubmitting} className="w-full">
+                {form.formState.isSubmitting && <Loader2 className="animate-spin mr-2" />}
+                Save Profile Changes
+            </Button>
         </form>
     </Form>
   );

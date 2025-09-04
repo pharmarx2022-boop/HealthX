@@ -8,11 +8,11 @@ import { Input } from '@/components/ui/input';
 import { Stethoscope, MapPin, Pill, Loader2, AlertTriangle, Building, Link as LinkIcon, Search, PercentCircle, Beaker, Calendar } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { initialDoctors, initialClinics, initialPharmacies, initialLabs, mockFamilyMembers } from '@/lib/mock-data';
+import { initialDoctors, initialClinics, initialPharmacies, initialLabs, mockPatientData } from '@/lib/mock-data';
+import { mockFamilyMembers } from '@/lib/family-members';
 import { Badge } from '../ui/badge';
 import { BookingDialog } from './booking-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { mockPatientData } from '@/lib/mock-data';
 
 // Types
 type Doctor = typeof initialDoctors[0];
@@ -70,10 +70,10 @@ export function NearbySearch() {
         const storedClinics = sessionStorage.getItem(CLINICS_KEY);
         setClinics(storedClinics ? JSON.parse(storedClinics) : initialClinics);
 
-        const storedPharmacies = sessionStorage.getItem(PHARMACIES_KEY);
+        const storedPharmacies = sessionStorage.getItem('mockPharmacies');
         setPharmacies(storedPharmacies ? JSON.parse(storedPharmacies) : initialPharmacies);
         
-        const storedLabs = sessionStorage.getItem(LABS_KEY);
+        const storedLabs = sessionStorage.getItem('mockLabs');
         setLabs(storedLabs ? JSON.parse(storedLabs) : initialLabs);
 
         const storedFamily = sessionStorage.getItem(FAMILY_KEY);
@@ -359,5 +359,3 @@ export function NearbySearch() {
     </div>
   );
 }
-
-    

@@ -50,7 +50,7 @@ export function requestWithdrawal(partnerId: string, partnerName: string, amount
     sessionStorage.setItem(HP_WITHDRAWAL_REQUESTS_KEY, JSON.stringify([...requests, newRequest]));
     toast({
         title: "Withdrawal Request Sent",
-        description: `Your request to withdraw ₹${amount.toFixed(2)} has been sent to the admin for approval.`
+        description: `Your request to withdraw INR ${amount.toFixed(2)} has been sent to the admin for approval.`
     });
 }
 

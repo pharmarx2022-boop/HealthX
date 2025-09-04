@@ -117,9 +117,9 @@ export function NearbySearch() {
     const maxFee = Math.max(...fees);
 
     if (minFee === maxFee) {
-        return `₹${minFee.toFixed(2)}`;
+        return `INR ${minFee.toFixed(2)}`;
     }
-    return `₹${minFee.toFixed(2)} - ₹${maxFee.toFixed(2)}`;
+    return `INR ${minFee.toFixed(2)} - INR ${maxFee.toFixed(2)}`;
   };
 
 

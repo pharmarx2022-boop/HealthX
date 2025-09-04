@@ -84,7 +84,7 @@ export function requestWithdrawal(userId: string, userName: string, amount: numb
     sessionStorage.setItem(WITHDRAWAL_REQUESTS_KEY, JSON.stringify([...requests, newRequest]));
     toast({
         title: "Withdrawal Request Sent",
-        description: `Your request to withdraw ₹${amount.toFixed(2)} has been sent to the admin for approval.`
+        description: `Your request to withdraw INR ${amount.toFixed(2)} has been sent to the admin for approval.`
     })
 }
 

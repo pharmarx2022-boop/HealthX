@@ -171,10 +171,10 @@ export default function PatientDashboardPage() {
                                                             </div>
                                                         </div>
                                                         <div className="flex items-center text-muted-foreground gap-3">
-                                                            <p className="font-bold text-primary">₹</p>
+                                                            <p className="font-bold text-primary">INR</p>
                                                             <div>
                                                                 <p className="font-medium text-foreground">Fee Paid</p>
-                                                                <p>₹{appt.consultationFee.toFixed(2)}</p>
+                                                                <p>INR {appt.consultationFee.toFixed(2)}</p>
                                                             </div>
                                                         </div>
                                                         <div className="flex items-center text-muted-foreground gap-3 col-span-2">
@@ -214,7 +214,7 @@ export default function PatientDashboardPage() {
                                     </div>
                                 </CardHeader>
                                 <CardContent>
-                                    <p className="text-3xl font-bold">₹{transactionHistory.balance.toFixed(2)}</p>
+                                    <p className="text-3xl font-bold">INR {transactionHistory.balance.toFixed(2)}</p>
                                     <p className="text-sm text-muted-foreground mt-1">Available to redeem.</p>
                                 </CardContent>
                                 <CardFooter className="flex flex-col gap-2">
@@ -312,7 +312,7 @@ export default function PatientDashboardPage() {
                                             <p className="text-xs text-muted-foreground mt-1">{format(tx.date, 'PP, p')}</p>
                                         </div>
                                         <span className={`font-semibold ${tx.type === 'credit' ? 'text-green-600' : 'text-destructive'}`}>
-                                            {tx.type === 'credit' ? '+' : '-'} ₹{tx.amount.toFixed(2)}
+                                            {tx.type === 'credit' ? '+' : '-'} INR {tx.amount.toFixed(2)}
                                         </span>
                                     </li>
                                 ))

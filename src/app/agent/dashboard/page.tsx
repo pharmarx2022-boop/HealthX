@@ -53,7 +53,7 @@ export default function AgentDashboardPage() {
 
         toast({
             title: "Conversion Request Sent!",
-            description: `Your request to convert ₹${conversionAmount.toFixed(2)} has been sent to the admin. The amount will be transferred to your bank account soon.`
+            description: `Your request to convert INR ${conversionAmount.toFixed(2)} has been sent to the admin. The amount will be transferred to your bank account soon.`
         });
     };
     
@@ -110,8 +110,8 @@ export default function AgentDashboardPage() {
                                     <CardDescription>Your total earnings available for conversion.</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <p className="text-4xl font-bold">₹{isClient ? agentData.balance.toFixed(2) : '0.00'}</p>
-                                    <p className="text-sm text-muted-foreground mt-1">1 Health Point = ₹1</p>
+                                    <p className="text-4xl font-bold">INR {isClient ? agentData.balance.toFixed(2) : '0.00'}</p>
+                                    <p className="text-sm text-muted-foreground mt-1">1 Health Point = 1 INR</p>
                                 </CardContent>
                                 <CardFooter className="flex-col items-start gap-4">
                                     <Button className="w-full" onClick={handleConversionRequest} disabled={!isClient || agentData.balance <= 0}>
@@ -138,7 +138,7 @@ export default function AgentDashboardPage() {
                                                                     <p className="text-xs text-muted-foreground mt-1">{format(new Date(tx.date), 'PP, p')}</p>
                                                                 </div>
                                                                 <span className={`font-semibold ${tx.type === 'credit' ? 'text-green-600' : 'text-destructive'}`}>
-                                                                    {tx.type === 'credit' ? '+' : '-'} ₹{tx.amount.toFixed(2)}
+                                                                    {tx.type === 'credit' ? '+' : '-'} INR {tx.amount.toFixed(2)}
                                                                 </span>
                                                             </li>
                                                         ))
@@ -157,7 +157,7 @@ export default function AgentDashboardPage() {
                                     <CardDescription>Your earnings from referring new partners.</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <p className="text-4xl font-bold">₹{isClient ? commissionWallet.balance.toFixed(2) : '0.00'}</p>
+                                    <p className="text-4xl font-bold">INR {isClient ? commissionWallet.balance.toFixed(2) : '0.00'}</p>
                                 </CardContent>
                                 <CardFooter className="flex-col items-start gap-4">
                                     <Button className="w-full" onClick={handleWithdrawalRequest} disabled={!isClient || commissionWallet.balance <= 0}>
@@ -184,7 +184,7 @@ export default function AgentDashboardPage() {
                                                                     <p className="text-xs text-muted-foreground mt-1">{format(new Date(tx.date), 'PP, p')}</p>
                                                                 </div>
                                                                 <span className={`font-semibold capitalize ${tx.type === 'credit' ? 'text-green-600' : 'text-destructive'}`}>
-                                                                    {tx.type === 'credit' ? '+' : '-'} ₹{tx.amount.toFixed(2)} <span className="text-muted-foreground">({tx.status})</span>
+                                                                    {tx.type === 'credit' ? '+' : '-'} INR {tx.amount.toFixed(2)} <span className="text-muted-foreground">({tx.status})</span>
                                                                 </span>
                                                             </li>
                                                         ))

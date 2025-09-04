@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Badge } from '../ui/badge';
-import { IndianRupee, Check, X, Pill, Beaker } from 'lucide-react';
+import { Check, X, Pill, Beaker } from 'lucide-react';
 
 export function HealthPointWithdrawals() {
     const [requests, setRequests] = useState<HealthPointWithdrawalRequest[]>([]);
@@ -55,7 +55,7 @@ export function HealthPointWithdrawals() {
                                     </div>
                                     <div className="text-xs text-muted-foreground pl-6">{req.partnerId}</div>
                                 </TableCell>
-                                <TableCell>₹{req.amount.toFixed(2)}</TableCell>
+                                <TableCell>INR {req.amount.toFixed(2)}</TableCell>
                                 <TableCell>{format(new Date(req.date), 'PP')}</TableCell>
                                 <TableCell>
                                     <Badge variant={

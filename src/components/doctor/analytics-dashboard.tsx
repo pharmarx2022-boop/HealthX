@@ -37,8 +37,8 @@ const statCards = [
     },
     {
         title: 'Total Earnings (Mock)',
-        value: '₹7450',
-        icon: () => <span className="font-bold">₹</span>,
+        value: 'INR 7450',
+        icon: () => <span className="font-bold">INR</span>,
         description: 'Based on completed consultations.',
     }
 ]

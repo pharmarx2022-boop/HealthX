@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useTransition } from 'react';
@@ -83,7 +84,7 @@ export function RefundTool() {
               name="refundAmount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Refund Amount (₹)</FormLabel>
+                  <FormLabel>Refund Amount (INR)</FormLabel>
                   <FormControl>
                     <Input type="number" placeholder="e.g., 500" {...field} />
                   </FormControl>
@@ -138,7 +139,7 @@ export function RefundTool() {
                     <Wallet className="w-5 h-5 mt-1 text-primary"/>
                     <div>
                         <h4 className="font-semibold">Current Wallet Balance</h4>
-                        <p className="text-sm text-muted-foreground">₹{result.walletBalance.toFixed(2)}</p>
+                        <p className="text-sm text-muted-foreground">INR {result.walletBalance.toFixed(2)}</p>
                     </div>
                 </div>
                 <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">

@@ -139,7 +139,7 @@ export default function LabDashboardPage() {
         if (pointsToPay > patientTransactionHistory.balance) {
             toast({
                 title: "Insufficient Balance",
-                description: `Patient needs ₹${pointsToPay.toFixed(2)} in Health Points but only has ₹${patientTransactionHistory.balance.toFixed(2)}.`,
+                description: `Patient needs INR ${pointsToPay.toFixed(2)} in Health Points but only has INR ${patientTransactionHistory.balance.toFixed(2)}.`,
                 variant: "destructive"
             });
             return;
@@ -163,7 +163,7 @@ export default function LabDashboardPage() {
 
         toast({
             title: "Payment Successful!",
-            description: `₹${pointsToPay.toFixed(2)} collected in Health Points. Please collect ₹${calculatedAmounts.cashToPay.toFixed(2)} in cash.`,
+            description: `INR ${pointsToPay.toFixed(2)} collected in Health Points. Please collect INR ${calculatedAmounts.cashToPay.toFixed(2)} in cash.`,
             duration: 6000
         });
 
@@ -289,7 +289,7 @@ export default function LabDashboardPage() {
                                             </div>
                                         </div>
                                         <div className="text-left md:text-right mt-4 md:mt-0">
-                                            <p className="text-xl font-bold">₹{patientTransactionHistory.balance.toFixed(2)}</p>
+                                            <p className="text-xl font-bold">INR {patientTransactionHistory.balance.toFixed(2)}</p>
                                             <p className="text-xs text-muted-foreground -mt-1">Available Balance</p>
                                         </div>
                                     </div>
@@ -307,7 +307,7 @@ export default function LabDashboardPage() {
                                             </Alert>
 
                                             <div>
-                                                <Label htmlFor="totalBill">Total Bill Amount (₹)</Label>
+                                                <Label htmlFor="totalBill">Total Bill Amount (INR)</Label>
                                                 <Input id="totalBill" placeholder="e.g., 1000" type="number" value={totalBill} onChange={(e) => setTotalBill(e.target.value)}/>
                                             </div>
 
@@ -315,11 +315,11 @@ export default function LabDashboardPage() {
                                                 <div className="space-y-2 text-sm p-3 bg-white rounded-md border">
                                                     <div className="flex justify-between">
                                                         <span className="text-muted-foreground">Pay with Health Points:</span>
-                                                        <span className="font-medium">₹{calculatedAmounts.pointsToPay.toFixed(2)}</span>
+                                                        <span className="font-medium">INR {calculatedAmounts.pointsToPay.toFixed(2)}</span>
                                                     </div>
                                                     <div className="flex justify-between font-semibold">
                                                         <span className="text-muted-foreground">Pay with Cash:</span>
-                                                        <span className="font-medium">₹{calculatedAmounts.cashToPay.toFixed(2)}</span>
+                                                        <span className="font-medium">INR {calculatedAmounts.cashToPay.toFixed(2)}</span>
                                                     </div>
                                                 </div>
                                             )}
@@ -405,7 +405,7 @@ export default function LabDashboardPage() {
                             <CardDescription>Points collected from patient bills.</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-4xl font-bold">₹{labData.balance.toFixed(2)}</p>
+                            <p className="text-4xl font-bold">INR {labData.balance.toFixed(2)}</p>
                         </CardContent>
                         <CardFooter className="flex-col items-start gap-4">
                             <Button className="w-full" onClick={handleHealthPointWithdrawal} disabled={!isClient || labData.balance <= 0}>
@@ -432,7 +432,7 @@ export default function LabDashboardPage() {
                                                             <p className="text-xs text-muted-foreground mt-1">{format(new Date(tx.date), 'PP, p')}</p>
                                                         </div>
                                                         <span className={`font-semibold ${tx.type === 'credit' ? 'text-green-600' : 'text-destructive'}`}>
-                                                            {tx.type === 'credit' ? '+' : '-'} ₹{tx.amount.toFixed(2)}
+                                                            {tx.type === 'credit' ? '+' : '-'} INR {tx.amount.toFixed(2)}
                                                         </span>
                                                     </li>
                                                 ))
@@ -451,7 +451,7 @@ export default function LabDashboardPage() {
                             <CardDescription>Your earnings from referring new partners.</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-4xl font-bold">₹{isClient ? commissionWallet.balance.toFixed(2) : '0.00'}</p>
+                            <p className="text-4xl font-bold">INR {isClient ? commissionWallet.balance.toFixed(2) : '0.00'}</p>
                         </CardContent>
                         <CardFooter className="flex-col items-start gap-4">
                             <Button className="w-full" onClick={handleCommissionWithdrawal} disabled={!isClient || commissionWallet.balance <= 0}>
@@ -478,7 +478,7 @@ export default function LabDashboardPage() {
                                                             <p className="text-xs text-muted-foreground mt-1">{format(new Date(tx.date), 'PP, p')}</p>
                                                         </div>
                                                         <span className={`font-semibold capitalize ${tx.type === 'credit' ? 'text-green-600' : 'text-destructive'}`}>
-                                                            {tx.type === 'credit' ? '+' : '-'} ₹{tx.amount.toFixed(2)} <span className="text-muted-foreground">({tx.status})</span>
+                                                            {tx.type === 'credit' ? '+' : '-'} INR {tx.amount.toFixed(2)} <span className="text-muted-foreground">({tx.status})</span>
                                                         </span>
                                                     </li>
                                                 ))

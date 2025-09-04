@@ -257,7 +257,7 @@ export function ClinicManager() {
 
                             <FormField control={form.control} name="consultationFee" render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Consultation Fee (₹)</FormLabel>
+                                    <FormLabel>Consultation Fee (INR)</FormLabel>
                                     <FormControl><Input type="number" placeholder="e.g., 1500" {...field} /></FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -335,7 +335,7 @@ export function ClinicManager() {
                         </div>
                         <CardTitle>{clinic.name}</CardTitle>
                         <CardDescription className="flex items-center gap-2 pt-1 text-primary">
-                            <span className="font-bold">₹{clinic.consultationFee.toFixed(2)}</span>
+                            <span className="font-bold">INR {clinic.consultationFee.toFixed(2)}</span>
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="flex-grow space-y-4">

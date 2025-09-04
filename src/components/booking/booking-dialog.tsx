@@ -256,8 +256,8 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
 
                     {selectedClinic && (
                          <Alert variant="default" className="bg-primary/10 border-primary/20 text-primary">
-                            <span className="font-bold">₹</span>
-                            <AlertTitle className="font-bold">Consultation Fee: ₹{selectedClinic.consultationFee.toFixed(2)}</AlertTitle>
+                            <span className="font-bold">INR</span>
+                            <AlertTitle className="font-bold">Consultation Fee: INR {selectedClinic.consultationFee.toFixed(2)}</AlertTitle>
                             <AlertDescription>
                                 This fee is applicable for {selectedClinic.name}.
                             </AlertDescription>

@@ -188,7 +188,7 @@ export default function DoctorDetailPage() {
                                             </p>
                                         </div>
                                         <div className="font-bold text-lg text-primary mt-4 md:mt-0">
-                                            <span>₹{clinic.consultationFee.toFixed(2)}</span>
+                                            <span>INR {clinic.consultationFee.toFixed(2)}</span>
                                         </div>
                                     </CardContent>
                                 </Card>

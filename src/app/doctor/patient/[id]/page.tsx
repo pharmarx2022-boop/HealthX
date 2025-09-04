@@ -69,7 +69,7 @@ export default function PatientDetailPage() {
         });
         toast({
             title: "Agent Commission Paid",
-            description: `A commission of ₹${commissionAmount.toFixed(2)} has been credited to agent ${patient.agentId}.`
+            description: `A commission of INR ${commissionAmount.toFixed(2)} has been credited to agent ${patient.agentId}.`
         });
     }
     
@@ -87,7 +87,7 @@ export default function PatientDetailPage() {
 
     toast({
         title: "Consultation Complete",
-        description: `Refund for ₹${patient?.consultationFee.toFixed(2)} initiated. An equal amount of Health Points has been credited to the patient.`,
+        description: `Refund for INR ${patient?.consultationFee.toFixed(2)} initiated. An equal amount of Health Points has been credited to the patient.`,
     });
   };
 
@@ -203,7 +203,7 @@ export default function PatientDetailPage() {
                   <CreditCard className="w-5 h-5 text-primary"/> 
                   <div>
                     <p className="font-medium text-foreground">Consultation Fee</p>
-                    <p>₹{patient.consultationFee.toFixed(2)}</p>
+                    <p>INR {patient.consultationFee.toFixed(2)}</p>
                   </div>
                 </div>
                  <div className="flex items-center text-muted-foreground gap-3">
@@ -261,7 +261,7 @@ export default function PatientDetailPage() {
                             <AlertDialogHeader>
                                 <AlertDialogTitle>Confirm Consultation Completion</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    This will mark the consultation as complete. A refund of ₹{patient.consultationFee.toFixed(2)} will be issued to the patient's original payment method, and an equal amount of Health Points will be credited to their account. This action cannot be undone.
+                                    This will mark the consultation as complete. A refund of INR {patient.consultationFee.toFixed(2)} will be issued to the patient's original payment method, and an equal amount of Health Points will be credited to their account. This action cannot be undone.
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>

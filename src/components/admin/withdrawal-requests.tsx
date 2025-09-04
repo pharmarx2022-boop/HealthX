@@ -47,7 +47,7 @@ export function WithdrawalRequests() {
                                     <div className="font-medium">{req.userName}</div>
                                     <div className="text-xs text-muted-foreground">{req.userId}</div>
                                 </TableCell>
-                                <TableCell>₹{req.amount.toFixed(2)}</TableCell>
+                                <TableCell>INR {req.amount.toFixed(2)}</TableCell>
                                 <TableCell>{format(new Date(req.date), 'PP')}</TableCell>
                                 <TableCell>
                                     <Badge variant={

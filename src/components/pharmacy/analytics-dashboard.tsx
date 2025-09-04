@@ -25,8 +25,8 @@ const chartConfig = {
 const statCards = [
     {
         title: 'Total HealthPoints Collected',
-        value: '₹25,600',
-        icon: () => <span className="font-bold">₹</span>,
+        value: 'INR 25,600',
+        icon: () => <span className="font-bold">INR</span>,
         description: 'All-time points collected from bills.',
     },
     {
@@ -37,7 +37,7 @@ const statCards = [
     },
     {
         title: 'Total Commission Earned',
-        value: '₹2,500',
+        value: 'INR 2,500',
         icon: Gift,
         description: 'From referring new partners.',
     }

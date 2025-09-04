@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -43,11 +44,11 @@ const refundVerificationPrompt = ai.definePrompt({
   Based on the user's consultation history, current wallet balance, and the refund reason, determine if the refund amount is appropriate. Display a approval message to the admin regarding the approval.
 
   User ID: {{{userId}}}
-  Refund Amount: ₹{{{refundAmount}}}
+  Refund Amount: INR {{{refundAmount}}}
   Reason: {{{reason}}}
 
   Consultation History: {{{consultationHistorySummary}}}
-  Wallet Balance: ₹{{{walletBalance}}}
+  Wallet Balance: INR {{{walletBalance}}}
 
   Verification Result: `,
 });
@@ -56,9 +57,9 @@ const refundVerificationPrompt = ai.definePrompt({
 const MOCK_USER_DATA: Record<string, { consultationHistory: string[], walletBalance: number }> = {
     'user_abc123': {
         consultationHistory: [
-            'Consulted Dr. Sharma for cardiology on 2023-10-15. Paid ₹1200.',
-            'Follow-up with Dr. Sharma on 2023-10-22. Paid ₹800.',
-            'Consulted Dr. Singh for dermatology on 2023-11-05. Paid ₹1500.'
+            'Consulted Dr. Sharma for cardiology on 2023-10-15. Paid INR 1200.',
+            'Follow-up with Dr. Sharma on 2023-10-22. Paid INR 800.',
+            'Consulted Dr. Singh for dermatology on 2023-11-05. Paid INR 1500.'
         ],
         walletBalance: 250,
     },
@@ -68,7 +69,7 @@ const MOCK_USER_DATA: Record<string, { consultationHistory: string[], walletBala
     },
     'user_ghi789': {
         consultationHistory: [
-            'Consulted Dr. Patel for pediatrics on 2023-11-10. Paid ₹900.',
+            'Consulted Dr. Patel for pediatrics on 2023-11-10. Paid INR 900.',
         ],
         walletBalance: 50,
     }

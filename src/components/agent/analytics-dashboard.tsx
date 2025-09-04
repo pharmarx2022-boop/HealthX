@@ -37,8 +37,8 @@ const statCards = [
     },
     {
         title: 'Total Commission Earned',
-        value: '₹5,500',
-        icon: () => <span className="font-bold">₹</span>,
+        value: 'INR 5,500',
+        icon: () => <span className="font-bold">INR</span>,
         description: 'Based on all completed bookings.',
     }
 ]

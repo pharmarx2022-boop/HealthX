@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
-import { Loader2, Upload } from 'lucide-react';
+import { Loader2, Upload, Briefcase } from 'lucide-react';
 import { initialDoctors } from '@/lib/mock-data';
 
 // This would typically come from a central store or API
@@ -24,6 +24,7 @@ const profileSchema = z.object({
   location: z.string().min(1, 'Location is required.'),
   bio: z.string().min(1, 'A short bio is required.'),
   image: z.string().min(1, 'A profile picture is required.'),
+  experience: z.coerce.number().min(0, 'Experience must be a positive number.'),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -62,6 +63,7 @@ export function ProfileForm() {
       location: '',
       bio: '',
       image: '',
+      experience: 0,
     },
   });
 
@@ -162,19 +164,37 @@ export function ProfileForm() {
                         </FormItem>
                     )}
                 />
-                <FormField
-                    control={form.control}
-                    name="specialty"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Specialty</FormLabel>
-                        <FormControl>
-                            <Input placeholder="e.g., Cardiologist" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                        control={form.control}
+                        name="specialty"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Specialty</FormLabel>
+                            <FormControl>
+                                <Input placeholder="e.g., Cardiologist" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="experience"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Years of Experience</FormLabel>
+                             <FormControl>
+                                <div className="relative">
+                                    <Input type="number" placeholder="e.g., 15" {...field} className="pl-8"/>
+                                    <Briefcase className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                </div>
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
                 <FormField
                     control={form.control}
                     name="location"

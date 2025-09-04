@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Stethoscope, MapPin, Pill, Loader2, AlertTriangle, Building, Link as LinkIcon, Search, PercentCircle, Beaker, Calendar, Star } from 'lucide-react';
+import { Stethoscope, MapPin, Pill, Loader2, AlertTriangle, Building, Link as LinkIcon, Search, PercentCircle, Beaker, Calendar, Star, Briefcase } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { initialDoctors, initialClinics, initialPharmacies, initialLabs, mockPatientData } from '@/lib/mock-data';
@@ -13,6 +13,7 @@ import { mockFamilyMembers } from '@/lib/family-members';
 import { Badge } from '../ui/badge';
 import { BookingDialog } from './booking-dialog';
 import { useToast } from '@/hooks/use-toast';
+import { Separator } from '../ui/separator';
 
 // Types
 type Doctor = typeof initialDoctors[0];
@@ -263,12 +264,19 @@ export function NearbySearch() {
                                                 </div>
                                             </CardHeader>
                                             <CardContent className="flex-grow space-y-2">
-                                                <div className="flex items-center gap-1 text-amber-500">
-                                                    <Star className="w-4 h-4 fill-current" />
-                                                    <span className="font-bold text-sm">{getAverageRating(doctor.reviewsList)}</span>
-                                                    <span className="text-xs text-muted-foreground ml-1">({doctor.reviewsList?.length ?? 0} reviews)</span>
+                                                <div className="flex items-center gap-4 text-sm">
+                                                    <div className="flex items-center gap-1 text-amber-500">
+                                                        <Star className="w-4 h-4 fill-current" />
+                                                        <span className="font-bold">{getAverageRating(doctor.reviewsList)}</span>
+                                                        <span className="text-xs text-muted-foreground ml-1">({doctor.reviewsList?.length ?? 0})</span>
+                                                    </div>
+                                                    <Separator orientation="vertical" className="h-4"/>
+                                                    <div className="flex items-center gap-1 text-muted-foreground">
+                                                        <Briefcase className="w-4 h-4" />
+                                                        <span>{doctor.experience} yrs exp.</span>
+                                                    </div>
                                                 </div>
-                                                <div className="text-sm flex items-center gap-2 font-semibold text-primary">
+                                                <div className="text-sm flex items-center gap-2 font-semibold text-primary pt-1">
                                                   <span>{getDoctorFeeRange(doctor.id)}</span>
                                                 </div>
                                             </CardContent>

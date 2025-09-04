@@ -5,7 +5,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Stethoscope, MapPin, Calendar, Star, Loader2, MessageSquare, UserPlus, Clock } from 'lucide-react';
+import { Stethoscope, MapPin, Calendar, Star, Loader2, MessageSquare, UserPlus, Clock, Briefcase } from 'lucide-react';
 import Image from 'next/image';
 import { notFound, useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -141,16 +141,23 @@ export default function DoctorDetailPage() {
                             <CardDescription className="flex items-center justify-center md:justify-start gap-2 pt-2 text-base">
                                 <Stethoscope className="w-5 h-5 text-primary" /> <span>{doctor.specialty}</span>
                             </CardDescription>
+                             <div className="flex items-center justify-center md:justify-start gap-4 text-muted-foreground mt-3">
+                                <div className="flex items-center gap-2">
+                                    <Briefcase className="w-5 h-5"/> 
+                                    <span>{doctor.experience} years experience</span>
+                                </div>
+                                <Separator orientation="vertical" className="h-5" />
+                                <div className="flex items-center gap-2">
+                                    <MapPin className="w-5 h-5"/> 
+                                    <span>{doctor.location}</span>
+                                </div>
+                            </div>
                             <div className="flex items-center justify-center md:justify-start gap-4 pt-3">
                                 <div className="flex items-center gap-1 text-amber-500">
                                     <Star className="w-5 h-5 fill-current" />
                                     <span className="font-bold">{averageRating}</span>
                                 </div>
                                 <span className="text-muted-foreground">({totalReviews} reviews)</span>
-                            </div>
-                             <div className="flex items-center justify-center md:justify-start text-muted-foreground gap-2 mt-3">
-                                <MapPin className="w-5 h-5"/> 
-                                <span>{doctor.location}</span>
                             </div>
                         </div>
                     </div>

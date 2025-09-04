@@ -4,7 +4,7 @@
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart';
-import { IndianRupee, FileText, Gift } from 'lucide-react';
+import { FileText, Gift } from 'lucide-react';
 
 const chartData = [
   { month: 'January', reports: 32 },
@@ -26,7 +26,7 @@ const statCards = [
     {
         title: 'Total HealthPoints Collected',
         value: '₹12,450',
-        icon: IndianRupee,
+        icon: () => <span className="font-bold">₹</span>,
         description: 'All-time points collected.',
     },
     {

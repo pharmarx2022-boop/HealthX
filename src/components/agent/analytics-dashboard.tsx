@@ -4,7 +4,7 @@
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart';
-import { IndianRupee, CalendarCheck, Users } from 'lucide-react';
+import { CalendarCheck, Users } from 'lucide-react';
 
 const chartData = [
   { month: 'January', bookings: 12 },
@@ -38,7 +38,7 @@ const statCards = [
     {
         title: 'Total Commission Earned',
         value: '₹5,500',
-        icon: IndianRupee,
+        icon: () => <span className="font-bold">₹</span>,
         description: 'Based on all completed bookings.',
     }
 ]

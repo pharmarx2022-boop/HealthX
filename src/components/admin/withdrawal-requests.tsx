@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Badge } from '../ui/badge';
-import { IndianRupee, Check, X } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 
 export function WithdrawalRequests() {
     const [requests, setRequests] = useState<WithdrawalRequest[]>([]);

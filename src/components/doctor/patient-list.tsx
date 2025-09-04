@@ -18,6 +18,8 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
+import { addNotification } from '@/lib/notifications';
+import { initialDoctors } from '@/lib/mock-data';
 
 export const mockPatients = [
   { id: '1', transactionId: 'txn_1', name: 'Rohan Sharma', clinic: 'Andheri', doctorId: '1', healthCoordinatorId: null, appointmentDate: '2024-08-15T10:00:00Z', status: 'upcoming', consultation: 'Follow-up for cardiology check-up.', notes: 'Patient has reported mild chest pain.', consultationFee: 1200, refundStatus: 'Not Refunded', nextAppointmentDate: null, reviewed: false },
@@ -39,6 +41,7 @@ export function PatientList() {
   const [patients, setPatients] = useState(mockPatients);
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [isClient, setIsClient] = useState(false);
+  const [user, setUser] = useState<any | null>(null);
   const [filters, setFilters] = useState({
     name: '',
     clinic: 'All',
@@ -49,15 +52,20 @@ export function PatientList() {
 
   useEffect(() => {
     setIsClient(true);
-    // Persist mock data to session storage on initial load
-    if (typeof window !== 'undefined' && !sessionStorage.getItem('mockPatients')) {
-      sessionStorage.setItem('mockPatients', JSON.stringify(mockPatients));
-    }
-    
-    // Load data from session storage if it exists
-    const storedPatients = sessionStorage.getItem('mockPatients');
-    if (storedPatients) {
-      setPatients(JSON.parse(storedPatients));
+     if (typeof window !== 'undefined') {
+        const storedUser = sessionStorage.getItem('user');
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+        }
+
+        if (!sessionStorage.getItem('mockPatients')) {
+            sessionStorage.setItem('mockPatients', JSON.stringify(mockPatients));
+        }
+        
+        const storedPatients = sessionStorage.getItem('mockPatients');
+        if (storedPatients) {
+            setPatients(JSON.parse(storedPatients));
+        }
     }
   }, []);
 
@@ -96,6 +104,16 @@ export function PatientList() {
   };
 
   const handleBulkCancel = () => {
+    const allDoctors = JSON.parse(sessionStorage.getItem('doctorsData') || '[]') || initialDoctors;
+    const doctor = allDoctors.find((d: any) => d.id === user?.id);
+
+    selectedRows.forEach(patientId => {
+        const patient = patients.find(p => p.id === patientId);
+        if(patient && doctor) {
+             addNotification(patient.id, `Your appointment at ${patient.clinic} on ${format(new Date(patient.appointmentDate), 'PP')} has been canceled by ${doctor.name}.`);
+        }
+    });
+
     const updatedPatients = patients.filter(p => !selectedRows.has(p.id));
     setPatients(updatedPatients);
     sessionStorage.setItem('mockPatients', JSON.stringify(updatedPatients));
@@ -107,6 +125,16 @@ export function PatientList() {
   }
 
   const handleBulkReschedule = () => {
+    const allDoctors = JSON.parse(sessionStorage.getItem('doctorsData') || '[]') || initialDoctors;
+    const doctor = allDoctors.find((d: any) => d.id === user?.id);
+    
+    selectedRows.forEach(patientId => {
+        const patient = patients.find(p => p.id === patientId);
+         if(patient && doctor) {
+            addNotification(patient.id, `Your appointment at ${patient.clinic} on ${format(new Date(patient.appointmentDate), 'PP')} has been rescheduled by ${doctor.name}. Please check for new details.`);
+        }
+    });
+
     toast({
         title: "Appointments Rescheduled",
         description: `${selectedRows.size} appointment(s) have been successfully rescheduled.`
@@ -118,6 +146,7 @@ export function PatientList() {
   const numSelected = selectedRows.size;
   const isAllSelected = numSelected > 0 && numSelected === filteredPatients.length;
   const isIndeterminate = numSelected > 0 && numSelected < filteredPatients.length;
+  const isActionDisabled = user?.status !== 'approved';
 
   return (
     <div className="space-y-6">
@@ -193,7 +222,7 @@ export function PatientList() {
                         
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button size="sm"><CalendarClock className="mr-2"/> Reschedule</Button>
+                                <Button size="sm" disabled={isActionDisabled}><CalendarClock className="mr-2"/> Reschedule</Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                                 <AlertDialogHeader>
@@ -211,7 +240,7 @@ export function PatientList() {
 
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button variant="destructive" size="sm"><Trash2 className="mr-2"/> Cancel</Button>
+                                <Button variant="destructive" size="sm" disabled={isActionDisabled}><Trash2 className="mr-2"/> Cancel</Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                                 <AlertDialogHeader>

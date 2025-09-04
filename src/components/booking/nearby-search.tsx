@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Stethoscope, MapPin, Pill, Loader2, AlertTriangle, Building, Link as LinkIcon, Search, PercentCircle, Beaker, Calendar, IndianRupee } from 'lucide-react';
+import { Stethoscope, MapPin, Pill, Loader2, AlertTriangle, Building, Link as LinkIcon, Search, PercentCircle, Beaker, Calendar } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { initialDoctors, initialClinics, initialPharmacies, initialLabs, mockPatientData } from '@/lib/mock-data';
@@ -255,7 +255,6 @@ export function NearbySearch() {
                                             </CardHeader>
                                             <CardContent className="flex-grow">
                                                 <div className="text-sm flex items-center gap-2 font-semibold text-primary">
-                                                  <IndianRupee className="w-4 h-4" />
                                                   <span>{getDoctorFeeRange(doctor.id)}</span>
                                                 </div>
                                             </CardContent>

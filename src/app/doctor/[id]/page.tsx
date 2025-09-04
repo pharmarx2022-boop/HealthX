@@ -5,7 +5,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Stethoscope, MapPin, Calendar, Star, Loader2, MessageSquare, UserPlus, IndianRupee, Clock } from 'lucide-react';
+import { Stethoscope, MapPin, Calendar, Star, Loader2, MessageSquare, UserPlus, Clock } from 'lucide-react';
 import Image from 'next/image';
 import { notFound, useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -187,9 +187,8 @@ export default function DoctorDetailPage() {
                                                 <Clock className="w-4 h-4"/> {clinic.slots}
                                             </p>
                                         </div>
-                                        <div className="flex items-center gap-2 font-bold text-lg text-primary mt-4 md:mt-0">
-                                            <IndianRupee className="w-5 h-5"/>
-                                            <span>{clinic.consultationFee.toFixed(2)}</span>
+                                        <div className="font-bold text-lg text-primary mt-4 md:mt-0">
+                                            <span>₹{clinic.consultationFee.toFixed(2)}</span>
                                         </div>
                                     </CardContent>
                                 </Card>

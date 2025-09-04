@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { Calendar as CalendarIcon, User, Search, Loader2, IndianRupee } from 'lucide-react';
+import { Calendar as CalendarIcon, User, Search, Loader2 } from 'lucide-react';
 import { Calendar } from '../ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -256,7 +256,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
 
                     {selectedClinic && (
                          <Alert variant="default" className="bg-primary/10 border-primary/20 text-primary">
-                            <IndianRupee className="h-4 w-4" />
+                            <span className="font-bold">₹</span>
                             <AlertTitle className="font-bold">Consultation Fee: ₹{selectedClinic.consultationFee.toFixed(2)}</AlertTitle>
                             <AlertDescription>
                                 This fee is applicable for {selectedClinic.name}.

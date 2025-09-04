@@ -42,7 +42,7 @@ import {
 } from "@/components/ui/dialog"
 import { Checkbox } from '@/components/ui/checkbox';
 import Image from 'next/image';
-import { PlusCircle, Edit, Trash2, MapPin, Calendar, Clock, Upload, X, ChevronsUpDown, Check, IndianRupee, Link as LinkIcon } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, MapPin, Calendar, Clock, Upload, X, ChevronsUpDown, Check, Link as LinkIcon } from 'lucide-react';
 import { initialClinics } from '@/lib/mock-data';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
@@ -335,7 +335,6 @@ export function ClinicManager() {
                         </div>
                         <CardTitle>{clinic.name}</CardTitle>
                         <CardDescription className="flex items-center gap-2 pt-1 text-primary">
-                            <IndianRupee className="w-4 h-4" />
                             <span className="font-bold">₹{clinic.consultationFee.toFixed(2)}</span>
                         </CardDescription>
                     </CardHeader>

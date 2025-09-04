@@ -4,7 +4,7 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { User, Calendar, Clock, Stethoscope, IndianRupee, RefreshCw, Bell, Star, Users, Wallet, History, FileText, Loader2, Store, KeyRound } from 'lucide-react';
+import { User, Calendar, Clock, Stethoscope, RefreshCw, Bell, Star, Users, Wallet, History, FileText, Loader2, Store, KeyRound } from 'lucide-react';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { mockPatients } from '@/components/doctor/patient-list';
 import { initialDoctors } from '@/lib/mock-data';
@@ -171,7 +171,7 @@ export default function PatientDashboardPage() {
                                                             </div>
                                                         </div>
                                                         <div className="flex items-center text-muted-foreground gap-3">
-                                                            <IndianRupee className="w-5 h-5 text-primary" />
+                                                            <p className="font-bold text-primary">₹</p>
                                                             <div>
                                                                 <p className="font-medium text-foreground">Fee Paid</p>
                                                                 <p>₹{appt.consultationFee.toFixed(2)}</p>

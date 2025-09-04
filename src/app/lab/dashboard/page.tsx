@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Beaker, Search, User, Wallet, History, BadgePercent, Banknote, IndianRupee, Upload, Gift } from 'lucide-react';
+import { Beaker, Search, User, Wallet, History, BadgePercent, Banknote, Upload, Gift } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useMemo, useEffect } from 'react';
 import { initialLabs, mockPatientData, mockReports, type MockReport } from '@/lib/mock-data';

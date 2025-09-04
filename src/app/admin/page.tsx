@@ -4,6 +4,7 @@ import { Footer } from '@/components/layout/footer';
 import { RefundTool } from '@/components/admin/refund-tool';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { WithdrawalRequests } from '@/components/admin/withdrawal-requests';
+import { HealthPointWithdrawals } from '@/components/admin/healthpoint-withdrawals';
 
 export default function AdminPage() {
   return (
@@ -28,17 +29,30 @@ export default function AdminPage() {
                         <RefundTool />
                     </CardContent>
                 </Card>
-                 <Card className="shadow-sm">
-                    <CardHeader>
-                        <CardTitle>Commission Withdrawal Requests</CardTitle>
-                        <CardDescription>
-                           Approve or reject requests from partners to withdraw their referral commissions.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <WithdrawalRequests />
-                    </CardContent>
-                </Card>
+                 <div className="space-y-8">
+                    <Card className="shadow-sm">
+                        <CardHeader>
+                            <CardTitle>Commission Withdrawal Requests</CardTitle>
+                            <CardDescription>
+                               Approve or reject requests from partners to withdraw their referral commissions.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <WithdrawalRequests />
+                        </CardContent>
+                    </Card>
+                     <Card className="shadow-sm">
+                        <CardHeader>
+                            <CardTitle>Health Point Withdrawal Requests</CardTitle>
+                            <CardDescription>
+                               Approve or reject requests from Labs & Pharmacies to withdraw their collected points.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <HealthPointWithdrawals />
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
 
         </div>

@@ -13,7 +13,8 @@ import { useState, useMemo, useEffect } from 'react';
 import { initialPharmacies, mockPatientData } from '@/lib/mock-data';
 import { getTransactionHistory, recordTransaction, type Transaction } from '@/lib/transactions';
 import { getPharmacyData, recordCommission, type PharmacyTransaction } from '@/lib/pharmacy-data';
-import { getCommissionWalletData, requestWithdrawal, type CommissionTransaction } from '@/lib/commission-wallet';
+import { getCommissionWalletData, requestWithdrawal as requestCommissionWithdrawal, type CommissionTransaction } from '@/lib/commission-wallet';
+import { requestWithdrawal as requestHealthPointWithdrawal } from '@/lib/healthpoint-wallet';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -33,9 +34,11 @@ export default function PharmacyDashboardPage() {
     const [pharmacyData, setPharmacyData] = useState<{ balance: number; transactions: PharmacyTransaction[] }>({ balance: 0, transactions: [] });
     const [commissionWallet, setCommissionWallet] = useState<{ balance: number; transactions: CommissionTransaction[] }>({ balance: 0, transactions: [] });
     const [pharmacyDetails, setPharmacyDetails] = useState<any>(null);
+    const [isClient, setIsClient] = useState(false);
 
 
     useEffect(() => {
+        setIsClient(true);
         if(typeof window !== 'undefined') {
             const storedUser = sessionStorage.getItem('user');
             if (storedUser) {
@@ -154,7 +157,7 @@ export default function PharmacyDashboardPage() {
         setTotalBill('');
     }
 
-     const handleWithdrawalRequest = () => {
+     const handleCommissionWithdrawal = () => {
         const withdrawalAmount = commissionWallet.balance;
          if (withdrawalAmount <= 0) {
             toast({
@@ -164,8 +167,22 @@ export default function PharmacyDashboardPage() {
             });
             return;
         }
-        requestWithdrawal(user.id, pharmacyDetails.name, withdrawalAmount);
+        requestCommissionWithdrawal(user.id, pharmacyDetails.name, withdrawalAmount);
         setCommissionWallet(getCommissionWalletData(user.id));
+    }
+    
+    const handleHealthPointWithdrawal = () => {
+        const withdrawalAmount = pharmacyData.balance;
+         if (withdrawalAmount <= 0) {
+            toast({
+                title: "No Health Points to Withdraw",
+                description: "You have no balance to withdraw.",
+                variant: "destructive"
+            });
+            return;
+        }
+        requestHealthPointWithdrawal(user.id, pharmacyDetails.name, withdrawalAmount, 'pharmacy');
+        setPharmacyData(getPharmacyData(user.id));
     }
 
 
@@ -285,7 +302,10 @@ export default function PharmacyDashboardPage() {
                         <CardContent>
                             <p className="text-4xl font-bold">₹{pharmacyData.balance.toFixed(2)}</p>
                         </CardContent>
-                        <CardFooter>
+                        <CardFooter className="flex-col items-start gap-4">
+                             <Button className="w-full" onClick={handleHealthPointWithdrawal} disabled={!isClient || pharmacyData.balance <= 0}>
+                                <Banknote className="mr-2"/> Request Withdrawal
+                            </Button>
                             <Dialog>
                                 <DialogTrigger asChild>
                                     <Button variant="link" className="p-0 h-auto self-center">
@@ -330,7 +350,7 @@ export default function PharmacyDashboardPage() {
                             <p className="text-4xl font-bold">₹{user ? commissionWallet.balance.toFixed(2) : '0.00'}</p>
                         </CardContent>
                         <CardFooter className="flex-col items-start gap-4">
-                            <Button className="w-full" onClick={handleWithdrawalRequest} disabled={!user || commissionWallet.balance <= 0}>
+                            <Button className="w-full" onClick={handleCommissionWithdrawal} disabled={!user || commissionWallet.balance <= 0}>
                                 <Banknote className="mr-2"/> Request Withdrawal
                             </Button>
                             <Dialog>

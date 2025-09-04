@@ -5,17 +5,26 @@ import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Stethoscope, MapPin, Pill, Loader2, AlertTriangle, Building, Link as LinkIcon, Search, PercentCircle, Beaker } from 'lucide-react';
+import { Stethoscope, MapPin, Pill, Loader2, AlertTriangle, Building, Link as LinkIcon, Search, PercentCircle, Beaker, Calendar } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { initialDoctors, initialClinics, initialPharmacies, initialLabs } from '@/lib/mock-data';
+import { initialDoctors, initialClinics, initialPharmacies, initialLabs, mockFamilyMembers } from '@/lib/mock-data';
 import { Badge } from '../ui/badge';
+import { BookingDialog } from './booking-dialog';
+import { useToast } from '@/hooks/use-toast';
+import { mockPatientData } from '@/lib/mock-data';
 
 // Types
 type Doctor = typeof initialDoctors[0];
 type Clinic = typeof initialClinics[0];
 type Pharmacy = typeof initialPharmacies[0];
 type Lab = typeof initialLabs[0];
+
+const DOCTORS_KEY = 'doctorsData';
+const FAMILY_KEY = 'familyMembers';
+const CLINICS_KEY = 'mockClinics';
+const PATIENTS_KEY = 'mockPatients';
+
 
 const WhatsAppIcon = () => (
     <svg 
@@ -37,20 +46,44 @@ export function NearbySearch() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isClient, setIsClient] = useState(false);
+  
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
+  const [familyMembers, setFamilyMembers] = useState(mockFamilyMembers);
+  const [user, setUser] = useState<any | null>(null);
+  
+  const [doctors, setDoctors] = useState<Doctor[]>(initialDoctors);
   const [clinics, setClinics] = useState<Clinic[]>([]);
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
   const [labs, setLabs] = useState<Lab[]>([]);
+  const { toast } = useToast();
 
   useEffect(() => {
     setIsClient(true);
-    const storedClinics = sessionStorage.getItem('mockClinics');
-    setClinics(storedClinics ? JSON.parse(storedClinics) : initialClinics);
+    if (typeof window !== 'undefined') {
+        const storedUser = sessionStorage.getItem('user');
+        setUser(storedUser ? JSON.parse(storedUser) : null);
 
-    const storedPharmacies = sessionStorage.getItem('mockPharmacies');
-    setPharmacies(storedPharmacies ? JSON.parse(storedPharmacies) : initialPharmacies);
-    
-    const storedLabs = sessionStorage.getItem('mockLabs');
-    setLabs(storedLabs ? JSON.parse(storedLabs) : initialLabs);
+        const storedDoctors = sessionStorage.getItem(DOCTORS_KEY);
+        setDoctors(storedDoctors ? JSON.parse(storedDoctors) : initialDoctors);
+
+        const storedClinics = sessionStorage.getItem(CLINICS_KEY);
+        setClinics(storedClinics ? JSON.parse(storedClinics) : initialClinics);
+
+        const storedPharmacies = sessionStorage.getItem(PHARMACIES_KEY);
+        setPharmacies(storedPharmacies ? JSON.parse(storedPharmacies) : initialPharmacies);
+        
+        const storedLabs = sessionStorage.getItem(LABS_KEY);
+        setLabs(storedLabs ? JSON.parse(storedLabs) : initialLabs);
+
+        const storedFamily = sessionStorage.getItem(FAMILY_KEY);
+        if (storedFamily) {
+            setFamilyMembers(JSON.parse(storedFamily));
+        } else {
+            sessionStorage.setItem(FAMILY_KEY, JSON.stringify(mockFamilyMembers));
+            setFamilyMembers(mockFamilyMembers);
+        }
+    }
   }, []);
 
   const handleLocationRequest = () => {
@@ -80,12 +113,12 @@ export function NearbySearch() {
     const allLabs = labs.filter(l => l.acceptsHealthPoints && l.discount >= 30);
 
     if (!searchTerm) {
-        return { doctors: initialDoctors, pharmacies: allPharmacies, labs: allLabs };
+        return { doctors: doctors, pharmacies: allPharmacies, labs: allLabs };
     }
 
     const lowerCaseSearchTerm = searchTerm.toLowerCase();
 
-    const filteredDoctors = initialDoctors.filter(d => 
+    const filteredDoctors = doctors.filter(d => 
         d.name.toLowerCase().includes(lowerCaseSearchTerm) || 
         d.specialty.toLowerCase().includes(lowerCaseSearchTerm)
     );
@@ -100,8 +133,52 @@ export function NearbySearch() {
 
     return { doctors: filteredDoctors, pharmacies: filteredPharmacies, labs: filteredLabs };
 
-  }, [searchTerm, clinics, pharmacies, labs]);
+  }, [searchTerm, clinics, pharmacies, labs, doctors]);
   
+  const handleBookNow = (doctor: Doctor) => {
+    setSelectedDoctor(doctor);
+    setIsBookingOpen(true);
+  };
+  
+  const handleBookingConfirm = (patientId: string, clinicId: string, date: Date, time: string) => {
+    if (!selectedDoctor) return;
+    const clinic = clinics.find(c => c.id === clinicId);
+    if (!clinic) return;
+
+    let patientName = "Yourself";
+    if(patientId !== 'self') {
+        const member = mockFamilyMembers.find(m => m.id === patientId) || mockPatientData.find(p => p.id === patientId);
+        if(member) patientName = member.name;
+    }
+
+    const newAppointment = {
+        id: `appt_${Date.now()}`,
+        name: patientName,
+        clinic: clinic.name,
+        doctorId: selectedDoctor.id,
+        agentId: user?.role === 'agent' ? user.id : null,
+        appointmentDate: new Date(date.getFullYear(), date.getMonth(), date.getDate(), parseInt(time.split(':')[0]), parseInt(time.split(':')[1].split(' ')[0])).toISOString(),
+        status: 'upcoming',
+        consultation: 'General Consultation',
+        notes: '',
+        consultationFee: clinic.consultationFee,
+        refundStatus: 'Not Refunded',
+        nextAppointmentDate: null,
+        reviewed: false
+    };
+
+    const allPatients = JSON.parse(sessionStorage.getItem(PATIENTS_KEY) || '[]');
+    const updatedPatients = [...allPatients, newAppointment];
+    sessionStorage.setItem(PATIENTS_KEY, JSON.stringify(updatedPatients));
+
+    toast({
+        title: "Booking Confirmed!",
+        description: `Your appointment at ${clinic.name} with Dr. ${selectedDoctor.name} on ${date.toDateString()} at ${time} has been booked.`,
+    });
+    setIsBookingOpen(false);
+    setSelectedDoctor(null);
+  };
+
   const renderContent = () => {
     switch(status) {
         case 'idle':
@@ -161,13 +238,16 @@ export function NearbySearch() {
                                                     </div>
                                                 </div>
                                             </CardHeader>
-                                            <CardContent className="flex-grow space-y-4">
+                                            <CardContent className="flex-grow">
+                                                <Button asChild variant="link" className="px-0">
+                                                    <Link href={`/doctor/${doctor.id}`}>
+                                                        View Full Profile
+                                                    </Link>
+                                                </Button>
                                             </CardContent>
                                             <CardFooter>
-                                                <Button asChild className="w-full mt-2">
-                                                    <Link href={`/doctor/${doctor.id}`}>
-                                                        View Profile & Book
-                                                    </Link>
+                                                <Button className="w-full mt-2" onClick={() => handleBookNow(doctor)}>
+                                                    <Calendar className="mr-2" /> Book Now
                                                 </Button>
                                             </CardFooter>
                                         </Card>
@@ -266,6 +346,18 @@ export function NearbySearch() {
   return (
     <div className="space-y-8">
         {renderContent()}
+        {selectedDoctor && (
+             <BookingDialog
+                isOpen={isBookingOpen}
+                onOpenChange={setIsBookingOpen}
+                doctor={selectedDoctor}
+                clinics={clinics.filter(c => c.doctorId === selectedDoctor.id)}
+                familyMembers={familyMembers}
+                onConfirm={handleBookingConfirm}
+            />
+        )}
     </div>
   );
 }
+
+    

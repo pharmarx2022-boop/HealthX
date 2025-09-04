@@ -1,9 +1,10 @@
 
+
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, Trash2, CalendarClock } from 'lucide-react';
+import { Calendar as CalendarIcon, Trash2, CalendarClock, DownloadIcon } from 'lucide-react';
 import Link from 'next/link';
 
 import { cn } from '@/lib/utils';
@@ -141,6 +142,38 @@ export function PatientList() {
     })
     setSelectedRows(new Set());
   }
+  
+  const handleDownload = () => {
+    const headers = ["Patient Name", "Clinic", "Appointment Date", "Appointment Time", "Status", "Reason for Visit"];
+    const csvContent = [
+        headers.join(','),
+        ...filteredPatients.map(p => {
+            const date = new Date(p.appointmentDate);
+            const row = [
+                `"${p.name}"`,
+                `"${p.clinic}"`,
+                format(date, 'yyyy-MM-dd'),
+                format(date, 'p'),
+                `"${p.status}"`,
+                `"${p.consultation.replace(/"/g, '""')}"`
+            ];
+            return row.join(',');
+        })
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        const filename = `patient_list_${format(new Date(), 'yyyy-MM-dd')}.csv`;
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+  };
 
 
   const numSelected = selectedRows.size;
@@ -259,6 +292,9 @@ export function PatientList() {
                 ) : (
                     <div className="text-sm text-muted-foreground">Select patients to perform bulk actions.</div>
                 )}
+                 <Button variant="outline" size="sm" onClick={handleDownload} disabled={filteredPatients.length === 0}>
+                    <DownloadIcon className="mr-2 h-4 w-4" /> Download List
+                </Button>
             </div>
             <Table>
                 <TableHeader>

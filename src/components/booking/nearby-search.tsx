@@ -8,15 +8,20 @@ import { Input } from '@/components/ui/input';
 import { Stethoscope, MapPin, Pill, Loader2, AlertTriangle, Building, Link as LinkIcon, Search, PercentCircle, Beaker, Calendar, Star, Briefcase, Filter } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { initialDoctors, initialClinics, initialPharmacies, initialLabs, mockPatientData } from '@/lib/mock-data';
 import { mockFamilyMembers } from '@/lib/family-members';
 import { Badge } from '../ui/badge';
-import { BookingDialog } from './booking-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '../ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Slider } from '../ui/slider';
 import { Label } from '../ui/label';
+
+const BookingDialog = dynamic(() => import('./booking-dialog').then(mod => mod.BookingDialog), {
+    ssr: false
+});
+
 
 // Types
 type Doctor = typeof initialDoctors[0];
@@ -450,7 +455,7 @@ export function NearbySearch() {
   return (
     <div className="space-y-8">
         {renderContent()}
-        {selectedDoctor && (
+        {selectedDoctor && isBookingOpen && (
              <BookingDialog
                 isOpen={isBookingOpen}
                 onOpenChange={setIsBookingOpen}
@@ -463,7 +468,3 @@ export function NearbySearch() {
     </div>
   );
 }
-
-    
-
-    

@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Pill, Search, User, Wallet, History, BadgePercent, Banknote, Gift } from 'lucide-react';
+import { Pill, Search, User, Wallet, History, BadgePercent, Banknote, Gift, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useMemo, useEffect } from 'react';
 import { initialPharmacies, mockPatientData } from '@/lib/mock-data';
@@ -18,8 +18,14 @@ import { requestWithdrawal as requestHealthPointWithdrawal } from '@/lib/healthp
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AnalyticsDashboard } from '@/components/pharmacy/analytics-dashboard';
+import dynamic from 'next/dynamic';
 import { addNotification, sendRedemptionOtpNotification } from '@/lib/notifications';
+
+const AnalyticsDashboard = dynamic(() => import('@/components/pharmacy/analytics-dashboard').then(mod => mod.AnalyticsDashboard), {
+    ssr: false,
+    loading: () => <div className="flex items-center justify-center min-h-[400px]"><Loader2 className="animate-spin" /></div>,
+});
+
 
 const PHARMACIES_KEY = 'mockPharmacies';
 const PATIENTS_KEY = 'mockPatientData';

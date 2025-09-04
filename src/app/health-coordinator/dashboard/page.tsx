@@ -5,7 +5,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BadgePercent, Banknote, Briefcase, History, Gift } from 'lucide-react';
+import { BadgePercent, Banknote, Briefcase, History, Gift, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
 import { getHealthCoordinatorData, convertPointsToCash, type HealthCoordinatorTransaction } from '@/lib/health-coordinator-data';
@@ -14,7 +14,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { format } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Link from 'next/link';
-import { AnalyticsDashboard } from '@/components/health-coordinator/analytics-dashboard';
+import dynamic from 'next/dynamic';
+
+const AnalyticsDashboard = dynamic(() => import('@/components/health-coordinator/analytics-dashboard').then(mod => mod.AnalyticsDashboard), {
+    ssr: false,
+    loading: () => <div className="flex items-center justify-center min-h-[400px]"><Loader2 className="animate-spin" /></div>,
+});
+
 
 export default function HealthCoordinatorDashboardPage() {
     const { toast } = useToast();

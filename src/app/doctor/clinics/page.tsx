@@ -4,10 +4,16 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ClinicManager } from '@/components/doctor/clinic-manager';
 import { useState, useEffect } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck, Loader2 } from 'lucide-react';
+import dynamic from 'next/dynamic';
+
+const ClinicManager = dynamic(() => import('@/components/doctor/clinic-manager').then(mod => mod.ClinicManager), {
+    ssr: false,
+    loading: () => <div className="flex items-center justify-center p-8"><Loader2 className="animate-spin" /></div>,
+});
+
 
 export default function DoctorClinicsPage() {
     const [user, setUser] = useState<any>(null);

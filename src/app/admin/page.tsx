@@ -1,13 +1,22 @@
 
 
+'use client';
+
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
-import { RefundTool } from '@/components/admin/refund-tool';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { WithdrawalRequests } from '@/components/admin/withdrawal-requests';
 import { HealthPointWithdrawals } from '@/components/admin/healthpoint-withdrawals';
 import { TransactionHistory } from '@/components/admin/transaction-history';
 import { ApprovalRequests } from '@/components/admin/approval-requests';
+import dynamic from 'next/dynamic';
+import { Loader2 } from 'lucide-react';
+
+const RefundTool = dynamic(() => import('@/components/admin/refund-tool').then(mod => mod.RefundTool), {
+  ssr: false,
+  loading: () => <div className="flex items-center justify-center p-8"><Loader2 className="animate-spin" /></div>,
+});
+
 
 export default function AdminPage() {
   return (

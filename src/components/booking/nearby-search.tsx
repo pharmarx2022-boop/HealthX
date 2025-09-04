@@ -221,9 +221,13 @@ export function NearbySearch() {
     const updatedPatients = [...allPatients, newAppointment];
     sessionStorage.setItem(PATIENTS_KEY, JSON.stringify(updatedPatients));
 
+    const toastDescription = user?.role === 'health-coordinator' 
+      ? `The appointment for ${patientName} at ${clinic.name} is booked. A receipt has been sent to the patient's email.`
+      : `Your appointment at ${clinic.name} is booked. A receipt has been sent to your email. Your fee is secured and will be refunded as Health Points after the consultation is marked complete by the doctor.`;
+
     toast({
         title: "Booking Confirmed!",
-        description: `Your appointment at ${clinic.name} is booked. A receipt has been sent to your email. Your fee is secured and will be refunded as Health Points after the consultation is marked complete by the doctor.`,
+        description: toastDescription,
         duration: 9000,
     });
     setIsBookingOpen(false);

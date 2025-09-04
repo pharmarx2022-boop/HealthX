@@ -1,27 +1,27 @@
 
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Book, Stethoscope, RefreshCw, ShoppingCart } from "lucide-react";
+import { Book, Stethoscope, RefreshCw, ShoppingCart, Wallet } from "lucide-react";
 
 const steps = [
     {
         icon: Book,
-        title: "1. Book & Pay a Deposit",
-        description: "Find your doctor and book an appointment by paying a fully refundable security deposit online. This confirms your slot, and no cash payment is needed at the clinic.",
+        title: "1. Book Your Slot",
+        description: "Find your preferred doctor and book an available appointment slot online. No payment is required to book.",
     },
     {
         icon: Stethoscope,
-        title: "2. Consult The Doctor",
-        description: "Attend your scheduled appointment. Once the doctor marks your consultation as complete, the magic begins.",
+        title: "2. Consult & Pay in Cash",
+        description: "Visit the doctor for your consultation and pay the fee directly at the clinic using cash.",
     },
     {
-        icon: RefreshCw,
-        title: "3. Get 100% Cashback + Points",
-        description: "You receive a 100% refund of your deposit to your original payment method, PLUS an equal amount credited to your account as Health Points.",
+        icon: Wallet,
+        title: "3. Earn Health Points",
+        description: "Once the doctor marks your consultation as complete, you'll receive Health Points equal to the fee amount in your wallet.",
     },
     {
         icon: ShoppingCart,
-        title: "4. Redeem Health Points",
-        description: "Use your Health Points like real cash to get discounts on medicines and lab tests at our partner pharmacies and labs.",
+        title: "4. Redeem for Discounts",
+        description: "Use your accumulated Health Points to get real discounts on medicines and lab tests at our partner pharmacies and labs.",
     }
 ]
 
@@ -30,9 +30,9 @@ export function HowItWorks() {
         <section className="py-16 md:py-24 bg-white">
             <div className="container mx-auto px-4">
                 <div className="text-center mb-12">
-                    <h2 className="text-3xl md:text-4xl font-headline font-bold">Effectively a Free Doctor's Visit</h2>
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold">Earn Rewards On Every Visit</h2>
                     <p className="text-lg text-muted-foreground mt-2 max-w-3xl mx-auto">
-                        Our unique cashback and points system rewards you for taking care of your health. Here's how simple it is.
+                        Our unique points system rewards you for taking care of your health. Here's how simple it is.
                     </p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -50,7 +50,7 @@ export function HowItWorks() {
                 </div>
                  <div className="text-center mt-12">
                     <p className="text-xl font-semibold">
-                       This means every consultation fee you pay comes back to you in full, with bonus points to spend.
+                       This means every consultation fee you pay comes back to you as valuable points to spend.
                     </p>
                 </div>
             </div>

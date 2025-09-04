@@ -21,7 +21,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AnalyticsDashboard } from '@/components/lab/analytics-dashboard';
 
 const LABS_KEY = 'mockLabs';
-const PATIENTS_KEY = 'mockPatientsData';
+const PATIENTS_KEY = 'mockPatientData';
 const REPORTS_KEY = 'mockReports';
 
 export default function LabDashboardPage() {
@@ -68,7 +68,7 @@ export default function LabDashboardPage() {
     }, []);
 
     const handleSearchPatient = (phone: string, type: 'payment' | 'upload') => {
-        const allPatients = JSON.parse(sessionStorage.getItem(PATIENTS_KEY) || JSON.stringify(mockPatientData));
+        const allPatients = JSON.parse(sessionStorage.getItem(PATIENTS_KEY) || '[]');
         const foundPatient = allPatients.find((p: any) => p.phone === phone);
 
         if (foundPatient) {

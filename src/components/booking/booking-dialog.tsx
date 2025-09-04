@@ -145,7 +145,8 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
     const handleSearchPatient = () => {
         setIsSearching(true);
         setTimeout(() => { // Simulate API call
-            const patient = mockPatientData.find(p => p.phone === patientPhone);
+            const allPatients = JSON.parse(sessionStorage.getItem('mockPatientData') || '[]');
+            const patient = allPatients.find((p: any) => p.phone === patientPhone);
             if (patient) {
                 setFoundPatient(patient);
             } else {

@@ -21,7 +21,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AnalyticsDashboard } from '@/components/pharmacy/analytics-dashboard';
 
 const PHARMACIES_KEY = 'mockPharmacies';
-const PATIENTS_KEY = 'mockPatientsData';
+const PATIENTS_KEY = 'mockPatientData';
 
 export default function PharmacyDashboardPage() {
     const { toast } = useToast();
@@ -53,11 +53,14 @@ export default function PharmacyDashboardPage() {
                 setPharmacyData(getPharmacyData(u.id));
                 setCommissionWallet(getCommissionWalletData(u.id));
             }
+             if (!sessionStorage.getItem(PATIENTS_KEY)) {
+                sessionStorage.setItem(PATIENTS_KEY, JSON.stringify(mockPatientData));
+            }
         }
     }, []);
 
     const handleSearchPatient = () => {
-        const allPatients = JSON.parse(sessionStorage.getItem(PATIENTS_KEY) || JSON.stringify(mockPatientData));
+        const allPatients = JSON.parse(sessionStorage.getItem(PATIENTS_KEY) || '[]');
         const foundPatient = allPatients.find((p: any) => p.phone === patientPhone);
 
         if (foundPatient) {

@@ -5,7 +5,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Stethoscope, MapPin, Calendar, Star, Loader2, MessageSquare, UserPlus, Clock, Briefcase, Link as LinkIcon } from 'lucide-react';
+import { Stethoscope, MapPin, Calendar, Star, Loader2, MessageSquare, UserPlus, Clock, Briefcase, Link as LinkIcon, CreditCard } from 'lucide-react';
 import Image from 'next/image';
 import { notFound, useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -183,7 +183,7 @@ export default function DoctorDetailPage() {
                                     <CardContent className="p-4 flex flex-col md:flex-row justify-between items-start md:items-center">
                                         <div className="flex-grow">
                                             <p className="font-bold">{clinic.name}</p>
-                                            <div className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
+                                            <div className="flex items-center text-sm text-muted-foreground gap-2 mt-1">
                                                 <MapPin className="w-4 h-4"/>
                                                 <span>{clinic.location}</span>
                                                  <Link href={`https://www.google.com/maps?q=${encodeURIComponent(clinic.location)}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-primary hover:underline">

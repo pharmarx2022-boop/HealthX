@@ -246,47 +246,47 @@ export function NearbySearch() {
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {doctors.map((doctor) => {
                                     return (
-                                        <Link href={`/doctor/${doctor.id}`} key={doctor.id} className="group">
-                                        <Card className="overflow-hidden h-full group-hover:shadow-xl transition-shadow duration-300 flex flex-col">
-                                            <CardHeader className="flex-row gap-4 items-start">
-                                                <div className="relative w-24 h-24 rounded-full overflow-hidden shrink-0 border-2 border-primary/20">
-                                                    <Image src={doctor.image} alt={`Dr. ${doctor.name}`} fill style={{objectFit:"cover"}} data-ai-hint={doctor.dataAiHint} />
-                                                </div>
-                                                <div className="flex-grow">
-                                                    <CardTitle className="font-headline text-xl">{doctor.name}</CardTitle>
-                                                    <CardDescription className="flex items-center gap-2 pt-1">
-                                                        <Stethoscope className="w-4 h-4 text-primary" /> <span>{doctor.specialty}</span>
-                                                    </CardDescription>
-                                                    <div className="flex items-center text-sm text-muted-foreground gap-2 mt-2">
-                                                        <MapPin className="w-4 h-4"/> 
-                                                        <span>{doctor.location}</span>
+                                        <Card key={doctor.id} className="overflow-hidden h-full hover:shadow-xl transition-shadow duration-300 flex flex-col group">
+                                            <Link href={`/doctor/${doctor.id}`} className="flex-grow">
+                                                <CardHeader className="flex-row gap-4 items-start">
+                                                    <div className="relative w-24 h-24 rounded-full overflow-hidden shrink-0 border-2 border-primary/20">
+                                                        <Image src={doctor.image} alt={`Dr. ${doctor.name}`} fill style={{objectFit:"cover"}} data-ai-hint={doctor.dataAiHint} />
                                                     </div>
-                                                </div>
-                                            </CardHeader>
-                                            <CardContent className="flex-grow space-y-2">
-                                                <div className="flex items-center gap-4 text-sm">
-                                                    <div className="flex items-center gap-1 text-amber-500">
-                                                        <Star className="w-4 h-4 fill-current" />
-                                                        <span className="font-bold">{getAverageRating(doctor.reviewsList)}</span>
-                                                        <span className="text-xs text-muted-foreground ml-1">({doctor.reviewsList?.length ?? 0})</span>
+                                                    <div className="flex-grow">
+                                                        <CardTitle className="font-headline text-xl">{doctor.name}</CardTitle>
+                                                        <CardDescription className="flex items-center gap-2 pt-1">
+                                                            <Stethoscope className="w-4 h-4 text-primary" /> <span>{doctor.specialty}</span>
+                                                        </CardDescription>
+                                                        <div className="flex items-center text-sm text-muted-foreground gap-2 mt-2">
+                                                            <MapPin className="w-4 h-4"/> 
+                                                            <span>{doctor.location}</span>
+                                                        </div>
                                                     </div>
-                                                    <Separator orientation="vertical" className="h-4"/>
-                                                    <div className="flex items-center gap-1 text-muted-foreground">
-                                                        <Briefcase className="w-4 h-4" />
-                                                        <span>{doctor.experience} yrs exp.</span>
+                                                </CardHeader>
+                                                <CardContent className="flex-grow space-y-2">
+                                                    <div className="flex items-center gap-4 text-sm">
+                                                        <div className="flex items-center gap-1 text-amber-500">
+                                                            <Star className="w-4 h-4 fill-current" />
+                                                            <span className="font-bold">{getAverageRating(doctor.reviewsList)}</span>
+                                                            <span className="text-xs text-muted-foreground ml-1">({doctor.reviewsList?.length ?? 0})</span>
+                                                        </div>
+                                                        <Separator orientation="vertical" className="h-4"/>
+                                                        <div className="flex items-center gap-1 text-muted-foreground">
+                                                            <Briefcase className="w-4 h-4" />
+                                                            <span>{doctor.experience} yrs exp.</span>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div className="text-sm flex items-center gap-2 font-semibold text-primary pt-1">
-                                                  <span>{getDoctorFeeRange(doctor.id)}</span>
-                                                </div>
-                                            </CardContent>
+                                                    <div className="text-sm flex items-center gap-2 font-semibold text-primary pt-1">
+                                                      <span>{getDoctorFeeRange(doctor.id)}</span>
+                                                    </div>
+                                                </CardContent>
+                                            </Link>
                                             <CardFooter>
                                                 <Button className="w-full" onClick={(e) => handleBookNow(e, doctor)}>
                                                     <Calendar className="mr-2 h-4 w-4" /> Book Now
                                                 </Button>
                                             </CardFooter>
                                         </Card>
-                                        </Link>
                                     )
                                 })}
                             </div>
@@ -393,3 +393,4 @@ export function NearbySearch() {
     </div>
   );
 }
+

@@ -17,7 +17,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { loginWithOtp, MOCK_OTP } from '@/lib/auth';
 
 const loginSchema = z.object({
-  phone: z.string().min(10, { message: 'A valid 10-digit phone number is required.' }).max(10, { message: 'A valid 10-digit phone number is required.' }),
+  email: z.string().email({ message: 'A valid email address is required.' }),
   otp: z.string().optional(),
   referralCode: z.string().optional(),
 });
@@ -41,7 +41,7 @@ export default function LoginPage() {
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      phone: '',
+      email: '',
       otp: '',
       referralCode: '',
     },
@@ -64,15 +64,15 @@ export default function LoginPage() {
 
 
   const handleSendOtp = () => {
-    const phone = form.getValues('phone');
-    if (phone.length === 10) {
+    const email = form.getValues('email');
+    if (form.getValues('email')) {
       setOtpSent(true);
       toast({
         title: "OTP Sent!",
-        description: `For testing purposes, your OTP is: ${MOCK_OTP}`,
+        description: `An OTP has been sent to ${email}. For testing purposes, your OTP is: ${MOCK_OTP}`,
       });
     } else {
-        form.setError("phone", { type: "manual", message: "Please enter a valid 10-digit phone number." })
+        form.setError("email", { type: "manual", message: "Please enter a valid email address." })
     }
   };
 
@@ -91,7 +91,7 @@ export default function LoginPage() {
         return;
     }
 
-    const { user, error } = loginWithOtp(values.phone, values.otp!, selectedRole, values.referralCode);
+    const { user, error } = loginWithOtp(values.email, values.otp!, selectedRole, values.referralCode);
     if (user) {
         toast({
             title: "Login Successful!",
@@ -124,7 +124,7 @@ export default function LoginPage() {
         <Card className="w-full max-w-md mx-auto shadow-lg">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-headline">{roleDisplayName} Login / Sign Up</CardTitle>
-            <CardDescription>Sign in with your mobile number to continue.</CardDescription>
+            <CardDescription>Sign in with your email address to continue.</CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...form}>
@@ -132,12 +132,12 @@ export default function LoginPage() {
                 
                 <FormField
                   control={form.control}
-                  name="phone"
+                  name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Phone Number</FormLabel>
+                      <FormLabel>Email Address</FormLabel>
                       <FormControl>
-                        <Input type="tel" placeholder="9876543210" {...field} disabled={otpSent} />
+                        <Input type="email" placeholder="you@example.com" {...field} disabled={otpSent} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -181,7 +181,7 @@ export default function LoginPage() {
                 <Button type="submit" className="w-full">
                   {otpSent ? 'Verify OTP & Login' : 'Send OTP'}
                 </Button>
-                {otpSent && <Button type="button" variant="link" className="w-full" onClick={() => setOtpSent(false)}>Change Number</Button>}
+                {otpSent && <Button type="button" variant="link" className="w-full" onClick={() => setOtpSent(false)}>Change Email</Button>}
               </form>
             </Form>
             <div className="mt-4 text-center text-sm">

@@ -2,9 +2,17 @@
 'use client';
 
 import Link from 'next/link';
-import { MessageCircle } from 'lucide-react'; // Or a specific WhatsApp icon if you have one
+import { usePathname } from 'next/navigation';
+import { MessageCircle } from 'lucide-react'; 
 
 export function FloatingWhatsApp() {
+  const pathname = usePathname();
+
+  // Don't show on admin pages
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
+  
   return (
     <Link 
       href="#"

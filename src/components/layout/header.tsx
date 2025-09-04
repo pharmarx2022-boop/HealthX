@@ -6,7 +6,7 @@ import { HeartPulse, Menu, X, UserCircle, LogOut, Settings, Briefcase, Users, Pi
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,6 +22,7 @@ export function Header() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -41,6 +42,11 @@ export function Header() {
     router.push('/');
     setIsSheetOpen(false);
   };
+  
+  // Hide header on admin pages for a cleaner look, as it has its own layout
+  if (pathname?.startsWith('/admin')) {
+      return null;
+  }
 
   const renderAuthButtons = () => {
     if (user) {

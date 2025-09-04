@@ -19,7 +19,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { format } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AnalyticsDashboard } from '@/components/lab/analytics-dashboard';
-import { sendRedemptionOtpNotification } from '@/lib/notifications';
+import { addNotification, sendRedemptionOtpNotification } from '@/lib/notifications';
 
 const LABS_KEY = 'mockLabs';
 const PATIENTS_KEY = 'mockPatientData';
@@ -159,6 +159,7 @@ export default function LabDashboardPage() {
             partnerName: labDetails.name,
             reviewed: false
         });
+        addNotification(patient.id, `You have successfully redeemed INR ${pointsToPay.toFixed(2)} in Health Points at ${labDetails.name}.`);
         
         // Credit points to lab
         recordCommission(user.id, {
@@ -206,6 +207,7 @@ export default function LabDashboardPage() {
         const updatedReports = [...allReports, newReport];
         sessionStorage.setItem(REPORTS_KEY, JSON.stringify(updatedReports));
 
+        addNotification(uploadPatient.id, `Your report "${reportName}" from ${labDetails.name} is now available to view.`);
         toast({
             title: "Report Uploaded!",
             description: `"${reportName}" has been uploaded for ${uploadPatient.name}.`

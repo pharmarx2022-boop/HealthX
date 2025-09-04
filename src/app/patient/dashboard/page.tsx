@@ -18,6 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { FamilyManager } from '@/components/patient/family-manager';
 import { MyReports } from '@/components/patient/my-reports';
 import { getTransactionHistory, type Transaction } from '@/lib/transactions';
+import { getNotifications } from '@/lib/notifications';
 
 const DOCTORS_KEY = 'doctorsData';
 const PATIENTS_KEY = 'mockPatients';
@@ -43,6 +44,7 @@ export default function PatientDashboardPage() {
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState('');
     const [user, setUser] = useState<any | null>(null);
+    const [nextReminder, setNextReminder] = useState<any | null>(null);
 
 
     useEffect(() => {
@@ -55,12 +57,14 @@ export default function PatientDashboardPage() {
                 
                 const storedPatients = sessionStorage.getItem(PATIENTS_KEY);
                 const allAppointments = storedPatients ? JSON.parse(storedPatients) : mockPatients;
-                setMyAppointments(allAppointments.filter((p: any) => p.name === u.fullName || (u.fullName === 'Rohan Sharma' && p.name === 'Rohan Sharma')));
+                const userAppointments = allAppointments.filter((p: any) => p.id === u.id || p.name === u.fullName || (u.fullName === 'Rohan Sharma' && p.name === 'Rohan Sharma'));
+                setMyAppointments(userAppointments);
+                
+                const reminder = userAppointments.find(appt => appt.nextAppointmentDate && !isNaN(new Date(appt.nextAppointmentDate).getTime()) && new Date(appt.nextAppointmentDate) > new Date());
+                setNextReminder(reminder);
             }
         }
     }, [isClient, isReviewOpen]); // Re-check appointments when review dialog closes
-
-    const nextReminder = myAppointments.find(appt => appt.nextAppointmentDate && !isNaN(new Date(appt.nextAppointmentDate).getTime()));
 
     const transactionHistory = useMemo(() => {
         if (!isClient || !user) return { balance: 0, transactions: [], reviewedTransactionIds: new Set() };
@@ -132,8 +136,8 @@ export default function PatientDashboardPage() {
 
             // Mark transaction as reviewed
             const userTransactionsKey = TRANSACTIONS_KEY_PREFIX + user.id;
-            const allUserTransactions: Transaction[] = JSON.parse(sessionStorage.getItem(userTransactionsKey) || '[]');
-            const updatedTransactions = allUserTransactions.map(tx => tx.id === reviewTarget.transactionId ? {...tx, reviewed: true} : tx);
+            const userHistory = getTransactionHistory(user.id);
+            const updatedTransactions = userHistory.transactions.map(tx => tx.id === reviewTarget.transactionId ? {...tx, reviewed: true} : tx);
             sessionStorage.setItem(userTransactionsKey, JSON.stringify(updatedTransactions));
         }
 

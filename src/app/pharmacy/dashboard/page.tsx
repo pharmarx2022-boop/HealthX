@@ -19,7 +19,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { format } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AnalyticsDashboard } from '@/components/pharmacy/analytics-dashboard';
-import { sendRedemptionOtpNotification } from '@/lib/notifications';
+import { addNotification, sendRedemptionOtpNotification } from '@/lib/notifications';
 
 const PHARMACIES_KEY = 'mockPharmacies';
 const PATIENTS_KEY = 'mockPatientData';
@@ -144,6 +144,7 @@ export default function PharmacyDashboardPage() {
             partnerName: pharmacyDetails.name,
             reviewed: false
         });
+        addNotification(patient.id, `You have successfully redeemed INR ${pointsToPay.toFixed(2)} in Health Points at ${pharmacyDetails.name}.`);
         
         // Credit points to pharmacy
         recordCommission(user.id, {

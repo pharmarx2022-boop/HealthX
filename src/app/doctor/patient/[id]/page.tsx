@@ -18,6 +18,8 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import { Calendar as CalendarPicker } from '@/components/ui/calendar';
 import { recordTransaction } from '@/lib/transactions';
 import { recordHealthCoordinatorCommission } from '@/lib/health-coordinator-data';
+import { addNotification } from '@/lib/notifications';
+import { initialDoctors } from '@/lib/mock-data';
 
 export default function PatientDetailPage() {
   const params = useParams();
@@ -50,13 +52,15 @@ export default function PatientDetailPage() {
     if (!patient) return;
     
     // Credit Health Points to the patient
-    const patientUserId = patient.name.split(' ')[0].toLowerCase() + '_sharma'; // simple mapping for demo
+    const patientUserId = patient.id; 
     recordTransaction(patientUserId, {
         type: 'credit',
         amount: patient.consultationFee,
         description: `Cashback from consultation on ${format(new Date(patient.appointmentDate), 'PP')}`,
         date: new Date(),
     });
+    const doctor = initialDoctors.find(d => d.id === patient.doctorId);
+    addNotification(patientUserId, `Your consultation with ${doctor?.name || 'your doctor'} is complete. INR ${patient.consultationFee.toFixed(2)} in Health Points has been credited to your account.`);
 
     // If a health coordinator booked this, credit commission to them
     if(patient.healthCoordinatorId) {
@@ -92,7 +96,7 @@ export default function PatientDetailPage() {
   };
 
   const handleSetReminder = () => {
-    if (!nextAppointment) {
+    if (!nextAppointment || !patient) {
         toast({
             title: "No date selected",
             description: "Please select a date for the next appointment reminder.",
@@ -110,6 +114,7 @@ export default function PatientDetailPage() {
 
     setAllPatients(updatedPatients);
     sessionStorage.setItem('mockPatients', JSON.stringify(updatedPatients));
+    addNotification(patient.id, `Your doctor has scheduled a follow-up for you on ${format(nextAppointment, 'PPP')}.`);
 
     toast({
         title: "Reminder Set",

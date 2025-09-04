@@ -19,7 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 import { MOCK_OTP } from '@/lib/auth';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { Card } from '../ui/card';
-import { sendBookingOtpNotification } from '@/lib/notifications';
+import { addNotification, sendBookingOtpNotification } from '@/lib/notifications';
 
 type Doctor = {
     id: string;
@@ -69,6 +69,7 @@ const calculateAge = (dob: string | Date) => {
 export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMembers, onConfirm }: BookingDialogProps) {
     const { toast } = useToast();
     const [userRole, setUserRole] = useState<string | null>(null);
+    const [user, setUser] = useState<any | null>(null);
     const [step, setStep] = useState<BookingStep>('details');
 
     // Common state
@@ -89,7 +90,16 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const storedUser = sessionStorage.getItem('user');
-            setUserRole(storedUser ? JSON.parse(storedUser).role : 'patient');
+            if (storedUser) {
+                const u = JSON.parse(storedUser);
+                setUser(u);
+                setUserRole(u.role);
+                if (u.role === 'patient') {
+                    setSelectedPatientId(u.id);
+                }
+            } else {
+                 setUserRole('patient');
+            }
         }
         
         if (isOpen) {
@@ -98,14 +108,14 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
             setSelectedClinicId(undefined);
             setSelectedDate(undefined);
             setSelectedTime('');
-            setSelectedPatientId('self');
+            setSelectedPatientId(user?.role === 'patient' ? user.id : 'self');
             setPatientSearch('');
             setFoundPatient(null);
             setIsSearching(false);
             setOtpSent(false);
             setOtp('');
         }
-    }, [isOpen]);
+    }, [isOpen, user?.id, user?.role]);
 
     const selectedClinic = useMemo(() => {
         return clinics.find(c => c.id === selectedClinicId);
@@ -134,6 +144,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
     const handleConfirmPayment = () => {
          const patientId = userRole === 'health-coordinator' ? foundPatient.id : selectedPatientId;
          if (patientId && selectedClinicId && selectedDate && selectedTime) {
+            addNotification(patientId, `Your appointment with ${doctor.name} at ${selectedClinic?.name} for ${format(selectedDate, 'PPP')} has been confirmed.`);
             onConfirm(patientId, selectedClinicId, selectedDate, selectedTime);
          }
     }
@@ -182,13 +193,13 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                 className="mt-2 space-y-2"
             >
                 <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="self" id="self" />
-                    <Label htmlFor="self" className="flex items-center gap-2 font-normal">
+                    <RadioGroupItem value={user.id} id={user.id} />
+                    <Label htmlFor={user.id} className="flex items-center gap-2 font-normal">
                         <Avatar className="h-8 w-8">
-                            <AvatarImage src={`https://i.pravatar.cc/150?u=rohan`} alt="Rohan Sharma" />
-                            <AvatarFallback>RS</AvatarFallback>
+                            <AvatarImage src={`https://i.pravatar.cc/150?u=${user.id}`} alt={user.fullName} />
+                            <AvatarFallback>{user.fullName.charAt(0)}</AvatarFallback>
                         </Avatar>
-                        <span>Rohan Sharma (Myself)</span>
+                        <span>{user.fullName} (Myself)</span>
                     </Label>
                 </div>
                 {familyMembers.map(member => (

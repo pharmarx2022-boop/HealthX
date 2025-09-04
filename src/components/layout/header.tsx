@@ -64,7 +64,7 @@ export function Header() {
              {user.role === 'doctor' && (
                 <>
                     <DropdownMenuItem asChild>
-                        <Link href="/doctor/dashboard#profile">
+                        <Link href="/doctor/profile">
                             <Settings className="mr-2" />
                             <span>Manage Profile</span>
                         </Link>
@@ -103,7 +103,7 @@ export function Header() {
              )}
               {user.role === 'lab' && (
                 <DropdownMenuItem asChild>
-                    <Link href="/lab/dashboard#profile">
+                    <Link href="/lab/profile">
                         <Beaker className="mr-2" />
                         <span>Manage Profile</span>
                     </Link>
@@ -138,7 +138,7 @@ export function Header() {
            {user.role === 'doctor' && (
              <>
                 <Button variant="ghost" asChild className="justify-start text-lg">
-                    <Link href="/doctor/dashboard#profile" onClick={() => setIsSheetOpen(false)}>
+                    <Link href="/doctor/profile" onClick={() => setIsSheetOpen(false)}>
                         <Settings className="mr-2" />
                         Manage Profile
                     </Link>
@@ -177,7 +177,7 @@ export function Header() {
            )}
            {user.role === 'lab' && (
                 <Button variant="ghost" asChild className="justify-start text-lg">
-                    <Link href="/lab/dashboard#profile" onClick={() => setIsSheetOpen(false)}>
+                    <Link href="/lab/profile" onClick={() => setIsSheetOpen(false)}>
                         <Beaker className="mr-2" />
                         Manage Profile
                     </Link>

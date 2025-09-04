@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
-import { Loader2, Upload, Briefcase, Link, MapPin } from 'lucide-react';
+import { Loader2, Upload, Briefcase, MapPin } from 'lucide-react';
 import { initialDoctors } from '@/lib/mock-data';
 
 const DOCTORS_KEY = 'doctorsData';
@@ -117,7 +117,7 @@ export function ProfileForm() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
              <div>
                 <h3 className="font-semibold mb-2 text-sm">Profile Picture</h3>
-                <div className="relative w-full aspect-square rounded-lg overflow-hidden border">
+                <div className="relative w-full aspect-square rounded-lg overflow-hidden border max-w-sm">
                     {currentImage ? (
                         <Image src={currentImage} alt="Profile Preview" fill style={{objectFit:"cover"}} data-ai-hint="doctor portrait" />
                     ) : (
@@ -127,7 +127,7 @@ export function ProfileForm() {
                     )}
                 </div>
                 <FormField control={form.control} name="image" render={({ field }) => (
-                    <FormItem className="mt-2">
+                    <FormItem className="mt-2 max-w-sm">
                         <FormControl>
                             <div>
                                 <Input 
@@ -180,7 +180,7 @@ export function ProfileForm() {
                     name="experience"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Experience</FormLabel>
+                        <FormLabel>Experience (Years)</FormLabel>
                             <FormControl>
                             <div className="relative">
                                 <Input type="number" placeholder="e.g., 15" {...field} className="pl-8"/>
@@ -197,7 +197,7 @@ export function ProfileForm() {
                 name="location"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Location</FormLabel>
+                    <FormLabel>City / Area</FormLabel>
                     <FormControl>
                         <Input placeholder="e.g., Mumbai, IN" {...field} />
                     </FormControl>

@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Stethoscope } from 'lucide-react';
 import { PatientList } from '@/components/doctor/patient-list';
 import { AnalyticsDashboard } from '@/components/doctor/analytics-dashboard';
-import { ProfileForm } from '@/components/doctor/profile-form';
 
 export default function DoctorDashboardPage() {
   return (
@@ -21,7 +20,7 @@ export default function DoctorDashboardPage() {
             <AnalyticsDashboard />
 
             <div className="grid lg:grid-cols-3 gap-8 mt-8 items-start">
-                <div className="lg:col-span-2 space-y-8">
+                <div className="lg:col-span-3 space-y-8">
                      <Card className="shadow-sm">
                         <CardHeader className="flex flex-row items-center gap-4">
                             <Stethoscope className="w-8 h-8 text-primary"/>
@@ -34,19 +33,6 @@ export default function DoctorDashboardPage() {
                         </CardHeader>
                         <CardContent>
                             <PatientList />
-                        </CardContent>
-                    </Card>
-                </div>
-                <div className="lg:col-span-1 space-y-8">
-                     <Card className="shadow-sm" id="profile">
-                        <CardHeader>
-                            <CardTitle>Edit Your Public Profile</CardTitle>
-                            <CardDescription>
-                                This information is visible to patients.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <ProfileForm />
                         </CardContent>
                     </Card>
                 </div>

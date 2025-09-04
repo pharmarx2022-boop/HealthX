@@ -1,4 +1,5 @@
 
+
 // A simple in-memory store for users
 const users: any[] = [];
 const referrals: any[] = []; // To track referrals
@@ -28,6 +29,7 @@ const populateAllUsersForLookup = () => {
     };
     addUsers('mockPharmacies');
     addUsers('mockLabs');
+    addUsers('doctorsData');
     // Assuming health coordinators are stored in a key like 'mockHealthCoordinators' if they existed separately
     // Or we rely on the dynamically created users array.
     users.forEach(u => {
@@ -46,53 +48,49 @@ export function loginWithOtp(email: string, otp: string, role: string, referralC
     if (otp !== MOCK_OTP) {
         return { user: null, error: "Invalid OTP. Please try again.", isNewUser: false };
     }
-
-    // Assign a static ID for demo purposes based on role
-    let userId;
-    let hasReferralCode = false;
-    const emailPrefix = email.split('@')[0];
-
-    switch(role) {
-        case 'doctor':
-            userId = `doc_${emailPrefix}`;
-            break;
-        case 'patient':
-             // Assuming patient Rohan Sharma has id 'rohan_sharma'
-            userId = 'rohan_sharma';
-            break;
-        case 'pharmacy':
-            userId = `pharm_${emailPrefix}`;
-            hasReferralCode = true;
-            break;
-        case 'lab':
-            userId = `lab_${emailPrefix}`;
-            hasReferralCode = true;
-            break;
-        case 'health-coordinator':
-            userId = `health_coordinator_${emailPrefix}`;
-            hasReferralCode = true;
-            break;
-        default:
-            userId = `${role}_${emailPrefix}`;
-    }
+    
+    // Combine all user data sources for lookup
+    const allUsers = [
+        ...users,
+        ...(JSON.parse(sessionStorage.getItem('doctorsData') || '[]')),
+        ...(JSON.parse(sessionStorage.getItem('mockLabs') || '[]')),
+        ...(JSON.parse(sessionStorage.getItem('mockPharmacies') || '[]')),
+    ];
 
 
     // Find user or create a new one
-    let user = users.find(u => u.email === email && u.role === role);
+    let user = allUsers.find(u => u.email === email && u.role === role);
     let isNewUser = false;
     
     if (!user) {
         isNewUser = true;
+        const emailPrefix = email.split('@')[0];
+        const isProfessional = ['doctor', 'pharmacy', 'lab', 'health-coordinator'].includes(role);
+
         user = { 
-            id: userId,
+            id: `${role}_${emailPrefix}_${Date.now()}`,
             email,
             role, 
-            referralCode: hasReferralCode ? generateReferralCode() : null,
+            referralCode: isProfessional ? generateReferralCode() : null,
             fullName: `${(role.charAt(0).toUpperCase() + role.slice(1)).replace('-coordinator', ' Coordinator')} ${emailPrefix}`, // Mock name
-            phone: '9876543210' // Mock phone for backward compatibility with other components
+            phone: '9876543210', // Mock phone for backward compatibility
+            status: isProfessional ? 'pending' : 'approved', // New users need approval
+            dateJoined: new Date().toISOString(),
         };
-        users.push(user);
-        console.log('New user created and logged in:', user);
+
+        // Add to appropriate mock data store based on role
+        if (role === 'doctor') {
+            const doctors = JSON.parse(sessionStorage.getItem('doctorsData') || '[]');
+            sessionStorage.setItem('doctorsData', JSON.stringify([...doctors, { ...user, specialty: 'General', experience: 0, location: 'City', bio: '', image: 'https://picsum.photos/400/400', reviewsList: [] }]));
+        } else if (role === 'pharmacy') {
+            const pharmacies = JSON.parse(sessionStorage.getItem('mockPharmacies') || '[]');
+            sessionStorage.setItem('mockPharmacies', JSON.stringify([...pharmacies, { ...user, location: 'City', image: 'https://picsum.photos/400/300', discount: 15, whatsappNumber: '', reviewsList: [] }]));
+        } else if (role === 'lab') {
+            const labs = JSON.parse(sessionStorage.getItem('mockLabs') || '[]');
+            sessionStorage.setItem('mockLabs', JSON.stringify([...labs, { ...user, location: 'City', image: 'https://picsum.photos/400/300', discount: 30, whatsappNumber: '', reviewsList: [] }]));
+        } else {
+             users.push(user); // For patients and health coordinators
+        }
         
         // Handle referral logic for new users
         if (referralCode) {
@@ -105,7 +103,6 @@ export function loginWithOtp(email: string, otp: string, role: string, referralC
                     referredUserId: user.id,
                     referredUserRole: user.role,
                     status: 'pending',
-                    // Reward details can be determined here based on referredUserRole
                 };
                 referrals.push(newReferral);
                 console.log('Referral successful:', newReferral);
@@ -114,12 +111,19 @@ export function loginWithOtp(email: string, otp: string, role: string, referralC
                  return { user: null, error: "Invalid referral code.", isNewUser: false };
             }
         }
+        console.log('New user created and awaiting approval:', user);
 
     } else {
-        console.log('Existing user logged in:', user);
+        console.log('Existing user logging in:', user);
+    }
+
+    if (user.status === 'pending') {
+        return { user: null, error: "Your account is pending admin approval.", isNewUser: false };
+    }
+    if (user.status === 'rejected') {
+        return { user: null, error: "Your registration has been rejected.", isNewUser: false };
     }
     
-    console.log('Current Users:', users);
     return { user, error: null, isNewUser };
 }
 
@@ -141,4 +145,39 @@ export function loginUser(email: string, password: string, role: string) {
         return user;
     }
     return null;
+}
+
+export function getAllPendingUsers() {
+    const doctors = JSON.parse(sessionStorage.getItem('doctorsData') || '[]').filter((u: any) => u.status === 'pending');
+    const labs = JSON.parse(sessionStorage.getItem('mockLabs') || '[]').filter((u: any) => u.status === 'pending');
+    const pharmacies = JSON.parse(sessionStorage.getItem('mockPharmacies') || '[]').filter((u: any) => u.status === 'pending');
+    const healthCoordinators = users.filter((u: any) => u.role === 'health-coordinator' && u.status === 'pending');
+    return [...doctors, ...labs, ...pharmacies, ...healthCoordinators];
+}
+
+export function updateUserStatus(userId: string, role: string, newStatus: 'approved' | 'rejected') {
+     let key;
+     switch(role) {
+         case 'doctor': key = 'doctorsData'; break;
+         case 'lab': key = 'mockLabs'; break;
+         case 'pharmacy': key = 'mockPharmacies'; break;
+         case 'health-coordinator':
+            const userIndex = users.findIndex(u => u.id === userId);
+            if(userIndex > -1) {
+                users[userIndex].status = newStatus;
+            }
+            return;
+     }
+
+     const storedData = sessionStorage.getItem(key);
+     if(storedData) {
+         let data = JSON.parse(storedData);
+         data = data.map((item: any) => {
+             if(item.id === userId) {
+                 return { ...item, status: newStatus };
+             }
+             return item;
+         });
+         sessionStorage.setItem(key, JSON.stringify(data));
+     }
 }

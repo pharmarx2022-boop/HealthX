@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import Link from 'next/link';
@@ -106,6 +107,16 @@ export default function LoginPage() {
         // Add a welcome notification
         addNotification(user.id, isNewUser ? 'Welcome to HealthLink Hub! Your account is ready.' : 'You have successfully logged in.');
         
+        if (isNewUser && user.status === 'pending') {
+             toast({
+                title: "Registration Submitted",
+                description: "Your account is now pending admin approval. You will be notified once it's active.",
+                duration: 9000,
+            });
+            router.push('/');
+            return;
+        }
+
         if(selectedRole === 'admin') {
             router.push('/admin');
         } else {

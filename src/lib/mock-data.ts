@@ -1,4 +1,5 @@
 
+
 export type MockReport = {
     id: string;
     patientId: string;
@@ -12,6 +13,10 @@ export const initialDoctors = [
   {
     id: '1',
     name: 'Dr. Anjali Sharma',
+    email: 'anjali@example.com',
+    role: 'doctor',
+    status: 'approved',
+    dateJoined: '2023-01-15T10:00:00Z',
     specialty: 'Cardiologist',
     location: 'Mumbai, IN',
     bio: 'Dr. Anjali Sharma is a renowned cardiologist with over 15 years of experience in treating complex heart conditions. She is known for her patient-centric approach and compassionate care.',
@@ -28,6 +33,10 @@ export const initialDoctors = [
   {
     id: '2',
     name: 'Dr. Vikram Singh',
+    email: 'vikram@example.com',
+    role: 'doctor',
+    status: 'approved',
+    dateJoined: '2023-02-20T11:00:00Z',
     specialty: 'Dermatologist',
     location: 'Mumbai, IN',
     bio: 'Dr. Vikram Singh is a leading dermatologist specializing in cosmetic and clinical dermatology. He is dedicated to providing personalized skin care solutions.',
@@ -43,6 +52,10 @@ export const initialDoctors = [
   {
     id: '3',
     name: 'Dr. Priya Patel',
+    email: 'priya@example.com',
+    role: 'doctor',
+    status: 'approved',
+    dateJoined: '2023-03-10T09:00:00Z',
     specialty: 'Pediatrician',
     location: 'Mumbai-IN',
     bio: 'Dr. Priya Patel is a compassionate pediatrician committed to providing the highest quality of care for children from infancy through adolescence.',
@@ -109,6 +122,10 @@ export const initialPharmacies = [
     {
         id: 'pharm1',
         name: 'Wellness Forever Pharmacy',
+        email: 'wellness@example.com',
+        role: 'pharmacy',
+        status: 'approved',
+        dateJoined: '2023-01-20T14:00:00Z',
         location: 'Shop 5, Andheri West',
         image: 'https://picsum.photos/id/24/400/300',
         acceptsHealthPoints: true,
@@ -123,6 +140,10 @@ export const initialPharmacies = [
     {
         id: 'pharm2',
         name: 'Apollo Pharmacy',
+        email: 'apollo@example.com',
+        role: 'pharmacy',
+        status: 'approved',
+        dateJoined: '2023-02-15T16:00:00Z',
         location: 'Main Road, Dadar',
         image: 'https://picsum.photos/id/219/400/300',
         acceptsHealthPoints: true,
@@ -136,6 +157,10 @@ export const initialPharmacies = [
     {
         id: 'pharm3',
         name: 'Noble Medical',
+        email: 'noble@example.com',
+        role: 'pharmacy',
+        status: 'approved',
+        dateJoined: '2023-04-01T12:00:00Z',
         location: 'Linking Road, Bandra',
         image: 'https://picsum.photos/id/183/400/300',
         acceptsHealthPoints: false,
@@ -150,6 +175,10 @@ export const initialLabs = [
     {
         id: 'lab1',
         name: 'Metropolis Lab',
+        email: 'metropolis@example.com',
+        role: 'lab',
+        status: 'approved',
+        dateJoined: '2023-01-25T18:00:00Z',
         location: 'Near Andheri Station',
         image: 'https://picsum.photos/id/30/400/300',
         acceptsHealthPoints: true,
@@ -164,6 +193,10 @@ export const initialLabs = [
     {
         id: 'lab2',
         name: 'Dr. Lal PathLabs',
+        email: 'lalpath@example.com',
+        role: 'lab',
+        status: 'approved',
+        dateJoined: '2023-03-05T13:00:00Z',
         location: 'Near Dadar Circle',
         image: 'https://picsum.photos/id/31/400/300',
         acceptsHealthPoints: true,

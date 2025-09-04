@@ -1,4 +1,5 @@
 
+
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { RefundTool } from '@/components/admin/refund-tool';
@@ -6,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { WithdrawalRequests } from '@/components/admin/withdrawal-requests';
 import { HealthPointWithdrawals } from '@/components/admin/healthpoint-withdrawals';
 import { TransactionHistory } from '@/components/admin/transaction-history';
+import { ApprovalRequests } from '@/components/admin/approval-requests';
 
 export default function AdminPage() {
   return (
@@ -20,6 +22,17 @@ export default function AdminPage() {
             
             <div className="grid lg:grid-cols-3 gap-8 items-start">
                 <div className="lg:col-span-2 space-y-8">
+                    <Card className="shadow-sm">
+                        <CardHeader>
+                            <CardTitle>Partner Approval Requests</CardTitle>
+                            <CardDescription>
+                                Approve or reject new partners who want to join the platform.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <ApprovalRequests />
+                        </CardContent>
+                    </Card>
                     <Card className="shadow-sm">
                         <CardHeader>
                             <CardTitle>AI-Assisted Refund Tool</CardTitle>

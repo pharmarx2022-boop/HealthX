@@ -68,7 +68,7 @@ export default function LoginPage() {
     if (form.getValues('email')) {
       setOtpSent(true);
       toast({
-        title: "OTP Sent!",
+        title: "OTP Sent to Email!",
         description: `An OTP has been sent to ${email}. For testing purposes, your OTP is: ${MOCK_OTP}`,
       });
     } else {

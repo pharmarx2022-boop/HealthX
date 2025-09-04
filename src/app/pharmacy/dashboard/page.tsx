@@ -82,8 +82,8 @@ export default function PharmacyDashboardPage() {
     const handleSendOtp = () => {
         setOtpSent(true);
         toast({
-            title: "OTP Sent",
-            description: `An OTP has been sent to the patient's number ending in ${patient.phone.slice(-4)}. For demo, OTP is 123456.`
+            title: "OTP Sent as Notification",
+            description: `An OTP has been sent to the patient's device ending in ${patient.phone.slice(-4)}. For demo, OTP is 123456.`
         });
     }
 

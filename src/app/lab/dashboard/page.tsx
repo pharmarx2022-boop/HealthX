@@ -37,7 +37,7 @@ export default function LabDashboardPage() {
     const [patientTransactionHistory, setPatientTransactionHistory] = useState<{ balance: number; transactions: Transaction[] }>({ balance: 0, transactions: [] });
     const [labData, setLabData] = useState<{ balance: number; transactions: LabTransaction[] }>({ balance: 0, transactions: [] });
     const [commissionWallet, setCommissionWallet] = useState<{ balance: number; transactions: CommissionTransaction[] }>({ balance: 0, transactions: [] });
-    const [labDetails, setLabDetails] = useState<any>(null);
+    const [labDetails, setLabDetails] = useState<any | null>(null);
     const [reportFile, setReportFile] = useState<File | null>(null);
     const [reportName, setReportName] = useState('');
     const [isClient, setIsClient] = useState(false);
@@ -97,8 +97,8 @@ export default function LabDashboardPage() {
     const handleSendOtp = () => {
         setOtpSent(true);
         toast({
-            title: "OTP Sent",
-            description: `An OTP has been sent to the patient's number ending in ${patient.phone.slice(-4)}. For demo, OTP is 123456.`
+            title: "OTP Sent as Notification",
+            description: `An OTP has been sent to the patient's device ending in ${patient.phone.slice(-4)}. For demo, OTP is 123456.`
         });
     }
 

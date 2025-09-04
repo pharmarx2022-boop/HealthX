@@ -6,6 +6,8 @@ import { useState, useMemo, useEffect } from 'react';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon, Trash2, CalendarClock, DownloadIcon } from 'lucide-react';
 import Link from 'next/link';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -144,35 +146,41 @@ export function PatientList() {
   }
   
   const handleDownload = () => {
-    const headers = ["Patient Name", "Clinic", "Appointment Date", "Appointment Time", "Status", "Reason for Visit"];
-    const csvContent = [
-        headers.join(','),
-        ...filteredPatients.map(p => {
-            const date = new Date(p.appointmentDate);
-            const row = [
-                `"${p.name}"`,
-                `"${p.clinic}"`,
-                format(date, 'yyyy-MM-dd'),
-                format(date, 'p'),
-                `"${p.status}"`,
-                `"${p.consultation.replace(/"/g, '""')}"`
-            ];
-            return row.join(',');
-        })
-    ].join('\n');
+    const doc = new jsPDF();
+    const tableHead = [["Patient Name", "Clinic", "Appointment Date", "Status", "Reason"]];
+    const tableBody = filteredPatients.map(p => {
+        const date = new Date(p.appointmentDate);
+        return [
+            p.name,
+            p.clinic,
+            format(date, 'PP, p'),
+            p.status,
+            p.consultation
+        ];
+    });
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    if (link.download !== undefined) {
-        const url = URL.createObjectURL(blob);
-        const filename = `patient_list_${format(new Date(), 'yyyy-MM-dd')}.csv`;
-        link.setAttribute('href', url);
-        link.setAttribute('download', filename);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
+    autoTable(doc, {
+      head: tableHead,
+      body: tableBody,
+      didDrawPage: (data) => {
+        // Header
+        doc.setFontSize(20);
+        doc.setTextColor(40);
+        doc.text("Patient List", data.settings.margin.left, 22);
+
+        // Footer
+        const pageCount = doc.internal.getNumberOfPages();
+        doc.setFontSize(10);
+        doc.text(
+          `Page ${data.pageNumber} of ${pageCount}`,
+          data.settings.margin.left,
+          doc.internal.pageSize.height - 10
+        );
+      },
+      startY: 30,
+    });
+    
+    doc.save(`patient_list_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
   };
 
 
@@ -293,7 +301,7 @@ export function PatientList() {
                     <div className="text-sm text-muted-foreground">Select patients to perform bulk actions.</div>
                 )}
                  <Button variant="outline" size="sm" onClick={handleDownload} disabled={filteredPatients.length === 0}>
-                    <DownloadIcon className="mr-2 h-4 w-4" /> Download List
+                    <DownloadIcon className="mr-2 h-4 w-4" /> Download PDF
                 </Button>
             </div>
             <Table>

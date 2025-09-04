@@ -344,9 +344,6 @@ export function ClinicManager() {
                              <MapPin className="w-4 h-4 mt-0.5 shrink-0"/>
                              <div className="flex items-center gap-2">
                                  <span>{clinic.location}</span>
-                                 <Link href={`https://www.google.com/maps?q=${encodeURIComponent(clinic.location)}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-primary hover:underline text-xs">
-                                     <LinkIcon className="w-4 h-4" />
-                                 </Link>
                              </div>
                         </div>
                         <div className="flex items-start gap-2 text-sm text-muted-foreground">

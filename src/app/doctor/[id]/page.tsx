@@ -186,9 +186,6 @@ export default function DoctorDetailPage() {
                                             <div className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
                                                 <MapPin className="w-4 h-4"/>
                                                 <span>{clinic.location}</span>
-                                                <Link href={`https://www.google.com/maps?q=${encodeURIComponent(clinic.location)}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-primary hover:underline">
-                                                    <LinkIcon className="w-4 h-4 ml-1" />
-                                                </Link>
                                             </div>
                                             <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
                                                 <Calendar className="w-4 h-4"/> {clinic.days.join(', ')}
@@ -253,5 +250,3 @@ export default function DoctorDetailPage() {
     </div>
   );
 }
-
-    

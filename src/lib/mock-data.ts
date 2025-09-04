@@ -82,6 +82,7 @@ export const initialClinics = [
         days: ['Monday', 'Wednesday', 'Friday'],
         slots: '10:00 AM, 11:00 AM, 12:00 PM',
         consultationFee: 1500,
+        patientLimit: 20
     },
     {
         id: 'clinic2',
@@ -93,6 +94,7 @@ export const initialClinics = [
         days: ['Tuesday', 'Thursday'],
         slots: '03:00 PM, 04:00 PM, 05:00 PM',
         consultationFee: 1200,
+        patientLimit: 15
     },
     {
         id: 'clinic3',
@@ -104,6 +106,7 @@ export const initialClinics = [
         days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
         slots: '09:00 AM, 10:30 AM, 12:00 PM, 02:00 PM',
         consultationFee: 2000,
+        patientLimit: 25
     },
     {
         id: 'clinic4',
@@ -115,6 +118,7 @@ export const initialClinics = [
         days: ['Monday', 'Wednesday', 'Friday', 'Saturday'],
         slots: '11:00 AM, 12:00 PM, 01:00 PM',
         consultationFee: 1000,
+        patientLimit: 30
     }
 ];
 

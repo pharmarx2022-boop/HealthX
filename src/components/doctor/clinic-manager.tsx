@@ -43,7 +43,7 @@ import {
 } from "@/components/ui/dialog"
 import { Checkbox } from '@/components/ui/checkbox';
 import Image from 'next/image';
-import { PlusCircle, Edit, Trash2, MapPin, Calendar, Clock, Upload, X, ChevronsUpDown, Check, Link as LinkIcon } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, MapPin, Calendar, Clock, Upload, X, ChevronsUpDown, Check, Link as LinkIcon, Users } from 'lucide-react';
 import { initialClinics } from '@/lib/mock-data';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
@@ -63,6 +63,7 @@ const clinicSchema = z.object({
   image: z.string().min(1, 'A clinic picture is required.'),
   dataAiHint: z.string().optional(),
   consultationFee: z.coerce.number().positive('Fee must be a positive number.'),
+  patientLimit: z.coerce.number().positive('Limit must be a positive number.').optional(),
   days: z.array(z.string()).refine((value) => value.some((item) => item), {
     message: 'You have to select at least one day.',
   }),
@@ -106,6 +107,7 @@ export function ClinicManager() {
         image: '',
         dataAiHint: 'clinic interior',
         consultationFee: 0,
+        patientLimit: 20,
         days: [],
         slots: '',
     },
@@ -126,6 +128,7 @@ export function ClinicManager() {
             image: '',
             dataAiHint: 'clinic interior',
             consultationFee: 0,
+            patientLimit: 20,
             days: [],
             slots: '',
           });
@@ -257,14 +260,22 @@ export function ClinicManager() {
                                     <Image src={currentImage} alt="Clinic preview" fill style={{ objectFit: 'cover' }} />
                                 </div>
                             )}
-
-                            <FormField control={form.control} name="consultationFee" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Consultation Fee (INR)</FormLabel>
-                                    <FormControl><Input type="number" placeholder="e.g., 1500" {...field} /></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )} />
+                            <div className="grid grid-cols-2 gap-4">
+                                <FormField control={form.control} name="consultationFee" render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Consultation Fee (INR)</FormLabel>
+                                        <FormControl><Input type="number" placeholder="e.g., 1500" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                                <FormField control={form.control} name="patientLimit" render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Patient Limit / Day</FormLabel>
+                                        <FormControl><Input type="number" placeholder="e.g., 25" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                            </div>
                             
                             <FormField
                                 control={form.control}
@@ -358,6 +369,10 @@ export function ClinicManager() {
                          <div className="flex items-start gap-2 text-sm text-muted-foreground">
                              <Clock className="w-4 h-4 mt-0.5 shrink-0"/>
                              <span>{clinic.slots}</span>
+                        </div>
+                         <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                             <Users className="w-4 h-4 mt-0.5 shrink-0"/>
+                             <span>Up to {clinic.patientLimit || 'N/A'} patients / day</span>
                         </div>
                     </CardContent>
                     <CardFooter className="bg-slate-50/70 p-4 border-t flex justify-end gap-2">

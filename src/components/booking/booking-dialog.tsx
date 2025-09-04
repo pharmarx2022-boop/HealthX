@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -20,6 +21,7 @@ import { MOCK_OTP } from '@/lib/auth';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { Card } from '../ui/card';
 import { addNotification, sendBookingOtpNotification } from '@/lib/notifications';
+import { mockPatients } from '@/components/doctor/patient-list';
 
 type Doctor = {
     id: string;
@@ -35,6 +37,7 @@ type Clinic = {
     days: string[];
     slots: string;
     consultationFee: number;
+    patientLimit?: number;
 };
 
 type FamilyMember = {
@@ -126,6 +129,18 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
         return selectedClinic.slots.split(',').map(s => s.trim());
     }, [selectedClinic]);
 
+    const isDateFull = useMemo(() => {
+        if (!selectedDate || !selectedClinic || !selectedClinic.patientLimit) {
+            return false;
+        }
+        const allAppointments = JSON.parse(sessionStorage.getItem('mockPatients') || JSON.stringify(mockPatients));
+        const appointmentsOnDate = allAppointments.filter((appt: any) => 
+            appt.clinicId === selectedClinic.id && 
+            format(new Date(appt.appointmentDate), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')
+        );
+        return appointmentsOnDate.length >= selectedClinic.patientLimit;
+    }, [selectedDate, selectedClinic]);
+
     const handleProceedToPayment = () => {
         const patientId = userRole === 'health-coordinator' ? foundPatient?.id : selectedPatientId;
         if (patientId && selectedClinicId && selectedDate && selectedTime) {
@@ -134,6 +149,10 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                     toast({ title: "Invalid OTP", description: "The OTP entered is incorrect.", variant: "destructive" });
                     return;
                 }
+            }
+            if (isDateFull) {
+                toast({ title: "Booking Limit Reached", description: "This day is fully booked. Please select another date.", variant: "destructive" });
+                return;
             }
             setStep('payment');
         } else {
@@ -305,6 +324,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                                 onSelect={setSelectedDate}
                                 disabled={isDateDisabled}
                                 initialFocus
+                                footer={isDateFull ? <p className="text-center text-sm text-destructive p-2">This date is fully booked.</p> : null}
                             />
                         </PopoverContent>
                     </Popover>
@@ -312,7 +332,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
 
                 <div>
                     <Label htmlFor="time-slot" className="font-semibold">Step 4: Select a Time Slot</Label>
-                     <Select value={selectedTime} onValueChange={setSelectedTime} disabled={!selectedDate}>
+                     <Select value={selectedTime} onValueChange={setSelectedTime} disabled={!selectedDate || isDateFull}>
                         <SelectTrigger id="time-slot" className="mt-2">
                             <SelectValue placeholder="Choose an available time" />
                         </SelectTrigger>

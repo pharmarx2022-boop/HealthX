@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Stethoscope, MapPin, Pill, Loader2, AlertTriangle, Building, Link as LinkIcon, Search, PercentCircle, Beaker, Calendar, Star, Briefcase } from 'lucide-react';
+import { Stethoscope, MapPin, Pill, Loader2, AlertTriangle, Building, Link as LinkIcon, Search, PercentCircle, Beaker, Calendar, Star, Briefcase, Filter } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { initialDoctors, initialClinics, initialPharmacies, initialLabs, mockPatientData } from '@/lib/mock-data';
@@ -14,6 +14,9 @@ import { Badge } from '../ui/badge';
 import { BookingDialog } from './booking-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '../ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Slider } from '../ui/slider';
+import { Label } from '../ui/label';
 
 // Types
 type Doctor = typeof initialDoctors[0];
@@ -26,20 +29,6 @@ const FAMILY_KEY = 'familyMembers';
 const CLINICS_KEY = 'mockClinics';
 const PATIENTS_KEY = 'mockPatients';
 
-
-const WhatsAppIcon = () => (
-    <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        width="20" 
-        height="20" 
-        viewBox="0 0 24 24" 
-        fill="currentColor"
-        className="text-green-500"
-    >
-        <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.38 1.25 4.81L2 22l5.29-1.38c1.37.71 2.93 1.11 4.59 1.11 5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2z"></path>
-        <path d="M16.92 14.37c-.14-.07-.84-.42-.97-.47-.13-.05-.23-.07-.33.07-.1.14-.37.47-.45.57-.08.1-.17.11-.3.05-.14-.07-1.46-.54-2.78-1.72-1.03-.92-1.73-2.05-2.02-2.39-.3-.34-.03-.52.04-.57.07-.05.14-.14.22-.22.08-.08.1-.14.17-.24.07-.1.03-.17-.02-.24-.05-.07-.33-.8-.45-1.1-.12-.3-.24-.26-.33-.26h-.3c-.1 0-.24.03-.37.14-.13.11-.5.48-.5.58 0 .1.03.14.07.17l.03.03c.53.47 1.02 1.14 1.48 1.83.47.7 1.13 1.52 2.39 2.11.3.14.56.22.84.28.3.06.84.05 1.12-.08.3-.14.84-.95.95-1.12.11-.17.11-.3.08-.37z" fill="white"></path>
-    </svg>
-)
 
 export function NearbySearch() {
   const [location, setLocation] = useState<{lat: number, lon: number} | null>(null);
@@ -58,6 +47,12 @@ export function NearbySearch() {
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
   const [labs, setLabs] = useState<Lab[]>([]);
   const { toast } = useToast();
+
+  // Filter state
+  const [specialty, setSpecialty] = useState('All');
+  const [experience, setExperience] = useState(0);
+  const [feeRange, setFeeRange] = useState('All');
+  const [distance, setDistance] = useState(10);
 
    useEffect(() => {
     setIsClient(true);
@@ -85,7 +80,6 @@ export function NearbySearch() {
         setFamilyMembers(mockFamilyMembers);
       }
       
-      // Check for location permission on mount
       if (navigator.permissions) {
         navigator.permissions.query({ name: 'geolocation' }).then((permissionStatus) => {
           if (permissionStatus.state === 'granted') {
@@ -120,45 +114,70 @@ export function NearbySearch() {
 
   const getDoctorFeeRange = (doctorId: string) => {
     const doctorClinics = clinics.filter(c => c.doctorId === doctorId);
-    if (doctorClinics.length === 0) return 'N/A';
+    if (doctorClinics.length === 0) return { range: 'N/A', min: 0 };
     
     const fees = doctorClinics.map(c => c.consultationFee);
     const minFee = Math.min(...fees);
     const maxFee = Math.max(...fees);
 
     if (minFee === maxFee) {
-        return `INR ${minFee.toFixed(2)}`;
+        return { range: `INR ${minFee.toFixed(2)}`, min: minFee };
     }
-    return `INR ${minFee.toFixed(2)} - INR ${maxFee.toFixed(2)}`;
+    return { range: `INR ${minFee.toFixed(2)} - INR ${maxFee.toFixed(2)}`, min: minFee };
   };
 
+  const specialties = useMemo(() => {
+    const allSpecialties = doctors.map(d => d.specialty);
+    return ['All', ...Array.from(new Set(allSpecialties))];
+  }, [doctors]);
 
   const searchResults = useMemo(() => {
     const allPharmacies = pharmacies;
     const allLabs = labs;
-
-    if (!searchTerm) {
-        return { doctors: doctors, pharmacies: allPharmacies, labs: allLabs };
-    }
-
     const lowerCaseSearchTerm = searchTerm.toLowerCase();
 
-    const filteredDoctors = doctors.filter(d => 
-        d.name.toLowerCase().includes(lowerCaseSearchTerm) || 
-        d.specialty.toLowerCase().includes(lowerCaseSearchTerm)
-    );
+    // Filter doctors
+    const filteredDoctors = doctors.filter(d => {
+        const feeData = getDoctorFeeRange(d.id);
 
-    const filteredPharmacies = allPharmacies.filter(p =>
-        p.name.toLowerCase().includes(lowerCaseSearchTerm)
-    );
+        if (lowerCaseSearchTerm && !d.name.toLowerCase().includes(lowerCaseSearchTerm) && !d.specialty.toLowerCase().includes(lowerCaseSearchTerm)) {
+            return false;
+        }
+        if (specialty !== 'All' && d.specialty !== specialty) {
+            return false;
+        }
+        if (d.experience < experience) {
+            return false;
+        }
+        if (feeRange !== 'All') {
+            const [min, max] = feeRange.split('-').map(Number);
+            if(max) {
+                 if (feeData.min < min || feeData.min > max) return false;
+            } else {
+                 if (feeData.min < min) return false;
+            }
+        }
+        // Mock distance filtering - in a real app, this would use lat/lng
+        return true;
+    });
+
+    // Filter others only by search term if it exists
+    const filteredPharmacies = lowerCaseSearchTerm ? allPharmacies.filter(p => p.name.toLowerCase().includes(lowerCaseSearchTerm)) : allPharmacies;
+    const filteredLabs = lowerCaseSearchTerm ? allLabs.filter(l => l.name.toLowerCase().includes(lowerCaseSearchTerm)) : allLabs;
     
-    const filteredLabs = allLabs.filter(l =>
-        l.name.toLowerCase().includes(lowerCaseSearchTerm)
-    );
+    // If search term is present, don't show all pharmacies/labs unless they match
+    if(lowerCaseSearchTerm) {
+        return { doctors: filteredDoctors, pharmacies: filteredPharmacies, labs: filteredLabs };
+    }
+    
+    // if filters are applied, only show doctors
+    if (specialty !== 'All' || experience > 0 || feeRange !== 'All' || distance < 10) {
+        return { doctors: filteredDoctors, pharmacies: [], labs: [] };
+    }
 
-    return { doctors: filteredDoctors, pharmacies: filteredPharmacies, labs: filteredLabs };
+    return { doctors: filteredDoctors, pharmacies: allPharmacies, labs: allLabs };
 
-  }, [searchTerm, clinics, pharmacies, labs, doctors]);
+  }, [searchTerm, doctors, clinics, pharmacies, labs, specialty, experience, feeRange, distance]);
   
   const handleBookNow = (e: React.MouseEvent, doctor: Doctor) => {
     e.preventDefault();
@@ -249,6 +268,47 @@ export function NearbySearch() {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
+                     <Card className="shadow-sm bg-slate-50/70">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><Filter/> Filter Doctors</CardTitle>
+                        </CardHeader>
+                        <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div className="space-y-2">
+                                <Label htmlFor="specialty">Specialty</Label>
+                                <Select value={specialty} onValueChange={setSpecialty}>
+                                    <SelectTrigger id="specialty">
+                                        <SelectValue placeholder="All Specialties"/>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {specialties.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="experience">Min. Experience: {experience} years</Label>
+                                <Slider id="experience" value={[experience]} onValueChange={(val) => setExperience(val[0])} max={30} step={1}/>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="fee">Consultation Fee</Label>
+                                <Select value={feeRange} onValueChange={setFeeRange}>
+                                    <SelectTrigger id="fee">
+                                        <SelectValue placeholder="Any"/>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="All">All</SelectItem>
+                                        <SelectItem value="0-500">Under INR 500</SelectItem>
+                                        <SelectItem value="500-1000">INR 500 - 1000</SelectItem>
+                                        <SelectItem value="1000-1500">INR 1000 - 1500</SelectItem>
+                                        <SelectItem value="1500">Over INR 1500</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                             <div className="space-y-2">
+                                <Label htmlFor="distance">Distance: {distance} km</Label>
+                                <Slider id="distance" value={[distance]} onValueChange={(val) => setDistance(val[0])} max={25} step={1}/>
+                            </div>
+                        </CardContent>
+                    </Card>
                     {doctors.length > 0 && (
                         <section>
                             <h2 className="text-2xl font-headline font-bold mb-4 flex items-center gap-2"><Stethoscope/> Doctors</h2>
@@ -286,7 +346,7 @@ export function NearbySearch() {
                                                         </div>
                                                     </div>
                                                     <div className="text-sm flex items-center gap-2 font-semibold text-primary pt-1">
-                                                      <span>{getDoctorFeeRange(doctor.id)}</span>
+                                                      <span>{getDoctorFeeRange(doctor.id).range}</span>
                                                     </div>
                                                 </CardContent>
                                             </Link>
@@ -376,7 +436,7 @@ export function NearbySearch() {
 
                      {(doctors.length === 0 && pharmacies.length === 0 && labs.length === 0) && (
                         <div className="text-center py-16 text-muted-foreground">
-                            <p>No results found for "{searchTerm}".</p>
+                            <p>No results found for your search or filters.</p>
                         </div>
                      )}
                 </div>
@@ -402,5 +462,7 @@ export function NearbySearch() {
     </div>
   );
 }
+
+    
 
     

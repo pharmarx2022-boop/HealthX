@@ -5,23 +5,23 @@ import { Book, Stethoscope, RefreshCw, ShoppingCart, Wallet } from "lucide-react
 const steps = [
     {
         icon: Book,
-        title: "1. Book Your Slot",
-        description: "Find your preferred doctor and book an available appointment slot online. No payment is required to book.",
+        title: "1. Pre-Pay to Book Slot",
+        description: "Pay the consultation fee online as a fully refundable deposit to secure your appointment slot.",
     },
     {
         icon: Stethoscope,
-        title: "2. Consult & Pay in Cash",
-        description: "Visit the doctor for your consultation and pay the fee directly at the clinic using cash.",
+        title: "2. Visit & Pay in Cash",
+        description: "Attend your consultation and pay the doctor's fee in cash directly at the clinic.",
+    },
+    {
+        icon: RefreshCw,
+        title: "3. Get 100% Refund",
+        description: "After the doctor marks the visit as complete, your initial online deposit is refunded to your original payment method.",
     },
     {
         icon: Wallet,
-        title: "3. Earn Health Points",
-        description: "Once the doctor marks your consultation as complete, you'll receive Health Points equal to the fee amount in your wallet.",
-    },
-    {
-        icon: ShoppingCart,
-        title: "4. Redeem for Discounts",
-        description: "Use your accumulated Health Points to get real discounts on medicines and lab tests at our partner pharmacies and labs.",
+        title: "4. Earn Bonus Health Points",
+        description: "You'll ALSO get Health Points of the same value to use for real discounts at our partner labs & pharmacies.",
     }
 ]
 
@@ -30,9 +30,9 @@ export function HowItWorks() {
         <section className="py-16 md:py-24 bg-white">
             <div className="container mx-auto px-4">
                 <div className="text-center mb-12">
-                    <h2 className="text-3xl md:text-4xl font-headline font-bold">Earn Rewards On Every Visit</h2>
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold">Effectively, A Free Consultation</h2>
                     <p className="text-lg text-muted-foreground mt-2 max-w-3xl mx-auto">
-                        Our unique points system rewards you for taking care of your health. Here's how simple it is.
+                        Our unique process rewards you with a 100% refund and bonus points for every doctor visit.
                     </p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -50,7 +50,7 @@ export function HowItWorks() {
                 </div>
                  <div className="text-center mt-12">
                     <p className="text-xl font-semibold">
-                       This means every consultation fee you pay comes back to you as valuable points to spend.
+                       Your online payment comes back to you, plus you earn valuable points to spend.
                     </p>
                 </div>
             </div>

@@ -131,45 +131,43 @@ export default function DoctorDetailPage() {
       <main className="flex-1 bg-slate-50/50">
         <div className="container mx-auto py-12">
             <Card className="max-w-4xl mx-auto shadow-lg">
-                <div className="grid md:grid-cols-3 gap-6">
-                    <div className="md:col-span-1 p-6">
-                        <div className="relative w-full aspect-square rounded-lg overflow-hidden">
+                <CardHeader className="p-6">
+                    <div className="flex flex-col md:flex-row gap-6">
+                        <div className="relative w-32 h-32 md:w-48 md:h-48 rounded-full overflow-hidden shrink-0 border-4 border-primary/20 mx-auto">
                            <Image src={doctor.image} alt={`Dr. ${doctor.name}`} fill style={{objectFit:"cover"}} data-ai-hint={doctor.dataAiHint} />
                         </div>
-                    </div>
-                    <div className="md:col-span-2">
-                        <CardHeader>
+                        <div className="flex-grow text-center md:text-left">
                             <CardTitle className="font-headline text-3xl">{doctor.name}</CardTitle>
-                            <CardDescription className="flex items-center gap-2 pt-1 text-base">
+                            <CardDescription className="flex items-center justify-center md:justify-start gap-2 pt-2 text-base">
                                 <Stethoscope className="w-5 h-5 text-primary" /> <span>{doctor.specialty}</span>
                             </CardDescription>
-                            <div className="flex items-center gap-4 pt-2">
+                            <div className="flex items-center justify-center md:justify-start gap-4 pt-3">
                                 <div className="flex items-center gap-1 text-amber-500">
                                     <Star className="w-5 h-5 fill-current" />
                                     <span className="font-bold">{averageRating}</span>
                                 </div>
                                 <span className="text-muted-foreground">({totalReviews} reviews)</span>
                             </div>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                             <div className="flex items-center text-muted-foreground gap-2">
+                             <div className="flex items-center justify-center md:justify-start text-muted-foreground gap-2 mt-3">
                                 <MapPin className="w-5 h-5"/> 
                                 <span>{doctor.location}</span>
                             </div>
-                            <div>
-                                <h3 className="font-semibold mb-2">About Dr. {doctor.name.split(' ').pop()}</h3>
-                                <p className="text-muted-foreground">{doctor.bio}</p>
-                            </div>
-                           
-                            <Button size="lg" className="w-full mt-4" onClick={() => setIsBookingOpen(true)}>
-                                <Calendar className="mr-2"/> Book Appointment
-                            </Button>
-                        </CardContent>
+                        </div>
                     </div>
-                </div>
+                </CardHeader>
+                <CardContent className="p-6 space-y-8">
+                     <div>
+                        <h3 className="font-semibold text-xl font-headline mb-2">About Dr. {doctor.name.split(' ').pop()}</h3>
+                        <p className="text-muted-foreground">{doctor.bio}</p>
+                    </div>
+                   
+                    <Button size="lg" className="w-full mt-4 text-lg" onClick={() => setIsBookingOpen(true)}>
+                        <Calendar className="mr-2"/> Book Appointment
+                    </Button>
+                </CardContent>
                  <Separator/>
                  <CardContent className="p-6">
-                    <h3 className="text-xl font-semibold mb-4">Clinics & Fees</h3>
+                    <h3 className="text-xl font-semibold font-headline mb-4">Clinics & Fees</h3>
                      {doctorClinics.length > 0 ? (
                         <div className="space-y-4">
                             {doctorClinics.map((clinic) => (
@@ -200,7 +198,7 @@ export default function DoctorDetailPage() {
                  </CardContent>
                  <Separator/>
                  <CardContent className="p-6">
-                    <h3 className="text-xl font-semibold mb-4">Patient Reviews</h3>
+                    <h3 className="text-xl font-semibold font-headline mb-4">Patient Reviews</h3>
                     {doctor.reviewsList && doctor.reviewsList.length > 0 ? (
                         <div className="space-y-6">
                             {doctor.reviewsList.map((review, index) => (
@@ -243,3 +241,5 @@ export default function DoctorDetailPage() {
     </div>
   );
 }
+
+    

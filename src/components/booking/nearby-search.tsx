@@ -150,7 +150,8 @@ export function NearbySearch() {
 
   }, [searchTerm, clinics, pharmacies, labs, doctors]);
   
-  const handleBookNow = (doctor: Doctor) => {
+  const handleBookNow = (e: React.MouseEvent, doctor: Doctor) => {
+    e.preventDefault();
     setSelectedDoctor(doctor);
     setIsBookingOpen(true);
   };
@@ -244,7 +245,8 @@ export function NearbySearch() {
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {doctors.map((doctor) => {
                                     return (
-                                        <Card key={doctor.id} className="overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col">
+                                        <Link href={`/doctor/${doctor.id}`} key={doctor.id} className="group">
+                                        <Card className="overflow-hidden h-full group-hover:shadow-xl transition-shadow duration-300 flex flex-col">
                                             <CardHeader className="flex-row gap-4 items-start">
                                                 <div className="relative w-24 h-24 rounded-full overflow-hidden shrink-0 border-2 border-primary/20">
                                                     <Image src={doctor.image} alt={`Dr. ${doctor.name}`} fill style={{objectFit:"cover"}} data-ai-hint={doctor.dataAiHint} />
@@ -260,22 +262,23 @@ export function NearbySearch() {
                                                     </div>
                                                 </div>
                                             </CardHeader>
-                                            <CardContent className="flex-grow">
+                                            <CardContent className="flex-grow space-y-2">
+                                                <div className="flex items-center gap-1 text-amber-500">
+                                                    <Star className="w-4 h-4 fill-current" />
+                                                    <span className="font-bold text-sm">{getAverageRating(doctor.reviewsList)}</span>
+                                                    <span className="text-xs text-muted-foreground ml-1">({doctor.reviewsList?.length ?? 0} reviews)</span>
+                                                </div>
                                                 <div className="text-sm flex items-center gap-2 font-semibold text-primary">
                                                   <span>{getDoctorFeeRange(doctor.id)}</span>
                                                 </div>
                                             </CardContent>
-                                            <CardFooter className="grid grid-cols-2 gap-2">
-                                                <Button asChild variant="outline">
-                                                    <Link href={`/doctor/${doctor.id}`}>
-                                                        View Profile
-                                                    </Link>
-                                                </Button>
-                                                <Button className="w-full" onClick={() => handleBookNow(doctor)}>
+                                            <CardFooter>
+                                                <Button className="w-full" onClick={(e) => handleBookNow(e, doctor)}>
                                                     <Calendar className="mr-2 h-4 w-4" /> Book Now
                                                 </Button>
                                             </CardFooter>
                                         </Card>
+                                        </Link>
                                     )
                                 })}
                             </div>
@@ -382,3 +385,5 @@ export function NearbySearch() {
     </div>
   );
 }
+
+    

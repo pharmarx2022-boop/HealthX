@@ -59,31 +59,40 @@ export function NearbySearch() {
   const [labs, setLabs] = useState<Lab[]>([]);
   const { toast } = useToast();
 
-  useEffect(() => {
+   useEffect(() => {
     setIsClient(true);
     if (typeof window !== 'undefined') {
-        const storedUser = sessionStorage.getItem('user');
-        setUser(storedUser ? JSON.parse(storedUser) : null);
+      const storedUser = sessionStorage.getItem('user');
+      setUser(storedUser ? JSON.parse(storedUser) : null);
 
-        const storedDoctors = sessionStorage.getItem(DOCTORS_KEY);
-        setDoctors(storedDoctors ? JSON.parse(storedDoctors) : initialDoctors);
+      const storedDoctors = sessionStorage.getItem(DOCTORS_KEY);
+      setDoctors(storedDoctors ? JSON.parse(storedDoctors) : initialDoctors);
 
-        const storedClinics = sessionStorage.getItem(CLINICS_KEY);
-        setClinics(storedClinics ? JSON.parse(storedClinics) : initialClinics);
+      const storedClinics = sessionStorage.getItem(CLINICS_KEY);
+      setClinics(storedClinics ? JSON.parse(storedClinics) : initialClinics);
 
-        const storedPharmacies = sessionStorage.getItem('mockPharmacies');
-        setPharmacies(storedPharmacies ? JSON.parse(storedPharmacies) : initialPharmacies);
-        
-        const storedLabs = sessionStorage.getItem('mockLabs');
-        setLabs(storedLabs ? JSON.parse(storedLabs) : initialLabs);
+      const storedPharmacies = sessionStorage.getItem('mockPharmacies');
+      setPharmacies(storedPharmacies ? JSON.parse(storedPharmacies) : initialPharmacies);
+      
+      const storedLabs = sessionStorage.getItem('mockLabs');
+      setLabs(storedLabs ? JSON.parse(storedLabs) : initialLabs);
 
-        const storedFamily = sessionStorage.getItem(FAMILY_KEY);
-        if (storedFamily) {
-            setFamilyMembers(JSON.parse(storedFamily));
-        } else {
-            sessionStorage.setItem(FAMILY_KEY, JSON.stringify(mockFamilyMembers));
-            setFamilyMembers(mockFamilyMembers);
-        }
+      const storedFamily = sessionStorage.getItem(FAMILY_KEY);
+      if (storedFamily) {
+        setFamilyMembers(JSON.parse(storedFamily));
+      } else {
+        sessionStorage.setItem(FAMILY_KEY, JSON.stringify(mockFamilyMembers));
+        setFamilyMembers(mockFamilyMembers);
+      }
+      
+      // Check for location permission on mount
+      if (navigator.permissions) {
+        navigator.permissions.query({ name: 'geolocation' }).then((permissionStatus) => {
+          if (permissionStatus.state === 'granted') {
+            handleLocationRequest();
+          }
+        });
+      }
     }
   }, []);
 
@@ -394,3 +403,4 @@ export function NearbySearch() {
   );
 }
 
+    

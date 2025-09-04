@@ -218,7 +218,8 @@ export function NearbySearch() {
 
     toast({
         title: "Booking Confirmed!",
-        description: `Your appointment at ${clinic.name} with Dr. ${selectedDoctor.name} on ${date.toDateString()} at ${time} has been booked.`,
+        description: `Your appointment at ${clinic.name} is booked. A receipt has been sent to your email. Your fee is secured and will be refunded as Health Points after the consultation is marked complete by the doctor.`,
+        duration: 9000,
     });
     setIsBookingOpen(false);
     setSelectedDoctor(null);

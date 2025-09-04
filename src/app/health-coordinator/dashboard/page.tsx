@@ -95,7 +95,7 @@ export default function HealthCoordinatorDashboardPage() {
                             <CardHeader className="flex flex-row items-center gap-4">
                                 <Briefcase className="w-8 h-8 text-primary"/>
                                 <div>
-                                    <CardTitle>Welcome, Health Coordinator!</CardTitle>
+                                    <CardTitle>Welcome, {user?.fullName || 'Health Coordinator'}!</CardTitle>
                                     <CardDescription>
                                         This is your portal to book appointments for patients and track your earnings.
                                     </CardDescription>

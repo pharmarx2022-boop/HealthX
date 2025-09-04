@@ -15,6 +15,7 @@ import { Footer } from '@/components/layout/footer';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { loginWithOtp, MOCK_OTP } from '@/lib/auth';
+import { sendLoginOtpNotification, addNotification } from '@/lib/notifications';
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'A valid email address is required.' }),
@@ -67,9 +68,10 @@ export default function LoginPage() {
     const email = form.getValues('email');
     if (form.getValues('email')) {
       setOtpSent(true);
+      sendLoginOtpNotification(email);
       toast({
-        title: "OTP Sent to Email!",
-        description: `An OTP has been sent to ${email}. For testing purposes, your OTP is: ${MOCK_OTP}`,
+        title: "OTP Sent!",
+        description: `An OTP has been sent to ${email} and as an in-app notification. For testing purposes, your OTP is: ${MOCK_OTP}`,
       });
     } else {
         form.setError("email", { type: "manual", message: "Please enter a valid email address." })
@@ -91,7 +93,7 @@ export default function LoginPage() {
         return;
     }
 
-    const { user, error } = loginWithOtp(values.email, values.otp!, selectedRole, values.referralCode);
+    const { user, error, isNewUser } = loginWithOtp(values.email, values.otp!, selectedRole, values.referralCode);
     if (user) {
         toast({
             title: "Login Successful!",
@@ -100,6 +102,9 @@ export default function LoginPage() {
         if (typeof window !== 'undefined') {
             sessionStorage.setItem('user', JSON.stringify(user));
         }
+
+        // Add a welcome notification
+        addNotification(user.id, isNewUser ? 'Welcome to HealthLink Hub! Your account is ready.' : 'You have successfully logged in.');
         
         if(selectedRole === 'admin') {
             router.push('/admin');

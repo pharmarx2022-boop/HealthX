@@ -44,7 +44,7 @@ export function loginWithOtp(email: string, otp: string, role: string, referralC
     // In a real app, you'd verify the OTP against a secure service.
     // Here, we'll just check against a mock OTP.
     if (otp !== MOCK_OTP) {
-        return { user: null, error: "Invalid OTP. Please try again." };
+        return { user: null, error: "Invalid OTP. Please try again.", isNewUser: false };
     }
 
     // Assign a static ID for demo purposes based on role
@@ -79,8 +79,10 @@ export function loginWithOtp(email: string, otp: string, role: string, referralC
 
     // Find user or create a new one
     let user = users.find(u => u.email === email && u.role === role);
+    let isNewUser = false;
     
     if (!user) {
+        isNewUser = true;
         user = { 
             id: userId,
             email,
@@ -109,7 +111,7 @@ export function loginWithOtp(email: string, otp: string, role: string, referralC
                 console.log('Referral successful:', newReferral);
                 sessionStorage.setItem('referrals', JSON.stringify(referrals));
             } else {
-                 return { user: null, error: "Invalid referral code." };
+                 return { user: null, error: "Invalid referral code.", isNewUser: false };
             }
         }
 
@@ -118,7 +120,7 @@ export function loginWithOtp(email: string, otp: string, role: string, referralC
     }
     
     console.log('Current Users:', users);
-    return { user, error: null };
+    return { user, error: null, isNewUser };
 }
 
 

@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { HeartPulse, Calendar, Menu, X, UserCircle, LogOut, Settings, Briefcase, Users, Pill, Beaker, Shield, Gift } from 'lucide-react';
+import { HeartPulse, Menu, X, UserCircle, LogOut, Settings, Briefcase, Users, Pill, Beaker, Gift, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { useState, useEffect } from 'react';
@@ -15,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Separator } from '../ui/separator';
+import { NotificationPopover } from './notification-popover';
 
 
 export function Header() {
@@ -35,6 +35,7 @@ export function Header() {
   const handleLogout = () => {
     if (typeof window !== 'undefined') {
       sessionStorage.removeItem('user');
+      sessionStorage.removeItem(`notifications_${user.id}`);
     }
     setUser(null);
     router.push('/');
@@ -45,77 +46,80 @@ export function Header() {
     if (user) {
       const roleDisplayName = (user.role.charAt(0).toUpperCase() + user.role.slice(1)).replace('-coordinator', ' Coordinator');
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost">
-              <UserCircle className="mr-2" />
-              {roleDisplayName} Account
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href={`/${user.role === 'admin' ? 'admin' : user.role + '/dashboard'}`}>
+        <>
+            <NotificationPopover userId={user.id} />
+            <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost">
                 <UserCircle className="mr-2" />
-                <span>Dashboard</span>
-              </Link>
-            </DropdownMenuItem>
-             {user.role === 'doctor' && (
-                <>
+                {roleDisplayName} Account
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                <Link href={`/${user.role === 'admin' ? 'admin' : user.role + '/dashboard'}`}>
+                    <UserCircle className="mr-2" />
+                    <span>Dashboard</span>
+                </Link>
+                </DropdownMenuItem>
+                {user.role === 'doctor' && (
+                    <>
+                        <DropdownMenuItem asChild>
+                            <Link href="/doctor/profile">
+                                <Settings className="mr-2" />
+                                <span>Manage Profile</span>
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                            <Link href="/doctor/clinics">
+                                <Briefcase className="mr-2" />
+                                <span>Manage Clinics</span>
+                            </Link>
+                        </DropdownMenuItem>
+                    </>
+                )}
+                {user.role === 'patient' && (
                     <DropdownMenuItem asChild>
-                        <Link href="/doctor/profile">
-                            <Settings className="mr-2" />
+                        <Link href="/patient/dashboard">
+                            <Users className="mr-2" />
+                            <span>Family Members</span>
+                        </Link>
+                    </DropdownMenuItem>
+                )}
+                {user.role === 'health-coordinator' && (
+                    <DropdownMenuItem asChild>
+                        <Link href="/health-coordinator/profile">
+                            <Gift className="mr-2" />
+                            <span>Referral Code</span>
+                        </Link>
+                    </DropdownMenuItem>
+                )}
+                {user.role === 'pharmacy' && (
+                    <DropdownMenuItem asChild>
+                        <Link href="/pharmacy/profile">
+                            <Pill className="mr-2" />
                             <span>Manage Profile</span>
                         </Link>
                     </DropdownMenuItem>
+                )}
+                {user.role === 'lab' && (
                     <DropdownMenuItem asChild>
-                        <Link href="/doctor/clinics">
-                            <Briefcase className="mr-2" />
-                            <span>Manage Clinics</span>
+                        <Link href="/lab/profile">
+                            <Beaker className="mr-2" />
+                            <span>Manage Profile</span>
                         </Link>
                     </DropdownMenuItem>
-                </>
-             )}
-             {user.role === 'patient' && (
-                <DropdownMenuItem asChild>
-                    <Link href="/patient/dashboard">
-                        <Users className="mr-2" />
-                        <span>Family Members</span>
-                    </Link>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                <LogOut className="mr-2" />
+                <span>Logout</span>
                 </DropdownMenuItem>
-             )}
-             {user.role === 'health-coordinator' && (
-                <DropdownMenuItem asChild>
-                    <Link href="/health-coordinator/profile">
-                        <Gift className="mr-2" />
-                        <span>Referral Code</span>
-                    </Link>
-                </DropdownMenuItem>
-             )}
-             {user.role === 'pharmacy' && (
-                <DropdownMenuItem asChild>
-                    <Link href="/pharmacy/profile">
-                        <Pill className="mr-2" />
-                        <span>Manage Profile</span>
-                    </Link>
-                </DropdownMenuItem>
-             )}
-              {user.role === 'lab' && (
-                <DropdownMenuItem asChild>
-                    <Link href="/lab/profile">
-                        <Beaker className="mr-2" />
-                        <span>Manage Profile</span>
-                    </Link>
-                </DropdownMenuItem>
-             )}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout}>
-              <LogOut className="mr-2" />
-              <span>Logout</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            </DropdownMenuContent>
+            </DropdownMenu>
+        </>
       );
     }
     return null;

@@ -19,6 +19,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { format } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AnalyticsDashboard } from '@/components/pharmacy/analytics-dashboard';
+import { sendRedemptionOtpNotification } from '@/lib/notifications';
 
 const PHARMACIES_KEY = 'mockPharmacies';
 const PATIENTS_KEY = 'mockPatientData';
@@ -82,6 +83,7 @@ export default function PharmacyDashboardPage() {
     
     const handleSendOtp = () => {
         setOtpSent(true);
+        sendRedemptionOtpNotification(patient.id, patient.name);
         toast({
             title: "OTP Sent as Notification",
             description: `An OTP has been sent to the patient's device ending in ${patient.phone.slice(-4)}. For demo, OTP is 123456.`

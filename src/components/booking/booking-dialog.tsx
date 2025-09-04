@@ -19,6 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 import { MOCK_OTP } from '@/lib/auth';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { Card } from '../ui/card';
+import { sendBookingOtpNotification } from '@/lib/notifications';
 
 type Doctor = {
     id: string;
@@ -165,9 +166,10 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
     
     const handleSendOtp = () => {
         setOtpSent(true);
+        sendBookingOtpNotification(foundPatient.id, foundPatient.name);
         toast({
             title: "OTP Sent to Patient",
-            description: `An OTP has been sent to ${foundPatient.name}. Please ask them for it. The mock OTP is ${MOCK_OTP}.`
+            description: `An OTP has been sent as a notification to ${foundPatient.name}. The mock OTP is ${MOCK_OTP}.`
         })
     }
 

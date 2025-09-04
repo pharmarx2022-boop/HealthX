@@ -5,8 +5,8 @@ import { Book, Stethoscope, RefreshCw, ShoppingCart } from "lucide-react";
 const steps = [
     {
         icon: Book,
-        title: "1. Book & Pay Securely",
-        description: "Find your doctor and book an appointment online. Your consultation fee is held securely with us.",
+        title: "1. Book & Pay a Deposit",
+        description: "Find your doctor and book an appointment by paying a fully refundable security deposit online. This confirms your slot, and no cash payment is needed at the clinic.",
     },
     {
         icon: Stethoscope,
@@ -16,7 +16,7 @@ const steps = [
     {
         icon: RefreshCw,
         title: "3. Get 100% Cashback + Points",
-        description: "You receive a 100% refund to your original payment method, PLUS an equal amount credited to your account as Health Points.",
+        description: "You receive a 100% refund of your deposit to your original payment method, PLUS an equal amount credited to your account as Health Points.",
     },
     {
         icon: ShoppingCart,

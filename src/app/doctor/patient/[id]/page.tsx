@@ -17,7 +17,7 @@ import { useState, useEffect } from 'react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Calendar as CalendarPicker } from '@/components/ui/calendar';
 import { recordTransaction } from '@/lib/transactions';
-import { recordAgentCommission } from '@/lib/agent-data';
+import { recordHealthCoordinatorCommission } from '@/lib/health-coordinator-data';
 
 export default function PatientDetailPage() {
   const params = useParams();
@@ -58,18 +58,18 @@ export default function PatientDetailPage() {
         date: new Date(),
     });
 
-    // If an agent booked this, credit commission to them
-    if(patient.agentId) {
+    // If a health coordinator booked this, credit commission to them
+    if(patient.healthCoordinatorId) {
         const commissionAmount = patient.consultationFee * 0.05; // 5% commission for demo
-        recordAgentCommission(patient.agentId, {
+        recordHealthCoordinatorCommission(patient.healthCoordinatorId, {
             type: 'credit',
             amount: commissionAmount,
             description: `Commission from booking for ${patient.name}`,
             date: new Date(),
         });
         toast({
-            title: "Agent Commission Paid",
-            description: `A commission of INR ${commissionAmount.toFixed(2)} has been credited to agent ${patient.agentId}.`
+            title: "Health Coordinator Commission Paid",
+            description: `A commission of INR ${commissionAmount.toFixed(2)} has been credited to health coordinator ${patient.healthCoordinatorId}.`
         });
     }
     

@@ -28,7 +28,7 @@ const populateAllUsersForLookup = () => {
     };
     addUsers('mockPharmacies');
     addUsers('mockLabs');
-    // Assuming agents are stored in a key like 'mockAgents' if they existed separately
+    // Assuming health coordinators are stored in a key like 'mockHealthCoordinators' if they existed separately
     // Or we rely on the dynamically created users array.
     users.forEach(u => {
         if(!allKnownUsers.find(k => k.id === u.id)) {
@@ -67,8 +67,8 @@ export function loginWithOtp(phone: string, otp: string, role: string, referralC
             userId = `lab_${phone.slice(-4)}`;
             hasReferralCode = true;
             break;
-        case 'agent':
-            userId = `agent_${phone.slice(-4)}`;
+        case 'health-coordinator':
+            userId = `health_coordinator_${phone.slice(-4)}`;
             hasReferralCode = true;
             break;
         default:
@@ -85,7 +85,7 @@ export function loginWithOtp(phone: string, otp: string, role: string, referralC
             phone,
             role, 
             referralCode: hasReferralCode ? generateReferralCode() : null,
-            fullName: `${role.charAt(0).toUpperCase() + role.slice(1)} ${phone.slice(-4)}`, // Mock name
+            fullName: `${(role.charAt(0).toUpperCase() + role.slice(1)).replace('-coordinator', ' Coordinator')} ${phone.slice(-4)}`, // Mock name
             email: `${phone}@example.com` // Mock email
         };
         users.push(user);

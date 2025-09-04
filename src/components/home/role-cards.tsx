@@ -20,10 +20,10 @@ const roles = [
     loginLink: '/login?role=patient',
   },
   {
-    name: 'Agent',
+    name: 'Health Coordinator',
     icon: Briefcase,
     description: 'Help others book and earn commissions.',
-    loginLink: '/login?role=agent',
+    loginLink: '/login?role=health-coordinator',
   },
   {
     name: 'Pharmacy',
@@ -44,7 +44,7 @@ export function RoleCards() {
     <section className="py-16 md:py-24 bg-slate-50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-headline font-bold">Are you a Provider or Agent?</h2>
+          <h2 className="text-3xl md:text-4xl font-headline font-bold">Are you a Provider or Health Coordinator?</h2>
           <p className="text-lg text-muted-foreground mt-2">Log in to your respective dashboard here.</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 max-w-7xl mx-auto">

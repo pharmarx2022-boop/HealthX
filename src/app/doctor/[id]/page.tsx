@@ -102,7 +102,7 @@ export default function DoctorDetailPage() {
         name: patientName,
         clinic: clinic.name,
         doctorId: doctor.id,
-        agentId: user?.role === 'agent' ? user.id : null,
+        healthCoordinatorId: user?.role === 'health-coordinator' ? user.id : null,
         appointmentDate: new Date(date.getFullYear(), date.getMonth(), date.getDate(), parseInt(time.split(':')[0]), parseInt(time.split(':')[1].split(' ')[0])).toISOString(),
         status: 'upcoming',
         consultation: 'General Consultation',

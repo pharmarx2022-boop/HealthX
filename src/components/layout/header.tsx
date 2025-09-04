@@ -43,7 +43,7 @@ export function Header() {
 
   const renderAuthButtons = () => {
     if (user) {
-      const roleDisplayName = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+      const roleDisplayName = (user.role.charAt(0).toUpperCase() + user.role.slice(1)).replace('-coordinator', ' Coordinator');
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -85,9 +85,9 @@ export function Header() {
                     </Link>
                 </DropdownMenuItem>
              )}
-             {user.role === 'agent' && (
+             {user.role === 'health-coordinator' && (
                 <DropdownMenuItem asChild>
-                    <Link href="/agent/profile">
+                    <Link href="/health-coordinator/profile">
                         <Gift className="mr-2" />
                         <span>Referral Code</span>
                     </Link>
@@ -159,9 +159,9 @@ export function Header() {
                     </Link>
                 </Button>
            )}
-           {user.role === 'agent' && (
+           {user.role === 'health-coordinator' && (
               <Button variant="ghost" asChild className="justify-start text-lg">
-                  <Link href="/agent/profile" onClick={() => setIsSheetOpen(false)}>
+                  <Link href="/health-coordinator/profile" onClick={() => setIsSheetOpen(false)}>
                       <Gift className="mr-2" />
                       Referral Code
                   </Link>

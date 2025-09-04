@@ -8,17 +8,17 @@ import { Button } from '@/components/ui/button';
 import { BadgePercent, Banknote, Briefcase, History, Gift } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
-import { getAgentData, convertPointsToCash, type AgentTransaction } from '@/lib/agent-data';
+import { getHealthCoordinatorData, convertPointsToCash, type HealthCoordinatorTransaction } from '@/lib/health-coordinator-data';
 import { getCommissionWalletData, requestWithdrawal, type CommissionTransaction } from '@/lib/commission-wallet';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Link from 'next/link';
-import { AnalyticsDashboard } from '@/components/agent/analytics-dashboard';
+import { AnalyticsDashboard } from '@/components/health-coordinator/analytics-dashboard';
 
-export default function AgentDashboardPage() {
+export default function HealthCoordinatorDashboardPage() {
     const { toast } = useToast();
-    const [agentData, setAgentData] = useState<{ balance: number; transactions: AgentTransaction[] }>({ balance: 0, transactions: [] });
+    const [healthCoordinatorData, setHealthCoordinatorData] = useState<{ balance: number; transactions: HealthCoordinatorTransaction[] }>({ balance: 0, transactions: [] });
     const [commissionWallet, setCommissionWallet] = useState<{ balance: number; transactions: CommissionTransaction[] }>({ balance: 0, transactions: [] });
     const [isClient, setIsClient] = useState(false);
     const [user, setUser] = useState<any | null>(null);
@@ -31,14 +31,14 @@ export default function AgentDashboardPage() {
             if (storedUser) {
                 const u = JSON.parse(storedUser);
                 setUser(u);
-                setAgentData(getAgentData(u.id));
+                setHealthCoordinatorData(getHealthCoordinatorData(u.id));
                 setCommissionWallet(getCommissionWalletData(u.id));
             }
         }
     }, []);
 
     const handleConversionRequest = () => {
-        const conversionAmount = agentData.balance;
+        const conversionAmount = healthCoordinatorData.balance;
         if (conversionAmount <= 0) {
             toast({
                 title: "No Points to Convert",
@@ -49,7 +49,7 @@ export default function AgentDashboardPage() {
         }
 
         convertPointsToCash(user.id);
-        setAgentData(getAgentData(user.id));
+        setHealthCoordinatorData(getHealthCoordinatorData(user.id));
 
         toast({
             title: "Conversion Request Sent!",
@@ -78,7 +78,7 @@ export default function AgentDashboardPage() {
             <main className="flex-1 bg-slate-50/50">
                 <div className="container mx-auto py-12">
                     <div className="mb-8">
-                        <h1 className="text-3xl font-headline font-bold">Agent Dashboard</h1>
+                        <h1 className="text-3xl font-headline font-bold">Health Coordinator Dashboard</h1>
                         <p className="text-muted-foreground">Book appointments and manage your commissions.</p>
                     </div>
 
@@ -89,7 +89,7 @@ export default function AgentDashboardPage() {
                             <CardHeader className="flex flex-row items-center gap-4">
                                 <Briefcase className="w-8 h-8 text-primary"/>
                                 <div>
-                                    <CardTitle>Welcome, Agent!</CardTitle>
+                                    <CardTitle>Welcome, Health Coordinator!</CardTitle>
                                     <CardDescription>
                                         This is your portal to book appointments for patients and track your earnings.
                                     </CardDescription>
@@ -110,11 +110,11 @@ export default function AgentDashboardPage() {
                                     <CardDescription>Your total earnings available for conversion.</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <p className="text-4xl font-bold">INR {isClient ? agentData.balance.toFixed(2) : '0.00'}</p>
+                                    <p className="text-4xl font-bold">INR {isClient ? healthCoordinatorData.balance.toFixed(2) : '0.00'}</p>
                                     <p className="text-sm text-muted-foreground mt-1">1 Health Point = 1 INR</p>
                                 </CardContent>
                                 <CardFooter className="flex-col items-start gap-4">
-                                    <Button className="w-full" onClick={handleConversionRequest} disabled={!isClient || agentData.balance <= 0}>
+                                    <Button className="w-full" onClick={handleConversionRequest} disabled={!isClient || healthCoordinatorData.balance <= 0}>
                                         <Banknote className="mr-2"/> Request Cash Conversion
                                     </Button>
                                     <Dialog>
@@ -130,8 +130,8 @@ export default function AgentDashboardPage() {
                                             </DialogHeader>
                                             <div className="max-h-[50vh] overflow-y-auto -mx-6 px-6">
                                                 <ul className="space-y-4 py-4">
-                                                    {isClient && agentData.transactions.length > 0 ? (
-                                                        agentData.transactions.map((tx, index) => (
+                                                    {isClient && healthCoordinatorData.transactions.length > 0 ? (
+                                                        healthCoordinatorData.transactions.map((tx, index) => (
                                                             <li key={index} className="flex items-center justify-between">
                                                                 <div>
                                                                     <p className="font-medium">{tx.description}</p>

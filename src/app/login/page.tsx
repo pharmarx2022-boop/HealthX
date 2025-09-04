@@ -22,9 +22,9 @@ const loginSchema = z.object({
   referralCode: z.string().optional(),
 });
 
-type Role = 'doctor' | 'patient' | 'agent' | 'admin' | 'pharmacy' | 'lab';
+type Role = 'doctor' | 'patient' | 'health-coordinator' | 'admin' | 'pharmacy' | 'lab';
 
-const ALL_ROLES: Role[] = ['doctor', 'patient', 'agent', 'admin', 'pharmacy', 'lab'];
+const ALL_ROLES: Role[] = ['doctor', 'patient', 'health-coordinator', 'admin', 'pharmacy', 'lab'];
 
 function isValidRole(role: any): role is Role {
     return ALL_ROLES.includes(role);
@@ -115,7 +115,7 @@ export default function LoginPage() {
     }
   }
   
-  const roleDisplayName = selectedRole ? selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1) : '';
+  const roleDisplayName = selectedRole ? (selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)).replace('-coordinator', ' Coordinator') : '';
 
   return (
     <div className="flex flex-col min-h-screen">

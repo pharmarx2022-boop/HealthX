@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Copy } from 'lucide-react';
 
 
-export function AgentProfileForm() {
+export function HealthCoordinatorProfileForm() {
   const { toast } = useToast();
   const [user, setUser] = useState<any>(null);
 
@@ -42,7 +42,7 @@ export function AgentProfileForm() {
             </div>
         </div>
          <p className="text-sm text-muted-foreground">
-            Share this code with new Doctors, Pharmacies, Labs, or other Agents you onboard. You'll earn a commission once they meet their activity milestones.
+            Share this code with new Doctors, Pharmacies, Labs, or other Health Coordinators you onboard. You'll earn a commission once they meet their activity milestones.
         </p>
     </div>
   );

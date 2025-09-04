@@ -1,17 +1,17 @@
 
 'use client';
 
-const TRANSACTIONS_KEY_PREFIX = 'agent_transactions_';
+const TRANSACTIONS_KEY_PREFIX = 'health_coordinator_transactions_';
 
-export type AgentTransaction = {
+export type HealthCoordinatorTransaction = {
     type: 'credit' | 'debit';
     amount: number;
     description: string;
     date: string | Date;
 }
 
-// MOCK DATA: Simulate that this agent has completed 10 bookings to trigger referral reward for their referrer
-const mockInitialTransactions: AgentTransaction[] = Array.from({ length: 10 }, (_, i) => ({
+// MOCK DATA: Simulate that this health coordinator has completed 10 bookings to trigger referral reward for their referrer
+const mockInitialTransactions: HealthCoordinatorTransaction[] = Array.from({ length: 10 }, (_, i) => ({
     type: 'credit' as 'credit',
     amount: 50 + i,
     description: `Commission from booking #${i+1}`,
@@ -19,15 +19,15 @@ const mockInitialTransactions: AgentTransaction[] = Array.from({ length: 10 }, (
 }));
 
 
-function initializeTransactions(agentId: string): AgentTransaction[] {
-    const key = TRANSACTIONS_KEY_PREFIX + agentId;
-    // In a real app, you would check if this agent was referred and if their referrer's reward is pending
-    // For demo, we will assume agent_1 was referred by pharm1
-    if(agentId === 'agent_1') {
+function initializeTransactions(healthCoordinatorId: string): HealthCoordinatorTransaction[] {
+    const key = TRANSACTIONS_KEY_PREFIX + healthCoordinatorId;
+    // In a real app, you would check if this health coordinator was referred and if their referrer's reward is pending
+    // For demo, we will assume health_coordinator_1 was referred by pharm1
+    if(healthCoordinatorId === 'health_coordinator_1') {
         const rewardDetails = {
             referrerId: 'pharm1',
-            referredUserId: 'agent_1',
-            type: 'agent',
+            referredUserId: 'health_coordinator_1',
+            type: 'health-coordinator',
             status: 'pending',
             rewardAmount: 200,
             milestone: 10, // 10 bookings needed
@@ -35,14 +35,14 @@ function initializeTransactions(agentId: string): AgentTransaction[] {
         };
         // Check if milestone is reached
         if (rewardDetails.currentProgress >= rewardDetails.milestone && rewardDetails.status === 'pending') {
-            console.log(`Agent ${agentId} reached the referral milestone. Crediting referrer ${rewardDetails.referrerId}.`);
+            console.log(`Health Coordinator ${healthCoordinatorId} reached the referral milestone. Crediting referrer ${rewardDetails.referrerId}.`);
             // This would call a backend function. We simulate it here.
             // In a real app, this would be a server-side check.
              import('./commission-wallet').then(wallet => {
                 wallet.recordCommission(rewardDetails.referrerId, {
                     type: 'credit',
                     amount: rewardDetails.rewardAmount,
-                    description: `Referral bonus for new agent: ${agentId}`,
+                    description: `Referral bonus for new health coordinator: ${healthCoordinatorId}`,
                     date: new Date(),
                     status: 'success'
                 });
@@ -57,15 +57,15 @@ function initializeTransactions(agentId: string): AgentTransaction[] {
     return mockInitialTransactions;
 }
 
-export function getAgentData(agentId: string): { balance: number; transactions: AgentTransaction[] } {
-    const key = TRANSACTIONS_KEY_PREFIX + agentId;
-    let transactions: AgentTransaction[] = [];
+export function getHealthCoordinatorData(healthCoordinatorId: string): { balance: number; transactions: HealthCoordinatorTransaction[] } {
+    const key = TRANSACTIONS_KEY_PREFIX + healthCoordinatorId;
+    let transactions: HealthCoordinatorTransaction[] = [];
 
     const storedTransactions = sessionStorage.getItem(key);
     if (storedTransactions) {
         transactions = JSON.parse(storedTransactions).map((t: any) => ({...t, date: new Date(t.date)}));
     } else {
-        transactions = initializeTransactions(agentId);
+        transactions = initializeTransactions(healthCoordinatorId);
     }
     
     const balance = transactions.reduce((acc, curr) => {
@@ -78,13 +78,13 @@ export function getAgentData(agentId: string): { balance: number; transactions: 
     };
 }
 
-export function convertPointsToCash(agentId: string) {
-    const key = TRANSACTIONS_KEY_PREFIX + agentId;
-    const { balance, transactions } = getAgentData(agentId);
+export function convertPointsToCash(healthCoordinatorId: string) {
+    const key = TRANSACTIONS_KEY_PREFIX + healthCoordinatorId;
+    const { balance, transactions } = getHealthCoordinatorData(healthCoordinatorId);
 
     if (balance <= 0) return;
 
-    const conversionTransaction: AgentTransaction = {
+    const conversionTransaction: HealthCoordinatorTransaction = {
         type: 'debit',
         amount: balance,
         description: 'Cash conversion request to admin',
@@ -95,9 +95,9 @@ export function convertPointsToCash(agentId: string) {
     sessionStorage.setItem(key, JSON.stringify(updatedTransactions));
 }
 
-export function recordAgentCommission(agentId: string, transaction: Omit<AgentTransaction, 'date'> & { date: Date }) {
-    const key = TRANSACTIONS_KEY_PREFIX + agentId;
-    const history = getAgentData(agentId);
+export function recordHealthCoordinatorCommission(healthCoordinatorId: string, transaction: Omit<HealthCoordinatorTransaction, 'date'> & { date: Date }) {
+    const key = TRANSACTIONS_KEY_PREFIX + healthCoordinatorId;
+    const history = getHealthCoordinatorData(healthCoordinatorId);
     const updatedTransactions = [...history.transactions, transaction];
     sessionStorage.setItem(key, JSON.stringify(updatedTransactions));
 }

@@ -2,9 +2,9 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AgentProfileForm } from '@/components/agent/profile-form';
+import { HealthCoordinatorProfileForm } from '@/components/health-coordinator/profile-form';
 
-export default function AgentProfilePage() {
+export default function HealthCoordinatorProfilePage() {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
@@ -17,13 +17,13 @@ export default function AgentProfilePage() {
             
             <Card className="max-w-4xl mx-auto shadow-sm">
                 <CardHeader>
-                    <CardTitle>Edit Your Agent Profile</CardTitle>
+                    <CardTitle>Edit Your Health Coordinator Profile</CardTitle>
                     <CardDescription>
                         Use your referral code to onboard new partners and earn commissions.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <AgentProfileForm />
+                    <HealthCoordinatorProfileForm />
                 </CardContent>
             </Card>
 

@@ -74,7 +74,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
     // Patient flow state
     const [selectedPatientId, setSelectedPatientId] = useState('self');
     
-    // Agent flow state
+    // Health Coordinator flow state
     const [patientPhone, setPatientPhone] = useState('');
     const [foundPatient, setFoundPatient] = useState<any | null>(null);
     const [isSearching, setIsSearching] = useState(false);
@@ -117,10 +117,10 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
     }
     
     const handleConfirm = () => {
-        const patientId = userRole === 'agent' ? foundPatient.id : selectedPatientId;
+        const patientId = userRole === 'health-coordinator' ? foundPatient.id : selectedPatientId;
         if (patientId && selectedClinicId && selectedDate && selectedTime) {
             
-            if (userRole === 'agent') {
+            if (userRole === 'health-coordinator') {
                 if (otp !== MOCK_OTP) {
                     toast({ title: "Invalid OTP", description: "The OTP entered is incorrect.", variant: "destructive" });
                     return;
@@ -197,7 +197,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
         </div>
     );
 
-    const renderAgentPatientFinder = () => (
+    const renderHealthCoordinatorPatientFinder = () => (
         <div>
             <Label className="font-semibold">Step 1: Find Patient</Label>
             {foundPatient ? (
@@ -224,7 +224,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
         </div>
     );
 
-    const isConfirmDisabled = userRole === 'agent' 
+    const isConfirmDisabled = userRole === 'health-coordinator' 
         ? !foundPatient || !selectedTime || !otpSent || otp.length !== 6
         : !selectedPatientId || !selectedTime;
 
@@ -238,9 +238,9 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                     </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-6 py-4">
-                    {userRole === 'agent' ? renderAgentPatientFinder() : renderPatientSelector()}
+                    {userRole === 'health-coordinator' ? renderHealthCoordinatorPatientFinder() : renderPatientSelector()}
 
-                    <div className={cn(!foundPatient && userRole === 'agent' && "opacity-50 pointer-events-none")}>
+                    <div className={cn(!foundPatient && userRole === 'health-coordinator' && "opacity-50 pointer-events-none")}>
                         <Label htmlFor="clinic" className="font-semibold">Step 2: Select a Clinic</Label>
                         <Select value={selectedClinicId} onValueChange={handleClinicChange}>
                             <SelectTrigger id="clinic" className="mt-2">
@@ -276,7 +276,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                                         "w-full justify-start text-left font-normal mt-2",
                                         !selectedDate && "text-muted-foreground"
                                     )}
-                                    disabled={!selectedClinicId || (!foundPatient && userRole === 'agent')}
+                                    disabled={!selectedClinicId || (!foundPatient && userRole === 'health-coordinator')}
                                 >
                                     <CalendarIcon className="mr-2 h-4 w-4" />
                                     {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
@@ -308,7 +308,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                         </Select>
                     </div>
                     
-                    {userRole === 'agent' && selectedTime && (
+                    {userRole === 'health-coordinator' && selectedTime && (
                          <div>
                             <Label className="font-semibold">Step 5: Verify with Patient</Label>
                             {!otpSent ? (
@@ -336,5 +336,3 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
         </Dialog>
     );
 }
-
-    

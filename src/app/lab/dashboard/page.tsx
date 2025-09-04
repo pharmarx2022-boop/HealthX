@@ -19,6 +19,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { format } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AnalyticsDashboard } from '@/components/lab/analytics-dashboard';
+import { LabProfileForm } from '@/components/lab/profile-form';
 
 const LABS_KEY = 'mockLabs';
 const PATIENTS_KEY = 'mockPatientData';
@@ -391,16 +392,16 @@ export default function LabDashboardPage() {
                     </Card>
                 </div>
                 <div className="lg:col-span-1 space-y-8">
-                    <Card className="shadow-sm">
-                        <CardHeader className="flex flex-row items-center gap-4">
-                            <Beaker className="w-8 h-8 text-primary"/>
-                            <div>
-                                <CardTitle>Welcome, {labDetails?.name || 'Lab'}!</CardTitle>
-                                <CardDescription>
-                                    Use this portal to manage your operations.
-                                </CardDescription>
-                            </div>
+                     <Card className="shadow-sm" id="profile">
+                        <CardHeader>
+                            <CardTitle>Edit Your Lab Profile</CardTitle>
+                            <CardDescription>
+                                This information will be visible to patients.
+                            </CardDescription>
                         </CardHeader>
+                        <CardContent>
+                            <LabProfileForm />
+                        </CardContent>
                     </Card>
 
                     <Card className="shadow-sm">
@@ -510,3 +511,5 @@ export default function LabDashboardPage() {
     </div>
   );
 }
+
+    

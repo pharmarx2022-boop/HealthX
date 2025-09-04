@@ -19,6 +19,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { format } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AnalyticsDashboard } from '@/components/pharmacy/analytics-dashboard';
+import { PharmacyProfileForm } from '@/components/pharmacy/profile-form';
 
 const PHARMACIES_KEY = 'mockPharmacies';
 const PATIENTS_KEY = 'mockPatientData';
@@ -207,101 +208,103 @@ export default function PharmacyDashboardPage() {
             <AnalyticsDashboard />
             
             <div className="grid lg:grid-cols-3 gap-8 items-start mt-8">
-                 <Card className="shadow-sm lg:col-span-2">
-                    <CardHeader>
-                        <CardTitle>Process Patient Bill</CardTitle>
-                        <CardDescription>
-                            Help patients pay for their medicines using their Health Points.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="space-y-2 max-w-sm">
-                           <Label htmlFor="patientPhone">Patient Phone Number</Label>
-                           <div className="flex gap-2">
-                                <Input 
-                                    id="patientPhone" 
-                                    placeholder="Enter 10-digit number" 
-                                    value={patientPhone}
-                                    onChange={(e) => setPatientPhone(e.target.value)}
-                                    disabled={!!patient}
-                                />
-                                <Button onClick={handleSearchPatient} disabled={!!patient}>
-                                    <Search className="mr-2"/> Search
-                                </Button>
-                           </div>
-                        </div>
-
-                        {patient && pharmacyDetails && (
-                            <Card className="bg-slate-50 p-6">
-                                <div className="flex flex-col md:flex-row md:items-start justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <User className="text-primary"/>
-                                        <div>
-                                            <p className="font-semibold text-lg">{patient.name}</p>
-                                             <Button variant="link" className="p-0 h-auto text-sm" onClick={() => { setPatient(null); setPatientPhone(''); }}>
-                                                Search for another patient
-                                            </Button>
-                                        </div>
-                                    </div>
-                                    <div className="text-left md:text-right mt-4 md:mt-0">
-                                        <p className="text-xl font-bold">INR {patientTransactionHistory.balance.toFixed(2)}</p>
-                                        <p className="text-xs text-muted-foreground -mt-1">Available Balance</p>
-                                    </div>
-                                </div>
-                                
-                                {!otpSent ? (
-                                     <Button className="w-full mt-4" onClick={handleSendOtp}>Send OTP to Patient</Button>
-                                ) : (
-                                    <div className="mt-4 pt-4 border-t space-y-4">
-                                        <Alert variant="default" className="bg-primary/10 border-primary/20">
-                                            <BadgePercent className="h-4 w-4 text-primary" />
-                                            <AlertTitle>Your Redemption Offer: {pharmacyDetails.discount}%</AlertTitle>
-                                            <AlertDescription>
-                                                The patient can pay {pharmacyDetails.discount}% of their bill using Health Points.
-                                            </AlertDescription>
-                                        </Alert>
-
-                                        <div>
-                                            <Label htmlFor="totalBill">Total Bill Amount (INR)</Label>
-                                            <Input id="totalBill" placeholder="e.g., 1000" type="number" value={totalBill} onChange={(e) => setTotalBill(e.target.value)}/>
-                                        </div>
-
-                                        {calculatedAmounts.pointsToPay > 0 && (
-                                            <div className="space-y-2 text-sm p-3 bg-white rounded-md border">
-                                                <div className="flex justify-between">
-                                                    <span className="text-muted-foreground">Pay with Health Points:</span>
-                                                    <span className="font-medium">INR {calculatedAmounts.pointsToPay.toFixed(2)}</span>
-                                                </div>
-                                                <div className="flex justify-between font-semibold">
-                                                    <span className="text-muted-foreground">Pay with Cash:</span>
-                                                    <span className="font-medium">INR {calculatedAmounts.cashToPay.toFixed(2)}</span>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                         <div>
-                                            <Label htmlFor="otp">Enter 6-Digit OTP</Label>
-                                            <Input id="otp" placeholder="Enter OTP from patient" value={otp} onChange={(e) => setOtp(e.target.value)} />
-                                        </div>
-                                        <Button className="w-full" onClick={handleRedeem}>Confirm Payment</Button>
-                                    </div>
-                                )}
-                            </Card>
-                        )}
-
-                    </CardContent>
-                </Card>
-                <div className="lg:col-span-1 space-y-8">
-                     <Card className="shadow-sm">
-                        <CardHeader className="flex flex-row items-center gap-4">
-                            <Pill className="w-8 h-8 text-primary"/>
-                            <div>
-                                <CardTitle>Welcome, {pharmacyDetails?.name || 'Pharmacy'}!</CardTitle>
-                                <CardDescription>
-                                    Use this portal to manage your operations.
-                                </CardDescription>
-                            </div>
+                 <div className="lg:col-span-2 space-y-8">
+                    <Card className="shadow-sm">
+                        <CardHeader>
+                            <CardTitle>Process Patient Bill</CardTitle>
+                            <CardDescription>
+                                Help patients pay for their medicines using their Health Points.
+                            </CardDescription>
                         </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="space-y-2 max-w-sm">
+                            <Label htmlFor="patientPhone">Patient Phone Number</Label>
+                            <div className="flex gap-2">
+                                    <Input 
+                                        id="patientPhone" 
+                                        placeholder="Enter 10-digit number" 
+                                        value={patientPhone}
+                                        onChange={(e) => setPatientPhone(e.target.value)}
+                                        disabled={!!patient}
+                                    />
+                                    <Button onClick={handleSearchPatient} disabled={!!patient}>
+                                        <Search className="mr-2"/> Search
+                                    </Button>
+                            </div>
+                            </div>
+
+                            {patient && pharmacyDetails && (
+                                <Card className="bg-slate-50 p-6">
+                                    <div className="flex flex-col md:flex-row md:items-start justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <User className="text-primary"/>
+                                            <div>
+                                                <p className="font-semibold text-lg">{patient.name}</p>
+                                                <Button variant="link" className="p-0 h-auto text-sm" onClick={() => { setPatient(null); setPatientPhone(''); }}>
+                                                    Search for another patient
+                                                </Button>
+                                            </div>
+                                        </div>
+                                        <div className="text-left md:text-right mt-4 md:mt-0">
+                                            <p className="text-xl font-bold">INR {patientTransactionHistory.balance.toFixed(2)}</p>
+                                            <p className="text-xs text-muted-foreground -mt-1">Available Balance</p>
+                                        </div>
+                                    </div>
+                                    
+                                    {!otpSent ? (
+                                        <Button className="w-full mt-4" onClick={handleSendOtp}>Send OTP to Patient</Button>
+                                    ) : (
+                                        <div className="mt-4 pt-4 border-t space-y-4">
+                                            <Alert variant="default" className="bg-primary/10 border-primary/20">
+                                                <BadgePercent className="h-4 w-4 text-primary" />
+                                                <AlertTitle>Your Redemption Offer: {pharmacyDetails.discount}%</AlertTitle>
+                                                <AlertDescription>
+                                                    The patient can pay {pharmacyDetails.discount}% of their bill using Health Points.
+                                                </AlertDescription>
+                                            </Alert>
+
+                                            <div>
+                                                <Label htmlFor="totalBill">Total Bill Amount (INR)</Label>
+                                                <Input id="totalBill" placeholder="e.g., 1000" type="number" value={totalBill} onChange={(e) => setTotalBill(e.target.value)}/>
+                                            </div>
+
+                                            {calculatedAmounts.pointsToPay > 0 && (
+                                                <div className="space-y-2 text-sm p-3 bg-white rounded-md border">
+                                                    <div className="flex justify-between">
+                                                        <span className="text-muted-foreground">Pay with Health Points:</span>
+                                                        <span className="font-medium">INR {calculatedAmounts.pointsToPay.toFixed(2)}</span>
+                                                    </div>
+                                                    <div className="flex justify-between font-semibold">
+                                                        <span className="text-muted-foreground">Pay with Cash:</span>
+                                                        <span className="font-medium">INR {calculatedAmounts.cashToPay.toFixed(2)}</span>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            <div>
+                                                <Label htmlFor="otp">Enter 6-Digit OTP</Label>
+                                                <Input id="otp" placeholder="Enter OTP from patient" value={otp} onChange={(e) => setOtp(e.target.value)} />
+                                            </div>
+                                            <Button className="w-full" onClick={handleRedeem}>Confirm Payment</Button>
+                                        </div>
+                                    )}
+                                </Card>
+                            )}
+
+                        </CardContent>
+                    </Card>
+                 </div>
+                <div className="lg:col-span-1 space-y-8">
+                     <Card className="shadow-sm" id="profile">
+                        <CardHeader>
+                            <CardTitle>Edit Your Pharmacy Profile</CardTitle>
+                             <CardDescription>
+                                Use your referral code to onboard new partners and earn commissions. This information will be visible to patients.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <PharmacyProfileForm />
+                        </CardContent>
                     </Card>
 
                     <Card className="shadow-sm">
@@ -413,3 +416,5 @@ export default function PharmacyDashboardPage() {
     </div>
   );
 }
+
+    

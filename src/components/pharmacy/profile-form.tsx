@@ -28,29 +28,8 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export function PharmacyProfileForm() {
   const { toast } = useToast();
-  const [isClient, setIsClient] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const [pharmacies, setPharmacies] = useState(initialPharmacies);
-
-  useEffect(() => {
-    setIsClient(true);
-    if (typeof window !== 'undefined') {
-      const storedUser = sessionStorage.getItem('user');
-      if (storedUser) {
-        const u = JSON.parse(storedUser);
-        setUser(u);
-      }
-
-      const storedPharmacies = sessionStorage.getItem(PHARMACIES_KEY);
-      if (!storedPharmacies) {
-        sessionStorage.setItem(PHARMACIES_KEY, JSON.stringify(initialPharmacies));
-      } else {
-        setPharmacies(JSON.parse(storedPharmacies));
-      }
-    }
-  }, []);
-
-  const pharmacyData = pharmacies.find(p => p.id === user?.id);
+  const [isLoading, setIsLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -65,13 +44,29 @@ export function PharmacyProfileForm() {
   });
 
   useEffect(() => {
-    if (pharmacyData) {
-      form.reset(pharmacyData);
+    if (typeof window !== 'undefined') {
+      const storedUser = sessionStorage.getItem('user');
+      const u = storedUser ? JSON.parse(storedUser) : null;
+      setUserId(u?.id);
+
+      const storedPharmacies = sessionStorage.getItem(PHARMACIES_KEY);
+      const allPharmacies = storedPharmacies ? JSON.parse(storedPharmacies) : initialPharmacies;
+      
+      if (!storedPharmacies) {
+        sessionStorage.setItem(PHARMACIES_KEY, JSON.stringify(initialPharmacies));
+      }
+
+      const pharmacyData = allPharmacies.find((d: any) => d.id === u?.id);
+      
+      if (pharmacyData) {
+        form.reset(pharmacyData);
+      }
+       if (u) {
+        form.setValue('referralCode', u.referralCode);
+      }
+      setIsLoading(false);
     }
-    if (user) {
-      form.setValue('referralCode', user.referralCode);
-    }
-  }, [pharmacyData, user, form]);
+  }, [form]);
 
   const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -86,17 +81,19 @@ export function PharmacyProfileForm() {
   };
 
   const onSubmit = (data: ProfileFormValues) => {
-    if (!pharmacyData) return;
+    if (!userId) return;
 
-    const updatedPharmacies = pharmacies.map(p => {
-        if (p.id === pharmacyData.id) {
+    const storedPharmacies = sessionStorage.getItem(PHARMACIES_KEY);
+    const allPharmacies = storedPharmacies ? JSON.parse(storedPharmacies) : initialPharmacies;
+
+    const updatedPharmacies = allPharmacies.map((p: any) => {
+        if (p.id === userId) {
             return { ...p, ...data };
         }
         return p;
     });
 
     sessionStorage.setItem(PHARMACIES_KEY, JSON.stringify(updatedPharmacies));
-    setPharmacies(updatedPharmacies);
 
     toast({
       title: 'Profile Updated!',
@@ -104,7 +101,17 @@ export function PharmacyProfileForm() {
     });
   };
   
-  if (!isClient || !pharmacyData) {
+  const copyToClipboard = () => {
+    const referralCode = form.getValues('referralCode');
+    if(!referralCode) return;
+    navigator.clipboard.writeText(referralCode);
+    toast({
+        title: "Copied to Clipboard!",
+        description: "Your referral code has been copied."
+    })
+  }
+
+  if (isLoading) {
     return (
         <div className="flex items-center justify-center py-12">
             <Loader2 className="animate-spin text-primary"/>
@@ -113,15 +120,6 @@ export function PharmacyProfileForm() {
     );
   }
 
-  const copyToClipboard = () => {
-    if(!user?.referralCode) return;
-    navigator.clipboard.writeText(user.referralCode);
-    toast({
-        title: "Copied to Clipboard!",
-        description: "Your referral code has been copied."
-    })
-  }
-  
   const currentImage = form.watch('image');
 
   return (
@@ -143,13 +141,13 @@ export function PharmacyProfileForm() {
                         <FormControl>
                              <div>
                                 <Input 
-                                    id="image-upload"
+                                    id="image-upload-pharmacy"
                                     type="file"
                                     accept="image/*"
                                     onChange={handleImageUpload}
                                     className="hidden" 
                                 />
-                                <label htmlFor="image-upload" className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full">
+                                <label htmlFor="image-upload-pharmacy" className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full">
                                     <Upload className="mr-2" />
                                     Upload from Device
                                 </label>

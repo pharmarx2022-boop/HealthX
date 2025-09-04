@@ -342,22 +342,23 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
             <DialogHeader>
                 <DialogTitle>Complete Your Payment</DialogTitle>
                 <DialogDescription>
-                   To confirm your booking with {doctor.name}, please complete the payment.
+                   To confirm your booking with {doctor.name}, please complete the UPI payment.
                 </DialogDescription>
             </DialogHeader>
              <div className="py-4">
-                 <Card className="p-6 text-center">
+                 <Card className="p-6 text-center bg-slate-50/50">
                     <p className="text-muted-foreground">Total Amount Payable</p>
                     <p className="text-4xl font-bold mt-2">INR {selectedClinic?.consultationFee.toFixed(2)}</p>
                  </Card>
 
                 <div className="mt-6 space-y-4">
-                    <p className="text-sm font-medium text-center">Choose a payment method:</p>
+                    <p className="text-sm font-medium text-center">Scan the QR or use the button below</p>
+                     <div className="flex justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-qr-code"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h.01"/><path d="M21 12v.01"/><path d="M12 21v-1a2 2 0 0 0-2-2h-1"/><path d="M7 12h3a2 2 0 0 0 2-2V7"/></svg>
+                    </div>
+
                     <Button className="w-full h-12" onClick={handleConfirmPayment}>
-                        <CreditCard className="mr-2"/> Pay with Paytm
-                    </Button>
-                     <Button className="w-full h-12" onClick={handleConfirmPayment}>
-                        <CreditCard className="mr-2"/> Pay with PayU
+                        <CreditCard className="mr-2"/> Pay via UPI
                     </Button>
                 </div>
              </div>

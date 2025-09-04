@@ -5,6 +5,7 @@ import { RefundTool } from '@/components/admin/refund-tool';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { WithdrawalRequests } from '@/components/admin/withdrawal-requests';
 import { HealthPointWithdrawals } from '@/components/admin/healthpoint-withdrawals';
+import { TransactionHistory } from '@/components/admin/transaction-history';
 
 export default function AdminPage() {
   return (
@@ -17,19 +18,32 @@ export default function AdminPage() {
                 <p className="text-muted-foreground">Manage users, approvals, and refunds.</p>
             </div>
             
-            <div className="grid lg:grid-cols-2 gap-8 items-start">
-                <Card className="shadow-sm">
-                    <CardHeader>
-                        <CardTitle>AI-Assisted Refund Tool</CardTitle>
-                        <CardDescription>
-                            Use this tool to quickly verify user refund requests by looking up consultation history and wallet balance.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <RefundTool />
-                    </CardContent>
-                </Card>
-                 <div className="space-y-8">
+            <div className="grid lg:grid-cols-3 gap-8 items-start">
+                <div className="lg:col-span-2 space-y-8">
+                    <Card className="shadow-sm">
+                        <CardHeader>
+                            <CardTitle>AI-Assisted Refund Tool</CardTitle>
+                            <CardDescription>
+                                Use this tool to quickly verify user refund requests by looking up consultation history and wallet balance.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <RefundTool />
+                        </CardContent>
+                    </Card>
+                     <Card className="shadow-sm">
+                        <CardHeader>
+                            <CardTitle>Transaction History</CardTitle>
+                            <CardDescription>
+                                View all incoming payments from appointment bookings.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                           <TransactionHistory />
+                        </CardContent>
+                    </Card>
+                </div>
+                 <div className="space-y-8 lg:col-span-1">
                     <Card className="shadow-sm">
                         <CardHeader>
                             <CardTitle>Commission Withdrawal Requests</CardTitle>

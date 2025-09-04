@@ -1,3 +1,4 @@
+
 import Image from 'next/image';
 import { Button } from '../ui/button';
 import Link from 'next/link';
@@ -22,7 +23,7 @@ export function Hero() {
           Easily book appointments with doctors, labs, and pharmacies near you.
         </p>
          <Button asChild size="lg" variant="secondary" className="mt-8 text-lg">
-            <Link href="#book">
+            <Link href="#roles">
                 Get Started
             </Link>
          </Button>

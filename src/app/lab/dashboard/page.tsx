@@ -18,6 +18,7 @@ import { requestWithdrawal as requestHealthPointWithdrawal } from '@/lib/healthp
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AnalyticsDashboard } from '@/components/lab/analytics-dashboard';
 
 const LABS_KEY = 'mockLabs';
 const PATIENTS_KEY = 'mockPatientsData';
@@ -246,8 +247,10 @@ export default function LabDashboardPage() {
                 <h1 className="text-3xl font-headline font-bold">Lab Dashboard</h1>
                 <p className="text-muted-foreground">Manage lab tests and process patient payments.</p>
             </div>
+
+            <AnalyticsDashboard />
             
-            <div className="grid lg:grid-cols-3 gap-8 items-start">
+            <div className="grid lg:grid-cols-3 gap-8 items-start mt-8">
                 <div className="lg:col-span-2 grid gap-8">
                      <Card className="shadow-sm">
                         <CardHeader>

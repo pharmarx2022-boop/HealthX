@@ -334,32 +334,23 @@ export function ClinicManager() {
                              <Image src={clinic.image || 'https://picsum.photos/400/300'} alt={clinic.name} fill style={{objectFit:"cover"}} data-ai-hint={clinic.dataAiHint || 'clinic'} />
                         </div>
                         <CardTitle>{clinic.name}</CardTitle>
-                        <CardDescription className="flex items-center gap-2 pt-1">
-                            <MapPin className="w-4 h-4" />
-                            {clinic.location}
+                        <CardDescription className="flex items-center gap-2 pt-1 text-primary">
+                            <IndianRupee className="w-4 h-4" />
+                            <span className="font-bold">₹{clinic.consultationFee.toFixed(2)}</span>
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="flex-grow space-y-4">
-                        <div className="flex items-start gap-2">
-                             <IndianRupee className="w-4 h-4 mt-1 text-primary"/>
-                             <div>
-                                <h4 className="font-semibold">Consultation Fee</h4>
-                                <p className="text-sm text-muted-foreground">₹{clinic.consultationFee.toFixed(2)}</p>
-                             </div>
+                        <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                             <MapPin className="w-4 h-4 mt-0.5 shrink-0"/>
+                             <span>{clinic.location}</span>
                         </div>
-                        <div className="flex items-start gap-2">
-                             <Calendar className="w-4 h-4 mt-1 text-primary"/>
-                             <div>
-                                <h4 className="font-semibold">Available Days</h4>
-                                <p className="text-sm text-muted-foreground">{clinic.days.join(', ')}</p>
-                             </div>
+                        <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                             <Calendar className="w-4 h-4 mt-0.5 shrink-0"/>
+                             <span>{clinic.days.join(', ')}</span>
                         </div>
-                         <div className="flex items-start gap-2">
-                             <Clock className="w-4 h-4 mt-1 text-primary"/>
-                             <div>
-                                <h4 className="font-semibold">Available Slots</h4>
-                                <p className="text-sm text-muted-foreground">{clinic.slots}</p>
-                             </div>
+                         <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                             <Clock className="w-4 h-4 mt-0.5 shrink-0"/>
+                             <span>{clinic.slots}</span>
                         </div>
                     </CardContent>
                     <CardFooter className="bg-slate-50/70 p-4 border-t flex justify-end gap-2">

@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Stethoscope, MapPin, Pill, Loader2, AlertTriangle, Building, Link as LinkIcon, Search, PercentCircle, Beaker, Calendar } from 'lucide-react';
+import { Stethoscope, MapPin, Pill, Loader2, AlertTriangle, Building, Link as LinkIcon, Search, PercentCircle, Beaker, Calendar, IndianRupee } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { initialDoctors, initialClinics, initialPharmacies, initialLabs, mockPatientData } from '@/lib/mock-data';
@@ -107,6 +107,21 @@ export function NearbySearch() {
         setStatus('error');
     }
   }
+
+  const getDoctorFeeRange = (doctorId: string) => {
+    const doctorClinics = clinics.filter(c => c.doctorId === doctorId);
+    if (doctorClinics.length === 0) return 'N/A';
+    
+    const fees = doctorClinics.map(c => c.consultationFee);
+    const minFee = Math.min(...fees);
+    const maxFee = Math.max(...fees);
+
+    if (minFee === maxFee) {
+        return `₹${minFee.toFixed(2)}`;
+    }
+    return `₹${minFee.toFixed(2)} - ₹${maxFee.toFixed(2)}`;
+  };
+
 
   const searchResults = useMemo(() => {
     const allPharmacies = pharmacies.filter(p => p.acceptsHealthPoints && p.discount >= 15);
@@ -239,15 +254,19 @@ export function NearbySearch() {
                                                 </div>
                                             </CardHeader>
                                             <CardContent className="flex-grow">
-                                                <Button asChild variant="link" className="px-0">
+                                                <div className="text-sm flex items-center gap-2 font-semibold text-primary">
+                                                  <IndianRupee className="w-4 h-4" />
+                                                  <span>{getDoctorFeeRange(doctor.id)}</span>
+                                                </div>
+                                            </CardContent>
+                                            <CardFooter className="grid grid-cols-2 gap-2">
+                                                <Button asChild variant="outline">
                                                     <Link href={`/doctor/${doctor.id}`}>
-                                                        View Full Profile
+                                                        View Profile
                                                     </Link>
                                                 </Button>
-                                            </CardContent>
-                                            <CardFooter>
-                                                <Button className="w-full mt-2" onClick={() => handleBookNow(doctor)}>
-                                                    <Calendar className="mr-2" /> Book Now
+                                                <Button className="w-full" onClick={() => handleBookNow(doctor)}>
+                                                    <Calendar className="mr-2 h-4 w-4" /> Book Now
                                                 </Button>
                                             </CardFooter>
                                         </Card>

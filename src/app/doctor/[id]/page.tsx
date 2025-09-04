@@ -5,7 +5,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Stethoscope, MapPin, Calendar, Star, Loader2, MessageSquare, UserPlus } from 'lucide-react';
+import { Stethoscope, MapPin, Calendar, Star, Loader2, MessageSquare, UserPlus, IndianRupee, Clock } from 'lucide-react';
 import Image from 'next/image';
 import { notFound, useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -167,7 +167,39 @@ export default function DoctorDetailPage() {
                         </CardContent>
                     </div>
                 </div>
-                 <Separator className="my-0"/>
+                 <Separator/>
+                 <CardContent className="p-6">
+                    <h3 className="text-xl font-semibold mb-4">Clinics & Fees</h3>
+                     {doctorClinics.length > 0 ? (
+                        <div className="space-y-4">
+                            {doctorClinics.map((clinic) => (
+                                <Card key={clinic.id} className="bg-slate-50/70">
+                                    <CardContent className="p-4 flex flex-col md:flex-row justify-between items-start md:items-center">
+                                        <div className="flex-grow">
+                                            <p className="font-bold">{clinic.name}</p>
+                                            <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
+                                                <MapPin className="w-4 h-4"/> {clinic.location}
+                                            </p>
+                                            <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
+                                                <Calendar className="w-4 h-4"/> {clinic.days.join(', ')}
+                                            </p>
+                                             <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
+                                                <Clock className="w-4 h-4"/> {clinic.slots}
+                                            </p>
+                                        </div>
+                                        <div className="flex items-center gap-2 font-bold text-lg text-primary mt-4 md:mt-0">
+                                            <IndianRupee className="w-5 h-5"/>
+                                            <span>{clinic.consultationFee.toFixed(2)}</span>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                     ) : (
+                        <p className="text-muted-foreground">No clinics listed for this doctor.</p>
+                     )}
+                 </CardContent>
+                 <Separator/>
                  <CardContent className="p-6">
                     <h3 className="text-xl font-semibold mb-4">Patient Reviews</h3>
                     {doctor.reviewsList && doctor.reviewsList.length > 0 ? (

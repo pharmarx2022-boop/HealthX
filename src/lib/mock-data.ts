@@ -77,6 +77,28 @@ export const initialClinics = [
         days: ['Tuesday', 'Thursday'],
         slots: '03:00 PM, 04:00 PM, 05:00 PM',
         consultationFee: 1200,
+    },
+    {
+        id: 'clinic3',
+        doctorId: '2',
+        name: 'Skin & Hair Clinic',
+        location: '789 Beauty Plaza, Bandra West, Mumbai',
+        image: 'https://picsum.photos/id/102/400/300',
+        dataAiHint: 'clinic interior',
+        days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        slots: '09:00 AM, 10:30 AM, 12:00 PM, 02:00 PM',
+        consultationFee: 2000,
+    },
+    {
+        id: 'clinic4',
+        doctorId: '3',
+        name: 'Happy Kids Pediatrics',
+        location: '101 Joy Building, Juhu, Mumbai',
+        image: 'https://picsum.photos/id/103/400/300',
+        dataAiHint: 'clinic interior children',
+        days: ['Monday', 'Wednesday', 'Friday', 'Saturday'],
+        slots: '11:00 AM, 12:00 PM, 01:00 PM',
+        consultationFee: 1000,
     }
 ];
 

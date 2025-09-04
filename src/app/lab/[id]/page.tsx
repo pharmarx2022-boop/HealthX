@@ -102,7 +102,6 @@ export default function LabDetailPage() {
                         <span>{lab.location}</span>
                          <Link href={`https://www.google.com/maps?q=${encodeURIComponent(lab.location)}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-primary hover:underline">
                             <LinkIcon className="w-4 h-4 ml-1" />
-                            <span className="ml-1">View on Map</span>
                         </Link>
                     </div>
                     {lab.acceptsHealthPoints && (

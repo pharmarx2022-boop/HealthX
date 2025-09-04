@@ -102,7 +102,6 @@ export default function PharmacyDetailPage() {
                         <span>{pharmacy.location}</span>
                          <Link href={`https://www.google.com/maps?q=${encodeURIComponent(pharmacy.location)}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-primary hover:underline">
                             <LinkIcon className="w-4 h-4 ml-1" />
-                            <span className="ml-1">View on Map</span>
                         </Link>
                     </div>
                     {pharmacy.acceptsHealthPoints && (

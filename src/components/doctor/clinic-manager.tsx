@@ -342,11 +342,10 @@ export function ClinicManager() {
                     <CardContent className="flex-grow space-y-4">
                         <div className="flex items-start gap-2 text-sm text-muted-foreground">
                              <MapPin className="w-4 h-4 mt-0.5 shrink-0"/>
-                             <div className="flex flex-col">
+                             <div className="flex items-center gap-2">
                                  <span>{clinic.location}</span>
                                  <Link href={`https://www.google.com/maps?q=${encodeURIComponent(clinic.location)}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-primary hover:underline text-xs">
-                                     <LinkIcon className="w-3 h-3 mr-1" />
-                                     View on Map
+                                     <LinkIcon className="w-4 h-4" />
                                  </Link>
                              </div>
                         </div>

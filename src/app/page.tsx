@@ -2,7 +2,6 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Hero } from '@/components/home/hero';
-import { RoleCards } from '@/components/home/role-cards';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
@@ -26,7 +25,6 @@ export default function Home() {
                  </Button>
              </div>
         </section>
-        <RoleCards />
       </main>
       <Footer />
     </div>

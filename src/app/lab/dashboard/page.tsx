@@ -151,6 +151,10 @@ export default function LabDashboardPage() {
             amount: pointsToPay,
             description: `Paid for bill at ${labDetails.name}`,
             date: new Date(),
+            partnerType: 'lab',
+            partnerId: labDetails.id,
+            partnerName: labDetails.name,
+            reviewed: false
         });
         
         // Credit points to lab

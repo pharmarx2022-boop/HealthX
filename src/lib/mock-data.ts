@@ -110,7 +110,11 @@ export const initialPharmacies = [
         image: 'https://picsum.photos/id/24/400/300',
         acceptsHealthPoints: true,
         discount: 15,
-        whatsappNumber: '919876543210'
+        whatsappNumber: '919876543210',
+        reviewsList: [
+            { patientName: 'Rohan Sharma', rating: 5, comment: 'Great service and quick delivery.' },
+            { patientName: 'Priya Mehta', rating: 4, comment: 'Well-stocked pharmacy.' },
+        ]
     },
     {
         id: 'pharm2',
@@ -119,7 +123,10 @@ export const initialPharmacies = [
         image: 'https://picsum.photos/id/219/400/300',
         acceptsHealthPoints: true,
         discount: 20,
-        whatsappNumber: '919876543211'
+        whatsappNumber: '919876543211',
+        reviewsList: [
+            { patientName: 'Amit Singh', rating: 5, comment: 'Very helpful staff.' },
+        ]
     },
     {
         id: 'pharm3',
@@ -128,7 +135,8 @@ export const initialPharmacies = [
         image: 'https://picsum.photos/id/183/400/300',
         acceptsHealthPoints: false,
         discount: 0,
-        whatsappNumber: '919876543212'
+        whatsappNumber: '919876543212',
+        reviewsList: []
     }
 ];
 
@@ -140,7 +148,11 @@ export const initialLabs = [
         image: 'https://picsum.photos/id/30/400/300',
         acceptsHealthPoints: true,
         discount: 30,
-        whatsappNumber: '919876543213'
+        whatsappNumber: '919876543213',
+        reviewsList: [
+            { patientName: 'Sunita Patil', rating: 5, comment: 'Quick and efficient sample collection.' },
+            { patientName: 'Karan Verma', rating: 4, comment: 'Reports were delivered on time.' },
+        ]
     },
     {
         id: 'lab2',
@@ -149,7 +161,8 @@ export const initialLabs = [
         image: 'https://picsum.photos/id/31/400/300',
         acceptsHealthPoints: true,
         discount: 35,
-        whatsappNumber: '919876543214'
+        whatsappNumber: '919876543214',
+        reviewsList: []
     }
 ];
 
@@ -161,5 +174,3 @@ export const mockPatientData = [
 
 
 export const mockReports: MockReport[] = [];
-
-    

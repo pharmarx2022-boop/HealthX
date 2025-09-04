@@ -4,10 +4,15 @@
 const TRANSACTIONS_KEY_PREFIX = 'transactions_';
 
 export type Transaction = {
+    id?: string;
     type: 'credit' | 'debit';
     amount: number;
     description: string;
     date: Date;
+    reviewed?: boolean;
+    partnerType?: 'lab' | 'pharmacy';
+    partnerId?: string;
+    partnerName?: string;
 }
 
 // Function to get transactions from sessionStorage
@@ -34,10 +39,14 @@ export function getTransactionHistory(patientId: string): { balance: number; tra
     };
 }
 
-export function recordTransaction(patientId: string, transaction: Omit<Transaction, 'date'> & { date: Date }) {
+export function recordTransaction(patientId: string, transaction: Omit<Transaction, 'date' | 'id'> & { date: Date }) {
     if (typeof window === 'undefined') return;
     const key = TRANSACTIONS_KEY_PREFIX + patientId;
     const history = getTransactionHistory(patientId);
-    const updatedTransactions = [...history.transactions, transaction];
+    const newTransaction = {
+        ...transaction,
+        id: `txn_${Date.now()}`
+    }
+    const updatedTransactions = [...history.transactions, newTransaction];
     sessionStorage.setItem(key, JSON.stringify(updatedTransactions));
 }

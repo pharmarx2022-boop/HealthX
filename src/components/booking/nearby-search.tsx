@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Stethoscope, MapPin, Pill, Loader2, AlertTriangle, Building, Link as LinkIcon, Search, PercentCircle, Beaker, Calendar } from 'lucide-react';
+import { Stethoscope, MapPin, Pill, Loader2, AlertTriangle, Building, Link as LinkIcon, Search, PercentCircle, Beaker, Calendar, Star } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { initialDoctors, initialClinics, initialPharmacies, initialLabs, mockPatientData } from '@/lib/mock-data';
@@ -124,8 +124,8 @@ export function NearbySearch() {
 
 
   const searchResults = useMemo(() => {
-    const allPharmacies = pharmacies.filter(p => p.acceptsHealthPoints && p.discount >= 15);
-    const allLabs = labs.filter(l => l.acceptsHealthPoints && l.discount >= 30);
+    const allPharmacies = pharmacies;
+    const allLabs = labs;
 
     if (!searchTerm) {
         return { doctors: doctors, pharmacies: allPharmacies, labs: allLabs };
@@ -193,6 +193,13 @@ export function NearbySearch() {
     setIsBookingOpen(false);
     setSelectedDoctor(null);
   };
+  
+  const getAverageRating = (reviewsList: any[] | undefined) => {
+    if (!reviewsList || reviewsList.length === 0) return 'N/A';
+    const totalRating = reviewsList.reduce((acc, review) => acc + review.rating, 0);
+    return (totalRating / reviewsList.length).toFixed(1);
+  };
+
 
   const renderContent = () => {
     switch(status) {
@@ -280,33 +287,32 @@ export function NearbySearch() {
                             <h2 className="text-2xl font-headline font-bold mb-4 flex items-center gap-2"><Pill/> Pharmacies</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {pharmacies.map((pharmacy) => (
-                                    <Card key={pharmacy.id} className="overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col">
-                                        <CardHeader>
-                                            <div className="relative w-full h-40 rounded-lg overflow-hidden">
-                                                 <Image src={pharmacy.image} alt={pharmacy.name} fill style={{objectFit:"cover"}} data-ai-hint="pharmacy exterior" />
-                                            </div>
-                                             <CardTitle className="font-headline text-xl pt-4">{pharmacy.name}</CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="flex-grow">
-                                            <div className="flex items-center text-muted-foreground gap-2">
-                                                <MapPin className="w-4 h-4"/> 
-                                                <span>{pharmacy.location}</span>
-                                            </div>
-                                            {pharmacy.acceptsHealthPoints && (
-                                                <Badge className="mt-4" variant="secondary">
-                                                    <PercentCircle className="mr-2 text-primary" /> Accepts Health Points ({pharmacy.discount}%)
-                                                </Badge>
-                                            )}
-                                        </CardContent>
-                                         <CardFooter>
-                                             <Button asChild variant="outline" className="w-full">
-                                                <a href={`https://wa.me/${pharmacy.whatsappNumber}`} target="_blank" rel="noopener noreferrer">
-                                                    <WhatsAppIcon />
-                                                    <span className="ml-2">Contact on WhatsApp</span>
-                                                </a>
-                                            </Button>
-                                        </CardFooter>
-                                    </Card>
+                                     <Link href={`/pharmacy/${pharmacy.id}`} key={pharmacy.id} className="group">
+                                        <Card className="overflow-hidden h-full group-hover:shadow-xl transition-shadow duration-300 flex flex-col">
+                                            <CardHeader className="p-0">
+                                                <div className="relative w-full h-40">
+                                                     <Image src={pharmacy.image} alt={pharmacy.name} fill style={{objectFit:"cover"}} data-ai-hint="pharmacy exterior" />
+                                                </div>
+                                            </CardHeader>
+                                            <CardContent className="p-4 flex-grow">
+                                                 <CardTitle className="font-headline text-xl ">{pharmacy.name}</CardTitle>
+                                                <div className="flex items-center text-muted-foreground gap-2 mt-2 text-sm">
+                                                    <MapPin className="w-4 h-4"/> 
+                                                    <span>{pharmacy.location}</span>
+                                                </div>
+                                                <div className="flex items-center gap-1 text-amber-500 mt-2">
+                                                    <Star className="w-4 h-4 fill-current" />
+                                                    <span className="font-bold text-sm">{getAverageRating(pharmacy.reviewsList)}</span>
+                                                    <span className="text-xs text-muted-foreground ml-1">({pharmacy.reviewsList?.length ?? 0} reviews)</span>
+                                                </div>
+                                                {pharmacy.acceptsHealthPoints && (
+                                                    <Badge className="mt-4" variant="secondary">
+                                                        <PercentCircle className="mr-2 text-primary" /> Accepts Health Points ({pharmacy.discount}%)
+                                                    </Badge>
+                                                )}
+                                            </CardContent>
+                                        </Card>
+                                    </Link>
                                 ))}
                             </div>
                         </section>
@@ -317,33 +323,32 @@ export function NearbySearch() {
                             <h2 className="text-2xl font-headline font-bold mb-4 flex items-center gap-2"><Beaker/> Labs</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {labs.map((lab) => (
-                                    <Card key={lab.id} className="overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col">
-                                        <CardHeader>
-                                            <div className="relative w-full h-40 rounded-lg overflow-hidden">
-                                                 <Image src={lab.image} alt={lab.name} fill style={{objectFit:"cover"}} data-ai-hint="lab exterior" />
-                                            </div>
-                                             <CardTitle className="font-headline text-xl pt-4">{lab.name}</CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="flex-grow">
-                                            <div className="flex items-center text-muted-foreground gap-2">
-                                                <MapPin className="w-4 h-4"/> 
-                                                <span>{lab.location}</span>
-                                            </div>
-                                            {lab.acceptsHealthPoints && (
-                                                <Badge className="mt-4" variant="secondary">
-                                                    <PercentCircle className="mr-2 text-primary" /> Accepts Health Points ({lab.discount}%)
-                                                </Badge>
-                                            )}
-                                        </CardContent>
-                                        <CardFooter>
-                                             <Button asChild variant="outline" className="w-full">
-                                                <a href={`https://wa.me/${lab.whatsappNumber}`} target="_blank" rel="noopener noreferrer">
-                                                    <WhatsAppIcon />
-                                                    <span className="ml-2">Contact on WhatsApp</span>
-                                                </a>
-                                            </Button>
-                                        </CardFooter>
-                                    </Card>
+                                     <Link href={`/lab/${lab.id}`} key={lab.id} className="group">
+                                        <Card className="overflow-hidden h-full group-hover:shadow-xl transition-shadow duration-300 flex flex-col">
+                                             <CardHeader className="p-0">
+                                                <div className="relative w-full h-40">
+                                                     <Image src={lab.image} alt={lab.name} fill style={{objectFit:"cover"}} data-ai-hint="lab exterior" />
+                                                </div>
+                                            </CardHeader>
+                                            <CardContent className="p-4 flex-grow">
+                                                <CardTitle className="font-headline text-xl">{lab.name}</CardTitle>
+                                                <div className="flex items-center text-muted-foreground gap-2 mt-2 text-sm">
+                                                    <MapPin className="w-4 h-4"/> 
+                                                    <span>{lab.location}</span>
+                                                </div>
+                                                <div className="flex items-center gap-1 text-amber-500 mt-2">
+                                                    <Star className="w-4 h-4 fill-current" />
+                                                    <span className="font-bold text-sm">{getAverageRating(lab.reviewsList)}</span>
+                                                     <span className="text-xs text-muted-foreground ml-1">({lab.reviewsList?.length ?? 0} reviews)</span>
+                                                </div>
+                                                {lab.acceptsHealthPoints && (
+                                                    <Badge className="mt-4" variant="secondary">
+                                                        <PercentCircle className="mr-2 text-primary" /> Accepts Health Points ({lab.discount}%)
+                                                    </Badge>
+                                                )}
+                                            </CardContent>
+                                        </Card>
+                                    </Link>
                                 ))}
                             </div>
                         </section>

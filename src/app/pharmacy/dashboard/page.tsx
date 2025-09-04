@@ -133,6 +133,10 @@ export default function PharmacyDashboardPage() {
             amount: pointsToPay,
             description: `Paid for bill at ${pharmacyDetails.name}`,
             date: new Date(),
+            partnerType: 'pharmacy',
+            partnerId: pharmacyDetails.id,
+            partnerName: pharmacyDetails.name,
+            reviewed: false
         });
         
         // Credit points to pharmacy

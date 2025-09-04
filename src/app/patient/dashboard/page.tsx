@@ -26,9 +26,9 @@ const PHARMACIES_KEY = 'mockPharmacies';
 
 type ReviewTarget = {
     type: 'doctor' | 'lab' | 'pharmacy';
-    id: string;
+    id: string; // Doctor, Lab, or Pharmacy ID
     name: string;
-    transactionId?: string;
+    transactionId?: string; // Appointment or Transaction ID to mark as reviewed
 };
 
 export default function PatientDashboardPage() {
@@ -50,7 +50,7 @@ export default function PatientDashboardPage() {
         const allAppointments = storedPatients ? JSON.parse(storedPatients) : mockPatients;
         // Let's assume the logged in patient is "Rohan Sharma" for this demo
         setMyAppointments(allAppointments.filter((p: any) => p.name === 'Rohan Sharma'));
-    }, []);
+    }, [isClient, isReviewOpen]); // Re-check appointments when review dialog closes
 
     const nextReminder = myAppointments.find(appt => appt.nextAppointmentDate && !isNaN(new Date(appt.nextAppointmentDate).getTime()));
 
@@ -60,7 +60,7 @@ export default function PatientDashboardPage() {
         const history = getTransactionHistory('rohan_sharma');
         const reviewedIds = new Set(history.transactions.filter(tx => tx.reviewed).map(tx => tx.id));
         return { ...history, reviewedTransactionIds: reviewedIds };
-    }, [isClient, myAppointments]);
+    }, [isClient, isReviewOpen]);
 
 
     const openReviewDialog = (target: ReviewTarget) => {
@@ -98,19 +98,17 @@ export default function PatientDashboardPage() {
             });
             sessionStorage.setItem(DOCTORS_KEY, JSON.stringify(updatedDoctors));
 
-            // Update appointment to prevent another review
-            const updatedAppointments = myAppointments.map(appt => 
-                appt.id === reviewTarget.id ? { ...appt, reviewed: true } : appt
-            );
+            // Update appointment to prevent another review, using the correct transactionId
             const allStoredAppointments = JSON.parse(sessionStorage.getItem(PATIENTS_KEY) || '[]');
             const finalAppointments = allStoredAppointments.map((appt: any) => {
-                if (appt.id === reviewTarget.id) {
+                if (appt.id === reviewTarget.transactionId) {
                     return { ...appt, reviewed: true };
                 }
                 return appt;
             });
             sessionStorage.setItem(PATIENTS_KEY, JSON.stringify(finalAppointments));
-            setMyAppointments(updatedAppointments);
+            setMyAppointments(finalAppointments.filter((p: any) => p.name === 'Rohan Sharma'));
+
         } else {
              // Handle Lab or Pharmacy review
             const key = reviewTarget.type === 'lab' ? LABS_KEY : PHARMACIES_KEY;
@@ -217,7 +215,7 @@ export default function PatientDashboardPage() {
                                                     </CardContent>
                                                     {appt.status === 'done' && (
                                                         <CardFooter className="bg-slate-50/70 p-4 border-t">
-                                                            <Button variant="outline" onClick={() => openReviewDialog({type: 'doctor', id: appt.doctorId, name: initialDoctors.find(d => d.id === appt.doctorId)?.name || 'Doctor'})} disabled={appt.reviewed}>
+                                                            <Button variant="outline" onClick={() => openReviewDialog({type: 'doctor', id: appt.doctorId, name: initialDoctors.find(d => d.id === appt.doctorId)?.name || 'Doctor', transactionId: appt.id})} disabled={appt.reviewed}>
                                                                 <Star className="mr-2"/> {appt.reviewed ? 'Review Submitted' : 'Leave a Review'}
                                                             </Button>
                                                         </CardFooter>
@@ -343,7 +341,7 @@ export default function PatientDashboardPage() {
                                     <li key={tx.id} className="flex items-start justify-between">
                                         <div className="flex-1">
                                             <p className="font-medium">{tx.description}</p>
-                                            <p className="text-xs text-muted-foreground mt-1">{format(tx.date, 'PP, p')}</p>
+                                            <p className="text-xs text-muted-foreground mt-1">{format(new Date(tx.date), 'PP, p')}</p>
                                             {canReview && (
                                                 <Button 
                                                     variant="link" 

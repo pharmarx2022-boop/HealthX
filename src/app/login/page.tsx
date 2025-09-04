@@ -19,6 +19,7 @@ import { loginWithOtp, MOCK_OTP } from '@/lib/auth';
 const loginSchema = z.object({
   phone: z.string().min(10, { message: 'A valid 10-digit phone number is required.' }).max(10, { message: 'A valid 10-digit phone number is required.' }),
   otp: z.string().optional(),
+  referralCode: z.string().optional(),
 });
 
 type Role = 'doctor' | 'patient' | 'agent' | 'admin' | 'pharmacy' | 'lab';
@@ -42,6 +43,7 @@ export default function LoginPage() {
     defaultValues: {
       phone: '',
       otp: '',
+      referralCode: '',
     },
   });
 
@@ -89,7 +91,7 @@ export default function LoginPage() {
         return;
     }
 
-    const user = loginWithOtp(values.phone, values.otp!, selectedRole);
+    const { user, error } = loginWithOtp(values.phone, values.otp!, selectedRole, values.referralCode);
     if (user) {
         toast({
             title: "Login Successful!",
@@ -107,7 +109,7 @@ export default function LoginPage() {
     } else {
         toast({
             title: "Login Failed",
-            description: "Invalid OTP. Please try again.",
+            description: error || "Invalid OTP. Please try again.",
             variant: "destructive",
         })
     }
@@ -121,7 +123,7 @@ export default function LoginPage() {
       <main className="flex-1 flex items-center justify-center py-12 px-4">
         <Card className="w-full max-w-md mx-auto shadow-lg">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-headline">{roleDisplayName} Login</CardTitle>
+            <CardTitle className="text-2xl font-headline">{roleDisplayName} Login / Sign Up</CardTitle>
             <CardDescription>Sign in with your mobile number to continue.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -143,19 +145,37 @@ export default function LoginPage() {
                 />
                 
                 {otpSent && (
-                  <FormField
-                    control={form.control}
-                    name="otp"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>OTP</FormLabel>
-                        <FormControl>
-                          <Input type="text" placeholder="Enter the 6-digit OTP" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+                  <>
+                    <FormField
+                      control={form.control}
+                      name="otp"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>OTP</FormLabel>
+                          <FormControl>
+                            <Input type="text" placeholder="Enter the 6-digit OTP" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    {selectedRole !== 'patient' && (
+                        <FormField
+                            control={form.control}
+                            name="referralCode"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Referral Code (Optional)</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Enter referral code if you have one" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                     )}
-                  />
+                  </>
                 )}
                 
                 <Button type="submit" className="w-full">

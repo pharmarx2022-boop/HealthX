@@ -4,7 +4,7 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { User, Calendar, Clock, Stethoscope, RefreshCw, Bell, Star, Users, Wallet, History, FileText, Loader2, Store, KeyRound } from 'lucide-react';
+import { User, Calendar, Clock, Stethoscope, RefreshCw, Bell, Star, Users, Wallet, History, FileText, Loader2, Store, KeyRound, Share2 } from 'lucide-react';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { mockPatients } from '@/components/doctor/patient-list';
 import { initialDoctors, initialLabs, initialPharmacies } from '@/lib/mock-data';
@@ -140,6 +140,31 @@ export default function PatientDashboardPage() {
         setReviewTarget(null);
     };
 
+    const handleShare = async (appt: any) => {
+        const doctor = initialDoctors.find(d => d.id === appt.doctorId);
+        const shareText = `Appointment Details:\n- Patient: ${appt.name}\n- Doctor: ${doctor?.name}\n- Clinic: ${appt.clinic}\n- Date: ${format(new Date(appt.appointmentDate), 'PPP')}\n- Time: ${format(new Date(appt.appointmentDate), 'p')}\n\nBooked via HealthLink Hub.`;
+
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: 'Your Appointment Details',
+                    text: shareText,
+                });
+                toast({ title: 'Appointment shared successfully!' });
+            } catch (error) {
+                toast({ title: 'Error sharing appointment', description: 'Could not share appointment details.', variant: 'destructive' });
+            }
+        } else {
+            // Fallback for browsers that don't support the Web Share API
+            try {
+                await navigator.clipboard.writeText(shareText);
+                toast({ title: 'Copied to Clipboard!', description: 'Appointment details have been copied.' });
+            } catch (err) {
+                 toast({ title: 'Failed to Copy', description: 'Could not copy details to clipboard.', variant: 'destructive' });
+            }
+        }
+    };
+
 
     return (
         <div className="flex flex-col min-h-screen">
@@ -213,13 +238,14 @@ export default function PatientDashboardPage() {
                                                             </div>
                                                         </div>
                                                     </CardContent>
-                                                    {appt.status === 'done' && (
-                                                        <CardFooter className="bg-slate-50/70 p-4 border-t">
-                                                            <Button variant="outline" onClick={() => openReviewDialog({type: 'doctor', id: appt.doctorId, name: initialDoctors.find(d => d.id === appt.doctorId)?.name || 'Doctor', transactionId: appt.id})} disabled={appt.reviewed}>
-                                                                <Star className="mr-2"/> {appt.reviewed ? 'Review Submitted' : 'Leave a Review'}
-                                                            </Button>
-                                                        </CardFooter>
-                                                    )}
+                                                    <CardFooter className="bg-slate-50/70 p-4 border-t flex justify-between">
+                                                        <Button variant="outline" onClick={() => openReviewDialog({type: 'doctor', id: appt.doctorId, name: initialDoctors.find(d => d.id === appt.doctorId)?.name || 'Doctor', transactionId: appt.id})} disabled={appt.reviewed || appt.status !== 'done'}>
+                                                            <Star className="mr-2"/> {appt.reviewed ? 'Review Submitted' : 'Leave a Review'}
+                                                        </Button>
+                                                        <Button variant="outline" onClick={() => handleShare(appt)}>
+                                                            <Share2 className="mr-2"/> Share
+                                                        </Button>
+                                                    </CardFooter>
                                                 </Card>
                                             ))
                                         ) : (

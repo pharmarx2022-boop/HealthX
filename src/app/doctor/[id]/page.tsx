@@ -5,7 +5,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Stethoscope, MapPin, Calendar, Star, Loader2, MessageSquare, UserPlus, Clock, Briefcase } from 'lucide-react';
+import { Stethoscope, MapPin, Calendar, Star, Loader2, MessageSquare, UserPlus, Clock, Briefcase, Link as LinkIcon } from 'lucide-react';
 import Image from 'next/image';
 import { notFound, useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -16,6 +16,7 @@ import { BookingDialog } from '@/components/booking/booking-dialog';
 import { mockFamilyMembers } from '@/lib/family-members';
 import { useToast } from '@/hooks/use-toast';
 import { mockPatients } from '@/components/doctor/patient-list';
+import Link from 'next/link';
 
 const DOCTORS_KEY = 'doctorsData';
 const FAMILY_KEY = 'familyMembers';
@@ -182,9 +183,13 @@ export default function DoctorDetailPage() {
                                     <CardContent className="p-4 flex flex-col md:flex-row justify-between items-start md:items-center">
                                         <div className="flex-grow">
                                             <p className="font-bold">{clinic.name}</p>
-                                            <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
-                                                <MapPin className="w-4 h-4"/> {clinic.location}
-                                            </p>
+                                            <div className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
+                                                <MapPin className="w-4 h-4"/>
+                                                <span>{clinic.location}</span>
+                                                <Link href={`https://www.google.com/maps?q=${encodeURIComponent(clinic.location)}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-primary hover:underline">
+                                                    <LinkIcon className="w-3 h-3 ml-1" />
+                                                </Link>
+                                            </div>
                                             <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
                                                 <Calendar className="w-4 h-4"/> {clinic.days.join(', ')}
                                             </p>

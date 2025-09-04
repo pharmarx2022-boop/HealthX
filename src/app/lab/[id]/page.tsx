@@ -5,7 +5,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MapPin, Star, Loader2, PercentCircle } from 'lucide-react';
+import { MapPin, Star, Loader2, PercentCircle, Link as LinkIcon } from 'lucide-react';
 import Image from 'next/image';
 import { notFound, useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -13,6 +13,7 @@ import { initialLabs } from '@/lib/mock-data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
 
 const LABS_KEY = 'mockLabs';
 
@@ -99,6 +100,10 @@ export default function LabDetailPage() {
                      <div className="flex items-center text-muted-foreground gap-2">
                         <MapPin className="w-5 h-5"/> 
                         <span>{lab.location}</span>
+                         <Link href={`https://www.google.com/maps?q=${encodeURIComponent(lab.location)}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-primary hover:underline">
+                            <LinkIcon className="w-4 h-4 ml-1" />
+                            <span className="ml-1">View on Map</span>
+                        </Link>
                     </div>
                     {lab.acceptsHealthPoints && (
                         <Badge className="mt-4" variant="secondary">

@@ -260,6 +260,9 @@ export function NearbySearch() {
                                                     <div className="flex items-center text-sm text-muted-foreground gap-2 mt-2">
                                                         <MapPin className="w-4 h-4"/> 
                                                         <span>{doctor.location}</span>
+                                                        <Link href={`https://www.google.com/maps?q=${encodeURIComponent(doctor.location)}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-primary hover:underline" onClick={(e) => e.stopPropagation()}>
+                                                            <LinkIcon className="w-3 h-3 ml-1" />
+                                                        </Link>
                                                     </div>
                                                 </div>
                                             </CardHeader>
@@ -310,6 +313,9 @@ export function NearbySearch() {
                                                 <div className="flex items-center text-muted-foreground gap-2 mt-2 text-sm">
                                                     <MapPin className="w-4 h-4"/> 
                                                     <span>{pharmacy.location}</span>
+                                                     <Link href={`https://www.google.com/maps?q=${encodeURIComponent(pharmacy.location)}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-primary hover:underline" onClick={(e) => e.stopPropagation()}>
+                                                        <LinkIcon className="w-3 h-3 ml-1" />
+                                                    </Link>
                                                 </div>
                                                 <div className="flex items-center gap-1 text-amber-500 mt-2">
                                                     <Star className="w-4 h-4 fill-current" />
@@ -346,6 +352,9 @@ export function NearbySearch() {
                                                 <div className="flex items-center text-muted-foreground gap-2 mt-2 text-sm">
                                                     <MapPin className="w-4 h-4"/> 
                                                     <span>{lab.location}</span>
+                                                     <Link href={`https://www.google.com/maps?q=${encodeURIComponent(lab.location)}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-primary hover:underline" onClick={(e) => e.stopPropagation()}>
+                                                        <LinkIcon className="w-3 h-3 ml-1" />
+                                                    </Link>
                                                 </div>
                                                 <div className="flex items-center gap-1 text-amber-500 mt-2">
                                                     <Star className="w-4 h-4 fill-current" />

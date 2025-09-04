@@ -48,6 +48,7 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 const CLINICS_KEY = 'mockClinics';
 
@@ -341,7 +342,13 @@ export function ClinicManager() {
                     <CardContent className="flex-grow space-y-4">
                         <div className="flex items-start gap-2 text-sm text-muted-foreground">
                              <MapPin className="w-4 h-4 mt-0.5 shrink-0"/>
-                             <span>{clinic.location}</span>
+                             <div className="flex flex-col">
+                                 <span>{clinic.location}</span>
+                                 <Link href={`https://www.google.com/maps?q=${encodeURIComponent(clinic.location)}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-primary hover:underline text-xs">
+                                     <LinkIcon className="w-3 h-3 mr-1" />
+                                     View on Map
+                                 </Link>
+                             </div>
                         </div>
                         <div className="flex items-start gap-2 text-sm text-muted-foreground">
                              <Calendar className="w-4 h-4 mt-0.5 shrink-0"/>

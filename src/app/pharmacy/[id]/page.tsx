@@ -94,11 +94,11 @@ export default function PharmacyDetailPage() {
                             <span className="font-bold">{averageRating}</span>
                              <span className="text-muted-foreground text-sm ml-1">({totalReviews} reviews)</span>
                         </div>
-                         {pharmacy.website && (
+                         {pharmacy.googleMapsLink && (
                             <div className="flex items-center gap-2">
-                                <Globe className="w-5 h-5 text-muted-foreground"/> 
-                                <a href={pharmacy.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                                    Website
+                                <MapPin className="w-5 h-5 text-muted-foreground"/> 
+                                <a href={pharmacy.googleMapsLink} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                                    View on Map
                                 </a>
                             </div>
                         )}

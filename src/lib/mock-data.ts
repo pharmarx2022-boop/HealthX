@@ -19,7 +19,7 @@ export const initialDoctors = [
     reviews: 124,
     image: 'https://picsum.photos/id/1018/400/400',
     dataAiHint: 'doctor portrait',
-    website: 'https://anjalisharma.example.com',
+    googleMapsLink: 'https://maps.app.goo.gl/d3sUjZAd5a5A5A5A5',
     reviewsList: [
         { patientName: 'Rohan Sharma', rating: 5, comment: 'Dr. Sharma was fantastic. Very thorough and took the time to explain everything clearly.' },
         { patientName: 'Sunita Patil', rating: 4, comment: 'Good experience, the wait time was a bit long but the consultation was worth it.' },
@@ -35,7 +35,7 @@ export const initialDoctors = [
     reviews: 98,
     image: 'https://picsum.photos/id/1027/400/400',
     dataAiHint: 'doctor portrait',
-    website: 'https://vikramsingh.example.com',
+    googleMapsLink: 'https://maps.app.goo.gl/d3sUjZAd5a5A5A5A5',
     reviewsList: [
         { patientName: 'Priya Mehta', rating: 5, comment: 'Excellent doctor! Solved my skin issue that had been bothering me for months.' },
     ]
@@ -50,7 +50,7 @@ export const initialDoctors = [
     reviews: 150,
     image: 'https://picsum.photos/id/1025/400/400',
     dataAiHint: 'doctor portrait',
-    website: 'https://priyapatel.example.com',
+    googleMapsLink: 'https://maps.app.goo.gl/d3sUjZAd5a5A5A5A5',
     reviewsList: [
         { patientName: 'Amit Singh', rating: 5, comment: 'Dr. Patel is wonderful with kids. My son felt very comfortable with her.' },
     ]
@@ -114,7 +114,7 @@ export const initialPharmacies = [
         acceptsHealthPoints: true,
         discount: 15,
         whatsappNumber: '919876543210',
-        website: 'https://wellnessforever.example.com',
+        googleMapsLink: 'https://maps.app.goo.gl/d3sUjZAd5a5A5A5A5',
         reviewsList: [
             { patientName: 'Rohan Sharma', rating: 5, comment: 'Great service and quick delivery.' },
             { patientName: 'Priya Mehta', rating: 4, comment: 'Well-stocked pharmacy.' },
@@ -128,7 +128,7 @@ export const initialPharmacies = [
         acceptsHealthPoints: true,
         discount: 20,
         whatsappNumber: '919876543211',
-        website: 'https://apollopharmacy.example.com',
+        googleMapsLink: 'https://maps.app.goo.gl/d3sUjZAd5a5A5A5A5',
         reviewsList: [
             { patientName: 'Amit Singh', rating: 5, comment: 'Very helpful staff.' },
         ]
@@ -141,7 +141,7 @@ export const initialPharmacies = [
         acceptsHealthPoints: false,
         discount: 0,
         whatsappNumber: '919876543212',
-        website: 'https://noblemedical.example.com',
+        googleMapsLink: 'https://maps.app.goo.gl/d3sUjZAd5a5A5A5A5',
         reviewsList: []
     }
 ];
@@ -155,7 +155,7 @@ export const initialLabs = [
         acceptsHealthPoints: true,
         discount: 30,
         whatsappNumber: '919876543213',
-        website: 'https://metropolis.example.com',
+        googleMapsLink: 'https://maps.app.goo.gl/d3sUjZAd5a5A5A5A5',
         reviewsList: [
             { patientName: 'Sunita Patil', rating: 5, comment: 'Quick and efficient sample collection.' },
             { patientName: 'Karan Verma', rating: 4, comment: 'Reports were delivered on time.' },
@@ -169,7 +169,7 @@ export const initialLabs = [
         acceptsHealthPoints: true,
         discount: 35,
         whatsappNumber: '919876543214',
-        website: 'https://lalpathlabs.example.com',
+        googleMapsLink: 'https://maps.app.goo.gl/d3sUjZAd5a5A5A5A5',
         reviewsList: []
     }
 ];

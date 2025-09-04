@@ -94,11 +94,11 @@ export default function LabDetailPage() {
                             <span className="font-bold">{averageRating}</span>
                             <span className="text-muted-foreground text-sm ml-1">({totalReviews} reviews)</span>
                         </div>
-                        {lab.website && (
+                        {lab.googleMapsLink && (
                             <div className="flex items-center gap-2">
-                                <Globe className="w-5 h-5 text-muted-foreground"/> 
-                                <a href={lab.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                                    Website
+                                <MapPin className="w-5 h-5 text-muted-foreground"/> 
+                                <a href={lab.googleMapsLink} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                                    View on Map
                                 </a>
                             </div>
                         )}

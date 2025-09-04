@@ -152,13 +152,13 @@ export default function DoctorDetailPage() {
                                     <MapPin className="w-5 h-5"/> 
                                     <span>{doctor.location}</span>
                                 </div>
-                                {doctor.website && (
+                                {doctor.googleMapsLink && (
                                      <>
                                         <Separator orientation="vertical" className="h-5" />
                                         <div className="flex items-center gap-2">
-                                            <Globe className="w-5 h-5"/> 
-                                            <a href={doctor.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                                                Website
+                                            <MapPin className="w-5 h-5"/> 
+                                            <a href={doctor.googleMapsLink} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                                                View on Map
                                             </a>
                                         </div>
                                     </>

@@ -18,6 +18,7 @@ import { mockPatientData } from '@/lib/mock-data';
 import { useToast } from '@/hooks/use-toast';
 import { MOCK_OTP } from '@/lib/auth';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
+import { Card } from '../ui/card';
 
 type Doctor = {
     id: string;
@@ -374,4 +375,3 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
         </Dialog>
     );
 }
-

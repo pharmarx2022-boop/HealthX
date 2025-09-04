@@ -27,8 +27,8 @@ const REPORTS_KEY = 'mockReports';
 export default function LabDashboardPage() {
     const { toast } = useToast();
     const [user, setUser] = useState<any | null>(null);
-    const [patientPhone, setPatientPhone] = useState('');
-    const [uploadPatientPhone, setUploadPatientPhone] = useState('');
+    const [patientSearch, setPatientSearch] = useState('');
+    const [uploadPatientSearch, setUploadPatientSearch] = useState('');
     const [patient, setPatient] = useState<any | null>(null);
     const [uploadPatient, setUploadPatient] = useState<any | null>(null);
     const [otp, setOtp] = useState('');
@@ -67,9 +67,10 @@ export default function LabDashboardPage() {
         }
     }, []);
 
-    const handleSearchPatient = (phone: string, type: 'payment' | 'upload') => {
+    const handleSearchPatient = (searchTermValue: string, type: 'payment' | 'upload') => {
         const allPatients = JSON.parse(sessionStorage.getItem(PATIENTS_KEY) || '[]');
-        const foundPatient = allPatients.find((p: any) => p.phone === phone);
+        const searchTerm = searchTermValue.toLowerCase();
+        const foundPatient = allPatients.find((p: any) => p.phone === searchTerm || (p.email && p.email.toLowerCase() === searchTerm));
 
         if (foundPatient) {
             if (type === 'payment') {
@@ -86,7 +87,7 @@ export default function LabDashboardPage() {
         } else {
             toast({
                 title: "Patient Not Found",
-                description: "No patient found with that phone number.",
+                description: "No patient found with that phone number or email.",
                 variant: "destructive"
             });
             if (type === 'payment') setPatient(null);
@@ -173,7 +174,7 @@ export default function LabDashboardPage() {
 
         // Refresh data
         setPatient(null);
-        setPatientPhone('');
+        setPatientSearch('');
         setLabData(getLabData(user.id));
         setOtpSent(false);
         setOtp('');
@@ -209,7 +210,7 @@ export default function LabDashboardPage() {
         });
 
         setUploadPatient(null);
-        setUploadPatientPhone('');
+        setUploadPatientSearch('');
         setReportFile(null);
         setReportName('');
     }
@@ -265,16 +266,16 @@ export default function LabDashboardPage() {
                         </CardHeader>
                         <CardContent className="space-y-6">
                             <div className="space-y-2 max-w-sm">
-                            <Label htmlFor="patientPhone">Patient Phone Number</Label>
+                            <Label htmlFor="patientSearch">Patient Phone or Email</Label>
                             <div className="flex gap-2">
                                     <Input 
-                                        id="patientPhone" 
-                                        placeholder="Enter 10-digit number" 
-                                        value={patientPhone}
-                                        onChange={(e) => setPatientPhone(e.target.value)}
+                                        id="patientSearch" 
+                                        placeholder="Enter phone or email..." 
+                                        value={patientSearch}
+                                        onChange={(e) => setPatientSearch(e.target.value)}
                                         disabled={!!patient}
                                     />
-                                    <Button onClick={() => handleSearchPatient(patientPhone, 'payment')} disabled={!!patient}>
+                                    <Button onClick={() => handleSearchPatient(patientSearch, 'payment')} disabled={!!patient}>
                                         <Search className="mr-2"/> Search
                                     </Button>
                             </div>
@@ -287,7 +288,7 @@ export default function LabDashboardPage() {
                                             <User className="text-primary"/>
                                             <div>
                                                 <p className="font-semibold text-lg">{patient.name}</p>
-                                                <Button variant="link" className="p-0 h-auto text-sm" onClick={() => { setPatient(null); setPatientPhone(''); }}>
+                                                <Button variant="link" className="p-0 h-auto text-sm" onClick={() => { setPatient(null); setPatientSearch(''); }}>
                                                     Search for another patient
                                                 </Button>
                                             </div>
@@ -347,16 +348,16 @@ export default function LabDashboardPage() {
                         </CardHeader>
                         <CardContent className="space-y-6">
                             <div className="space-y-2 max-w-sm">
-                                <Label htmlFor="uploadPatientPhone">Patient Phone Number</Label>
+                                <Label htmlFor="uploadPatientSearch">Patient Phone or Email</Label>
                                 <div className="flex gap-2">
                                     <Input 
-                                        id="uploadPatientPhone" 
-                                        placeholder="Enter 10-digit number" 
-                                        value={uploadPatientPhone}
-                                        onChange={(e) => setUploadPatientPhone(e.target.value)}
+                                        id="uploadPatientSearch" 
+                                        placeholder="Enter phone or email..." 
+                                        value={uploadPatientSearch}
+                                        onChange={(e) => setUploadPatientSearch(e.target.value)}
                                         disabled={!!uploadPatient}
                                     />
-                                    <Button onClick={() => handleSearchPatient(uploadPatientPhone, 'upload')} disabled={!!uploadPatient}>
+                                    <Button onClick={() => handleSearchPatient(uploadPatientSearch, 'upload')} disabled={!!uploadPatient}>
                                         <Search className="mr-2"/> Search
                                     </Button>
                                 </div>
@@ -367,7 +368,7 @@ export default function LabDashboardPage() {
                                         <User className="text-primary"/>
                                         <div>
                                             <p className="font-semibold text-lg">{uploadPatient.name}</p>
-                                            <Button variant="link" className="p-0 h-auto text-sm" onClick={() => { setUploadPatient(null); setUploadPatientPhone(''); }}>
+                                            <Button variant="link" className="p-0 h-auto text-sm" onClick={() => { setUploadPatient(null); setUploadPatientSearch(''); }}>
                                                 Search for another patient
                                             </Button>
                                         </div>

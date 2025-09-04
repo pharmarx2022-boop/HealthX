@@ -79,7 +79,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
     const [selectedPatientId, setSelectedPatientId] = useState('self');
     
     // Health Coordinator flow state
-    const [patientPhone, setPatientPhone] = useState('');
+    const [patientSearch, setPatientSearch] = useState('');
     const [foundPatient, setFoundPatient] = useState<any | null>(null);
     const [isSearching, setIsSearching] = useState(false);
     const [otpSent, setOtpSent] = useState(false);
@@ -98,7 +98,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
             setSelectedDate(undefined);
             setSelectedTime('');
             setSelectedPatientId('self');
-            setPatientPhone('');
+            setPatientSearch('');
             setFoundPatient(null);
             setIsSearching(false);
             setOtpSent(false);
@@ -152,11 +152,12 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
         setIsSearching(true);
         setTimeout(() => { // Simulate API call
             const allPatients = JSON.parse(sessionStorage.getItem('mockPatientData') || '[]');
-            const patient = allPatients.find((p: any) => p.phone === patientPhone);
+            const searchTerm = patientSearch.toLowerCase();
+            const patient = allPatients.find((p: any) => p.phone === searchTerm || p.email.toLowerCase() === searchTerm);
             if (patient) {
                 setFoundPatient(patient);
             } else {
-                toast({ title: "Patient Not Found", description: "No patient exists with this mobile number.", variant: "destructive" });
+                toast({ title: "Patient Not Found", description: "No patient exists with this mobile number or email.", variant: "destructive" });
             }
             setIsSearching(false);
         }, 500);
@@ -213,17 +214,17 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                         <User className="text-primary"/>
                         <p className="font-medium">{foundPatient.name} ({foundPatient.phone})</p>
                     </div>
-                    <Button variant="link" size="sm" onClick={() => { setFoundPatient(null); setPatientPhone('')}}>Change</Button>
+                    <Button variant="link" size="sm" onClick={() => { setFoundPatient(null); setPatientSearch('')}}>Change</Button>
                 </div>
             ) : (
                 <div className="flex gap-2 mt-2">
                     <Input 
-                        placeholder="Patient's 10-digit mobile number" 
-                        value={patientPhone}
-                        onChange={(e) => setPatientPhone(e.target.value)}
+                        placeholder="Patient's Phone or Email" 
+                        value={patientSearch}
+                        onChange={(e) => setPatientSearch(e.target.value)}
                         disabled={isSearching}
                     />
-                    <Button onClick={handleSearchPatient} disabled={isSearching || patientPhone.length !== 10}>
+                    <Button onClick={handleSearchPatient} disabled={isSearching || patientSearch.length < 3}>
                         {isSearching ? <Loader2 className="animate-spin"/> : <Search/>}
                     </Button>
                 </div>

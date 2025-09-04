@@ -26,7 +26,7 @@ const PATIENTS_KEY = 'mockPatientData';
 export default function PharmacyDashboardPage() {
     const { toast } = useToast();
     const [user, setUser] = useState<any | null>(null);
-    const [patientPhone, setPatientPhone] = useState('');
+    const [patientSearch, setPatientSearch] = useState('');
     const [patient, setPatient] = useState<any | null>(null);
     const [otp, setOtp] = useState('');
     const [otpSent, setOtpSent] = useState(false);
@@ -61,7 +61,8 @@ export default function PharmacyDashboardPage() {
 
     const handleSearchPatient = () => {
         const allPatients = JSON.parse(sessionStorage.getItem(PATIENTS_KEY) || '[]');
-        const foundPatient = allPatients.find((p: any) => p.phone === patientPhone);
+        const searchTerm = patientSearch.toLowerCase();
+        const foundPatient = allPatients.find((p: any) => p.phone === searchTerm || p.email.toLowerCase() === searchTerm);
 
         if (foundPatient) {
             setPatient(foundPatient);
@@ -72,7 +73,7 @@ export default function PharmacyDashboardPage() {
         } else {
             toast({
                 title: "Patient Not Found",
-                description: "No patient found with that phone number.",
+                description: "No patient found with that phone number or email.",
                 variant: "destructive"
             });
             setPatient(null);
@@ -158,7 +159,7 @@ export default function PharmacyDashboardPage() {
 
         // Refresh data
         setPatient(null);
-        setPatientPhone('');
+        setPatientSearch('');
         setPharmacyData(getPharmacyData(user.id));
         setOtpSent(false);
         setOtp('');
@@ -217,13 +218,13 @@ export default function PharmacyDashboardPage() {
                         </CardHeader>
                         <CardContent className="space-y-6">
                             <div className="space-y-2 max-w-sm">
-                            <Label htmlFor="patientPhone">Patient Phone Number</Label>
+                            <Label htmlFor="patientSearch">Patient Phone or Email</Label>
                             <div className="flex gap-2">
                                     <Input 
-                                        id="patientPhone" 
-                                        placeholder="Enter 10-digit number" 
-                                        value={patientPhone}
-                                        onChange={(e) => setPatientPhone(e.target.value)}
+                                        id="patientSearch" 
+                                        placeholder="Enter phone or email..." 
+                                        value={patientSearch}
+                                        onChange={(e) => setPatientSearch(e.target.value)}
                                         disabled={!!patient}
                                     />
                                     <Button onClick={handleSearchPatient} disabled={!!patient}>
@@ -239,7 +240,7 @@ export default function PharmacyDashboardPage() {
                                             <User className="text-primary"/>
                                             <div>
                                                 <p className="font-semibold text-lg">{patient.name}</p>
-                                                <Button variant="link" className="p-0 h-auto text-sm" onClick={() => { setPatient(null); setPatientPhone(''); }}>
+                                                <Button variant="link" className="p-0 h-auto text-sm" onClick={() => { setPatient(null); setPatientSearch(''); }}>
                                                     Search for another patient
                                                 </Button>
                                             </div>

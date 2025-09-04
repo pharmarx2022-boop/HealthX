@@ -44,7 +44,7 @@ export const initialDoctors = [
     id: '3',
     name: 'Dr. Priya Patel',
     specialty: 'Pediatrician',
-    location: 'Mumbai, IN',
+    location: 'Mumbai-IN',
     bio: 'Dr. Priya Patel is a compassionate pediatrician committed to providing the highest quality of care for children from infancy through adolescence.',
     experience: 12,
     reviews: 150,
@@ -176,8 +176,8 @@ export const initialLabs = [
 
 
 export const mockPatientData = [
-    { id: 'rohan_sharma', name: 'Rohan Sharma', phone: '9876543210' },
-    { id: 'priya_mehta', name: 'Priya Mehta', phone: '9876543211' },
+    { id: 'rohan_sharma', name: 'Rohan Sharma', phone: '9876543210', email: 'rohan.sharma@example.com' },
+    { id: 'priya_mehta', name: 'Priya Mehta', phone: '9876543211', email: 'priya.mehta@example.com' },
 ];
 
 

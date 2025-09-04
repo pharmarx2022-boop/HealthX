@@ -118,11 +118,7 @@ export function Header() {
         </DropdownMenu>
       );
     }
-    return (
-      <Button asChild variant="outline">
-        <Link href="/login?role=patient">Login / Register</Link>
-      </Button>
-    );
+    return null;
   };
   
     const renderMobileAuthButtons = () => {
@@ -190,11 +186,7 @@ export function Header() {
         </>
       );
     }
-    return (
-      <Button asChild className="text-lg">
-        <Link href="/login?role=patient" onClick={() => setIsSheetOpen(false)}>Login / Register</Link>
-      </Button>
-    );
+    return null;
   };
 
   return (
@@ -209,10 +201,6 @@ export function Header() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-2">
-          <Button asChild>
-            <Link href="/book-appointment"><Calendar className="mr-2"/>Book Appointment</Link>
-          </Button>
-          <div className="h-6 border-l mx-2"></div>
           {renderAuthButtons()}
         </nav>
 
@@ -242,12 +230,6 @@ export function Header() {
                     </SheetClose>
                 </div>
                 <nav className="flex flex-col gap-4">
-                  <Button asChild className="justify-start text-lg">
-                    <Link href="/book-appointment" onClick={() => setIsSheetOpen(false)}>
-                      <Calendar className="mr-2"/>Book Appointment
-                    </Link>
-                  </Button>
-                  <Separator className="my-2"/>
                   {renderMobileAuthButtons()}
                 </nav>
               </div>

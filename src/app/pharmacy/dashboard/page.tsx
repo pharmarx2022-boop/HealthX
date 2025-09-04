@@ -109,6 +109,7 @@ export default function PharmacyDashboardPage() {
         }
 
         const { pointsToPay } = calculatedAmounts;
+        const commissionAmount = pointsToPay * 0.95; // Pharmacy gets 95%
 
         if (pointsToPay > patientTransactionHistory.balance) {
             toast({
@@ -130,7 +131,7 @@ export default function PharmacyDashboardPage() {
         // Credit points to pharmacy
         recordCommission(user.id, {
             type: 'credit',
-            amount: pointsToPay,
+            amount: commissionAmount,
             description: `Health Points collected from ${patient.name}`,
             date: new Date(),
         });
@@ -142,7 +143,8 @@ export default function PharmacyDashboardPage() {
         });
 
         // Refresh data
-        handleSearchPatient();
+        setPatient(null);
+        setPatientPhone('');
         setPharmacyData(getPharmacyData(user.id));
         setOtpSent(false);
         setOtp('');
@@ -159,75 +161,16 @@ export default function PharmacyDashboardPage() {
                 <p className="text-muted-foreground">Manage inventory and process patient payments.</p>
             </div>
             
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <Card className="shadow-sm">
-                    <CardHeader className="flex flex-row items-center gap-4">
-                        <Pill className="w-8 h-8 text-primary"/>
-                        <div>
-                            <CardTitle>Welcome, {pharmacyDetails?.name || 'Pharmacy'}!</CardTitle>
-                            <CardDescription>
-                                Use this portal to manage your operations.
-                            </CardDescription>
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <p>Inventory management and other pharmacy-specific tools will be available here.</p>
-                    </CardContent>
-                </Card>
-
-                 <Card className="shadow-sm">
-                    <CardHeader>
-                        <CardTitle>Collected Health Points</CardTitle>
-                        <CardDescription>Points collected from patient bills.</CardDescription>
-                    </CardHeader>
-                     <CardContent>
-                        <p className="text-4xl font-bold">₹{pharmacyData.balance.toFixed(2)}</p>
-                    </CardContent>
-                    <CardFooter>
-                         <Dialog>
-                            <DialogTrigger asChild>
-                                <Button variant="link" className="p-0 h-auto self-center">
-                                    <History className="mr-2"/> View Collection History
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>Collection History</DialogTitle>
-                                    <DialogDescription>A record of Health Points collected from patient bills.</DialogDescription>
-                                </DialogHeader>
-                                <div className="max-h-[50vh] overflow-y-auto -mx-6 px-6">
-                                    <ul className="space-y-4 py-4">
-                                        {pharmacyData.transactions.length > 0 ? (
-                                            pharmacyData.transactions.map((tx, index) => (
-                                                <li key={index} className="flex items-center justify-between">
-                                                    <div>
-                                                        <p className="font-medium">{tx.description}</p>
-                                                        <p className="text-xs text-muted-foreground mt-1">{format(new Date(tx.date), 'PP, p')}</p>
-                                                    </div>
-                                                    <span className={`font-semibold ${tx.type === 'credit' ? 'text-green-600' : 'text-destructive'}`}>
-                                                        {tx.type === 'credit' ? '+' : '-'} ₹{tx.amount.toFixed(2)}
-                                                    </span>
-                                                </li>
-                                            ))
-                                        ) : (
-                                            <p className="text-center text-muted-foreground py-4">No transactions yet.</p>
-                                        )}
-                                    </ul>
-                                </div>
-                            </DialogContent>
-                        </Dialog>
-                    </CardFooter>
-                </Card>
-
-                 <Card className="shadow-sm md:col-span-2 lg:col-span-1">
+            <div className="grid lg:grid-cols-3 gap-8 items-start">
+                 <Card className="shadow-sm lg:col-span-2">
                     <CardHeader>
                         <CardTitle>Process Patient Bill</CardTitle>
                         <CardDescription>
-                            Help patients pay using their Health Points.
+                            Help patients pay for their medicines using their Health Points.
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                        <div className="space-y-2">
+                        <div className="space-y-2 max-w-sm">
                            <Label htmlFor="patientPhone">Patient Phone Number</Label>
                            <div className="flex gap-2">
                                 <Input 
@@ -244,20 +187,22 @@ export default function PharmacyDashboardPage() {
                         </div>
 
                         {patient && pharmacyDetails && (
-                            <Card className="bg-slate-50 p-4">
-                                <div className="flex items-start justify-between">
+                            <Card className="bg-slate-50 p-6">
+                                <div className="flex flex-col md:flex-row md:items-start justify-between">
                                     <div className="flex items-center gap-3">
                                         <User className="text-primary"/>
-                                        <p className="font-semibold">{patient.name}</p>
+                                        <div>
+                                            <p className="font-semibold text-lg">{patient.name}</p>
+                                             <Button variant="link" className="p-0 h-auto text-sm" onClick={() => { setPatient(null); setPatientPhone(''); }}>
+                                                Search for another patient
+                                            </Button>
+                                        </div>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="text-lg font-bold">₹{patientTransactionHistory.balance.toFixed(2)}</p>
+                                    <div className="text-left md:text-right mt-4 md:mt-0">
+                                        <p className="text-xl font-bold">₹{patientTransactionHistory.balance.toFixed(2)}</p>
                                         <p className="text-xs text-muted-foreground -mt-1">Available Balance</p>
                                     </div>
                                 </div>
-                                <Button variant="link" className="p-0 h-auto text-sm mt-1" onClick={() => setPatient(null)}>
-                                   Search for another patient
-                                </Button>
                                 
                                 {!otpSent ? (
                                      <Button className="w-full mt-4" onClick={handleSendOtp}>Send OTP to Patient</Button>
@@ -277,7 +222,7 @@ export default function PharmacyDashboardPage() {
                                         </div>
 
                                         {calculatedAmounts.pointsToPay > 0 && (
-                                            <div className="space-y-2 text-sm">
+                                            <div className="space-y-2 text-sm p-3 bg-white rounded-md border">
                                                 <div className="flex justify-between">
                                                     <span className="text-muted-foreground">Pay with Health Points:</span>
                                                     <span className="font-medium">₹{calculatedAmounts.pointsToPay.toFixed(2)}</span>
@@ -301,7 +246,62 @@ export default function PharmacyDashboardPage() {
 
                     </CardContent>
                 </Card>
-                <div className="md:col-span-2 lg:col-span-3">
+                <div className="lg:col-span-1 space-y-8">
+                     <Card className="shadow-sm">
+                        <CardHeader className="flex flex-row items-center gap-4">
+                            <Pill className="w-8 h-8 text-primary"/>
+                            <div>
+                                <CardTitle>Welcome, {pharmacyDetails?.name || 'Pharmacy'}!</CardTitle>
+                                <CardDescription>
+                                    Use this portal to manage your operations.
+                                </CardDescription>
+                            </div>
+                        </CardHeader>
+                    </Card>
+
+                    <Card className="shadow-sm">
+                        <CardHeader>
+                            <CardTitle>Collected Health Points</CardTitle>
+                            <CardDescription>Points collected from patient bills.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-4xl font-bold">₹{pharmacyData.balance.toFixed(2)}</p>
+                        </CardContent>
+                        <CardFooter>
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button variant="link" className="p-0 h-auto self-center">
+                                        <History className="mr-2"/> View Collection History
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Collection History</DialogTitle>
+                                        <DialogDescription>A record of Health Points collected from patient bills.</DialogDescription>
+                                    </DialogHeader>
+                                    <div className="max-h-[50vh] overflow-y-auto -mx-6 px-6">
+                                        <ul className="space-y-4 py-4">
+                                            {pharmacyData.transactions.length > 0 ? (
+                                                pharmacyData.transactions.map((tx, index) => (
+                                                    <li key={index} className="flex items-center justify-between">
+                                                        <div>
+                                                            <p className="font-medium">{tx.description}</p>
+                                                            <p className="text-xs text-muted-foreground mt-1">{format(new Date(tx.date), 'PP, p')}</p>
+                                                        </div>
+                                                        <span className={`font-semibold ${tx.type === 'credit' ? 'text-green-600' : 'text-destructive'}`}>
+                                                            {tx.type === 'credit' ? '+' : '-'} ₹{tx.amount.toFixed(2)}
+                                                        </span>
+                                                    </li>
+                                                ))
+                                            ) : (
+                                                <p className="text-center text-muted-foreground py-4">No transactions yet.</p>
+                                            )}
+                                        </ul>
+                                    </div>
+                                </DialogContent>
+                            </Dialog>
+                        </CardFooter>
+                    </Card>
                     <Alert variant="outline" className="w-full">
                         <Banknote className="h-4 w-4" />
                         <AlertTitle>How Payments Work</AlertTitle>

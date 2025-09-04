@@ -19,7 +19,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { format } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AnalyticsDashboard } from '@/components/pharmacy/analytics-dashboard';
-import { PharmacyProfileForm } from '@/components/pharmacy/profile-form';
 
 const PHARMACIES_KEY = 'mockPharmacies';
 const PATIENTS_KEY = 'mockPatientData';
@@ -295,18 +294,6 @@ export default function PharmacyDashboardPage() {
                     </Card>
                  </div>
                 <div className="lg:col-span-1 space-y-8">
-                     <Card className="shadow-sm" id="profile">
-                        <CardHeader>
-                            <CardTitle>Edit Your Pharmacy Profile</CardTitle>
-                             <CardDescription>
-                                Use your referral code to onboard new partners and earn commissions. This information will be visible to patients.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <PharmacyProfileForm />
-                        </CardContent>
-                    </Card>
-
                     <Card className="shadow-sm">
                         <CardHeader>
                             <CardTitle>Collected Health Points</CardTitle>
@@ -416,5 +403,3 @@ export default function PharmacyDashboardPage() {
     </div>
   );
 }
-
-    

@@ -100,6 +100,9 @@ export default function PharmacyDetailPage() {
                      <div className="flex items-center text-muted-foreground gap-2">
                         <MapPin className="w-5 h-5"/> 
                         <span>{pharmacy.location}</span>
+                         <Link href={`https://www.google.com/maps?q=${encodeURIComponent(pharmacy.location)}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-primary hover:underline">
+                            <LinkIcon className="w-4 h-4" />
+                        </Link>
                     </div>
                     {pharmacy.acceptsHealthPoints && (
                         <Badge className="mt-4" variant="secondary">

@@ -66,10 +66,10 @@ export default function HealthCoordinatorDashboardPage() {
     
     const handleWithdrawalRequest = () => {
         const withdrawalAmount = commissionWallet.balance;
-         if (withdrawalAmount <= 0) {
+         if (withdrawalAmount < 1000) {
             toast({
-                title: "No Commission to Withdraw",
-                description: "You have no commission balance to withdraw.",
+                title: "Minimum Withdrawal Amount",
+                description: "You need a minimum balance of INR 1000 to request a withdrawal.",
                 variant: "destructive"
             });
             return;
@@ -166,8 +166,8 @@ export default function HealthCoordinatorDashboardPage() {
                                     <p className="text-4xl font-bold">INR {isClient ? commissionWallet.balance.toFixed(2) : '0.00'}</p>
                                 </CardContent>
                                 <CardFooter className="flex-col items-start gap-4">
-                                    <Button className="w-full" onClick={handleWithdrawalRequest} disabled={!isClient || commissionWallet.balance <= 0}>
-                                        <Banknote className="mr-2"/> Request Withdrawal
+                                    <Button className="w-full" onClick={handleWithdrawalRequest} disabled={!isClient || commissionWallet.balance < 1000}>
+                                        <Banknote className="mr-2"/> Request Withdrawal (Min. INR 1000)
                                     </Button>
                                     <Dialog>
                                         <DialogTrigger asChild>
@@ -207,7 +207,7 @@ export default function HealthCoordinatorDashboardPage() {
                                 <BadgePercent className="h-4 w-4" />
                                 <AlertTitle>How Earnings Work</AlertTitle>
                                 <AlertDescription>
-                                    You earn a commission in Health Points for every appointment you book for a patient. Once you've collected points, you can request a cash conversion. The admin will process your request and transfer the amount to your registered bank account.
+                                    You earn Health Points for every appointment you book. You can request to convert these points to cash at any time. You earn Referral Commissions separately when partners you refer join the platform.
                                 </AlertDescription>
                             </Alert>
                         </div>

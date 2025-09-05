@@ -7,7 +7,7 @@ import { createReferral } from './referrals';
 // A secure, hardcoded list of admin accounts.
 // In a real application, this would be stored securely in a database.
 const ADMIN_ACCOUNTS = [
-    { email: 'admin@example.com', id: 'admin_001', role: 'admin' },
+    { email: 'admin@example.com', id: 'admin_001', role: 'admin', password: 'password123' },
 ];
 
 const generateReferralCode = () => {
@@ -117,7 +117,8 @@ export function completeSignIn(href: string, role: string, referralCode?: string
             // Health Coordinator verification details
             aadharNumber: '',
             aadharFrontImage: '',
-            aadharBackImage: ''
+            aadharBackImage: '',
+            password: '', // Add password field
         };
 
         // Add to appropriate mock data store based on role
@@ -158,6 +159,82 @@ export function completeSignIn(href: string, role: string, referralCode?: string
     return { user, error: null, isNewUser };
 }
 
+
+export function signInWithPassword(email: string, password: string, role: string) {
+    if (role === 'admin') {
+        const adminUser = ADMIN_ACCOUNTS.find(admin => admin.email === email);
+        if (adminUser && adminUser.password === password) {
+            return { user: { ...adminUser, fullName: 'Admin' }, error: null };
+        } else {
+            return { user: null, error: "Invalid admin credentials." };
+        }
+    }
+
+    let allMockUsers: any[] = [];
+    const keys: Record<string, string> = {
+        doctor: 'doctorsData',
+        lab: 'mockLabs',
+        pharmacy: 'mockPharmacies',
+    };
+    if (role in keys) {
+        allMockUsers = JSON.parse(sessionStorage.getItem(keys[role]) || '[]');
+    } else {
+        allMockUsers = users;
+    }
+
+    const user = allMockUsers.find(u => u.email === email && u.role === role);
+
+    if (!user) {
+        return { user: null, error: "No user found with this email for the selected role." };
+    }
+    if (!user.password) {
+        return { user: null, error: "This account was set up with a magic link. Please use that method or set a password first." };
+    }
+    if (user.password !== password) {
+        return { user: null, error: "Invalid password." };
+    }
+    if (user.status === 'rejected') {
+        return { user: null, error: "Your registration has been rejected." };
+    }
+
+    return { user, error: null };
+}
+
+export function setUserPassword(userId: string, role: string, password: string) {
+    let key;
+    let allUsers: any[] = [];
+
+    const professionalRoles: Record<string, string> = {
+        doctor: 'doctorsData',
+        lab: 'mockLabs',
+        pharmacy: 'mockPharmacies',
+    };
+
+    if (role in professionalRoles) {
+        key = professionalRoles[role];
+        allUsers = JSON.parse(sessionStorage.getItem(key) || '[]');
+        const userIndex = allUsers.findIndex(u => u.id === userId);
+        if (userIndex !== -1) {
+            allUsers[userIndex].password = password;
+            sessionStorage.setItem(key, JSON.stringify(allUsers));
+        }
+    } else { // Patient or Health Coordinator
+        const userIndex = users.findIndex(u => u.id === userId);
+        if (userIndex !== -1) {
+            users[userIndex].password = password;
+        }
+    }
+    
+    // Also update the user object in session storage if it exists
+    const storedUser = sessionStorage.getItem('user');
+    if (storedUser) {
+        const u = JSON.parse(storedUser);
+        if (u.id === userId) {
+            u.password = password;
+            sessionStorage.setItem('user', JSON.stringify(u));
+        }
+    }
+}
 
 
 export function getAllPendingUsers() {

@@ -14,6 +14,7 @@ import { Footer } from '@/components/layout/footer';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { Loader2, KeyRound } from 'lucide-react';
+import { setUserPassword } from '@/lib/auth';
 
 const passwordSchema = z.object({
     password: z.string().min(8, { message: 'Password must be at least 8 characters long.' }),
@@ -57,8 +58,7 @@ export default function SetPasswordPage() {
     });
 
     const onSubmit = (values: z.infer<typeof passwordSchema>) => {
-        // In a real app, this would be an API call to securely update the user's password.
-        console.log('Password set for user:', user.id, 'Password:', values.password);
+        setUserPassword(user.id, user.role, values.password);
 
         toast({
             title: 'Password Set Successfully!',

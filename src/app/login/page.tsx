@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import Link from 'next/link';
@@ -8,19 +7,21 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { sendAuthenticationLink, completeSignIn } from '@/lib/auth';
+import { sendAuthenticationLink, completeSignIn, signInWithPassword } from '@/lib/auth';
 import { addNotification } from '@/lib/notifications';
-import { MailCheck, Loader2 } from 'lucide-react';
+import { MailCheck, Loader2, KeyRound } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'A valid email address is required.' }),
+  password: z.string().optional(),
   referralCode: z.string().optional(),
 });
 
@@ -45,6 +46,7 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: '',
+      password: '',
       referralCode: '',
     },
   });
@@ -131,6 +133,31 @@ export default function LoginPage() {
 
 
   function onSubmit(values: z.infer<typeof loginSchema>) {
+    // If password is provided, try password login
+    if (values.password && selectedRole) {
+        const { user, error } = signInWithPassword(values.email, values.password, selectedRole);
+
+        if (user) {
+            sessionStorage.setItem('user', JSON.stringify(user));
+            toast({
+                title: "Login Successful!",
+                description: "Welcome back to HealthLink Hub.",
+            });
+            const dashboardPath = user.role === 'admin' ? '/admin' 
+                           : user.role === 'patient' ? '/patient/my-health'
+                           : `/${user.role}/dashboard`;
+            router.push(dashboardPath);
+        } else {
+             toast({
+                title: "Login Failed",
+                description: error,
+                variant: "destructive",
+            });
+        }
+        return;
+    }
+    
+    // Otherwise, use magic link
     sendAuthenticationLink(values.email);
     if(values.referralCode) {
         sessionStorage.setItem('referralCode', values.referralCode);
@@ -156,9 +183,9 @@ export default function LoginPage() {
       <main className="flex-1 flex items-center justify-center py-12 px-4">
         <Card className="w-full max-w-md mx-auto shadow-lg">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-headline">{roleDisplayName} Login / Sign Up</CardTitle>
+            <CardTitle className="text-2xl font-headline">{roleDisplayName} Login</CardTitle>
             {!linkSent ? (
-                <CardDescription>Enter your email to receive a secure sign-in link.</CardDescription>
+                <CardDescription>Enter your credentials to log in.</CardDescription>
             ) : (
                 <CardDescription>A sign-in link has been sent to your email address.</CardDescription>
             )}
@@ -169,26 +196,55 @@ export default function LoginPage() {
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     
                     <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Email Address</FormLabel>
-                        <FormControl>
-                            <Input type="email" placeholder="you@example.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Email Address</FormLabel>
+                            <FormControl>
+                                <Input type="email" placeholder="you@example.com" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
                     />
                     
-                    {selectedRole !== 'patient' && (
+                    <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Password (for testing)</FormLabel>
+                            <FormControl>
+                                 <div className="relative">
+                                    <Input type="password" placeholder="••••••••" {...field} />
+                                    <KeyRound className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                </div>
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    
+                    <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+                        {form.formState.isSubmitting ? <Loader2 className="animate-spin" /> : "Login"}
+                    </Button>
+
+                    <div className="relative">
+                        <Separator />
+                        <span className="absolute left-1/2 -translate-x-1/2 top-[-13px] bg-card px-2 text-sm text-muted-foreground">OR</span>
+                    </div>
+                    
+                    <Button type="button" variant="outline" className="w-full" disabled={form.formState.isSubmitting} onClick={() => onSubmit(form.getValues())}>
+                        {form.formState.isSubmitting ? <Loader2 className="animate-spin" /> : "Send Secure Sign-in Link"}
+                    </Button>
+                     {selectedRole !== 'patient' && (
                         <FormField
                             control={form.control}
                             name="referralCode"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Referral Code (Optional)</FormLabel>
+                                <FormLabel>Referral Code (for new users)</FormLabel>
                                 <FormControl>
                                     <Input placeholder="Enter referral code if you have one" {...field} />
                                 </FormControl>
@@ -197,10 +253,6 @@ export default function LoginPage() {
                             )}
                         />
                     )}
-                    
-                    <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-                        {form.formState.isSubmitting ? <Loader2 className="animate-spin" /> : "Send Sign-in Link"}
-                    </Button>
                 </form>
                 </Form>
             ) : (
@@ -211,13 +263,13 @@ export default function LoginPage() {
                         We've sent a magic link to <span className="font-medium text-foreground">{form.getValues('email')}</span>. Click the link in the email to sign in instantly.
                     </p>
                     <Button variant="link" onClick={() => setLinkSent(false)} className="mt-4">
-                        Use a different email
+                        Use a different email or method
                     </Button>
                 </div>
             )}
-            <div className="mt-4 text-center text-sm">
+            <CardFooter className="pt-6 text-center text-sm">
                 Not a {roleDisplayName}? <Link href="/" className="underline">Go back</Link>
-            </div>
+            </CardFooter>
           </CardContent>
         </Card>
       </main>

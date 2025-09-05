@@ -99,18 +99,26 @@ export function Header() {
                     </>
                 )}
                 {user.role === 'patient' && (
-                     <DropdownMenuItem asChild>
-                        <Link href="/patient/my-health#family">
-                            <Users className="mr-2" />
-                            <span>Family Members</span>
-                        </Link>
-                    </DropdownMenuItem>
+                    <>
+                         <DropdownMenuItem asChild>
+                            <Link href="/patient/profile">
+                                <Settings className="mr-2" />
+                                <span>Manage Profile</span>
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                            <Link href="/patient/my-health#family">
+                                <Users className="mr-2" />
+                                <span>Family Members</span>
+                            </Link>
+                        </DropdownMenuItem>
+                    </>
                 )}
                 {user.role === 'health-coordinator' && (
                     <DropdownMenuItem asChild>
                         <Link href="/health-coordinator/profile">
-                            <Gift className="mr-2" />
-                            <span>Referral Code</span>
+                            <Settings className="mr-2" />
+                            <span>Manage Profile</span>
                         </Link>
                     </DropdownMenuItem>
                 )}
@@ -173,18 +181,26 @@ export function Header() {
             </>
            )}
            {user.role === 'patient' && (
-                <Button variant="ghost" asChild className="justify-start text-lg">
-                    <Link href="/patient/my-health#family" onClick={() => setIsSheetOpen(false)}>
-                        <Users className="mr-2" />
-                        Family Members
-                    </Link>
-                </Button>
+               <>
+                    <Button variant="ghost" asChild className="justify-start text-lg">
+                        <Link href="/patient/profile" onClick={() => setIsSheetOpen(false)}>
+                            <Settings className="mr-2" />
+                            Manage Profile
+                        </Link>
+                    </Button>
+                    <Button variant="ghost" asChild className="justify-start text-lg">
+                        <Link href="/patient/my-health#family" onClick={() => setIsSheetOpen(false)}>
+                            <Users className="mr-2" />
+                            Family Members
+                        </Link>
+                    </Button>
+                </>
            )}
            {user.role === 'health-coordinator' && (
               <Button variant="ghost" asChild className="justify-start text-lg">
                   <Link href="/health-coordinator/profile" onClick={() => setIsSheetOpen(false)}>
-                      <Gift className="mr-2" />
-                      Referral Code
+                      <Settings className="mr-2" />
+                      Manage Profile
                   </Link>
               </Button>
             )}

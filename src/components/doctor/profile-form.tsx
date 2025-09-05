@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect, ChangeEvent } from 'react';
@@ -12,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
-import { Loader2, Upload, Briefcase, MapPin, Copy, FileText, BadgeCheck } from 'lucide-react';
+import { Loader2, Upload, Briefcase, MapPin, Copy, FileText, BadgeCheck, Phone } from 'lucide-react';
 import { initialDoctors } from '@/lib/mock-data';
 import { isRegistrationNumberUnique } from '@/lib/auth';
 
@@ -20,6 +19,7 @@ const DOCTORS_KEY = 'doctorsData';
 
 const profileSchema = z.object({
   name: z.string().min(1, 'Full name is required.'),
+  phone: z.string().min(10, "A valid 10-digit phone number is required."),
   specialty: z.string().min(1, 'Specialty is required.'),
   location: z.string().min(1, 'Location is required.'),
   bio: z.string().min(1, 'A short bio is required.'),
@@ -42,6 +42,7 @@ export function ProfileForm() {
     resolver: zodResolver(profileSchema),
     defaultValues: {
       name: '',
+      phone: '',
       specialty: '',
       location: '',
       bio: '',
@@ -117,6 +118,11 @@ export function ProfileForm() {
     });
 
     sessionStorage.setItem(DOCTORS_KEY, JSON.stringify(updatedDoctors));
+    
+    // Also update the user object in session storage if name/phone changes
+    const updatedUser = { ...user, fullName: data.name, phone: data.phone };
+    sessionStorage.setItem('user', JSON.stringify(updatedUser));
+
 
     toast({
       title: 'Profile Updated!',
@@ -191,19 +197,37 @@ export function ProfileForm() {
                 )}
             />
 
-            <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Full Name</FormLabel>
-                    <FormControl>
-                        <Input placeholder="e.g., Dr. Anjali Sharma" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-            />
+            <div className="grid grid-cols-2 gap-4">
+                 <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Full Name</FormLabel>
+                        <FormControl>
+                            <Input placeholder="e.g., Dr. Anjali Sharma" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                 <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Phone Number</FormLabel>
+                        <FormControl>
+                             <div className="relative">
+                                <Input type="tel" placeholder="e.g., 9876543210" {...field} className="pl-8"/>
+                                <Phone className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            </div>
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            </div>
             <div className="grid grid-cols-2 gap-4">
                 <FormField
                     control={form.control}

@@ -1,5 +1,4 @@
 
-
 export type MockReport = {
     id: string;
     patientId: string;
@@ -14,6 +13,7 @@ export const initialDoctors = [
     id: '1',
     name: 'Dr. Anjali Sharma',
     email: 'anjali@example.com',
+    phone: '9876543210',
     role: 'doctor',
     status: 'approved',
     dateJoined: '2023-01-15T10:00:00Z',
@@ -36,6 +36,7 @@ export const initialDoctors = [
     id: '2',
     name: 'Dr. Vikram Singh',
     email: 'vikram@example.com',
+    phone: '9876543211',
     role: 'doctor',
     status: 'approved',
     dateJoined: '2023-02-20T11:00:00Z',
@@ -57,6 +58,7 @@ export const initialDoctors = [
     id: '3',
     name: 'Dr. Priya Patel',
     email: 'priya@example.com',
+    phone: '9876543212',
     role: 'doctor',
     status: 'approved',
     dateJoined: '2023-03-10T09:00:00Z',
@@ -140,7 +142,7 @@ export const initialPharmacies = [
         image: 'https://picsum.photos/id/24/400/300',
         acceptsHealthPoints: true,
         discount: 15,
-        whatsappNumber: '919876543210',
+        phoneNumber: '919876543210',
         googleMapsLink: 'https://maps.app.goo.gl/d3sUjZAd5a5A5A5A5',
         reviewsList: [
             { patientName: 'Rohan Sharma', rating: 5, comment: 'Great service and quick delivery.' },
@@ -160,7 +162,7 @@ export const initialPharmacies = [
         image: 'https://picsum.photos/id/219/400/300',
         acceptsHealthPoints: true,
         discount: 20,
-        whatsappNumber: '919876543211',
+        phoneNumber: '919876543211',
         googleMapsLink: 'https://maps.app.goo.gl/d3sUjZAd5a5A5A5A5',
         reviewsList: [
             { patientName: 'Amit Singh', rating: 5, comment: 'Very helpful staff.' },
@@ -179,7 +181,7 @@ export const initialPharmacies = [
         image: 'https://picsum.photos/id/183/400/300',
         acceptsHealthPoints: false,
         discount: 0,
-        whatsappNumber: '919876543212',
+        phoneNumber: '919876543212',
         googleMapsLink: 'https://maps.app.goo.gl/d3sUjZAd5a5A5A5A5',
         reviewsList: [],
         registrationNumber: 'PHM-MH-778899',
@@ -199,7 +201,7 @@ export const initialLabs = [
         image: 'https://picsum.photos/id/30/400/300',
         acceptsHealthPoints: true,
         discount: 30,
-        whatsappNumber: '919876543213',
+        phoneNumber: '919876543213',
         googleMapsLink: 'https://maps.app.goo.gl/d3sUjZAd5a5A5A5A5',
         reviewsList: [
             { patientName: 'Sunita Patil', rating: 5, comment: 'Quick and efficient sample collection.' },
@@ -219,7 +221,7 @@ export const initialLabs = [
         image: 'https://picsum.photos/id/31/400/300',
         acceptsHealthPoints: true,
         discount: 35,
-        whatsappNumber: '919876543214',
+        phoneNumber: '919876543214',
         googleMapsLink: 'https://maps.app.goo.gl/d3sUjZAd5a5A5A5A5',
         reviewsList: [],
         registrationNumber: 'LAB-MH-DDEEFF',

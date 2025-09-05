@@ -119,7 +119,7 @@ export default function PharmacyDetailPage() {
                     )}
                    
                     <Button asChild size="lg" className="w-full mt-4">
-                        <a href={`https://wa.me/${pharmacy.whatsappNumber}`} target="_blank" rel="noopener noreferrer">
+                        <a href={`https://wa.me/${pharmacy.phoneNumber}`} target="_blank" rel="noopener noreferrer">
                             <WhatsAppIcon />
                             <span className="ml-2">Contact on WhatsApp</span>
                         </a>

@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect, ChangeEvent } from 'react';
@@ -22,7 +21,7 @@ const profileSchema = z.object({
   location: z.string().min(1, 'Location is required.'),
   image: z.string().min(1, 'A lab picture is required.'),
   discount: z.coerce.number().min(30, 'Discount must be at least 30%.').max(100, 'Discount cannot exceed 100%.'),
-  whatsappNumber: z.string().min(10, 'A valid phone number is required.'),
+  phoneNumber: z.string().min(10, 'A valid phone number is required.'),
   referralCode: z.string().optional(),
   googleMapsLink: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
   registrationNumber: z.string().min(1, 'Registration number is required.'),
@@ -43,7 +42,7 @@ export function LabProfileForm() {
       location: '',
       image: '',
       discount: 30,
-      whatsappNumber: '',
+      phoneNumber: '',
       referralCode: '',
       googleMapsLink: '',
       registrationNumber: '',
@@ -67,7 +66,10 @@ export function LabProfileForm() {
       const labData = allLabs.find((d: any) => d.id === u?.id);
       
       if (labData) {
-        form.reset(labData);
+        form.reset({
+            ...labData,
+            phoneNumber: labData.phoneNumber || labData.whatsappNumber, // Handle legacy data
+        });
       }
        if (u) {
         form.setValue('referralCode', u.referralCode);
@@ -107,6 +109,10 @@ export function LabProfileForm() {
     });
 
     sessionStorage.setItem(LABS_KEY, JSON.stringify(updatedLabs));
+    
+    const updatedUser = { ...user, fullName: data.name, phone: data.phoneNumber };
+    sessionStorage.setItem('user', JSON.stringify(updatedUser));
+
 
     toast({
       title: 'Profile Updated!',
@@ -201,9 +207,9 @@ export function LabProfileForm() {
                         <FormMessage />
                     </FormItem>
                 )} />
-                 <FormField control={form.control} name="whatsappNumber" render={({ field }) => (
+                 <FormField control={form.control} name="phoneNumber" render={({ field }) => (
                     <FormItem>
-                        <FormLabel>WhatsApp Number</FormLabel>
+                        <FormLabel>Contact Phone Number (WhatsApp)</FormLabel>
                         <FormControl>
                             <div className="relative">
                                  <Input type="tel" placeholder="e.g., 919876543210" {...field} className="pl-8"/>
@@ -288,5 +294,3 @@ export function LabProfileForm() {
     </Form>
   );
 }
-
-    

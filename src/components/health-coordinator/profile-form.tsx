@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect, ChangeEvent } from 'react';
@@ -11,11 +10,12 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import Image from 'next/image';
-import { Loader2, Upload, Copy, BadgeCheck, FileText, IdCard } from 'lucide-react';
+import { Loader2, Upload, Copy, BadgeCheck, FileText, IdCard, Phone } from 'lucide-react';
 import { isAadharNumberUnique } from '@/lib/auth';
 
 const profileSchema = z.object({
   fullName: z.string().min(1, 'Full name is required.'),
+  phone: z.string().min(10, 'A valid 10-digit phone number is required.'),
   referralCode: z.string().optional(),
   aadharNumber: z.string().min(12, 'Aadhar must be 12 digits.').max(12, 'Aadhar must be 12 digits.'),
   aadharFrontImage: z.string().min(1, 'Front image is required.'),
@@ -33,6 +33,7 @@ export function HealthCoordinatorProfileForm() {
     resolver: zodResolver(profileSchema),
     defaultValues: {
       fullName: '',
+      phone: '',
       referralCode: '',
       aadharNumber: '',
       aadharFrontImage: '',
@@ -49,6 +50,7 @@ export function HealthCoordinatorProfileForm() {
       if (u) {
         form.reset({
             fullName: u.fullName || '',
+            phone: u.phone || '',
             referralCode: u.referralCode || '',
             aadharNumber: u.aadharNumber || '',
             aadharFrontImage: u.aadharFrontImage || '',
@@ -145,6 +147,22 @@ export function HealthCoordinatorProfileForm() {
                     <FormLabel>Full Name</FormLabel>
                     <FormControl>
                         <Input placeholder="e.g., Rohan Sharma" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Phone Number</FormLabel>
+                    <FormControl>
+                         <div className="relative">
+                            <Input type="tel" placeholder="Enter your 10-digit mobile number" {...field} className="pl-8"/>
+                            <Phone className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        </div>
                     </FormControl>
                     <FormMessage />
                     </FormItem>

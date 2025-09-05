@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
-import { Loader2, Upload, Briefcase, MapPin } from 'lucide-react';
+import { Loader2, Upload, Briefcase, MapPin, Copy } from 'lucide-react';
 import { initialDoctors } from '@/lib/mock-data';
 
 const DOCTORS_KEY = 'doctorsData';
@@ -24,6 +24,7 @@ const profileSchema = z.object({
   image: z.string().min(1, 'A profile picture is required.'),
   experience: z.coerce.number().min(0, 'Experience must be a positive number.'),
   googleMapsLink: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
+  referralCode: z.string().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -31,7 +32,7 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 export function ProfileForm() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [user, setUser] = useState<any | null>(null);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -43,6 +44,7 @@ export function ProfileForm() {
       image: '',
       experience: 0,
       googleMapsLink: '',
+      referralCode: '',
     },
   });
 
@@ -50,7 +52,7 @@ export function ProfileForm() {
     if (typeof window !== 'undefined') {
       const storedUser = sessionStorage.getItem('user');
       const u = storedUser ? JSON.parse(storedUser) : null;
-      setUserId(u?.id || '1'); // Fallback to '1' for demo if no user
+      setUser(u);
 
       const storedDoctors = sessionStorage.getItem(DOCTORS_KEY);
       const allDoctors = storedDoctors ? JSON.parse(storedDoctors) : initialDoctors;
@@ -59,7 +61,7 @@ export function ProfileForm() {
         sessionStorage.setItem(DOCTORS_KEY, JSON.stringify(initialDoctors));
       }
 
-      const doctorData = allDoctors.find((d: any) => d.id === (u?.id || '1'));
+      const doctorData = allDoctors.find((d: any) => d.id === (u?.id));
       
       if (doctorData) {
         form.reset(doctorData);
@@ -79,15 +81,25 @@ export function ProfileForm() {
       reader.readAsDataURL(file);
     }
   };
+  
+  const copyToClipboard = () => {
+    const referralCode = form.getValues('referralCode');
+    if(!referralCode) return;
+    navigator.clipboard.writeText(referralCode);
+    toast({
+        title: "Copied to Clipboard!",
+        description: "Your referral code has been copied."
+    })
+  }
 
   const onSubmit = (data: ProfileFormValues) => {
-    if (!userId) return;
+    if (!user?.id) return;
 
     const storedDoctors = sessionStorage.getItem(DOCTORS_KEY);
     const allDoctors = storedDoctors ? JSON.parse(storedDoctors) : initialDoctors;
 
     const updatedDoctors = allDoctors.map((d: any) => {
-        if (d.id === userId) {
+        if (d.id === user.id) {
             return { ...d, ...data };
         }
         return d;
@@ -148,6 +160,25 @@ export function ProfileForm() {
                 )} />
             </div>
             
+            <FormField
+                control={form.control}
+                name="referralCode"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Your Referral Code</FormLabel>
+                     <div className="flex items-center gap-2">
+                        <FormControl>
+                            <Input readOnly {...field} />
+                        </FormControl>
+                            <Button type="button" variant="outline" size="icon" onClick={copyToClipboard}>
+                            <Copy className="h-4 w-4" />
+                        </Button>
+                    </div>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
+
             <FormField
                 control={form.control}
                 name="name"

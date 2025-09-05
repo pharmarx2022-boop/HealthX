@@ -114,8 +114,8 @@ export function PatientList() {
         const patient = patients.find(p => p.id === patientId);
         if(patient && doctor) {
             addNotification(patient.id, {
-                title: 'Appointment Canceled',
-                message: `Your appointment at ${patient.clinic} on ${format(new Date(patient.appointmentDate), 'PP')} has been canceled by ${doctor.name}.`,
+                title: 'Appointment Canceled & Refunded',
+                message: `Your appointment at ${patient.clinic} on ${format(new Date(patient.appointmentDate), 'PP')} was canceled by ${doctor.name}. A full refund of INR ${patient.consultationFee.toFixed(2)} has been issued.`,
                 icon: 'calendar',
                 href: '/patient/my-health'
             });
@@ -127,7 +127,7 @@ export function PatientList() {
     sessionStorage.setItem('mockPatients', JSON.stringify(updatedPatients));
     toast({
         title: "Appointments Canceled",
-        description: `${selectedRows.size} appointment(s) have been successfully canceled.`
+        description: `${selectedRows.size} appointment(s) have been canceled. Patients have been notified and refunded.`
     })
     setSelectedRows(new Set());
   }
@@ -297,7 +297,7 @@ export function PatientList() {
                                 <AlertDialogHeader>
                                     <AlertDialogTitle>Cancel Appointments?</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                        Are you sure you want to cancel the selected {numSelected} appointments? This action cannot be undone.
+                                        This action cannot be undone. This will cancel {numSelected} appointment(s) and issue a full refund to each patient's original payment method.
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
@@ -370,3 +370,5 @@ export function PatientList() {
     </div>
   )
 }
+
+    

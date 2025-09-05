@@ -21,7 +21,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import dynamic from 'next/dynamic';
 import { addNotification, sendRedemptionOtpNotification } from '@/lib/notifications';
 import { checkPartnerMilestone } from '@/lib/referrals';
-import { NearbySearch } from '@/components/booking/nearby-search';
+import Link from 'next/link';
 
 const AnalyticsDashboard = dynamic(() => import('@/components/pharmacy/analytics-dashboard').then(mod => mod.AnalyticsDashboard), {
     ssr: false,
@@ -319,7 +319,11 @@ export default function PharmacyDashboardPage() {
                             </div>
                         </CardHeader>
                         <CardContent>
-                             <NearbySearch allowedServices={['doctor']} />
+                            <Button asChild className="w-full">
+                                <Link href="/book-doctor-appointment">
+                                    Book Appointment
+                                </Link>
+                             </Button>
                         </CardContent>
                     </Card>
                  </div>

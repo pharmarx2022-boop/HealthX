@@ -1,15 +1,17 @@
 
+
 'use client';
 
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import Image from 'next/image';
-import { Target, Eye, Users } from 'lucide-react';
+import { Target, Eye, Users, Linkedin, Twitter, Instagram } from 'lucide-react';
 import { FloatingWhatsApp } from '@/components/layout/floating-whatsapp';
 import { useEffect, useState } from 'react';
 import { getTeamMembers, type TeamMember } from '@/lib/team-members';
 import { Skeleton } from '@/components/ui/skeleton';
+import Link from 'next/link';
 
 export default function AboutUsPage() {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
@@ -73,8 +75,8 @@ export default function AboutUsPage() {
                 ))
               ) : (
                 teamMembers.map((member) => (
-                  <Card key={member.name} className="text-center hover:shadow-xl transition-shadow">
-                    <CardContent className="p-6">
+                  <Card key={member.name} className="text-center hover:shadow-xl transition-shadow flex flex-col">
+                    <CardContent className="p-6 flex-grow">
                       <div className="w-32 h-32 rounded-full mx-auto overflow-hidden border-4 border-primary/20 mb-4 relative">
                           <Image src={member.image} alt={member.name} fill className="object-cover" data-ai-hint={member.dataAiHint} />
                       </div>
@@ -82,6 +84,15 @@ export default function AboutUsPage() {
                       <p className="text-primary font-medium">{member.title}</p>
                       <p className="text-muted-foreground mt-2 text-sm">{member.bio}</p>
                     </CardContent>
+                    {(member.linkedin || member.twitter || member.instagram) && (
+                         <CardFooter className="p-4 border-t bg-slate-50/70 justify-center">
+                            <div className="flex gap-4">
+                                {member.linkedin && <Link href={member.linkedin} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary"><Linkedin/></Link>}
+                                {member.twitter && <Link href={member.twitter} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary"><Twitter/></Link>}
+                                {member.instagram && <Link href={member.instagram} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary"><Instagram/></Link>}
+                            </div>
+                        </CardFooter>
+                    )}
                   </Card>
                 ))
               )}

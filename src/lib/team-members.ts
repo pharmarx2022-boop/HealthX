@@ -1,4 +1,5 @@
 
+
 'use client';
 
 const TEAM_MEMBERS_KEY = 'teamMembers';
@@ -10,6 +11,9 @@ export type TeamMember = {
     image: string;
     dataAiHint: string;
     bio: string;
+    linkedin?: string;
+    twitter?: string;
+    instagram?: string;
 }
 
 const initialTeamMembers: TeamMember[] = [
@@ -20,6 +24,9 @@ const initialTeamMembers: TeamMember[] = [
     image: 'https://picsum.photos/400/400',
     dataAiHint: 'ceo portrait',
     bio: 'A visionary leader with a passion for leveraging technology to improve healthcare access for all.',
+    linkedin: '#',
+    twitter: '#',
+    instagram: '#'
   },
   {
     id: 'team_2',
@@ -28,6 +35,9 @@ const initialTeamMembers: TeamMember[] = [
     image: 'https://picsum.photos/401/401',
     dataAiHint: 'cto portrait',
     bio: 'The architect of our platform, ensuring a seamless and secure experience for all users.',
+    linkedin: '#',
+    twitter: '#',
+    instagram: '#'
   },
   {
     id: 'team_3',
@@ -36,6 +46,9 @@ const initialTeamMembers: TeamMember[] = [
     image: 'https://picsum.photos/402/402',
     dataAiHint: 'manager portrait',
     bio: 'Dedicated to making sure every patient feels heard, supported, and cared for.',
+    linkedin: '#',
+    twitter: '#',
+    instagram: '#'
   },
 ];
 

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, ChangeEvent } from 'react';
@@ -15,7 +16,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { PlusCircle, Edit, Trash2, Upload, Loader2 } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, Upload, Loader2, Link as LinkIcon } from 'lucide-react';
 
 const memberSchema = z.object({
   id: z.string().optional(),
@@ -24,6 +25,9 @@ const memberSchema = z.object({
   bio: z.string().min(1, 'Bio is required.'),
   image: z.string().min(1, 'An image is required.'),
   dataAiHint: z.string().optional(),
+  linkedin: z.string().url().optional().or(z.literal('')),
+  twitter: z.string().url().optional().or(z.literal('')),
+  instagram: z.string().url().optional().or(z.literal('')),
 });
 
 type TeamMemberFormValues = z.infer<typeof memberSchema>;
@@ -42,6 +46,9 @@ export default function TeamManagementPage() {
       bio: '',
       image: '',
       dataAiHint: 'portrait',
+      linkedin: '',
+      twitter: '',
+      instagram: ''
     },
   });
 
@@ -59,7 +66,10 @@ export default function TeamManagementPage() {
             title: '',
             bio: '',
             image: '',
-            dataAiHint: 'portrait'
+            dataAiHint: 'portrait',
+            linkedin: '',
+            twitter: '',
+            instagram: ''
           });
       }
   }, [editingMember, form]);
@@ -119,12 +129,12 @@ export default function TeamManagementPage() {
                     <PlusCircle className="mr-2" /> Add Member
                 </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="sm:max-w-[600px]">
                  <DialogHeader>
                     <DialogTitle>{editingMember ? 'Edit Team Member' : 'Add New Team Member'}</DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
+                    <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4 max-h-[70vh] overflow-y-auto pr-4">
                         <FormField control={form.control} name="image" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Photo</FormLabel>
@@ -163,7 +173,17 @@ export default function TeamManagementPage() {
                         <FormField control={form.control} name="bio" render={({ field }) => (
                             <FormItem><FormLabel>Bio</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
-                         <DialogFooter>
+                        <h4 className="font-medium text-sm pt-2">Social Links (Optional)</h4>
+                        <FormField control={form.control} name="linkedin" render={({ field }) => (
+                            <FormItem><FormLabel>LinkedIn URL</FormLabel><FormControl><Input type="url" placeholder="https://linkedin.com/in/..." {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                         <FormField control={form.control} name="twitter" render={({ field }) => (
+                            <FormItem><FormLabel>X (Twitter) URL</FormLabel><FormControl><Input type="url" placeholder="https://x.com/..." {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                         <FormField control={form.control} name="instagram" render={({ field }) => (
+                            <FormItem><FormLabel>Instagram URL</FormLabel><FormControl><Input type="url" placeholder="https://instagram.com/..." {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                         <DialogFooter className="sticky bottom-0 bg-background pt-4">
                             <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
                             <Button type="submit" disabled={form.formState.isSubmitting}>
                                 {form.formState.isSubmitting && <Loader2 className="animate-spin mr-2"/>}

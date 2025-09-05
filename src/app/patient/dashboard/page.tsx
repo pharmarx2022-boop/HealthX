@@ -19,6 +19,7 @@ import { FamilyManager } from '@/components/patient/family-manager';
 import { MyReports } from '@/components/patient/my-reports';
 import { getTransactionHistory, type Transaction } from '@/lib/transactions';
 import { getNotifications } from '@/lib/notifications';
+import { BottomNavBar } from '@/components/layout/bottom-nav-bar';
 
 const DOCTORS_KEY = 'doctorsData';
 const PATIENTS_KEY = 'mockPatients';
@@ -178,7 +179,7 @@ export default function PatientDashboardPage() {
     return (
         <div className="flex flex-col min-h-screen">
             <Header />
-            <main className="flex-1 bg-slate-50/50">
+            <main className="flex-1 bg-slate-50/50 pb-20 md:pb-0">
                 <div className="container mx-auto py-12">
                     <div className="mb-8">
                         <h1 className="text-3xl font-headline font-bold">Patient Dashboard</h1>
@@ -313,6 +314,7 @@ export default function PatientDashboardPage() {
                 </div>
             </main>
             <Footer />
+            <BottomNavBar />
 
             {/* Review Dialog */}
             <Dialog open={isReviewOpen} onOpenChange={setIsReviewOpen}>

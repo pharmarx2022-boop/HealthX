@@ -19,7 +19,7 @@ import { mockPatientData } from '@/lib/mock-data';
 import { useToast } from '@/hooks/use-toast';
 import { MOCK_OTP } from '@/lib/auth';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
-import { Card } from '../ui/card';
+import { Card, CardFooter } from '../ui/card';
 import { addNotification, sendBookingOtpNotification } from '@/lib/notifications';
 import { mockPatients } from '@/components/doctor/patient-list';
 
@@ -56,8 +56,6 @@ interface BookingDialogProps {
     onConfirm: (patientId: string, clinicId: string, date: Date, time: string) => void;
 }
 
-type BookingStep = 'details' | 'payment';
-
 const calculateAge = (dob: string | Date) => {
     const dobDate = typeof dob === 'string' ? new Date(dob) : dob;
     const today = new Date();
@@ -73,9 +71,8 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
     const { toast } = useToast();
     const [userRole, setUserRole] = useState<string | null>(null);
     const [user, setUser] = useState<any | null>(null);
-    const [step, setStep] = useState<BookingStep>('details');
 
-    // Common state
+    // Form state
     const [selectedClinicId, setSelectedClinicId] = useState<string | undefined>();
     const [selectedDate, setSelectedDate] = useState<Date | undefined>();
     const [selectedTime, setSelectedTime] = useState('');
@@ -101,14 +98,13 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                     setSelectedPatientId(u.id);
                 }
             } else {
-                 setUserRole('patient');
+                 setUserRole('patient'); // Default to patient flow if not logged in
             }
         }
         
         if (isOpen) {
             // Reset all state when dialog opens
-            setStep('details');
-            setSelectedClinicId(undefined);
+            setSelectedClinicId(clinics.length === 1 ? clinics[0].id : undefined);
             setSelectedDate(undefined);
             setSelectedTime('');
             setSelectedPatientId(user?.role === 'patient' ? user.id : 'self');
@@ -118,7 +114,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
             setOtpSent(false);
             setOtp('');
         }
-    }, [isOpen, user?.id, user?.role]);
+    }, [isOpen, user?.id, user?.role, clinics]);
 
     const selectedClinic = useMemo(() => {
         return clinics.find(c => c.id === selectedClinicId);
@@ -133,7 +129,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
         if (!selectedDate || !selectedClinic || !selectedClinic.patientLimit) {
             return false;
         }
-        const allAppointments = JSON.parse(sessionStorage.getItem('mockPatients') || JSON.stringify(mockPatients));
+        const allAppointments = JSON.parse(sessionStorage.getItem('mockPatients') || '[]');
         const appointmentsOnDate = allAppointments.filter((appt: any) => 
             appt.clinicId === selectedClinic.id && 
             format(new Date(appt.appointmentDate), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')
@@ -141,31 +137,27 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
         return appointmentsOnDate.length >= selectedClinic.patientLimit;
     }, [selectedDate, selectedClinic]);
 
-    const handleProceedToPayment = () => {
+    const handleConfirmBooking = () => {
         const patientId = userRole === 'health-coordinator' ? foundPatient?.id : selectedPatientId;
-        if (patientId && selectedClinicId && selectedDate && selectedTime) {
-            if (userRole === 'health-coordinator') {
-                if (otp !== MOCK_OTP) {
-                    toast({ title: "Invalid OTP", description: "The OTP entered is incorrect.", variant: "destructive" });
-                    return;
-                }
-            }
-            if (isDateFull) {
-                toast({ title: "Booking Limit Reached", description: "This day is fully booked. Please select another date.", variant: "destructive" });
+        if (!patientId || !selectedClinicId || !selectedDate || !selectedTime) {
+             toast({ title: "Incomplete Details", description: "Please fill all the booking details before proceeding.", variant: "destructive" });
+             return;
+        }
+         if (isDateFull) {
+            toast({ title: "Booking Limit Reached", description: "This day is fully booked. Please select another date.", variant: "destructive" });
+            return;
+        }
+
+        if (userRole === 'health-coordinator') {
+            if (otp !== MOCK_OTP) {
+                toast({ title: "Invalid OTP", description: "The OTP entered is incorrect.", variant: "destructive" });
                 return;
             }
-            setStep('payment');
-        } else {
-             toast({ title: "Incomplete Details", description: "Please fill all the booking details before proceeding.", variant: "destructive" });
         }
-    };
-    
-    const handleConfirmPayment = () => {
-         const patientId = userRole === 'health-coordinator' ? foundPatient.id : selectedPatientId;
-         if (patientId && selectedClinicId && selectedDate && selectedTime) {
-            addNotification(patientId, `Your appointment with ${doctor.name} at ${selectedClinic?.name} for ${format(selectedDate, 'PPP')} has been confirmed.`);
-            onConfirm(patientId, selectedClinicId, selectedDate, selectedTime);
-         }
+
+        // Simulate payment and confirm
+        addNotification(patientId, `Your appointment with ${doctor.name} at ${selectedClinic?.name} for ${format(selectedDate, 'PPP')} has been confirmed.`);
+        onConfirm(patientId, selectedClinicId, selectedDate, selectedTime);
     }
     
     const isDateDisabled = (date: Date) => {
@@ -205,22 +197,24 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
 
     const renderPatientSelector = () => (
         <div>
-            <Label className="font-semibold">Step 1: Who is this appointment for?</Label>
+            <Label className="font-semibold">Who is this appointment for?</Label>
             <RadioGroup 
                 value={selectedPatientId} 
                 onValueChange={setSelectedPatientId}
                 className="mt-2 space-y-2"
             >
-                <div className="flex items-center space-x-2">
-                    <RadioGroupItem value={user.id} id={user.id} />
-                    <Label htmlFor={user.id} className="flex items-center gap-2 font-normal">
-                        <Avatar className="h-8 w-8">
-                            <AvatarImage src={`https://i.pravatar.cc/150?u=${user.id}`} alt={user.fullName} />
-                            <AvatarFallback>{user.fullName.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <span>{user.fullName} (Myself)</span>
-                    </Label>
-                </div>
+                {user && (
+                    <div className="flex items-center space-x-2">
+                        <RadioGroupItem value={user.id} id={user.id} />
+                        <Label htmlFor={user.id} className="flex items-center gap-2 font-normal">
+                            <Avatar className="h-8 w-8">
+                                <AvatarImage src={`https://i.pravatar.cc/150?u=${user.id}`} alt={user.fullName} />
+                                <AvatarFallback>{user.fullName.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <span>{user.fullName} (Myself)</span>
+                        </Label>
+                    </div>
+                )}
                 {familyMembers.map(member => (
                     <div key={member.id} className="flex items-center space-x-2">
                         <RadioGroupItem value={member.id} id={member.id} />
@@ -239,7 +233,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
 
     const renderHealthCoordinatorPatientFinder = () => (
         <div>
-            <Label className="font-semibold">Step 1: Find Patient</Label>
+            <Label className="font-semibold">Find Patient</Label>
             {foundPatient ? (
                 <div className="mt-2 p-3 bg-slate-50 border rounded-md flex justify-between items-center">
                     <div className="flex items-center gap-3">
@@ -263,149 +257,105 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
             )}
         </div>
     );
-    
-    const renderDetailsStep = () => (
-        <>
-            <DialogHeader>
-                <DialogTitle>Book Appointment with {doctor.name}</DialogTitle>
-                <DialogDescription>
-                    Complete the steps below to confirm your booking.
-                </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-6 py-4 pr-2 max-h-[60vh] overflow-y-auto">
-                {userRole === 'health-coordinator' ? renderHealthCoordinatorPatientFinder() : renderPatientSelector()}
-
-                <div className={cn(!foundPatient && userRole === 'health-coordinator' && "opacity-50 pointer-events-none")}>
-                    <Label htmlFor="clinic" className="font-semibold">Step 2: Select a Clinic</Label>
-                    <Select value={selectedClinicId} onValueChange={setSelectedClinicId}>
-                        <SelectTrigger id="clinic" className="mt-2">
-                            <SelectValue placeholder="Choose a clinic location" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {clinics.length > 0 ? clinics.map(clinic => (
-                                <SelectItem key={clinic.id} value={clinic.id}>{clinic.name}</SelectItem>
-                            )) : <SelectItem value="none" disabled>No clinics available</SelectItem>}
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                {selectedClinic && (
-                     <Alert variant="default" className="bg-primary/10 border-primary/20 text-primary">
-                        <span className="font-bold">INR</span>
-                        <AlertTitle className="font-bold">Consultation Fee: INR {selectedClinic.consultationFee.toFixed(2)}</AlertTitle>
-                        <AlertDescription>
-                            This fee is applicable for {selectedClinic.name}.
-                        </AlertDescription>
-                    </Alert>
-                )}
-
-
-                <div>
-                    <Label htmlFor="date" className="font-semibold">Step 3: Select a Date</Label>
-                     <Popover>
-                        <PopoverTrigger asChild>
-                            <Button
-                                id="date"
-                                variant={"outline"}
-                                className={cn(
-                                    "w-full justify-start text-left font-normal mt-2",
-                                    !selectedDate && "text-muted-foreground"
-                                )}
-                                disabled={!selectedClinicId || (!foundPatient && userRole === 'health-coordinator')}
-                            >
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                            <Calendar
-                                mode="single"
-                                selected={selectedDate}
-                                onSelect={setSelectedDate}
-                                disabled={isDateDisabled}
-                                initialFocus
-                                footer={isDateFull ? <p className="text-center text-sm text-destructive p-2">This date is fully booked.</p> : null}
-                            />
-                        </PopoverContent>
-                    </Popover>
-                </div>
-
-                <div>
-                    <Label htmlFor="time-slot" className="font-semibold">Step 4: Select a Time Slot</Label>
-                     <Select value={selectedTime} onValueChange={setSelectedTime} disabled={!selectedDate || isDateFull}>
-                        <SelectTrigger id="time-slot" className="mt-2">
-                            <SelectValue placeholder="Choose an available time" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {availableTimeSlots.map(time => (
-                                <SelectItem key={time} value={time}>{time}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-                
-                {userRole === 'health-coordinator' && selectedTime && (
-                     <div>
-                        <Label className="font-semibold">Step 5: Verify with Patient</Label>
-                        {!otpSent ? (
-                            <Button className="w-full mt-2" onClick={handleSendOtp}>Send OTP to Patient</Button>
-                        ) : (
-                            <div className="mt-2">
-                                <Input 
-                                    placeholder="Enter 6-digit OTP from patient"
-                                    value={otp}
-                                    onChange={(e) => setOtp(e.target.value)}
-                                    maxLength={6}
-                                />
-                            </div>
-                        )}
-                    </div>
-                )}
-            </div>
-            <DialogFooter>
-                <DialogClose asChild>
-                    <Button variant="outline">Cancel</Button>
-                </DialogClose>
-                <Button onClick={handleProceedToPayment}>Proceed to Payment</Button>
-            </DialogFooter>
-        </>
-    );
-    
-    const renderPaymentStep = () => (
-         <>
-            <DialogHeader>
-                <DialogTitle>Complete Your Payment</DialogTitle>
-                <DialogDescription>
-                   To confirm your booking with {doctor.name}, please complete the UPI payment.
-                </DialogDescription>
-            </DialogHeader>
-             <div className="py-4">
-                 <Card className="p-6 text-center bg-slate-50/50">
-                    <p className="text-muted-foreground">Total Amount Payable</p>
-                    <p className="text-4xl font-bold mt-2">INR {selectedClinic?.consultationFee.toFixed(2)}</p>
-                 </Card>
-
-                <div className="mt-6 space-y-4">
-                    <p className="text-sm font-medium text-center">Scan the QR or use the button below</p>
-                     <div className="flex justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-qr-code"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h.01"/><path d="M21 12v.01"/><path d="M12 21v-1a2 2 0 0 0-2-2h-1"/><path d="M7 12h3a2 2 0 0 0 2-2V7"/></svg>
-                    </div>
-
-                    <Button className="w-full h-12" onClick={handleConfirmPayment}>
-                        <CreditCard className="mr-2"/> Pay via UPI
-                    </Button>
-                </div>
-             </div>
-            <DialogFooter>
-                 <Button variant="outline" onClick={() => setStep('details')}>Go Back</Button>
-            </DialogFooter>
-        </>
-    );
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[480px]">
-                {step === 'details' ? renderDetailsStep() : renderPaymentStep()}
+                <DialogHeader>
+                    <DialogTitle>Book Appointment with {doctor.name}</DialogTitle>
+                    <DialogDescription>
+                        Confirm the details below to book your slot.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-6 py-4 pr-2 max-h-[60vh] overflow-y-auto">
+                    {userRole === 'health-coordinator' ? renderHealthCoordinatorPatientFinder() : renderPatientSelector()}
+
+                    <div className={cn(!foundPatient && userRole === 'health-coordinator' && "opacity-50 pointer-events-none")}>
+                        <Label htmlFor="clinic" className="font-semibold">Clinic</Label>
+                        <Select value={selectedClinicId} onValueChange={setSelectedClinicId}>
+                            <SelectTrigger id="clinic" className="mt-2">
+                                <SelectValue placeholder="Choose a clinic location" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {clinics.length > 0 ? clinics.map(clinic => (
+                                    <SelectItem key={clinic.id} value={clinic.id}>{clinic.name}</SelectItem>
+                                )) : <SelectItem value="none" disabled>No clinics available</SelectItem>}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div>
+                        <Label htmlFor="date" className="font-semibold">Date</Label>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    id="date"
+                                    variant={"outline"}
+                                    className={cn(
+                                        "w-full justify-start text-left font-normal mt-2",
+                                        !selectedDate && "text-muted-foreground"
+                                    )}
+                                    disabled={!selectedClinicId || (!foundPatient && userRole === 'health-coordinator')}
+                                >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0">
+                                <Calendar
+                                    mode="single"
+                                    selected={selectedDate}
+                                    onSelect={setSelectedDate}
+                                    disabled={isDateDisabled}
+                                    initialFocus
+                                    footer={isDateFull ? <p className="text-center text-sm text-destructive p-2">This date is fully booked.</p> : null}
+                                />
+                            </PopoverContent>
+                        </Popover>
+                    </div>
+
+                    <div>
+                        <Label htmlFor="time-slot" className="font-semibold">Time Slot</Label>
+                        <Select value={selectedTime} onValueChange={setSelectedTime} disabled={!selectedDate || isDateFull}>
+                            <SelectTrigger id="time-slot" className="mt-2">
+                                <SelectValue placeholder="Choose an available time" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {availableTimeSlots.map(time => (
+                                    <SelectItem key={time} value={time}>{time}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    
+                    {userRole === 'health-coordinator' && foundPatient && (
+                        <div>
+                            <Label className="font-semibold">Verify with Patient</Label>
+                            {!otpSent ? (
+                                <Button className="w-full mt-2" onClick={handleSendOtp}>Send OTP to Patient</Button>
+                            ) : (
+                                <div className="mt-2">
+                                    <Input 
+                                        placeholder="Enter 6-digit OTP from patient"
+                                        value={otp}
+                                        onChange={(e) => setOtp(e.target.value)}
+                                        maxLength={6}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+                <CardFooter className="flex-col gap-4 !p-0 !pt-4 border-t">
+                    <div className="w-full flex justify-between items-center px-1">
+                        <p className="text-muted-foreground">Total Payable:</p>
+                        <p className="text-xl font-bold">INR {selectedClinic?.consultationFee.toFixed(2) ?? '0.00'}</p>
+                    </div>
+                    <Button className="w-full h-12" onClick={handleConfirmBooking}>
+                        <CreditCard className="mr-2"/> Pay & Confirm Booking
+                    </Button>
+                    <p className="text-xs text-muted-foreground text-center px-4">Your payment is secured and will be refunded as Health Points after the consultation is marked complete by the doctor.</p>
+                </CardFooter>
             </DialogContent>
         </Dialog>
     );

@@ -17,6 +17,7 @@ import { Separator } from '../ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Slider } from '../ui/slider';
 import { Label } from '../ui/label';
+import { BottomNavBar } from '../layout/bottom-nav-bar';
 
 const BookingDialog = dynamic(() => import('./booking-dialog').then(mod => mod.BookingDialog), {
     ssr: false
@@ -37,7 +38,7 @@ const PATIENTS_KEY = 'mockPatients';
 
 export function NearbySearch() {
   const [location, setLocation] = useState<{lat: number, lon: number} | null>(null);
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isClient, setIsClient] = useState(false);
@@ -85,13 +86,7 @@ export function NearbySearch() {
         setFamilyMembers(mockFamilyMembers);
       }
       
-      if (navigator.permissions) {
-        navigator.permissions.query({ name: 'geolocation' }).then((permissionStatus) => {
-          if (permissionStatus.state === 'granted') {
-            handleLocationRequest();
-          }
-        });
-      }
+      handleLocationRequest();
     }
   }, []);
 
@@ -205,6 +200,7 @@ export function NearbySearch() {
         id: `appt_${Date.now()}`,
         name: patientName,
         clinic: clinic.name,
+        clinicId: clinic.id,
         doctorId: selectedDoctor.id,
         healthCoordinatorId: user?.role === 'health-coordinator' ? user.id : null,
         appointmentDate: new Date(date.getFullYear(), date.getMonth(), date.getDate(), parseInt(time.split(':')[0]), parseInt(time.split(':')[1].split(' ')[0])).toISOString(),
@@ -243,14 +239,6 @@ export function NearbySearch() {
 
   const renderContent = () => {
     switch(status) {
-        case 'idle':
-            return (
-                <div className="text-center py-12">
-                    <Button size="lg" onClick={handleLocationRequest}>
-                        <MapPin className="mr-2" /> Find Services Near Me
-                    </Button>
-                </div>
-            )
         case 'loading':
             return (
                 <div className="text-center text-muted-foreground py-12">

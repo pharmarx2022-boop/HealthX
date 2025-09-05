@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { Toaster } from "@/components/ui/toaster";
 import './globals.css';
 import { FloatingWhatsApp } from '@/components/layout/floating-whatsapp';
+import { BottomNavBar } from '@/components/layout/bottom-nav-bar';
 
 const fontSans = PT_Sans({
   subsets: ['latin'],

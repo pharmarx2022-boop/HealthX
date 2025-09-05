@@ -303,7 +303,7 @@ export function NearbySearch() {
                             </div>
                              <div className="space-y-2">
                                 <Label htmlFor="distance">Distance: {distance} km</Label>
-                                <Slider id="distance" value={[distance]} onValueChange={(val) => setDistance(val[0])} max={25} step={1}/>
+                                <Slider id="distance" value={[distance]} onValueChange={(val) => setDistance(val[0])} max={500} step={1}/>
                             </div>
                         </CardContent>
                     </Card>

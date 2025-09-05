@@ -12,6 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import Image from 'next/image';
 import { Loader2, Upload, Copy, BadgeCheck, FileText, IdCard } from 'lucide-react';
+import { isAadharNumberUnique } from '@/lib/auth';
 
 const profileSchema = z.object({
   fullName: z.string().min(1, 'Full name is required.'),
@@ -82,6 +83,11 @@ export function HealthCoordinatorProfileForm() {
 
   const onSubmit = (data: ProfileFormValues) => {
     if (!user?.id) return;
+
+    if (!isAadharNumberUnique(data.aadharNumber, user.id)) {
+        form.setError('aadharNumber', { type: 'manual', message: 'This Aadhar number is already in use.' });
+        return;
+    }
     
     // In a real app, you'd save this to a database. Here we update sessionStorage.
     const updatedUser = { ...user, ...data };

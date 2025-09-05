@@ -178,6 +178,14 @@ export function updateUserStatus(userId: string, role: string, newStatus: 'appro
             const userIndex = users.findIndex(u => u.id === userId);
             if(userIndex > -1) {
                 users[userIndex].status = newStatus;
+                 const storedUser = sessionStorage.getItem('user');
+                if (storedUser) {
+                    const u = JSON.parse(storedUser);
+                    if (u.id === userId) {
+                        u.status = newStatus;
+                        sessionStorage.setItem('user', JSON.stringify(u));
+                    }
+                }
             }
             return;
      }
@@ -205,6 +213,14 @@ export function isRegistrationNumberUnique(role: 'doctor' | 'lab' | 'pharmacy', 
     const allPartners = JSON.parse(sessionStorage.getItem(key) || '[]');
     const existingPartner = allPartners.find((p: any) => p.registrationNumber === regNumber && p.id !== currentUserId);
     return !existingPartner;
+}
+
+export function isAadharNumberUnique(aadharNumber: string, currentUserId: string): boolean {
+    // For this mock setup, we only check the `users` array which contains health coordinators and patients.
+    const existingUser = users.find(
+        (u: any) => u.role === 'health-coordinator' && u.aadharNumber === aadharNumber && u.id !== currentUserId
+    );
+    return !existingUser;
 }
 
 

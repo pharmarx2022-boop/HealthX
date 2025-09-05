@@ -1,14 +1,15 @@
 
+
 'use client';
 
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Stethoscope, MapPin, Calendar, Star, Loader2, MessageSquare, UserPlus, Clock, Briefcase, Link as LinkIcon, CreditCard, Globe } from 'lucide-react';
+import { Stethoscope, MapPin, Calendar, Star, Loader2, MessageSquare, UserPlus, Clock, Briefcase, Link as LinkIcon, CreditCard, Globe, BadgeCheck } from 'lucide-react';
 import Image from 'next/image';
 import { notFound, useParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { initialDoctors, initialClinics, mockPatientData } from '@/lib/mock-data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
@@ -36,6 +37,7 @@ export default function DoctorDetailPage() {
   const [doctorClinics, setDoctorClinics] = useState<Clinic[]>([]);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [user, setUser] = useState<any | null>(null);
+  const [allAppointments, setAllAppointments] = useState(mockPatients);
   
   useEffect(() => {
     setIsClient(true);
@@ -61,10 +63,18 @@ export default function DoctorDetailPage() {
       const storedClinics = sessionStorage.getItem(CLINICS_KEY);
       const allClinics = storedClinics ? JSON.parse(storedClinics) : initialClinics;
       setDoctorClinics(allClinics.filter((c: Clinic) => c.doctorId === id));
+
+      const storedPatients = sessionStorage.getItem(PATIENTS_KEY);
+      setAllAppointments(storedPatients ? JSON.parse(storedPatients) : mockPatients);
     }
   }, [id]);
 
   const doctor = doctors.find(d => d.id === id);
+
+  const completedConsultations = useMemo(() => {
+      if (!doctor) return 0;
+      return allAppointments.filter(p => p.doctorId === doctor.id && p.status === 'done').length;
+  }, [doctor, allAppointments]);
   
   if (!isClient) {
     return (
@@ -117,6 +127,7 @@ export default function DoctorDetailPage() {
     const allPatients = JSON.parse(sessionStorage.getItem(PATIENTS_KEY) || '[]');
     const updatedPatients = [...allPatients, newAppointment];
     sessionStorage.setItem(PATIENTS_KEY, JSON.stringify(updatedPatients));
+    setAllAppointments(updatedPatients);
     
     const toastDescription = user?.role === 'health-coordinator' 
       ? `The appointment for ${patientName} at ${clinic.name} is booked. A receipt has been sent to the patient's email.`
@@ -155,8 +166,8 @@ export default function DoctorDetailPage() {
                                 </div>
                                 <Separator orientation="vertical" className="h-5" />
                                 <div className="flex items-center gap-2">
-                                    <MapPin className="w-5 h-5"/> 
-                                    <span>{doctor.location}</span>
+                                    <BadgeCheck className="w-5 h-5" />
+                                    <span>{completedConsultations} consultations completed</span>
                                 </div>
                                 {doctor.googleMapsLink && (
                                      <>

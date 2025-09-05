@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -160,7 +161,12 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
         }
 
         // Simulate payment and confirm
-        addNotification(patientId, `Your appointment with ${doctor.name} at ${selectedClinic?.name} for ${format(selectedDate, 'PPP')} has been confirmed.`);
+        addNotification(patientId, {
+            title: 'Appointment Confirmed!',
+            message: `Your booking with ${doctor.name} at ${selectedClinic?.name} for ${format(selectedDate, 'PPP')} is confirmed.`,
+            icon: 'calendar',
+            href: '/patient/my-health'
+        });
         onConfirm(patientId, selectedClinicId, selectedDate, selectedTime);
     }
     

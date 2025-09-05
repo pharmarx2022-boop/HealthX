@@ -113,7 +113,12 @@ export function PatientList() {
     selectedRows.forEach(patientId => {
         const patient = patients.find(p => p.id === patientId);
         if(patient && doctor) {
-             addNotification(patient.id, `Your appointment at ${patient.clinic} on ${format(new Date(patient.appointmentDate), 'PP')} has been canceled by ${doctor.name}.`);
+            addNotification(patient.id, {
+                title: 'Appointment Canceled',
+                message: `Your appointment at ${patient.clinic} on ${format(new Date(patient.appointmentDate), 'PP')} has been canceled by ${doctor.name}.`,
+                icon: 'calendar',
+                href: '/patient/my-health'
+            });
         }
     });
 
@@ -134,7 +139,12 @@ export function PatientList() {
     selectedRows.forEach(patientId => {
         const patient = patients.find(p => p.id === patientId);
          if(patient && doctor) {
-            addNotification(patient.id, `Your appointment at ${patient.clinic} on ${format(new Date(patient.appointmentDate), 'PP')} has been rescheduled by ${doctor.name}. Please check for new details.`);
+            addNotification(patient.id, {
+                title: 'Appointment Rescheduled',
+                message: `Your appointment at ${patient.clinic} on ${format(new Date(patient.appointmentDate), 'PP')} has been rescheduled. Please contact them for new details.`,
+                icon: 'calendar',
+                href: '/patient/my-health'
+            });
         }
     });
 

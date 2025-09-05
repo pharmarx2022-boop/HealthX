@@ -105,7 +105,12 @@ export default function LoginPage() {
         }
 
         // Add a welcome notification
-        addNotification(user.id, isNewUser ? 'Welcome to HealthLink Hub! Your account is ready.' : 'You have successfully logged in.');
+        addNotification(user.id, {
+            title: isNewUser ? 'Welcome to HealthLink Hub!' : 'Login Successful',
+            message: isNewUser ? 'Your account is ready. Complete your profile to get started.' : 'You have successfully logged in.',
+            icon: 'login',
+            href: isNewUser && user.role !== 'patient' ? `/${user.role}/profile` : `/${user.role}/dashboard`
+        });
         
         if (user.status === 'pending') {
              toast({
@@ -211,5 +216,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
-    

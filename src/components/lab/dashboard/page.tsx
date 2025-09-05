@@ -8,10 +8,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Pill, Search, User, History, BadgePercent, Banknote, Gift, Loader2, Briefcase } from 'lucide-react';
+import { Beaker, Search, User, History, BadgePercent, Banknote, Upload, Gift, Loader2, Briefcase } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useMemo, useEffect } from 'react';
-import { initialPharmacies, mockPatientData } from '@/lib/mock-data';
+import { initialLabs, mockPatientData, mockReports, type MockReport } from '@/lib/mock-data';
 import { getTransactionHistory, recordTransaction, type Transaction } from '@/lib/transactions';
 import { getCommissionWalletData, requestWithdrawal as requestCommissionWithdrawal, recordCommission, type CommissionTransaction } from '@/lib/commission-wallet';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
@@ -22,26 +22,31 @@ import { addNotification, sendRedemptionOtpNotification } from '@/lib/notificati
 import { checkPartnerMilestone } from '@/lib/referrals';
 import Link from 'next/link';
 
-const AnalyticsDashboard = dynamic(() => import('@/components/pharmacy/analytics-dashboard').then(mod => mod.AnalyticsDashboard), {
+const AnalyticsDashboard = dynamic(() => import('@/components/lab/analytics-dashboard').then(mod => mod.AnalyticsDashboard), {
     ssr: false,
     loading: () => <div className="flex items-center justify-center min-h-[400px]"><Loader2 className="animate-spin" /></div>,
 });
 
 
-const PHARMACIES_KEY = 'mockPharmacies';
+const LABS_KEY = 'mockLabs';
 const PATIENTS_KEY = 'mockPatientData';
+const REPORTS_KEY = 'mockReports';
 
-export default function PharmacyDashboardPage() {
+export default function LabDashboardPage() {
     const { toast } = useToast();
     const [user, setUser] = useState<any | null>(null);
     const [patientSearch, setPatientSearch] = useState('');
+    const [uploadPatientSearch, setUploadPatientSearch] = useState('');
     const [patient, setPatient] = useState<any | null>(null);
+    const [uploadPatient, setUploadPatient] = useState<any | null>(null);
     const [otp, setOtp] = useState('');
     const [otpSent, setOtpSent] = useState(false);
     const [totalBill, setTotalBill] = useState('');
     const [patientTransactionHistory, setPatientTransactionHistory] = useState<{ balance: number; transactions: Transaction[] }>({ balance: 0, transactions: [] });
     const [commissionWallet, setCommissionWallet] = useState<{ balance: number; transactions: CommissionTransaction[] }>({ balance: 0, transactions: [] });
-    const [pharmacyDetails, setPharmacyDetails] = useState<any>(null);
+    const [labDetails, setLabDetails] = useState<any | null>(null);
+    const [reportFile, setReportFile] = useState<File | null>(null);
+    const [reportName, setReportName] = useState('');
     const [isClient, setIsClient] = useState(false);
 
 
@@ -53,36 +58,46 @@ export default function PharmacyDashboardPage() {
                 const u = JSON.parse(storedUser);
                 setUser(u);
 
-                const storedPharmacies = sessionStorage.getItem(PHARMACIES_KEY);
-                const allPharmacies = storedPharmacies ? JSON.parse(storedPharmacies) : initialPharmacies;
-                const myDetails = allPharmacies.find((p: any) => p.id === u.id);
-                setPharmacyDetails(myDetails);
+                const storedLabs = sessionStorage.getItem(LABS_KEY);
+                const allLabs = storedLabs ? JSON.parse(storedLabs) : initialLabs;
+                const myDetails = allLabs.find((p: any) => p.id === u.id);
+                setLabDetails(myDetails);
                 setCommissionWallet(getCommissionWalletData(u.id));
             }
-             if (!sessionStorage.getItem(PATIENTS_KEY)) {
+             if (!sessionStorage.getItem(REPORTS_KEY)) {
+                sessionStorage.setItem(REPORTS_KEY, JSON.stringify(mockReports));
+            }
+            if (!sessionStorage.getItem(PATIENTS_KEY)) {
                 sessionStorage.setItem(PATIENTS_KEY, JSON.stringify(mockPatientData));
             }
         }
     }, []);
 
-    const handleSearchPatient = () => {
+    const handleSearchPatient = (searchTermValue: string, type: 'payment' | 'upload') => {
         const allPatients = JSON.parse(sessionStorage.getItem(PATIENTS_KEY) || '[]');
-        const searchTerm = patientSearch.toLowerCase();
-        const foundPatient = allPatients.find((p: any) => p.phone === searchTerm || p.email.toLowerCase() === searchTerm);
+        const searchTerm = searchTermValue.toLowerCase();
+        const foundPatient = allPatients.find((p: any) => p.phone === searchTerm || (p.email && p.email.toLowerCase() === searchTerm));
 
         if (foundPatient) {
-            setPatient(foundPatient);
-            setPatientTransactionHistory(getTransactionHistory(foundPatient.id));
-            setOtpSent(false);
-            setOtp('');
-            setTotalBill('');
+            if (type === 'payment') {
+                setPatient(foundPatient);
+                setPatientTransactionHistory(getTransactionHistory(foundPatient.id));
+                setOtpSent(false);
+                setOtp('');
+                setTotalBill('');
+            } else {
+                setUploadPatient(foundPatient);
+                setReportFile(null);
+                setReportName('');
+            }
         } else {
             toast({
                 title: "Patient Not Found",
                 description: "No patient found with that phone number or email.",
                 variant: "destructive"
             });
-            setPatient(null);
+            if (type === 'payment') setPatient(null);
+            if (type === 'upload') setUploadPatient(null);
         }
     };
     
@@ -97,13 +112,13 @@ export default function PharmacyDashboardPage() {
 
     const calculatedAmounts = useMemo(() => {
         const bill = parseFloat(totalBill);
-        if (!bill || isNaN(bill) || !pharmacyDetails) {
+        if (!bill || isNaN(bill) || !labDetails) {
             return { pointsToPay: 0, cashToPay: 0 };
         }
-        const pointsToPay = bill * (pharmacyDetails.discount / 100);
+        const pointsToPay = bill * (labDetails.discount / 100);
         const cashToPay = bill - pointsToPay;
         return { pointsToPay, cashToPay };
-    }, [totalBill, pharmacyDetails]);
+    }, [totalBill, labDetails]);
 
 
     const handleRedeem = () => {
@@ -127,7 +142,7 @@ export default function PharmacyDashboardPage() {
         }
 
         const { pointsToPay } = calculatedAmounts;
-        const commissionAmount = pointsToPay * 0.05; // Pharmacy gets 5%
+        const commissionAmount = pointsToPay * 0.05; // Partner gets 5%
 
         if (pointsToPay > patientTransactionHistory.balance) {
             toast({
@@ -142,21 +157,21 @@ export default function PharmacyDashboardPage() {
         recordTransaction(patient.id, {
             type: 'debit',
             amount: pointsToPay,
-            description: `Paid for bill at ${pharmacyDetails.name}`,
+            description: `Paid for bill at ${labDetails.name}`,
             date: new Date(),
-            partnerType: 'pharmacy',
-            partnerId: pharmacyDetails.id,
-            partnerName: pharmacyDetails.name,
+            partnerType: 'lab',
+            partnerId: labDetails.id,
+            partnerName: labDetails.name,
             reviewed: false
         });
         addNotification(patient.id, {
             title: 'Payment Successful',
-            message: `You redeemed INR ${pointsToPay.toFixed(2)} in Health Points at ${pharmacyDetails.name}.`,
+            message: `You redeemed INR ${pointsToPay.toFixed(2)} in Health Points at ${labDetails.name}.`,
             icon: 'wallet',
             href: '/patient/my-health'
         });
         
-        // Credit commission to pharmacy
+        // Credit commission to lab
         recordCommission(user.id, {
             type: 'credit',
             amount: commissionAmount,
@@ -166,8 +181,7 @@ export default function PharmacyDashboardPage() {
         });
         
         // Check for referral milestone
-        checkPartnerMilestone(user.id, 'pharmacy');
-
+        checkPartnerMilestone(user.id, 'lab');
 
         toast({
             title: "Payment Successful!",
@@ -182,9 +196,49 @@ export default function PharmacyDashboardPage() {
         setOtpSent(false);
         setOtp('');
         setTotalBill('');
+    };
+
+    const handleUploadReport = () => {
+        if (!reportFile || !reportName) {
+            toast({
+                title: "Upload Failed",
+                description: "Please select a file and enter a report name.",
+                variant: "destructive"
+            });
+            return;
+        }
+        
+        const allReports = JSON.parse(sessionStorage.getItem(REPORTS_KEY) || '[]');
+        const newReport: MockReport = {
+            id: `rep${Date.now()}`,
+            patientId: uploadPatient.id,
+            name: reportName,
+            lab: labDetails.name,
+            date: new Date().toISOString(),
+            file: 'mock.pdf' // In a real app, this would be a URL to the uploaded file
+        };
+        
+        const updatedReports = [...allReports, newReport];
+        sessionStorage.setItem(REPORTS_KEY, JSON.stringify(updatedReports));
+
+        addNotification(uploadPatient.id, {
+            title: 'New Report Available',
+            message: `Your report "${reportName}" from ${labDetails.name} is now available to view.`,
+            icon: 'file-text',
+            href: '/patient/my-health'
+        });
+        toast({
+            title: "Report Uploaded!",
+            description: `"${reportName}" has been uploaded for ${uploadPatient.name}.`
+        });
+
+        setUploadPatient(null);
+        setUploadPatientSearch('');
+        setReportFile(null);
+        setReportName('');
     }
 
-     const handleCommissionWithdrawal = () => {
+    const handleCommissionWithdrawal = () => {
         const withdrawalAmount = commissionWallet.balance;
          if (withdrawalAmount <= 0) {
             toast({
@@ -194,10 +248,9 @@ export default function PharmacyDashboardPage() {
             });
             return;
         }
-        requestCommissionWithdrawal(user.id, pharmacyDetails.name, withdrawalAmount);
+        requestCommissionWithdrawal(user.id, labDetails.name, withdrawalAmount);
         setCommissionWallet(getCommissionWalletData(user.id));
     }
-
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -205,19 +258,19 @@ export default function PharmacyDashboardPage() {
       <main className="flex-1 bg-slate-50/50">
         <div className="container mx-auto py-12">
             <div className="mb-8">
-                <h1 className="text-3xl font-headline font-bold">Pharmacy Dashboard</h1>
-                <p className="text-muted-foreground">Manage inventory and process patient payments.</p>
+                <h1 className="text-3xl font-headline font-bold">Lab Dashboard</h1>
+                <p className="text-muted-foreground">Manage lab tests and process patient payments.</p>
             </div>
 
             <AnalyticsDashboard />
             
             <div className="grid lg:grid-cols-3 gap-8 items-start mt-8">
-                 <div className="lg:col-span-2 space-y-8">
-                    <Card className="shadow-sm">
+                <div className="lg:col-span-2 grid gap-8">
+                     <Card className="shadow-sm">
                         <CardHeader>
                             <CardTitle>Process Patient Bill</CardTitle>
                             <CardDescription>
-                                Help patients pay for their medicines using their Health Points.
+                                Help patients pay using their Health Points.
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
@@ -231,13 +284,13 @@ export default function PharmacyDashboardPage() {
                                         onChange={(e) => setPatientSearch(e.target.value)}
                                         disabled={!!patient}
                                     />
-                                    <Button onClick={handleSearchPatient} disabled={!!patient}>
+                                    <Button onClick={() => handleSearchPatient(patientSearch, 'payment')} disabled={!!patient}>
                                         <Search className="mr-2"/> Search
                                     </Button>
                             </div>
                             </div>
 
-                            {patient && pharmacyDetails && (
+                            {patient && labDetails && (
                                 <Card className="bg-slate-50 p-6">
                                     <div className="flex flex-col md:flex-row md:items-start justify-between">
                                         <div className="flex items-center gap-3">
@@ -254,16 +307,16 @@ export default function PharmacyDashboardPage() {
                                             <p className="text-xs text-muted-foreground -mt-1">Available Balance</p>
                                         </div>
                                     </div>
-                                    
+                                
                                     {!otpSent ? (
                                         <Button className="w-full mt-4" onClick={handleSendOtp}>Send OTP to Patient</Button>
                                     ) : (
                                         <div className="mt-4 pt-4 border-t space-y-4">
                                             <Alert variant="default" className="bg-primary/10 border-primary/20">
                                                 <BadgePercent className="h-4 w-4 text-primary" />
-                                                <AlertTitle>Your Redemption Offer: {pharmacyDetails.discount}%</AlertTitle>
+                                                <AlertTitle>Your Redemption Offer: {labDetails.discount}%</AlertTitle>
                                                 <AlertDescription>
-                                                    The patient can pay {pharmacyDetails.discount}% of their bill using Health Points.
+                                                    The patient can pay {labDetails.discount}% of their bill using Health Points.
                                                 </AlertDescription>
                                             </Alert>
 
@@ -297,7 +350,7 @@ export default function PharmacyDashboardPage() {
 
                         </CardContent>
                     </Card>
-                     <Card className="shadow-sm">
+                    <Card className="shadow-sm">
                         <CardHeader className="flex flex-row items-center gap-4">
                             <Briefcase className="w-8 h-8 text-primary"/>
                             <div>
@@ -308,16 +361,65 @@ export default function PharmacyDashboardPage() {
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <Button asChild className="w-full">
+                             <Button asChild className="w-full">
                                 <Link href="/book-doctor-appointment">
                                     Book Appointment
                                 </Link>
                              </Button>
                         </CardContent>
                     </Card>
-                 </div>
-                <div className="lg:col-span-1 space-y-8">
                     <Card className="shadow-sm">
+                        <CardHeader>
+                            <CardTitle>Upload Patient Report</CardTitle>
+                            <CardDescription>Find a patient to upload their lab report.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="space-y-2 max-w-sm">
+                                <Label htmlFor="uploadPatientSearch">Patient Phone or Email</Label>
+                                <div className="flex gap-2">
+                                    <Input 
+                                        id="uploadPatientSearch" 
+                                        placeholder="Enter phone or email..." 
+                                        value={uploadPatientSearch}
+                                        onChange={(e) => setUploadPatientSearch(e.target.value)}
+                                        disabled={!!uploadPatient}
+                                    />
+                                    <Button onClick={() => handleSearchPatient(uploadPatientSearch, 'upload')} disabled={!!uploadPatient}>
+                                        <Search className="mr-2"/> Search
+                                    </Button>
+                                </div>
+                            </div>
+                             {uploadPatient && (
+                                <Card className="bg-slate-50 p-6">
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <User className="text-primary"/>
+                                        <div>
+                                            <p className="font-semibold text-lg">{uploadPatient.name}</p>
+                                            <Button variant="link" className="p-0 h-auto text-sm" onClick={() => { setUploadPatient(null); setUploadPatientSearch(''); }}>
+                                                Search for another patient
+                                            </Button>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <Label htmlFor="reportName">Report Name</Label>
+                                            <Input id="reportName" placeholder="e.g., Blood Test Report" value={reportName} onChange={(e) => setReportName(e.target.value)} />
+                                        </div>
+                                        <div>
+                                            <Label htmlFor="reportFile">Report File</Label>
+                                            <Input id="reportFile" type="file" onChange={(e) => setReportFile(e.target.files?.[0] || null)} />
+                                        </div>
+                                        <Button className="w-full" onClick={handleUploadReport}>
+                                            <Upload className="mr-2"/> Upload Report for {uploadPatient.name}
+                                        </Button>
+                                    </div>
+                                </Card>
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
+                <div className="lg:col-span-1 space-y-8">
+                     <Card className="shadow-sm">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2"><Gift/> Total Earnings</CardTitle>
                             <CardDescription>Your earnings from referrals and patient transactions.</CardDescription>
@@ -363,8 +465,7 @@ export default function PharmacyDashboardPage() {
                             </Dialog>
                         </CardFooter>
                     </Card>
-
-                    <Alert variant="outline" className="w-full">
+                     <Alert variant="outline" className="w-full">
                         <Banknote className="h-4 w-4" />
                         <AlertTitle>How Payments Work</AlertTitle>
                         <AlertDescription>

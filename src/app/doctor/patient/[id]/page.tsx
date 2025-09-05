@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useParams, notFound } from 'next/navigation';
@@ -61,7 +62,13 @@ export default function PatientDetailPage() {
         date: new Date(),
     });
     const doctor = initialDoctors.find(d => d.id === patient.doctorId);
-    addNotification(patientUserId, `Your consultation with ${doctor?.name || 'your doctor'} is complete. INR ${patient.consultationFee.toFixed(2)} in Health Points has been credited to your account.`);
+    
+    addNotification(patientUserId, {
+        title: 'Health Points Added!',
+        message: `INR ${patient.consultationFee.toFixed(2)} in points credited from your consultation with ${doctor?.name || 'your doctor'}.`,
+        icon: 'wallet',
+        href: '/patient/my-health'
+    });
 
     // If a health coordinator booked this, credit commission to them
     if(patient.healthCoordinatorId) {
@@ -110,7 +117,13 @@ export default function PatientDetailPage() {
 
     setAllPatients(updatedPatients);
     sessionStorage.setItem('mockPatients', JSON.stringify(updatedPatients));
-    addNotification(patient.id, `Your doctor has scheduled a follow-up for you on ${format(nextAppointment, 'PPP')}.`);
+    
+    addNotification(patient.id, {
+        title: 'Follow-up Reminder Set',
+        message: `Your doctor scheduled a follow-up for ${format(nextAppointment, 'PPP')}.`,
+        icon: 'calendar',
+        href: '/patient/my-health'
+    });
 
     toast({
         title: "Reminder Set",

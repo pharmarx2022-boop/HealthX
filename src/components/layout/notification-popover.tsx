@@ -1,17 +1,29 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Button } from '../ui/button';
-import { BellDot, Bell } from 'lucide-react';
+import { BellDot, Bell, Calendar, Wallet, Gift, FileText, CheckCheck } from 'lucide-react';
 import { getNotifications, markNotificationsAsRead, type Notification } from '@/lib/notifications';
 import { formatDistanceToNow } from 'date-fns';
 import { ScrollArea } from '../ui/scroll-area';
+import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 interface NotificationPopoverProps {
     userId: string;
 }
+
+const iconMap = {
+    calendar: Calendar,
+    wallet: Wallet,
+    gift: Gift,
+    'file-text': FileText,
+    bell: Bell,
+    login: Bell, // default
+};
 
 export function NotificationPopover({ userId }: NotificationPopoverProps) {
     const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -28,26 +40,22 @@ export function NotificationPopover({ userId }: NotificationPopoverProps) {
         fetchNotifications();
         
         const handleUpdate = () => fetchNotifications();
+        // Listen for the custom event to update notifications
         window.addEventListener('notifications-updated', handleUpdate);
         
         return () => {
             window.removeEventListener('notifications-updated', handleUpdate);
         };
     }, [userId]);
-
-    const handleOpenChange = (open: boolean) => {
-        setIsOpen(open);
-        if (open && hasUnread) {
-            setTimeout(() => {
-                markNotificationsAsRead(userId);
-                fetchNotifications(); // Refresh state after marking as read
-            }, 1000); // Delay to allow user to see the change
-        }
-    };
-
+    
+    const handleMarkAllAsRead = (e: React.MouseEvent) => {
+        e.preventDefault();
+        markNotificationsAsRead(userId);
+        fetchNotifications();
+    }
 
     return (
-        <Popover open={isOpen} onOpenChange={handleOpenChange}>
+        <Popover open={isOpen} onOpenChange={setIsOpen}>
             <PopoverTrigger asChild>
                 <Button variant="ghost" size="icon" className="relative">
                     {hasUnread ? (
@@ -63,31 +71,48 @@ export function NotificationPopover({ userId }: NotificationPopoverProps) {
                     )}
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80 p-0">
-                <div className="p-4 font-medium border-b">
-                    Notifications
+            <PopoverContent className="w-80 p-0" align="end">
+                <div className="p-3 font-medium border-b flex justify-between items-center">
+                    <span className="text-sm">Notifications</span>
+                    {hasUnread && (
+                         <Button variant="link" size="sm" className="p-0 h-auto text-xs" onClick={handleMarkAllAsRead}>
+                            <CheckCheck className="mr-1 h-3 w-3" /> Mark all as read
+                        </Button>
+                    )}
                 </div>
                 <ScrollArea className="h-[300px]">
                     {notifications.length > 0 ? (
                         <div className="divide-y">
-                            {notifications.map(n => (
-                                <div key={n.id} className="p-4 hover:bg-slate-50">
-                                    <p className={`text-sm ${!n.read ? 'font-semibold' : ''}`}>{n.message}</p>
-                                    <p className="text-xs text-muted-foreground mt-1">
-                                        {formatDistanceToNow(new Date(n.date), { addSuffix: true })}
-                                    </p>
-                                </div>
-                            ))}
+                            {notifications.map(n => {
+                                const Icon = iconMap[n.icon] || Bell;
+                                const content = (
+                                     <div className={cn("p-3 hover:bg-slate-50 flex items-start gap-3", !n.read && "bg-primary/5")}>
+                                        <div className={cn("w-8 h-8 flex items-center justify-center rounded-full shrink-0 mt-1", !n.read ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-muted-foreground')}>
+                                             <Icon className="w-4 h-4"/>
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-sm font-medium">{n.title}</p>
+                                            <p className="text-sm text-muted-foreground">{n.message}</p>
+                                            <p className="text-xs text-muted-foreground mt-1">
+                                                {formatDistanceToNow(new Date(n.date), { addSuffix: true })}
+                                            </p>
+                                        </div>
+                                         {!n.read && <div className="w-2 h-2 rounded-full bg-primary mt-1 shrink-0"></div>}
+                                    </div>
+                                );
+                                return n.href ? (
+                                    <Link key={n.id} href={n.href} onClick={() => setIsOpen(false)}>{content}</Link>
+                                ) : (
+                                    <div key={n.id}>{content}</div>
+                                );
+                            })}
                         </div>
                     ) : (
-                         <div className="text-center text-muted-foreground p-8">
+                         <div className="text-center text-muted-foreground p-8 text-sm">
                             You have no new notifications.
                         </div>
                     )}
                 </ScrollArea>
-                 <div className="p-2 text-center text-xs text-muted-foreground border-t">
-                    End of notifications
-                </div>
             </PopoverContent>
         </Popover>
     );

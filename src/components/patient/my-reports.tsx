@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,8 +23,8 @@ export function MyReports() {
             const u = JSON.parse(storedUser);
             setUser(u);
 
-            const allReports = JSON.parse(sessionStorage.getItem(REPORTS_KEY) || '[]');
-            setMyReports(allReports.filter((r: MockReport) => r.patientId === u.id));
+            const allReports = JSON.parse(sessionStorage.getItem(REPORTS_KEY) || '[]')
+            setMyReports(allReports.filter((r: MockReport) => r.patientId === u.id || r.patientId === u.fullName)); // a bit of a hack to support old data
         } else {
              if (!sessionStorage.getItem(REPORTS_KEY)) {
                 sessionStorage.setItem(REPORTS_KEY, JSON.stringify(initialReports));

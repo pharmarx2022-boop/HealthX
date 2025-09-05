@@ -194,6 +194,7 @@ export function updateUserStatus(userId: string, role: string, newStatus: 'appro
  * For this demo, it checks sessionStorage against the hardcoded admin list.
  * @returns {boolean} True if the user is a verified admin, false otherwise.
  */
+export const MOCK_OTP = '123456';
 export function verifyAdmin(): boolean {
     if (typeof window === 'undefined') return false;
     const storedUser = sessionStorage.getItem('user');

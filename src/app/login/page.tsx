@@ -72,36 +72,50 @@ export default function LoginPage() {
             const { user, error, isNewUser } = completeSignIn(window.location.href, roleFromQuery, referralCode);
 
             if (user) {
-                toast({
-                    title: "Login Successful!",
-                    description: "Welcome to HealthLink Hub.",
-                });
                 sessionStorage.setItem('user', JSON.stringify(user));
                 sessionStorage.removeItem('referralCode');
 
-                // Add a welcome notification
-                addNotification(user.id, {
-                    title: isNewUser ? 'Welcome to HealthLink Hub!' : 'Login Successful',
-                    message: isNewUser ? 'Your account is ready. Complete your profile to get started.' : 'You have successfully logged in.',
-                    icon: 'login',
-                    href: isNewUser && user.role !== 'patient' ? `/${user.role}/profile` : `/${user.role}/dashboard`
-                });
-                
-                if (user.status === 'pending') {
+                if (isNewUser) {
                     toast({
-                        title: "Account Pending Approval",
-                        description: "Your account is active for viewing and profile updates, but some features are disabled until admin approval.",
-                        duration: 9000,
+                        title: "Account Created!",
+                        description: "Please create a password to secure your account.",
                     });
-                }
+                     // Add a welcome notification
+                    addNotification(user.id, {
+                        title: 'Welcome to HealthLink Hub!',
+                        message: 'Your account is ready. Complete your profile to get started.',
+                        icon: 'login',
+                        href: `/${user.role}/profile`
+                    });
+                    router.push('/set-password');
+                } else {
+                    toast({
+                        title: "Login Successful!",
+                        description: "Welcome back to HealthLink Hub.",
+                    });
+                    addNotification(user.id, {
+                        title: 'Login Successful',
+                        message: 'You have successfully logged in.',
+                        icon: 'login',
+                        href: `/${user.role}/dashboard`
+                    });
+                    
+                    if (user.status === 'pending') {
+                        toast({
+                            title: "Account Pending Approval",
+                            description: "Your account is active for viewing and profile updates, but some features are disabled until admin approval.",
+                            duration: 9000,
+                        });
+                    }
 
-                if(selectedRole === 'admin') {
-                    router.push('/admin');
-                } else if (selectedRole === 'patient' || selectedRole === 'health-coordinator') {
-                    router.push('/book-appointment');
-                }
-                else {
-                    router.push(`/${selectedRole}/dashboard`);
+                    if(selectedRole === 'admin') {
+                        router.push('/admin');
+                    } else if (selectedRole === 'patient' || selectedRole === 'health-coordinator') {
+                        router.push('/book-appointment');
+                    }
+                    else {
+                        router.push(`/${selectedRole}/dashboard`);
+                    }
                 }
             } else {
                 toast({

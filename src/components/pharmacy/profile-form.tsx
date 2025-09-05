@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, ChangeEvent } from 'react';
@@ -10,8 +11,9 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import Image from 'next/image';
-import { Loader2, Upload, Percent, Phone, Copy, Link, MapPin } from 'lucide-react';
+import { Loader2, Upload, Percent, Phone, Copy, Link as LinkIcon, MapPin, BadgeCheck, FileText } from 'lucide-react';
 import { initialPharmacies } from '@/lib/mock-data';
+import { isRegistrationNumberUnique } from '@/lib/auth';
 
 const PHARMACIES_KEY = 'mockPharmacies';
 
@@ -23,6 +25,8 @@ const profileSchema = z.object({
   whatsappNumber: z.string().min(10, 'A valid phone number is required.'),
   referralCode: z.string().optional(),
   googleMapsLink: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
+  registrationNumber: z.string().min(1, 'Registration number is required.'),
+  registrationCertificate: z.string().min(1, 'Registration certificate is required.'),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -30,7 +34,7 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 export function PharmacyProfileForm() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [user, setUser] = useState<any | null>(null);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -42,6 +46,8 @@ export function PharmacyProfileForm() {
       whatsappNumber: '',
       referralCode: '',
       googleMapsLink: '',
+      registrationNumber: '',
+      registrationCertificate: ''
     },
   });
 
@@ -49,7 +55,7 @@ export function PharmacyProfileForm() {
     if (typeof window !== 'undefined') {
       const storedUser = sessionStorage.getItem('user');
       const u = storedUser ? JSON.parse(storedUser) : null;
-      setUserId(u?.id);
+      setUser(u);
 
       const storedPharmacies = sessionStorage.getItem(PHARMACIES_KEY);
       const allPharmacies = storedPharmacies ? JSON.parse(storedPharmacies) : initialPharmacies;
@@ -70,26 +76,31 @@ export function PharmacyProfileForm() {
     }
   }, [form]);
 
-  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>, fieldName: 'image' | 'registrationCertificate') => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        form.setValue('image', reader.result as string);
-        form.clearErrors('image');
+        form.setValue(fieldName, reader.result as string);
+        form.clearErrors(fieldName);
       };
       reader.readAsDataURL(file);
     }
   };
 
   const onSubmit = (data: ProfileFormValues) => {
-    if (!userId) return;
+    if (!user?.id) return;
+    
+    if (!isRegistrationNumberUnique('pharmacy', data.registrationNumber, user.id)) {
+        form.setError('registrationNumber', { type: 'manual', message: 'This registration number is already in use.' });
+        return;
+    }
 
     const storedPharmacies = sessionStorage.getItem(PHARMACIES_KEY);
     const allPharmacies = storedPharmacies ? JSON.parse(storedPharmacies) : initialPharmacies;
 
     const updatedPharmacies = allPharmacies.map((p: any) => {
-        if (p.id === userId) {
+        if (p.id === user.id) {
             return { ...p, ...data };
         }
         return p;
@@ -123,6 +134,7 @@ export function PharmacyProfileForm() {
   }
 
   const currentImage = form.watch('image');
+  const currentCertificate = form.watch('registrationCertificate');
 
   return (
     <Form {...form}>
@@ -146,7 +158,7 @@ export function PharmacyProfileForm() {
                                     id="image-upload-pharmacy"
                                     type="file"
                                     accept="image/*"
-                                    onChange={handleImageUpload}
+                                    onChange={(e) => handleImageUpload(e, 'image')}
                                     className="hidden" 
                                 />
                                 <label htmlFor="image-upload-pharmacy" className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full">
@@ -226,6 +238,46 @@ export function PharmacyProfileForm() {
                         <FormMessage />
                     </FormItem>
                 )} />
+                
+                 <div className="space-y-4 p-4 border rounded-md bg-slate-50">
+                    <h3 className="font-semibold text-base flex items-center gap-2"><BadgeCheck/> Verification Details</h3>
+                    <p className="text-sm text-muted-foreground">This information is required for admin approval and is not displayed publicly.</p>
+                    <FormField
+                        control={form.control}
+                        name="registrationNumber"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Pharmacy Registration Number</FormLabel>
+                            <FormControl>
+                                <Input placeholder="Enter your official registration number" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField control={form.control} name="registrationCertificate" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Registration Certificate</FormLabel>
+                            <FormControl>
+                                <div>
+                                    <Input 
+                                        id="cert-upload-pharmacy"
+                                        type="file"
+                                        accept="image/*,application/pdf"
+                                        onChange={(e) => handleImageUpload(e, 'registrationCertificate')}
+                                        className="hidden" 
+                                    />
+                                    <label htmlFor="cert-upload-pharmacy" className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 w-full">
+                                        <Upload className="mr-2 h-4 w-4" />
+                                        {currentCertificate ? 'Change File' : 'Upload File'}
+                                    </label>
+                                </div>
+                            </FormControl>
+                            {currentCertificate && <div className="text-xs text-muted-foreground flex items-center gap-2 mt-2"><FileText className="w-4 h-4"/> <span>{form.getValues('registrationNumber') || 'Certificate'}.jpg</span></div>}
+                            <FormMessage />
+                        </FormItem>
+                    )} />
+                </div>
                 
                 <Button type="submit" disabled={form.formState.isSubmitting}>
                     {form.formState.isSubmitting && <Loader2 className="animate-spin mr-2" />}

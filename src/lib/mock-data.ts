@@ -28,7 +28,9 @@ export const initialDoctors = [
     reviewsList: [
         { patientName: 'Rohan Sharma', rating: 5, comment: 'Dr. Sharma was fantastic. Very thorough and took the time to explain everything clearly.' },
         { patientName: 'Sunita Patil', rating: 4, comment: 'Good experience, the wait time was a bit long but the consultation was worth it.' },
-    ]
+    ],
+    registrationNumber: 'MCI-12345',
+    registrationCertificate: 'https://picsum.photos/id/10/800/600',
   },
   {
     id: '2',
@@ -47,7 +49,9 @@ export const initialDoctors = [
     googleMapsLink: 'https://maps.app.goo.gl/d3sUjZAd5a5A5A5A5',
     reviewsList: [
         { patientName: 'Priya Mehta', rating: 5, comment: 'Excellent doctor! Solved my skin issue that had been bothering me for months.' },
-    ]
+    ],
+    registrationNumber: 'MCI-67890',
+    registrationCertificate: 'https://picsum.photos/id/11/800/600',
   },
   {
     id: '3',
@@ -66,7 +70,9 @@ export const initialDoctors = [
     googleMapsLink: 'https://maps.app.goo.gl/d3sUjZAd5a5A5A5A5',
     reviewsList: [
         { patientName: 'Amit Singh', rating: 5, comment: 'Dr. Patel is wonderful with kids. My son felt very comfortable with her.' },
-    ]
+    ],
+    registrationNumber: 'MCI-54321',
+    registrationCertificate: 'https://picsum.photos/id/12/800/600',
   },
 ];
 
@@ -139,7 +145,9 @@ export const initialPharmacies = [
         reviewsList: [
             { patientName: 'Rohan Sharma', rating: 5, comment: 'Great service and quick delivery.' },
             { patientName: 'Priya Mehta', rating: 4, comment: 'Well-stocked pharmacy.' },
-        ]
+        ],
+        registrationNumber: 'PHM-MH-112233',
+        registrationCertificate: 'https://picsum.photos/id/20/800/600',
     },
     {
         id: 'pharm2',
@@ -156,7 +164,9 @@ export const initialPharmacies = [
         googleMapsLink: 'https://maps.app.goo.gl/d3sUjZAd5a5A5A5A5',
         reviewsList: [
             { patientName: 'Amit Singh', rating: 5, comment: 'Very helpful staff.' },
-        ]
+        ],
+        registrationNumber: 'PHM-MH-445566',
+        registrationCertificate: 'https://picsum.photos/id/21/800/600',
     },
     {
         id: 'pharm3',
@@ -171,7 +181,9 @@ export const initialPharmacies = [
         discount: 0,
         whatsappNumber: '919876543212',
         googleMapsLink: 'https://maps.app.goo.gl/d3sUjZAd5a5A5A5A5',
-        reviewsList: []
+        reviewsList: [],
+        registrationNumber: 'PHM-MH-778899',
+        registrationCertificate: 'https://picsum.photos/id/22/800/600',
     }
 ];
 
@@ -192,7 +204,9 @@ export const initialLabs = [
         reviewsList: [
             { patientName: 'Sunita Patil', rating: 5, comment: 'Quick and efficient sample collection.' },
             { patientName: 'Karan Verma', rating: 4, comment: 'Reports were delivered on time.' },
-        ]
+        ],
+        registrationNumber: 'LAB-MH-AABBCC',
+        registrationCertificate: 'https://picsum.photos/id/33/800/600',
     },
     {
         id: 'lab2',
@@ -207,7 +221,9 @@ export const initialLabs = [
         discount: 35,
         whatsappNumber: '919876543214',
         googleMapsLink: 'https://maps.app.goo.gl/d3sUjZAd5a5A5A5A5',
-        reviewsList: []
+        reviewsList: [],
+        registrationNumber: 'LAB-MH-DDEEFF',
+        registrationCertificate: 'https://picsum.photos/id/34/800/600',
     }
 ];
 

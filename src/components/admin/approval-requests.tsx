@@ -9,15 +9,22 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Badge } from '../ui/badge';
-import { Check, X, Pill, Beaker, Briefcase, Stethoscope } from 'lucide-react';
+import { Check, X, Pill, Beaker, Briefcase, Stethoscope, FileText } from 'lucide-react';
+import Image from 'next/image';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 export function ApprovalRequests() {
     const [requests, setRequests] = useState<any[]>([]);
     const { toast } = useToast();
 
     useEffect(() => {
-        // In a real app, this data would be fetched from a secure API endpoint.
-        // The verifyAdmin check provides a layer of client-side security for this demo.
         if (verifyAdmin()) {
             setRequests(getAllPendingUsers());
         }
@@ -64,7 +71,7 @@ export function ApprovalRequests() {
                             <TableRow>
                                 <TableHead>Partner Name</TableHead>
                                 <TableHead>Role</TableHead>
-                                <TableHead className="hidden md:table-cell">Date Joined</TableHead>
+                                <TableHead className="hidden md:table-cell">Verification</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -74,6 +81,7 @@ export function ApprovalRequests() {
                                     <TableCell>
                                         <div className="font-medium">{req.fullName}</div>
                                         <div className="text-xs text-muted-foreground">{req.email}</div>
+                                        <div className="text-xs text-muted-foreground hidden md:block">Joined: {format(new Date(req.dateJoined), 'PP')}</div>
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-2">
@@ -81,7 +89,35 @@ export function ApprovalRequests() {
                                             <span>{getRoleDisplayName(req.role)}</span>
                                         </div>
                                     </TableCell>
-                                    <TableCell className="hidden md:table-cell">{format(new Date(req.dateJoined), 'PP')}</TableCell>
+                                    <TableCell className="hidden md:table-cell">
+                                        {req.registrationNumber ? (
+                                            <div className="flex flex-col">
+                                                <span className="text-xs font-mono">{req.registrationNumber}</span>
+                                                {req.registrationCertificate && (
+                                                    <Dialog>
+                                                        <DialogTrigger asChild>
+                                                            <Button variant="link" className="p-0 h-auto text-xs justify-start">
+                                                                <FileText className="mr-1 h-3 w-3" /> View Certificate
+                                                            </Button>
+                                                        </DialogTrigger>
+                                                        <DialogContent>
+                                                            <DialogHeader>
+                                                                <DialogTitle>Registration Certificate for {req.fullName}</DialogTitle>
+                                                                <DialogDescription>
+                                                                    Review the uploaded document for verification.
+                                                                </DialogDescription>
+                                                            </DialogHeader>
+                                                            <div className="relative w-full aspect-video mt-4 rounded-md overflow-hidden border">
+                                                                <Image src={req.registrationCertificate} alt="Registration Certificate" fill className="object-contain"/>
+                                                            </div>
+                                                        </DialogContent>
+                                                    </Dialog>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <span className="text-xs text-muted-foreground italic">Not provided</span>
+                                        )}
+                                    </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex gap-2 justify-end">
                                             <Button size="icon" variant="outline" className="h-8 w-8 text-green-600" onClick={() => handleUpdateRequest(req.id, req.role, 'approved')}>

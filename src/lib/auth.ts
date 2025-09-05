@@ -111,6 +111,8 @@ export function completeSignIn(href: string, role: string, referralCode?: string
             phone: '9876543210', // Mock phone for backward compatibility
             status: isProfessional ? 'pending' : 'approved', // New users need approval
             dateJoined: new Date().toISOString(),
+            registrationNumber: '',
+            registrationCertificate: '',
         };
 
         // Add to appropriate mock data store based on role
@@ -187,6 +189,19 @@ export function updateUserStatus(userId: string, role: string, newStatus: 'appro
          sessionStorage.setItem(key, JSON.stringify(data));
      }
 }
+
+export function isRegistrationNumberUnique(role: 'doctor' | 'lab' | 'pharmacy', regNumber: string, currentUserId: string): boolean {
+    const keys = {
+        doctor: 'doctorsData',
+        lab: 'mockLabs',
+        pharmacy: 'mockPharmacies',
+    };
+    const key = keys[role];
+    const allPartners = JSON.parse(sessionStorage.getItem(key) || '[]');
+    const existingPartner = allPartners.find((p: any) => p.registrationNumber === regNumber && p.id !== currentUserId);
+    return !existingPartner;
+}
+
 
 /**
  * Verifies if the currently logged-in user is a legitimate admin.

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -12,7 +13,7 @@ export function HealthPointWithdrawals() {
     // It can be removed or repurposed later if needed.
 
     return (
-        <div>
+        <div className="hidden">
             <p className="text-center text-muted-foreground py-8">
                 This withdrawal system is no longer in use. All partner earnings (from referrals and Health Point transactions) are consolidated into the main Commission Withdrawal system. Please manage all withdrawal requests there.
             </p>

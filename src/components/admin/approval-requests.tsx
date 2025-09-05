@@ -3,7 +3,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getAllPendingUsers, updateUserStatus } from '@/lib/auth';
+import { getAllPendingUsers, updateUserStatus, verifyAdmin } from '@/lib/auth';
 import { Button } from '../ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -16,10 +16,23 @@ export function ApprovalRequests() {
     const { toast } = useToast();
 
     useEffect(() => {
-        setRequests(getAllPendingUsers());
+        // In a real app, this data would be fetched from a secure API endpoint.
+        // The verifyAdmin check provides a layer of client-side security for this demo.
+        if (verifyAdmin()) {
+            setRequests(getAllPendingUsers());
+        }
     }, []);
 
     const handleUpdateRequest = (userId: string, role: string, newStatus: 'approved' | 'rejected') => {
+        if (!verifyAdmin()) {
+            toast({
+                title: "Permission Denied",
+                description: "You do not have permission to perform this action.",
+                variant: "destructive",
+            });
+            return;
+        }
+
         updateUserStatus(userId, role, newStatus);
         setRequests(getAllPendingUsers()); // Refresh list
         toast({

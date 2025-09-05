@@ -5,6 +5,12 @@ const users: any[] = [];
 import { createReferral } from './referrals';
 export const MOCK_OTP = '123456';
 
+// A secure, hardcoded list of admin accounts.
+// In a real application, this would be stored securely in a database.
+const ADMIN_ACCOUNTS = [
+    { email: 'admin@example.com', id: 'admin_001', role: 'admin' },
+];
+
 const generateReferralCode = () => {
     return `HLH-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 }
@@ -43,10 +49,18 @@ const populateAllUsersForLookup = () => {
 
 
 export function loginWithOtp(email: string, otp: string, role: string, referralCode?: string) {
-    // In a real app, you'd verify the OTP against a secure service.
-    // Here, we'll just check against a mock OTP.
     if (otp !== MOCK_OTP) {
         return { user: null, error: "Invalid OTP. Please try again.", isNewUser: false };
+    }
+
+    // Special handling for admin login
+    if (role === 'admin') {
+        const adminUser = ADMIN_ACCOUNTS.find(admin => admin.email === email);
+        if (adminUser) {
+            return { user: { ...adminUser, fullName: 'Admin' }, error: null, isNewUser: false };
+        } else {
+            return { user: null, error: "This email is not registered as an admin.", isNewUser: false };
+        }
     }
     
     // Combine all user data sources for lookup
@@ -168,4 +182,24 @@ export function updateUserStatus(userId: string, role: string, newStatus: 'appro
          });
          sessionStorage.setItem(key, JSON.stringify(data));
      }
+}
+
+/**
+ * Verifies if the currently logged-in user is a legitimate admin.
+ * In a real app, this would check a secure, server-set HTTP-only cookie.
+ * For this demo, it checks sessionStorage against the hardcoded admin list.
+ * @returns {boolean} True if the user is a verified admin, false otherwise.
+ */
+export function verifyAdmin(): boolean {
+    if (typeof window === 'undefined') return false;
+    const storedUser = sessionStorage.getItem('user');
+    if (!storedUser) return false;
+
+    try {
+        const user = JSON.parse(storedUser);
+        // Check if the user from session exists in our secure admin list
+        return user.role === 'admin' && ADMIN_ACCOUNTS.some(admin => admin.id === user.id && admin.email === user.email);
+    } catch (e) {
+        return false;
+    }
 }

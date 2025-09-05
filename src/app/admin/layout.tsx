@@ -20,10 +20,13 @@ import {
   BadgePercent,
   Banknote,
   ShieldCheck,
+  Loader2,
+  Lock,
 } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/header';
+import { verifyAdmin } from '@/lib/auth';
 
 export default function AdminLayout({
   children,
@@ -31,6 +34,20 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [isVerified, setIsVerified] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    // This simulates a server-side check. In a real app, this would be
+    // handled by server-side rendering or an API call that checks a secure cookie.
+    if (verifyAdmin()) {
+      setIsVerified(true);
+    } else {
+      router.replace('/'); // Redirect non-admins to the homepage
+    }
+    setIsLoading(false);
+  }, [router]);
 
   const menuItems = [
     {
@@ -49,6 +66,31 @@ export default function AdminLayout({
       icon: Banknote,
     },
   ];
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <Loader2 className="animate-spin text-primary" />
+        <p className="ml-4 text-muted-foreground">Verifying access...</p>
+      </div>
+    );
+  }
+
+  if (!isVerified) {
+    // You can optionally show a more specific "Access Denied" page here
+    return (
+      <div className="flex h-screen w-full flex-col items-center justify-center bg-background">
+        <Lock className="h-16 w-16 text-destructive" />
+        <h1 className="mt-4 text-2xl font-bold">Access Denied</h1>
+        <p className="text-muted-foreground">
+          You do not have permission to view this page.
+        </p>
+        <Button asChild className="mt-6">
+          <Link href="/">Return to Homepage</Link>
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <SidebarProvider>

@@ -3,7 +3,6 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { WithdrawalRequests } from '@/components/admin/withdrawal-requests';
-import { HealthPointWithdrawals } from '@/components/admin/healthpoint-withdrawals';
 import { TransactionHistory } from '@/components/admin/transaction-history';
 import { ApprovalRequests } from '@/components/admin/approval-requests';
 import dynamic from 'next/dynamic';
@@ -69,17 +68,6 @@ export default function AdminPage() {
                     </CardHeader>
                     <CardContent>
                         <WithdrawalRequests />
-                    </CardContent>
-                </Card>
-                    <Card className="shadow-sm">
-                    <CardHeader>
-                        <CardTitle>Health Point Withdrawal Requests</CardTitle>
-                        <CardDescription>
-                            Approve or reject requests from Labs & Pharmacies to withdraw their collected points.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <HealthPointWithdrawals />
                     </CardContent>
                 </Card>
             </div>

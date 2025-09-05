@@ -9,16 +9,27 @@ import { format } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Badge } from '../ui/badge';
 import { Check, X } from 'lucide-react';
+import { verifyAdmin } from '@/lib/auth';
 
 export function WithdrawalRequests() {
     const [requests, setRequests] = useState<WithdrawalRequest[]>([]);
     const { toast } = useToast();
 
     useEffect(() => {
-        setRequests(getWithdrawalRequests());
+        if (verifyAdmin()) {
+            setRequests(getWithdrawalRequests());
+        }
     }, []);
 
     const handleUpdateRequest = (requestId: string, newStatus: 'approved' | 'rejected') => {
+        if (!verifyAdmin()) {
+            toast({
+                title: "Permission Denied",
+                description: "You do not have permission to perform this action.",
+                variant: "destructive",
+            });
+            return;
+        }
         updateWithdrawalRequest(requestId, newStatus);
         setRequests(getWithdrawalRequests()); // Refresh list
         toast({

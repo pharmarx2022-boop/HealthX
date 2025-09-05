@@ -1,36 +1,25 @@
 
+'use client';
+
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
 import { Target, Eye, Users } from 'lucide-react';
 import { FloatingWhatsApp } from '@/components/layout/floating-whatsapp';
-
-const teamMembers = [
-  {
-    name: 'Dr. Anjali Sharma',
-    title: 'Founder & CEO',
-    image: 'https://picsum.photos/400/400',
-    dataAiHint: 'ceo portrait',
-    bio: 'A visionary leader with a passion for leveraging technology to improve healthcare access for all.',
-  },
-  {
-    name: 'Vikram Singh',
-    title: 'Chief Technology Officer',
-    image: 'https://picsum.photos/401/401',
-    dataAiHint: 'cto portrait',
-    bio: 'The architect of our platform, ensuring a seamless and secure experience for all users.',
-  },
-  {
-    name: 'Priya Patel',
-    title: 'Head of Patient Relations',
-    image: 'https://picsum.photos/402/402',
-    dataAiHint: 'manager portrait',
-    bio: 'Dedicated to making sure every patient feels heard, supported, and cared for.',
-  },
-];
+import { useEffect, useState } from 'react';
+import { getTeamMembers, type TeamMember } from '@/lib/team-members';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AboutUsPage() {
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setTeamMembers(getTeamMembers());
+    setIsLoading(false);
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
@@ -78,18 +67,24 @@ export default function AboutUsPage() {
               <p className="text-lg text-muted-foreground mt-2">The minds behind the mission.</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {teamMembers.map((member) => (
-                <Card key={member.name} className="text-center hover:shadow-xl transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="w-32 h-32 rounded-full mx-auto overflow-hidden border-4 border-primary/20 mb-4">
-                        <Image src={member.image} alt={member.name} width={128} height={128} className="object-cover" data-ai-hint={member.dataAiHint} />
-                    </div>
-                    <h3 className="text-xl font-semibold font-headline">{member.name}</h3>
-                    <p className="text-primary font-medium">{member.title}</p>
-                    <p className="text-muted-foreground mt-2 text-sm">{member.bio}</p>
-                  </CardContent>
-                </Card>
-              ))}
+              {isLoading ? (
+                Array.from({ length: 3 }).map((_, i) => (
+                  <Card key={i}><CardContent className="p-6 space-y-4"><Skeleton className="h-32 w-32 rounded-full mx-auto" /><Skeleton className="h-5 w-3/4 mx-auto" /><Skeleton className="h-4 w-1/2 mx-auto" /><Skeleton className="h-10 w-full mx-auto" /></CardContent></Card>
+                ))
+              ) : (
+                teamMembers.map((member) => (
+                  <Card key={member.name} className="text-center hover:shadow-xl transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="w-32 h-32 rounded-full mx-auto overflow-hidden border-4 border-primary/20 mb-4 relative">
+                          <Image src={member.image} alt={member.name} fill className="object-cover" data-ai-hint={member.dataAiHint} />
+                      </div>
+                      <h3 className="text-xl font-semibold font-headline">{member.name}</h3>
+                      <p className="text-primary font-medium">{member.title}</p>
+                      <p className="text-muted-foreground mt-2 text-sm">{member.bio}</p>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
           </div>
         </div>

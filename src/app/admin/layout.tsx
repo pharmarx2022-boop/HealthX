@@ -27,6 +27,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { verifyAdmin } from '@/lib/auth';
+import { Button } from '@/components/ui/button';
 
 export default function AdminLayout({
   children,
@@ -64,6 +65,11 @@ export default function AdminLayout({
       href: '/admin/withdrawals',
       label: 'Withdrawals',
       icon: Banknote,
+    },
+     {
+      href: '/admin/team',
+      label: 'Team',
+      icon: Users,
     },
   ];
 

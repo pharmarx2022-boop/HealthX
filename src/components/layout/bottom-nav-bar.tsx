@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Calendar, UserCircle, LayoutDashboard } from 'lucide-react';
+import { Home, Calendar, User, LayoutDashboard } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
 
@@ -26,17 +26,35 @@ export function BottomNavBar() {
     return null; // Don't show for admins or if not logged in
   }
 
-  const navItems = [
-    { href: '/', label: 'Home', icon: Home },
-    { href: '/book-appointment', label: 'Book', icon: Calendar },
-    { href: `/${user.role}/dashboard`, label: 'Dashboard', icon: LayoutDashboard },
-  ];
+  let navItems = [];
+  if (user.role === 'patient') {
+      navItems = [
+        { href: '/book-appointment', label: 'Dashboard', icon: LayoutDashboard },
+        { href: '/book-appointment?tab=services', label: 'Book', icon: Calendar },
+      ];
+  } else if (user.role === 'health-coordinator') {
+      navItems = [
+        { href: '/book-appointment', label: 'Book', icon: Calendar },
+        { href: '/health-coordinator/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      ];
+  } else if (user.role === 'doctor') {
+      navItems = [
+        { href: `/${user.role}/dashboard`, label: 'Dashboard', icon: LayoutDashboard },
+        { href: `/${user.role}/profile`, label: 'Profile', icon: User },
+      ]
+  } else {
+       navItems = [
+        { href: '/book-appointment', label: 'Book', icon: Calendar },
+        { href: `/${user.role}/dashboard`, label: 'Dashboard', icon: LayoutDashboard },
+      ];
+  }
+
 
   return (
     <div className="fixed bottom-0 left-0 z-50 w-full h-16 bg-background border-t border-border md:hidden">
-      <div className="grid h-full max-w-lg grid-cols-3 mx-auto font-medium">
+      <div className={`grid h-full max-w-lg grid-cols-${navItems.length} mx-auto font-medium`}>
         {navItems.map((item) => {
-          const isActive = (pathname === '/' && item.href === '/') || (pathname.startsWith(item.href) && item.href !== '/');
+          const isActive = pathname.startsWith(item.href);
           return (
             <Link
               key={item.href}

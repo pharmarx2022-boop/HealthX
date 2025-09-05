@@ -51,12 +51,16 @@ export function Header() {
   const renderAuthButtons = () => {
     if (user) {
       const roleDisplayName = (user.role.charAt(0).toUpperCase() + user.role.slice(1)).replace('-coordinator', ' Coordinator');
+      const dashboardPath = user.role === 'admin' ? '/admin' 
+                           : user.role === 'patient' ? '/book-appointment'
+                           : `/${user.role}/dashboard`;
+
       return (
         <>
             <NotificationPopover userId={user.id} />
              {(user.role === 'patient' || user.role === 'health-coordinator') && (
                 <Button asChild>
-                    <Link href="/book-appointment">
+                    <Link href="/book-appointment?tab=services">
                         <Calendar className="mr-2 h-4 w-4" />
                         Book Appointment
                     </Link>
@@ -73,7 +77,7 @@ export function Header() {
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                <Link href={`/${user.role === 'admin' ? 'admin' : user.role + '/dashboard'}`}>
+                <Link href={dashboardPath}>
                     <UserCircle className="mr-2" />
                     <span>Dashboard</span>
                 </Link>
@@ -96,7 +100,7 @@ export function Header() {
                 )}
                 {user.role === 'patient' && (
                     <DropdownMenuItem asChild>
-                        <Link href="/patient/dashboard">
+                        <Link href="/book-appointment#family">
                             <Users className="mr-2" />
                             <span>Family Members</span>
                         </Link>
@@ -141,10 +145,13 @@ export function Header() {
   
     const renderMobileAuthButtons = () => {
     if (user) {
+       const dashboardPath = user.role === 'admin' ? '/admin' 
+                           : user.role === 'patient' ? '/book-appointment'
+                           : `/${user.role}/dashboard`;
       return (
         <>
           <Button variant="ghost" asChild className="justify-start text-lg">
-            <Link href={`/${user.role === 'admin' ? 'admin' : user.role + '/dashboard'}`} onClick={() => setIsSheetOpen(false)}>
+            <Link href={dashboardPath} onClick={() => setIsSheetOpen(false)}>
               <UserCircle className="mr-2" />
               Dashboard
             </Link>
@@ -167,7 +174,7 @@ export function Header() {
            )}
            {user.role === 'patient' && (
                 <Button variant="ghost" asChild className="justify-start text-lg">
-                    <Link href="/patient/dashboard" onClick={() => setIsSheetOpen(false)}>
+                    <Link href="/book-appointment#family" onClick={() => setIsSheetOpen(false)}>
                         <Users className="mr-2" />
                         Family Members
                     </Link>

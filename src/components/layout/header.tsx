@@ -1,10 +1,11 @@
 
+
 'use client';
 
 import Link from 'next/link';
 import { HeartPulse, Menu, X, UserCircle, LogOut, Settings, Briefcase, Users, Pill, Beaker, Gift, Bell, Calendar, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from '@/components/ui/sheet';
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -255,6 +256,7 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[280px]">
+               <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
               <div className="p-6">
                 <div className="flex items-center justify-between mb-8">
                     <Link href="/" className="flex items-center gap-2" onClick={() => setIsSheetOpen(false)}>

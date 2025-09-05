@@ -117,7 +117,10 @@ export default function LoginPage() {
 
         if(selectedRole === 'admin') {
             router.push('/admin');
-        } else {
+        } else if (selectedRole === 'patient' || selectedRole === 'health-coordinator') {
+            router.push('/book-appointment');
+        }
+        else {
             router.push(`/${selectedRole}/dashboard`);
         }
     } else {

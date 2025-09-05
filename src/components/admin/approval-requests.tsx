@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Badge } from '../ui/badge';
-import { Check, X, Pill, Beaker, Briefcase, Stethoscope, FileText } from 'lucide-react';
+import { Check, X, Pill, Beaker, Briefcase, Stethoscope, FileText, IdCard } from 'lucide-react';
 import Image from 'next/image';
 import {
   Dialog,
@@ -90,32 +90,57 @@ export function ApprovalRequests() {
                                         </div>
                                     </TableCell>
                                     <TableCell className="hidden md:table-cell">
-                                        {req.registrationNumber ? (
-                                            <div className="flex flex-col">
-                                                <span className="text-xs font-mono">{req.registrationNumber}</span>
-                                                {req.registrationCertificate && (
-                                                    <Dialog>
-                                                        <DialogTrigger asChild>
-                                                            <Button variant="link" className="p-0 h-auto text-xs justify-start">
-                                                                <FileText className="mr-1 h-3 w-3" /> View Certificate
-                                                            </Button>
-                                                        </DialogTrigger>
-                                                        <DialogContent>
-                                                            <DialogHeader>
-                                                                <DialogTitle>Registration Certificate for {req.fullName}</DialogTitle>
-                                                                <DialogDescription>
-                                                                    Review the uploaded document for verification.
-                                                                </DialogDescription>
-                                                            </DialogHeader>
-                                                            <div className="relative w-full aspect-video mt-4 rounded-md overflow-hidden border">
-                                                                <Image src={req.registrationCertificate} alt="Registration Certificate" fill className="object-contain"/>
-                                                            </div>
-                                                        </DialogContent>
-                                                    </Dialog>
-                                                )}
-                                            </div>
+                                        {req.role === 'health-coordinator' ? (
+                                             req.aadharNumber ? (
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs font-mono flex items-center gap-2"><IdCard className="w-4 h-4" /> {req.aadharNumber}</span>
+                                                    {(req.aadharFrontImage || req.aadharBackImage) && (
+                                                        <Dialog>
+                                                            <DialogTrigger asChild>
+                                                                <Button variant="link" className="p-0 h-auto text-xs justify-start">
+                                                                    <FileText className="mr-1 h-3 w-3" /> View Aadhar Images
+                                                                </Button>
+                                                            </DialogTrigger>
+                                                            <DialogContent>
+                                                                <DialogHeader>
+                                                                    <DialogTitle>Aadhar Verification for {req.fullName}</DialogTitle>
+                                                                </DialogHeader>
+                                                                <div className="grid grid-cols-2 gap-4 mt-4">
+                                                                    {req.aadharFrontImage && <div className="space-y-2"><p className="text-sm font-medium text-center">Front</p><div className="relative w-full aspect-video rounded-md overflow-hidden border"><Image src={req.aadharFrontImage} alt="Aadhar Front" fill className="object-contain"/></div></div>}
+                                                                    {req.aadharBackImage && <div className="space-y-2"><p className="text-sm font-medium text-center">Back</p><div className="relative w-full aspect-video rounded-md overflow-hidden border"><Image src={req.aadharBackImage} alt="Aadhar Back" fill className="object-contain"/></div></div>}
+                                                                </div>
+                                                            </DialogContent>
+                                                        </Dialog>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <span className="text-xs text-muted-foreground italic">Not provided</span>
+                                            )
                                         ) : (
-                                            <span className="text-xs text-muted-foreground italic">Not provided</span>
+                                            req.registrationNumber ? (
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs font-mono">{req.registrationNumber}</span>
+                                                    {req.registrationCertificate && (
+                                                        <Dialog>
+                                                            <DialogTrigger asChild>
+                                                                <Button variant="link" className="p-0 h-auto text-xs justify-start">
+                                                                    <FileText className="mr-1 h-3 w-3" /> View Certificate
+                                                                </Button>
+                                                            </DialogTrigger>
+                                                            <DialogContent>
+                                                                <DialogHeader>
+                                                                    <DialogTitle>Registration Certificate for {req.fullName}</DialogTitle>
+                                                                </DialogHeader>
+                                                                <div className="relative w-full aspect-video mt-4 rounded-md overflow-hidden border">
+                                                                    <Image src={req.registrationCertificate} alt="Registration Certificate" fill className="object-contain"/>
+                                                                </div>
+                                                            </DialogContent>
+                                                        </Dialog>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <span className="text-xs text-muted-foreground italic">Not provided</span>
+                                            )
                                         )}
                                     </TableCell>
                                     <TableCell className="text-right">

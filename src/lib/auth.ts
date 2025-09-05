@@ -111,8 +111,13 @@ export function completeSignIn(href: string, role: string, referralCode?: string
             phone: '9876543210', // Mock phone for backward compatibility
             status: isProfessional ? 'pending' : 'approved', // New users need approval
             dateJoined: new Date().toISOString(),
+            // Professional registration details
             registrationNumber: '',
             registrationCertificate: '',
+            // Health Coordinator verification details
+            aadharNumber: '',
+            aadharFrontImage: '',
+            aadharBackImage: ''
         };
 
         // Add to appropriate mock data store based on role

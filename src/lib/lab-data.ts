@@ -39,7 +39,7 @@ export function getLabData(labId: string): { balance: number; transactions: LabT
     };
 }
 
-export function recordCommission(labId: string, transaction: Omit<LabTransaction, 'date'> & { date: Date }) {
+export function recordCommission(labId: string, transaction: LabTransaction) {
     const key = TRANSACTIONS_KEY_PREFIX + labId;
     const history = getLabData(labId);
     const updatedTransactions = [...history.transactions, transaction];

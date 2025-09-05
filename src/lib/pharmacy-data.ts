@@ -39,7 +39,7 @@ export function getPharmacyData(pharmacyId: string): { balance: number; transact
     };
 }
 
-export function recordCommission(pharmacyId: string, transaction: Omit<PharmacyTransaction, 'date'> & { date: Date }) {
+export function recordCommission(pharmacyId: string, transaction: PharmacyTransaction) {
     const key = TRANSACTIONS_KEY_PREFIX + pharmacyId;
     const history = getPharmacyData(pharmacyId);
     const updatedTransactions = [...history.transactions, transaction];

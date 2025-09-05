@@ -17,7 +17,6 @@ import { Separator } from '../ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Slider } from '../ui/slider';
 import { Label } from '../ui/label';
-import { BottomNavBar } from '../layout/bottom-nav-bar';
 
 const BookingDialog = dynamic(() => import('./booking-dialog').then(mod => mod.BookingDialog), {
     ssr: false
@@ -35,8 +34,12 @@ const FAMILY_KEY = 'familyMembers';
 const CLINICS_KEY = 'mockClinics';
 const PATIENTS_KEY = 'mockPatients';
 
+interface NearbySearchProps {
+    allowedServices?: ('doctor' | 'pharmacy' | 'lab')[];
+}
 
-export function NearbySearch() {
+
+export function NearbySearch({ allowedServices = ['doctor', 'pharmacy', 'lab'] }: NearbySearchProps) {
   const [location, setLocation] = useState<{lat: number, lon: number} | null>(null);
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [error, setError] = useState<string | null>(null);
@@ -132,12 +135,14 @@ export function NearbySearch() {
   }, [doctors]);
 
   const searchResults = useMemo(() => {
-    const allPharmacies = pharmacies;
-    const allLabs = labs;
     const lowerCaseSearchTerm = searchTerm.toLowerCase();
 
+    const showDoctors = allowedServices.includes('doctor');
+    const showPharmacies = allowedServices.includes('pharmacy');
+    const showLabs = allowedServices.includes('lab');
+
     // Filter doctors
-    const filteredDoctors = doctors.filter(d => {
+    const filteredDoctors = showDoctors ? doctors.filter(d => {
         const feeData = getDoctorFeeRange(d.id);
 
         if (lowerCaseSearchTerm && !d.name.toLowerCase().includes(lowerCaseSearchTerm) && !d.specialty.toLowerCase().includes(lowerCaseSearchTerm)) {
@@ -159,15 +164,15 @@ export function NearbySearch() {
         }
         // Mock distance filtering - in a real app, this would use lat/lng
         return true;
-    });
+    }) : [];
 
     // Filter others only by search term if it exists
-    const filteredPharmacies = lowerCaseSearchTerm ? allPharmacies.filter(p => p.name.toLowerCase().includes(lowerCaseSearchTerm)) : allPharmacies;
-    const filteredLabs = lowerCaseSearchTerm ? allLabs.filter(l => l.name.toLowerCase().includes(lowerCaseSearchTerm)) : allLabs;
+    const filteredPharmacies = showPharmacies && (lowerCaseSearchTerm ? pharmacies.filter(p => p.name.toLowerCase().includes(lowerCaseSearchTerm)) : pharmacies);
+    const filteredLabs = showLabs && (lowerCaseSearchTerm ? labs.filter(l => l.name.toLowerCase().includes(lowerCaseSearchTerm)) : labs);
     
     // If search term is present, don't show all pharmacies/labs unless they match
     if(lowerCaseSearchTerm) {
-        return { doctors: filteredDoctors, pharmacies: filteredPharmacies, labs: filteredLabs };
+        return { doctors: filteredDoctors, pharmacies: filteredPharmacies || [], labs: filteredLabs || [] };
     }
     
     // if filters are applied, only show doctors
@@ -175,9 +180,9 @@ export function NearbySearch() {
         return { doctors: filteredDoctors, pharmacies: [], labs: [] };
     }
 
-    return { doctors: filteredDoctors, pharmacies: allPharmacies, labs: allLabs };
+    return { doctors: filteredDoctors, pharmacies: showPharmacies ? pharmacies : [], labs: showLabs ? labs : [] };
 
-  }, [searchTerm, doctors, clinics, pharmacies, labs, specialty, experience, feeRange, distance]);
+  }, [searchTerm, doctors, clinics, pharmacies, labs, specialty, experience, feeRange, distance, allowedServices]);
   
   const handleBookNow = (e: React.MouseEvent, doctor: Doctor) => {
     e.preventDefault();
@@ -217,7 +222,7 @@ export function NearbySearch() {
     const updatedPatients = [...allPatients, newAppointment];
     sessionStorage.setItem(PATIENTS_KEY, JSON.stringify(updatedPatients));
 
-    const toastDescription = user?.role === 'health-coordinator' 
+    const toastDescription = user?.role === 'health-coordinator' || user?.role === 'lab' || user?.role === 'pharmacy'
       ? `The appointment for ${patientName} at ${clinic.name} is booked. A receipt has been sent to the patient's email.`
       : `Your appointment at ${clinic.name} is booked. A receipt has been sent to your email. Your fee is secured and will be refunded as Health Points after the consultation is marked complete by the doctor.`;
 

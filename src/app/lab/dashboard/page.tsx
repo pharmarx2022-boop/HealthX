@@ -7,12 +7,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Beaker, Search, User, Wallet, History, BadgePercent, Banknote, Upload, Gift, Loader2 } from 'lucide-react';
+import { Beaker, Search, User, Wallet, History, BadgePercent, Banknote, Upload, Gift, Loader2, Briefcase } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useMemo, useEffect } from 'react';
 import { initialLabs, mockPatientData, mockReports, type MockReport } from '@/lib/mock-data';
 import { getTransactionHistory, recordTransaction, type Transaction } from '@/lib/transactions';
-import { getLabData, recordCommission as recordLabTransaction } from '@/lib/lab-data';
+import { getLabData, recordCommission as recordLabTransaction, LabTransaction } from '@/lib/lab-data';
 import { getCommissionWalletData, requestWithdrawal as requestCommissionWithdrawal, type CommissionTransaction } from '@/lib/commission-wallet';
 import { requestWithdrawal as requestHealthPointWithdrawal } from '@/lib/healthpoint-wallet';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
@@ -21,6 +21,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import dynamic from 'next/dynamic';
 import { addNotification, sendRedemptionOtpNotification } from '@/lib/notifications';
 import { checkPartnerMilestone } from '@/lib/referrals';
+import { NearbySearch } from '@/components/booking/nearby-search';
 
 const AnalyticsDashboard = dynamic(() => import('@/components/lab/analytics-dashboard').then(mod => mod.AnalyticsDashboard), {
     ssr: false,
@@ -353,6 +354,20 @@ export default function LabDashboardPage() {
                                 </Card>
                             )}
 
+                        </CardContent>
+                    </Card>
+                    <Card className="shadow-sm">
+                        <CardHeader className="flex flex-row items-center gap-4">
+                            <Briefcase className="w-8 h-8 text-primary"/>
+                            <div>
+                                <CardTitle>Book a Doctor Appointment</CardTitle>
+                                <CardDescription>
+                                   Find and book a doctor for a patient.
+                                </CardDescription>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                             <NearbySearch allowedServices={['doctor']} />
                         </CardContent>
                     </Card>
                     <Card className="shadow-sm">

@@ -196,17 +196,13 @@ export function MyHealthPage() {
                     <div className="grid lg:grid-cols-3 gap-8">
                         <div className="lg:col-span-2 space-y-8">
                              <Card className="shadow-sm">
-                                <CardHeader className="flex flex-row items-center gap-4">
-                                    <User className="w-8 h-8 text-primary" />
-                                    <div>
-                                        <CardTitle>Welcome, {user?.fullName || 'Patient'}!</CardTitle>
-                                        <CardDescription>
-                                            Book new appointments, view your upcoming visits, and track your refunds.
-                                        </CardDescription>
-                                    </div>
+                                <CardHeader>
+                                    <CardTitle>Your Appointments</CardTitle>
+                                    <CardDescription>
+                                        View your upcoming visits, and track your refunds.
+                                    </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <h2 className="text-xl font-semibold mb-4">Your Appointments</h2>
                                     <div className="space-y-6">
                                         {isClient && myAppointments.length > 0 ? (
                                             myAppointments.map(appt => (

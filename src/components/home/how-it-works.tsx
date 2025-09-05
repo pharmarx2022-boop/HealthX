@@ -10,18 +10,18 @@ const steps = [
     },
     {
         icon: Stethoscope,
-        title: "2. Visit & Pay in Cash",
-        description: "Attend your consultation and pay the doctor's fee in cash directly at the clinic.",
+        title: "2. Visit The Doctor",
+        description: "Attend your consultation as scheduled. There are no additional fees to be paid at the clinic.",
     },
     {
         icon: RefreshCw,
-        title: "3. Get 100% Refund",
-        description: "After the doctor marks the visit as complete, your initial online deposit is refunded to your original payment method.",
+        title: "3. Get 100% Cashback",
+        description: "After the doctor marks the visit as complete, your initial online deposit is refunded as Health Points of the same value.",
     },
     {
         icon: Wallet,
-        title: "4. Earn Bonus Health Points",
-        description: "You'll ALSO get Health Points of the same value to use for real discounts at our partner labs & pharmacies.",
+        title: "4. Use Points for Discounts",
+        description: "Use your new Health Points to get real discounts on medicines and lab tests at our partner network.",
     }
 ]
 
@@ -30,9 +30,9 @@ export function HowItWorks() {
         <section className="py-16 md:py-24 bg-white">
             <div className="container mx-auto px-4">
                 <div className="text-center mb-12">
-                    <h2 className="text-3xl md:text-4xl font-headline font-bold">Effectively, A Free Consultation</h2>
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold">A Rewarding Healthcare Experience</h2>
                     <p className="text-lg text-muted-foreground mt-2 max-w-3xl mx-auto">
-                        Our unique process rewards you with a 100% refund and bonus points for every doctor visit.
+                        Our unique process gives you 100% of your consultation fee back as valuable Health Points.
                     </p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -50,7 +50,7 @@ export function HowItWorks() {
                 </div>
                  <div className="text-center mt-12">
                     <p className="text-xl font-semibold">
-                       Your online payment comes back to you, plus you earn valuable points to spend.
+                       Your online payment comes back to you as points, which you can spend on other healthcare needs.
                     </p>
                 </div>
             </div>

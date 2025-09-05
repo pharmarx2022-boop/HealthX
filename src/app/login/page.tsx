@@ -17,6 +17,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { sendAuthenticationLink, completeSignIn, signInWithPassword } from '@/lib/auth';
 import { addNotification } from '@/lib/notifications';
 import { MailCheck, Loader2 } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'A valid email address is required.' }),
@@ -124,37 +125,39 @@ export default function LoginPage() {
   }, [searchParams, router, toast, selectedRole]);
 
 
-  function onSubmit(values: z.infer<typeof loginSchema>) {
-    if (values.password) {
-        // Password login flow
-        if (!selectedRole) return;
-        const { user, error } = signInWithPassword(values.email, values.password, selectedRole);
-
-        if (user) {
-             sessionStorage.setItem('user', JSON.stringify(user));
-             const dashboardPath = user.role === 'admin' ? '/admin' 
-                           : user.role === 'patient' ? '/patient/my-health'
-                           : `/${user.role}/dashboard`;
-             toast({
-                title: "Login Successful!",
-                description: "Welcome back to HealthLink Hub.",
-             });
-             router.push(dashboardPath);
-        } else {
-             toast({
-                title: "Login Failed",
-                description: error,
-                variant: "destructive",
-             });
-        }
-    } else {
-        // Magic link flow
-        sendAuthenticationLink(values.email);
-        if(values.referralCode) {
-            sessionStorage.setItem('referralCode', values.referralCode);
-        }
-        setLinkSent(true);
+  const onSubmitPassword = (values: z.infer<typeof loginSchema>) => {
+    if (!values.password) {
+        form.setError('password', { message: 'Password is required for this login method.' });
+        return;
     }
+    if (!selectedRole) return;
+    const { user, error } = signInWithPassword(values.email, values.password, selectedRole);
+
+    if (user) {
+        sessionStorage.setItem('user', JSON.stringify(user));
+        const dashboardPath = user.role === 'admin' ? '/admin' 
+                        : user.role === 'patient' ? '/patient/my-health'
+                        : `/${user.role}/dashboard`;
+        toast({
+            title: "Login Successful!",
+            description: "Welcome back to HealthLink Hub.",
+        });
+        router.push(dashboardPath);
+    } else {
+        toast({
+            title: "Login Failed",
+            description: error,
+            variant: "destructive",
+        });
+    }
+  };
+
+  const onSubmitMagicLink = (values: z.infer<typeof loginSchema>) => {
+    sendAuthenticationLink(values.email);
+    if(values.referralCode) {
+        sessionStorage.setItem('referralCode', values.referralCode);
+    }
+    setLinkSent(true);
   }
   
   const roleDisplayName = selectedRole ? (selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)).replace('-coordinator', ' Coordinator') : '';
@@ -177,7 +180,9 @@ export default function LoginPage() {
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-headline">{roleDisplayName} Login</CardTitle>
             {!linkSent ? (
-                <CardDescription>Enter your email and password, or get a secure sign-in link.</CardDescription>
+                <CardDescription>
+                    For returning users, enter your email and password. For new users, enter your email and get a secure sign-in link.
+                </CardDescription>
             ) : (
                 <CardDescription>A sign-in link has been sent to your email address.</CardDescription>
             )}
@@ -185,8 +190,7 @@ export default function LoginPage() {
           <CardContent>
             {!linkSent ? (
                 <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    
+                <form className="space-y-4">
                     <FormField
                         control={form.control}
                         name="email"
@@ -205,7 +209,7 @@ export default function LoginPage() {
                         name="password"
                         render={({ field }) => (
                             <FormItem>
-                            <FormLabel>Password (Optional)</FormLabel>
+                            <FormLabel>Password (for returning users)</FormLabel>
                             <FormControl>
                                 <Input type="password" placeholder="Enter your password" {...field} />
                             </FormControl>
@@ -229,12 +233,16 @@ export default function LoginPage() {
                             )}
                         />
                     )}
-                    <div className="space-y-2">
-                        <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-                            {form.formState.isSubmitting ? <Loader2 className="animate-spin" /> : "Sign In"}
+                    <div className="space-y-2 pt-2">
+                        <Button type="button" className="w-full" onClick={form.handleSubmit(onSubmitPassword)} disabled={form.formState.isSubmitting}>
+                            {form.formState.isSubmitting ? <Loader2 className="animate-spin" /> : "Sign In with Password"}
                         </Button>
-                         <Button type="button" variant="outline" className="w-full" onClick={() => form.handleSubmit(onSubmit)()} disabled={form.formState.isSubmitting || !!form.watch('password')}>
-                            Send Secure Sign-in Link
+                        <div className="relative">
+                            <Separator className="my-4"/>
+                            <span className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 bg-background px-2 text-xs text-muted-foreground">OR</span>
+                        </div>
+                         <Button type="button" variant="outline" className="w-full" onClick={form.handleSubmit(onSubmitMagicLink)} disabled={form.formState.isSubmitting}>
+                            Email a Secure Sign-in Link
                         </Button>
                     </div>
                 </form>

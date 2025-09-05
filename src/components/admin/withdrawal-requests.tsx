@@ -30,48 +30,50 @@ export function WithdrawalRequests() {
     return (
         <div>
             {requests.length > 0 ? (
-                 <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>User</TableHead>
-                            <TableHead>Amount</TableHead>
-                            <TableHead>Date</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {requests.map((req) => (
-                            <TableRow key={req.id}>
-                                <TableCell>
-                                    <div className="font-medium">{req.userName}</div>
-                                    <div className="text-xs text-muted-foreground">{req.userId}</div>
-                                </TableCell>
-                                <TableCell>INR {req.amount.toFixed(2)}</TableCell>
-                                <TableCell>{format(new Date(req.date), 'PP')}</TableCell>
-                                <TableCell>
-                                    <Badge variant={
-                                        req.status === 'approved' ? 'secondary' :
-                                        req.status === 'rejected' ? 'destructive' :
-                                        'default'
-                                    } className="capitalize">{req.status}</Badge>
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    {req.status === 'pending' && (
-                                        <div className="flex gap-2 justify-end">
-                                            <Button size="icon" variant="outline" className="h-8 w-8 text-green-600" onClick={() => handleUpdateRequest(req.id, 'approved')}>
-                                                <Check />
-                                            </Button>
-                                             <Button size="icon" variant="outline" className="h-8 w-8 text-red-600" onClick={() => handleUpdateRequest(req.id, 'rejected')}>
-                                                <X />
-                                            </Button>
-                                        </div>
-                                    )}
-                                </TableCell>
+                 <div className="w-full overflow-x-auto">
+                     <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>User</TableHead>
+                                <TableHead>Amount</TableHead>
+                                <TableHead className="hidden md:table-cell">Date</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                 </Table>
+                        </TableHeader>
+                        <TableBody>
+                            {requests.map((req) => (
+                                <TableRow key={req.id}>
+                                    <TableCell>
+                                        <div className="font-medium">{req.userName}</div>
+                                        <div className="text-xs text-muted-foreground">{req.userId}</div>
+                                    </TableCell>
+                                    <TableCell>INR {req.amount.toFixed(2)}</TableCell>
+                                    <TableCell className="hidden md:table-cell">{format(new Date(req.date), 'PP')}</TableCell>
+                                    <TableCell>
+                                        <Badge variant={
+                                            req.status === 'approved' ? 'secondary' :
+                                            req.status === 'rejected' ? 'destructive' :
+                                            'default'
+                                        } className="capitalize">{req.status}</Badge>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        {req.status === 'pending' && (
+                                            <div className="flex gap-2 justify-end">
+                                                <Button size="icon" variant="outline" className="h-8 w-8 text-green-600" onClick={() => handleUpdateRequest(req.id, 'approved')}>
+                                                    <Check />
+                                                </Button>
+                                                 <Button size="icon" variant="outline" className="h-8 w-8 text-red-600" onClick={() => handleUpdateRequest(req.id, 'rejected')}>
+                                                    <X />
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                     </Table>
+                 </div>
             ) : (
                 <p className="text-center text-muted-foreground py-8">No pending withdrawal requests.</p>
             )}

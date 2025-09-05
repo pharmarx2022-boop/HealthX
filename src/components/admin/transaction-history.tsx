@@ -46,28 +46,30 @@ export function TransactionHistory() {
     return (
         <div>
             {transactions.length > 0 ? (
-                 <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Patient</TableHead>
-                            <TableHead>Doctor</TableHead>
-                            <TableHead>Amount</TableHead>
-                            <TableHead>Date</TableHead>
-                             <TableHead>Status</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {transactions.map((tx) => (
-                            <TableRow key={tx.id}>
-                                <TableCell className="font-medium">{tx.patientName}</TableCell>
-                                <TableCell>{tx.doctorName}</TableCell>
-                                <TableCell>INR {tx.amount.toFixed(2)}</TableCell>
-                                <TableCell>{format(tx.date, 'PP, p')}</TableCell>
-                                <TableCell><Badge variant="secondary">{tx.status}</Badge></TableCell>
+                 <div className="w-full overflow-x-auto">
+                     <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Patient</TableHead>
+                                <TableHead className="hidden md:table-cell">Doctor</TableHead>
+                                <TableHead>Amount</TableHead>
+                                <TableHead className="hidden sm:table-cell">Date</TableHead>
+                                 <TableHead>Status</TableHead>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                 </Table>
+                        </TableHeader>
+                        <TableBody>
+                            {transactions.map((tx) => (
+                                <TableRow key={tx.id}>
+                                    <TableCell className="font-medium">{tx.patientName}</TableCell>
+                                    <TableCell className="hidden md:table-cell">{tx.doctorName}</TableCell>
+                                    <TableCell>INR {tx.amount.toFixed(2)}</TableCell>
+                                    <TableCell className="hidden sm:table-cell">{format(tx.date, 'PP, p')}</TableCell>
+                                    <TableCell><Badge variant="secondary">{tx.status}</Badge></TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                     </Table>
+                 </div>
             ) : (
                 <p className="text-center text-muted-foreground py-8">No transactions found.</p>
             )}

@@ -176,8 +176,8 @@ export function MyHealthPage() {
 
     return (
         <>
-            <div className="space-y-8 pt-8">
-                    <div className="mb-8">
+            <div className="space-y-8">
+                    <div className="mb-4">
                         <h1 className="text-3xl font-headline font-bold">My Health</h1>
                         <p className="text-muted-foreground">Manage your appointments and health records.</p>
                     </div>
@@ -193,7 +193,7 @@ export function MyHealthPage() {
                         </Alert>
                     )}
 
-                    <div className="grid lg:grid-cols-3 gap-8">
+                    <div className="grid lg:grid-cols-3 gap-8 items-start">
                         <div className="lg:col-span-2 space-y-8">
                              <Card className="shadow-sm">
                                 <CardHeader>
@@ -207,45 +207,45 @@ export function MyHealthPage() {
                                         {isClient && myAppointments.length > 0 ? (
                                             myAppointments.map(appt => (
                                                 <Card key={appt.id} className="overflow-hidden">
-                                                    <CardHeader className="flex flex-row justify-between items-start bg-slate-50/70 p-4">
+                                                    <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-50/70 p-4">
                                                         <div>
                                                             <CardTitle className="text-lg font-headline">Consultation at {appt.clinic}</CardTitle>
-                                                            <CardDescription className="flex items-center gap-2 pt-1">
-                                                                <Calendar className="w-4 h-4"/> {format(new Date(appt.appointmentDate), 'EEEE, MMMM d, yyyy')}
-                                                                <Clock className="w-4 h-4 ml-2"/> {format(new Date(appt.appointmentDate), 'p')}
+                                                            <CardDescription className="flex flex-col sm:flex-row sm:items-center gap-x-4 gap-y-1 pt-1">
+                                                                <span className="flex items-center gap-2"><Calendar className="w-4 h-4"/> {format(new Date(appt.appointmentDate), 'EEEE, MMMM d, yyyy')}</span>
+                                                                <span className="flex items-center gap-2"><Clock className="w-4 h-4"/> {format(new Date(appt.appointmentDate), 'p')}</span>
                                                             </CardDescription>
                                                         </div>
-                                                        <Badge variant={appt.status === 'done' ? 'secondary' : 'default'} className="capitalize">{appt.status}</Badge>
+                                                        <Badge variant={appt.status === 'done' ? 'secondary' : 'default'} className="capitalize mt-2 sm:mt-0">{appt.status}</Badge>
                                                     </CardHeader>
-                                                    <CardContent className="p-4 grid grid-cols-2 gap-4">
+                                                    <CardContent className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                         <div className="flex items-center text-muted-foreground gap-3">
-                                                            <Stethoscope className="w-5 h-5 text-primary" />
+                                                            <Stethoscope className="w-5 h-5 text-primary shrink-0" />
                                                             <div>
                                                                 <p className="font-medium text-foreground">Reason</p>
                                                                 <p>{appt.consultation}</p>
                                                             </div>
                                                         </div>
                                                         <div className="flex items-center text-muted-foreground gap-3">
-                                                            <p className="font-bold text-primary">INR</p>
+                                                            <p className="font-bold text-primary text-lg shrink-0">INR</p>
                                                             <div>
                                                                 <p className="font-medium text-foreground">Fee Paid</p>
                                                                 <p>INR {appt.consultationFee.toFixed(2)}</p>
                                                             </div>
                                                         </div>
-                                                        <div className="flex items-center text-muted-foreground gap-3 col-span-2">
-                                                            <RefreshCw className="w-5 h-5 text-primary" />
+                                                        <div className="flex items-center text-muted-foreground gap-3 col-span-1 sm:col-span-2">
+                                                            <RefreshCw className="w-5 h-5 text-primary shrink-0" />
                                                             <div>
                                                                 <p className="font-medium text-foreground">Refund Status</p>
                                                                 <p>{appt.refundStatus} (Full cash refund + Health Points bonus)</p>
                                                             </div>
                                                         </div>
                                                     </CardContent>
-                                                    <CardFooter className="bg-slate-50/70 p-4 border-t flex justify-between">
+                                                    <CardFooter className="bg-slate-50/70 p-4 border-t flex flex-wrap justify-between gap-2">
                                                         <Button variant="outline" onClick={() => openReviewDialog({type: 'doctor', id: appt.doctorId, name: initialDoctors.find(d => d.id === appt.doctorId)?.name || 'Doctor', transactionId: appt.id})} disabled={appt.reviewed || appt.status !== 'done'}>
-                                                            <Star className="mr-2"/> {appt.reviewed ? 'Review Submitted' : 'Leave a Review'}
+                                                            <Star className="mr-2 h-4 w-4"/> {appt.reviewed ? 'Review Submitted' : 'Leave a Review'}
                                                         </Button>
                                                         <Button variant="outline" onClick={() => handleShare(appt)}>
-                                                            <Share2 className="mr-2"/> Share
+                                                            <Share2 className="mr-2 h-4 w-4"/> Share
                                                         </Button>
                                                     </CardFooter>
                                                 </Card>

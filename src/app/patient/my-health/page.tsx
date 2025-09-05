@@ -10,7 +10,7 @@ export default function MyHealthWrapper() {
         <div className="flex flex-col min-h-screen">
             <Header />
             <main className="flex-1 bg-slate-50/50 pb-20 md:pb-0">
-                <div className="container mx-auto py-12">
+                <div className="container mx-auto py-8 md:py-12">
                    <MyHealthPage />
                 </div>
             </main>

@@ -266,14 +266,14 @@ export function PatientList() {
         </div>
 
         <div className="border rounded-lg overflow-hidden">
-            <div className="p-4 bg-slate-50/70 border-b flex items-center justify-between">
+            <div className="p-4 bg-slate-50/70 border-b flex flex-col sm:flex-row items-center justify-between gap-4">
                 {numSelected > 0 ? (
-                    <div className="flex items-center gap-4">
-                        <span className="text-sm font-medium">{numSelected} patient(s) selected</span>
+                    <div className="flex items-center gap-2 sm:gap-4">
+                        <span className="text-sm font-medium">{numSelected} selected</span>
                         
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button size="sm" disabled={isActionDisabled}><CalendarClock className="mr-2"/> Reschedule</Button>
+                                <Button size="sm" disabled={isActionDisabled}><CalendarClock className="mr-2 h-4 w-4"/> Reschedule</Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                                 <AlertDialogHeader>
@@ -291,7 +291,7 @@ export function PatientList() {
 
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button variant="destructive" size="sm" disabled={isActionDisabled}><Trash2 className="mr-2"/> Cancel</Button>
+                                <Button variant="destructive" size="sm" disabled={isActionDisabled}><Trash2 className="mr-2 h-4 w-4"/> Cancel</Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                                 <AlertDialogHeader>
@@ -314,61 +314,61 @@ export function PatientList() {
                     <DownloadIcon className="mr-2 h-4 w-4" /> Download PDF
                 </Button>
             </div>
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead className="w-12">
-                            <Checkbox 
-                                onCheckedChange={(checked) => handleSelectAll(checked)}
-                                checked={isAllSelected || (isIndeterminate ? 'indeterminate' : false)}
-                                aria-label="Select all"
-                            />
-                        </TableHead>
-                        <TableHead>Patient Name</TableHead>
-                        <TableHead>Clinic</TableHead>
-                        <TableHead>Appointment</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Actions</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {filteredPatients.length > 0 ? (
-                        filteredPatients.map(patient => (
-                            <TableRow key={patient.id} data-state={selectedRows.has(patient.id) ? "selected" : ""}>
-                                <TableCell>
-                                    <Checkbox
-                                        onCheckedChange={(checked) => handleSelectRow(patient.id, Boolean(checked))}
-                                        checked={selectedRows.has(patient.id)}
-                                        aria-label={`Select ${patient.name}`}
-                                    />
-                                </TableCell>
-                                <TableCell className="font-medium">{patient.name}</TableCell>
-                                <TableCell>{patient.clinic}</TableCell>
-                                <TableCell>{isClient ? format(new Date(patient.appointmentDate), 'PP, p') : ''}</TableCell>
-                                <TableCell>
-                                    <Badge variant={patient.status === 'done' ? 'secondary' : 'default'}>
-                                        {patient.status}
-                                    </Badge>
-                                </TableCell>
-                                <TableCell>
-                                    <Button asChild variant="outline" size="sm">
-                                        <Link href={`/doctor/patient/${patient.id}`}>View Details</Link>
-                                    </Button>
+            <div className="w-full overflow-x-auto">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className="w-12">
+                                <Checkbox 
+                                    onCheckedChange={(checked) => handleSelectAll(checked)}
+                                    checked={isAllSelected || (isIndeterminate ? 'indeterminate' : false)}
+                                    aria-label="Select all"
+                                />
+                            </TableHead>
+                            <TableHead>Patient Name</TableHead>
+                            <TableHead className="hidden lg:table-cell">Clinic</TableHead>
+                            <TableHead>Appointment</TableHead>
+                            <TableHead className="hidden sm:table-cell">Status</TableHead>
+                            <TableHead>Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {filteredPatients.length > 0 ? (
+                            filteredPatients.map(patient => (
+                                <TableRow key={patient.id} data-state={selectedRows.has(patient.id) ? "selected" : ""}>
+                                    <TableCell>
+                                        <Checkbox
+                                            onCheckedChange={(checked) => handleSelectRow(patient.id, Boolean(checked))}
+                                            checked={selectedRows.has(patient.id)}
+                                            aria-label={`Select ${patient.name}`}
+                                        />
+                                    </TableCell>
+                                    <TableCell className="font-medium">{patient.name}</TableCell>
+                                    <TableCell className="hidden lg:table-cell">{patient.clinic}</TableCell>
+                                    <TableCell>{isClient ? format(new Date(patient.appointmentDate), 'PP, p') : ''}</TableCell>
+                                    <TableCell className="hidden sm:table-cell">
+                                        <Badge variant={patient.status === 'done' ? 'secondary' : 'default'}>
+                                            {patient.status}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Button asChild variant="outline" size="sm">
+                                            <Link href={`/doctor/patient/${patient.id}`}>View</Link>
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={6} className="text-center h-24">
+                                    No patients found with the selected filters.
                                 </TableCell>
                             </TableRow>
-                        ))
-                    ) : (
-                        <TableRow>
-                            <TableCell colSpan={6} className="text-center h-24">
-                                No patients found with the selected filters.
-                            </TableCell>
-                        </TableRow>
-                    )}
-                </TableBody>
-            </Table>
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
         </div>
     </div>
   )
 }
-
-    

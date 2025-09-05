@@ -24,9 +24,9 @@ const initialTeamMembers: TeamMember[] = [
     image: 'https://picsum.photos/400/400',
     dataAiHint: 'ceo portrait',
     bio: 'A visionary leader with a passion for leveraging technology to improve healthcare access for all.',
-    linkedin: '#',
-    twitter: '#',
-    instagram: '#'
+    linkedin: 'https://linkedin.com/in/anjalisharma',
+    twitter: 'https://x.com/anjalisharma',
+    instagram: 'https://instagram.com/anjalisharma'
   },
   {
     id: 'team_2',

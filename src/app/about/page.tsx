@@ -44,7 +44,7 @@ export default function AboutUsPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-center text-muted-foreground">
-                  To create a world where high-quality healthcare is not a privilege, but a right accessible to everyone, everywhere, through a single, unified digital platform.
+                  To create a self-sustaining healthcare economy where every transaction is rewarding, making quality care not just accessible, but financially advantageous for every patient.
                 </p>
               </CardContent>
             </Card>
@@ -57,7 +57,7 @@ export default function AboutUsPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-center text-muted-foreground">
-                  To empower patients and connect them seamlessly with doctors, pharmacies, labs, and agents by building intuitive, reliable, and innovative technology solutions that prioritize health and well-being.
+                  To build a unified digital platform that seamlessly integrates patients, doctors, pharmacies, and labs through innovative technology, a unique cash-refund system, and a shared rewards program, fostering a healthier and more connected community.
                 </p>
               </CardContent>
             </Card>
@@ -75,7 +75,7 @@ export default function AboutUsPage() {
                 ))
               ) : (
                 teamMembers.map((member) => (
-                  <Card key={member.name} className="text-center hover:shadow-xl transition-shadow flex flex-col">
+                  <Card key={member.id} className="text-center hover:shadow-xl transition-shadow flex flex-col">
                     <CardContent className="p-6 flex-grow">
                       <div className="w-32 h-32 rounded-full mx-auto overflow-hidden border-4 border-primary/20 mb-4 relative">
                           <Image src={member.image} alt={member.name} fill className="object-cover" data-ai-hint={member.dataAiHint} />

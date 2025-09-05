@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { Calendar as CalendarIcon, User, Search, Loader2, CreditCard } from 'lucide-react';
+import { Calendar as CalendarIcon, User, Search, Loader2, CreditCard, Users } from 'lucide-react';
 import { Calendar } from '../ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -22,6 +22,7 @@ import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { Card, CardFooter } from '../ui/card';
 import { addNotification, sendBookingOtpNotification } from '@/lib/notifications';
 import { mockPatients } from '@/components/doctor/patient-list';
+import { mockFamilyMembers } from '@/lib/family-members';
 
 type Doctor = {
     id: string;
@@ -83,6 +84,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
     // Health Coordinator flow state
     const [patientSearch, setPatientSearch] = useState('');
     const [foundPatient, setFoundPatient] = useState<any | null>(null);
+    const [foundPatientFamily, setFoundPatientFamily] = useState<FamilyMember[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const [otpSent, setOtpSent] = useState(false);
     const [otp, setOtp] = useState('');
@@ -110,6 +112,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
             setSelectedPatientId(user?.role === 'patient' ? user.id : 'self');
             setPatientSearch('');
             setFoundPatient(null);
+            setFoundPatientFamily([]);
             setIsSearching(false);
             setOtpSent(false);
             setOtp('');
@@ -138,7 +141,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
     }, [selectedDate, selectedClinic]);
 
     const handleConfirmBooking = () => {
-        const patientId = userRole === 'health-coordinator' ? foundPatient?.id : selectedPatientId;
+        const patientId = userRole === 'health-coordinator' ? selectedPatientId : selectedPatientId;
         if (!patientId || !selectedClinicId || !selectedDate || !selectedTime) {
              toast({ title: "Incomplete Details", description: "Please fill all the booking details before proceeding.", variant: "destructive" });
              return;
@@ -179,6 +182,10 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
             const patient = allPatients.find((p: any) => p.phone === searchTerm || p.email.toLowerCase() === searchTerm);
             if (patient) {
                 setFoundPatient(patient);
+                setSelectedPatientId(patient.id); // Default selection to the patient
+                // For demo purposes, we'll assign the standard mock family to the found user
+                const storedFamily = sessionStorage.getItem('familyMembers')
+                setFoundPatientFamily(storedFamily ? JSON.parse(storedFamily) : mockFamilyMembers);
             } else {
                 toast({ title: "Patient Not Found", description: "No patient exists with this mobile number or email.", variant: "destructive" });
             }
@@ -234,16 +241,8 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
     const renderHealthCoordinatorPatientFinder = () => (
         <div>
             <Label className="font-semibold">Find Patient</Label>
-            {foundPatient ? (
-                <div className="mt-2 p-3 bg-slate-50 border rounded-md flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                        <User className="text-primary"/>
-                        <p className="font-medium">{foundPatient.name} ({foundPatient.phone})</p>
-                    </div>
-                    <Button variant="link" size="sm" onClick={() => { setFoundPatient(null); setPatientSearch('')}}>Change</Button>
-                </div>
-            ) : (
-                <div className="flex gap-2 mt-2">
+            {!foundPatient ? (
+                 <div className="flex gap-2 mt-2">
                     <Input 
                         placeholder="Patient's Phone or Email" 
                         value={patientSearch}
@@ -253,6 +252,46 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                     <Button onClick={handleSearchPatient} disabled={isSearching || patientSearch.length < 3}>
                         {isSearching ? <Loader2 className="animate-spin"/> : <Search/>}
                     </Button>
+                </div>
+            ) : (
+                <div className="mt-2 p-3 bg-slate-50 border rounded-md">
+                     <div className="flex justify-between items-center mb-4">
+                        <div className="flex items-center gap-3">
+                            <User className="text-primary"/>
+                            <p className="font-medium">{foundPatient.name} ({foundPatient.phone})</p>
+                        </div>
+                        <Button variant="link" size="sm" onClick={() => { setFoundPatient(null); setPatientSearch(''); setFoundPatientFamily([]); }}>Change</Button>
+                    </div>
+
+                    <Label className="font-semibold flex items-center gap-2 mb-2"><Users className="w-4 h-4"/> Who is this appointment for?</Label>
+                     <RadioGroup 
+                        value={selectedPatientId} 
+                        onValueChange={setSelectedPatientId}
+                        className="mt-2 space-y-2"
+                    >
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value={foundPatient.id} id={`hc_${foundPatient.id}`} />
+                            <Label htmlFor={`hc_${foundPatient.id}`} className="flex items-center gap-2 font-normal">
+                                <Avatar className="h-8 w-8">
+                                    <AvatarImage src={`https://i.pravatar.cc/150?u=${foundPatient.id}`} alt={foundPatient.name} />
+                                    <AvatarFallback>{foundPatient.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <span>{foundPatient.name} (Themself)</span>
+                            </Label>
+                        </div>
+                        {foundPatientFamily.map(member => (
+                            <div key={member.id} className="flex items-center space-x-2">
+                                <RadioGroupItem value={member.id} id={`hc_${member.id}`} />
+                                <Label htmlFor={`hc_${member.id}`} className="flex items-center gap-2 font-normal">
+                                        <Avatar className="h-8 w-8">
+                                        <AvatarImage src={`https://i.pravatar.cc/150?u=${member.name}`} alt={member.name} />
+                                        <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <span>{member.name} ({member.relationship}, {calculateAge(member.dob)} yrs)</span>
+                                </Label>
+                            </div>
+                        ))}
+                    </RadioGroup>
                 </div>
             )}
         </div>
@@ -360,3 +399,5 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
         </Dialog>
     );
 }
+
+    

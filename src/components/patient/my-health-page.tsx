@@ -2,7 +2,7 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { User, Calendar, Clock, Stethoscope, RefreshCw, Bell, Star, Users, Wallet, History, FileText, Loader2, Store, KeyRound, Share2 } from 'lucide-react';
+import { User, Calendar, Clock, Stethoscope, RefreshCw, Bell, Star, Users, Wallet, History, FileText, Loader2, Store, KeyRound, Share2, Gift } from 'lucide-react';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { mockPatients } from '@/components/doctor/patient-list';
 import { initialDoctors, initialLabs, initialPharmacies } from '@/lib/mock-data';
@@ -236,7 +236,7 @@ export function MyHealthPage() {
                                                             <RefreshCw className="w-5 h-5 text-primary" />
                                                             <div>
                                                                 <p className="font-medium text-foreground">Refund Status</p>
-                                                                <p>{appt.refundStatus}</p>
+                                                                <p>{appt.refundStatus} (Full cash refund + Health Points bonus)</p>
                                                             </div>
                                                         </div>
                                                     </CardContent>
@@ -261,11 +261,11 @@ export function MyHealthPage() {
                         <div className="lg:col-span-1 space-y-8">
                              <Card className="shadow-sm">
                                 <CardHeader className="flex flex-row items-center gap-4">
-                                    <Wallet className="w-8 h-8 text-primary" />
+                                    <Gift className="w-8 h-8 text-primary" />
                                     <div>
                                         <CardTitle>Health Points</CardTitle>
                                         <CardDescription>
-                                            Your cashback rewards.
+                                            Your bonus rewards.
                                         </CardDescription>
                                     </div>
                                 </CardHeader>

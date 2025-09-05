@@ -400,7 +400,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                     <Button className="w-full h-12" onClick={handleConfirmBooking}>
                         <CreditCard className="mr-2"/> Pay & Confirm Booking
                     </Button>
-                    <p className="text-xs text-muted-foreground text-center px-4">Your payment is secured and will be refunded as Health Points after the consultation is marked complete by the doctor.</p>
+                    <p className="text-xs text-muted-foreground text-center px-4">Your payment will be refunded to your original payment method AND you'll get 100% back in Health Points after the consultation.</p>
                 </CardFooter>
             </DialogContent>
         </Dialog>

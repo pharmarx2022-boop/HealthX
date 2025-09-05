@@ -58,14 +58,14 @@ export default function PatientDetailPage() {
     recordTransaction(patientUserId, {
         type: 'credit',
         amount: patient.consultationFee,
-        description: `Cashback from consultation on ${format(new Date(patient.appointmentDate), 'PP')}`,
+        description: `Bonus Health Points from consultation on ${format(new Date(patient.appointmentDate), 'PP')}`,
         date: new Date(),
     });
     const doctor = initialDoctors.find(d => d.id === patient.doctorId);
     
     addNotification(patientUserId, {
         title: 'Health Points Added!',
-        message: `INR ${patient.consultationFee.toFixed(2)} in points credited from your consultation with ${doctor?.name || 'your doctor'}.`,
+        message: `You've earned INR ${patient.consultationFee.toFixed(2)} in Health Points from your consultation with ${doctor?.name || 'your doctor'}.`,
         icon: 'wallet',
         href: '/patient/my-health'
     });
@@ -93,8 +93,8 @@ export default function PatientDetailPage() {
     sessionStorage.setItem('mockPatients', JSON.stringify(updatedPatients));
 
     toast({
-        title: "Consultation Complete",
-        description: `Refund for INR ${patient?.consultationFee.toFixed(2)} initiated. An equal amount of Health Points has been credited to the patient.`,
+        title: "Consultation Complete!",
+        description: `A refund for INR ${patient?.consultationFee.toFixed(2)} has been issued to the patient's original payment method, and Health Points have been credited.`,
     });
   };
 
@@ -275,7 +275,7 @@ export default function PatientDetailPage() {
                             <AlertDialogHeader>
                                 <AlertDialogTitle>Confirm Consultation Completion</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    This will mark the consultation as complete. A refund of INR {patient.consultationFee.toFixed(2)} will be issued to the patient's original payment method, and an equal amount of Health Points will be credited to their account. This action cannot be undone.
+                                    This will mark the consultation as complete. A full refund of INR {patient.consultationFee.toFixed(2)} will be issued to the patient's original payment method, and an equal amount of Health Points will be credited to their account as a reward. This action cannot be undone.
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>

@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { HeartPulse, Menu, X, UserCircle, LogOut, Settings, Briefcase, Users, Pill, Beaker, Gift, Bell } from 'lucide-react';
+import { HeartPulse, Menu, X, UserCircle, LogOut, Settings, Briefcase, Users, Pill, Beaker, Gift, Bell, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { useState, useEffect } from 'react';
@@ -54,6 +54,14 @@ export function Header() {
       return (
         <>
             <NotificationPopover userId={user.id} />
+             {(user.role === 'patient' || user.role === 'health-coordinator') && (
+                <Button asChild>
+                    <Link href="/book-appointment">
+                        <Calendar className="mr-2 h-4 w-4" />
+                        Book Appointment
+                    </Link>
+                </Button>
+            )}
             <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost">

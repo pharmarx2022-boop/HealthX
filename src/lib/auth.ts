@@ -7,8 +7,10 @@ import { createReferral } from './referrals';
 // A secure, hardcoded list of admin accounts.
 // In a real application, this would be stored securely in a database.
 const ADMIN_ACCOUNTS = [
-    { email: 'admin@example.com', id: 'admin_001', role: 'admin', password: 'password123' },
+    { email: 'admin@example.com', id: 'admin_001', role: 'admin' },
 ];
+
+const MOCK_OTP = '123456';
 
 const generateReferralCode = () => {
     return `HLH-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
@@ -47,39 +49,41 @@ const populateAllUsersForLookup = () => {
 }
 
 
-// This function simulates sending an authentication link.
-// In a real Firebase app, this would use `sendSignInLinkToEmail` from the Firebase SDK.
-export function sendAuthenticationLink(email: string) {
-    // We store the email in localStorage because when the user clicks the link and comes back,
-    // we need to know which email to sign in. Firebase's SDK handles this automatically.
+// This function simulates sending an OTP.
+export async function sendOtp(email: string) {
     if (typeof window !== 'undefined') {
-        window.localStorage.setItem('emailForSignIn', email);
+        // We store the email to associate the OTP with it on the verification step.
+        window.sessionStorage.setItem('emailForSignIn', email);
     }
-    console.log(`SIGN-IN LINK: A sign-in link has been sent to ${email}. In this demo, you don't need to check your email. The link is simulated.`);
-    // In a real app, you would not return the link. The user gets it via email.
-    // For demo purposes, we can construct a "magic link" that the user can use.
-    return `${window.location.origin}/login?signIn=true&role=${new URLSearchParams(window.location.search).get('role')}`;
+    console.log(`OTP SENT to ${email}: The OTP is ${MOCK_OTP}`);
+    // Simulate a network delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return true;
 }
 
 
-export function completeSignIn(href: string, role: string, referralCode?: string) {
+export function signInWithOtp(email: string, otp: string, role: string, referralCode?: string) {
     if (typeof window === 'undefined') {
         return { user: null, error: "Sign-in must be completed in a browser.", isNewUser: false };
     }
 
-    const email = window.localStorage.getItem('emailForSignIn');
-    if (!email) {
-        return { user: null, error: "Sign-in session expired or invalid. Please try again.", isNewUser: false };
+    const emailForSignIn = window.sessionStorage.getItem('emailForSignIn');
+    if (emailForSignIn !== email) {
+        return { user: null, error: "Email does not match the one that requested the OTP.", isNewUser: false };
+    }
+    
+    if (otp !== MOCK_OTP) {
+        return { user: null, error: "Invalid OTP.", isNewUser: false };
     }
 
     // Special handling for admin login
     if (role === 'admin') {
         const adminUser = ADMIN_ACCOUNTS.find(admin => admin.email === email);
         if (adminUser) {
-            window.localStorage.removeItem('emailForSignIn');
+            window.sessionStorage.removeItem('emailForSignIn');
             return { user: { ...adminUser, fullName: 'Admin' }, error: null, isNewUser: false };
         } else {
-             window.localStorage.removeItem('emailForSignIn');
+            window.sessionStorage.removeItem('emailForSignIn');
             return { user: null, error: "This email is not registered as an admin.", isNewUser: false };
         }
     }
@@ -118,7 +122,6 @@ export function completeSignIn(href: string, role: string, referralCode?: string
             aadharNumber: '',
             aadharFrontImage: '',
             aadharBackImage: '',
-            password: '', // Add password field
         };
 
         // Add to appropriate mock data store based on role
@@ -155,10 +158,7 @@ export function completeSignIn(href: string, role: string, referralCode?: string
         return { user: null, error: "Your registration has been rejected.", isNewUser: false };
     }
     
-    // For new users, don't remove the email yet. We need it on the set-password page.
-    if (!isNewUser) {
-        window.localStorage.removeItem('emailForSignIn');
-    }
+    window.sessionStorage.removeItem('emailForSignIn');
     return { user, error: null, isNewUser };
 }
 
@@ -232,7 +232,6 @@ export function isAadharNumberUnique(aadharNumber: string, currentUserId: string
  * For this demo, it checks sessionStorage against the hardcoded admin list.
  * @returns {boolean} True if the user is a verified admin, false otherwise.
  */
-export const MOCK_OTP = '123456';
 export function verifyAdmin(): boolean {
     if (typeof window === 'undefined') return false;
     const storedUser = sessionStorage.getItem('user');
@@ -245,61 +244,4 @@ export function verifyAdmin(): boolean {
     } catch (e) {
         return false;
     }
-}
-
-export function signInWithPassword(email: string, password: string, role: string) {
-    let allKnownUsers: any[] = [...users, ...ADMIN_ACCOUNTS];
-    if (role === 'doctor') allKnownUsers = [...allKnownUsers, ...(JSON.parse(sessionStorage.getItem('doctorsData') || '[]'))];
-    if (role === 'lab') allKnownUsers = [...allKnownUsers, ...(JSON.parse(sessionStorage.getItem('mockLabs') || '[]'))];
-    if (role === 'pharmacy') allKnownUsers = [...allKnownUsers, ...(JSON.parse(sessionStorage.getItem('mockPharmacies') || '[]'))];
-
-    const user = allKnownUsers.find(u => u.email === email && u.role === role);
-
-    if (user && user.password === password) {
-        return { user, error: null };
-    }
-    
-    if (user && !user.password) {
-        return { user: null, error: "This account uses magic link sign-in. Please use the link sent to your email." };
-    }
-
-    return { user: null, error: "Invalid email or password." };
-}
-
-export function updateUserPassword(userId: string, role: string, newPassword: string): boolean {
-    let key: string | null = null;
-    let dataArray: any[] | null = null;
-
-    switch (role) {
-        case 'doctor':
-            key = 'doctorsData';
-            break;
-        case 'lab':
-            key = 'mockLabs';
-            break;
-        case 'pharmacy':
-            key = 'mockPharmacies';
-            break;
-        case 'patient':
-        case 'health-coordinator':
-            const userIndex = users.findIndex(u => u.id === userId);
-            if (userIndex > -1) {
-                users[userIndex].password = newPassword;
-                return true;
-            }
-            return false;
-    }
-
-    if (key) {
-        const storedData = sessionStorage.getItem(key);
-        dataArray = storedData ? JSON.parse(storedData) : [];
-        const userIndex = dataArray.findIndex(u => u.id === userId);
-        if (userIndex > -1) {
-            dataArray[userIndex].password = newPassword;
-            sessionStorage.setItem(key, JSON.stringify(dataArray));
-            return true;
-        }
-    }
-    
-    return false;
 }

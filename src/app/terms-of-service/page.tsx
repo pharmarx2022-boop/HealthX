@@ -35,7 +35,7 @@ export default function TermsOfServicePage() {
                  <ul className="list-disc list-inside space-y-2">
                     <li><strong>Earning Commissions:</strong> Registered partners (Doctors, Labs, Pharmacies) and Health Coordinators receive a unique referral code. You earn a commission when a new partner you referred signs up with your code and meets their first performance milestone.</li>
                     <li><strong>Commission Wallet:</strong> All earned referral commissions are credited to your "Commission Wallet" in INR.</li>
-                    <li><strong>Withdrawal:</strong> You can request to withdraw your commission balance at any time from your dashboard. A minimum balance of ₹500 is required before a withdrawal request can be made. All withdrawal requests are reviewed and processed by an administrator.</li>
+                    <li><strong>Withdrawal:</strong> You can request to withdraw your commission balance at any time from your dashboard. A minimum balance of ₹1000 is required before a withdrawal request can be made. All withdrawal requests are reviewed and processed by an administrator.</li>
                 </ul>
 
               <h2 className="text-xl font-bold text-foreground pt-4">5. User Accounts</h2>

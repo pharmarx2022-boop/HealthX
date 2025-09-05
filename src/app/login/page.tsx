@@ -14,14 +14,12 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { sendAuthenticationLink, completeSignIn, signInWithPassword } from '@/lib/auth';
+import { sendAuthenticationLink, completeSignIn } from '@/lib/auth';
 import { addNotification } from '@/lib/notifications';
-import { MailCheck, Loader2, KeyRound } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
+import { MailCheck, Loader2 } from 'lucide-react';
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'A valid email address is required.' }),
-  password: z.string().optional(),
   referralCode: z.string().optional(),
 });
 
@@ -46,7 +44,6 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: '',
-      password: '',
       referralCode: '',
     },
   });
@@ -76,11 +73,14 @@ export default function LoginPage() {
             if (user) {
                 sessionStorage.setItem('user', JSON.stringify(user));
                 sessionStorage.removeItem('referralCode');
+                const dashboardPath = user.role === 'admin' ? '/admin' 
+                           : user.role === 'patient' ? '/patient/my-health'
+                           : `/${user.role}/dashboard`;
 
                 if (isNewUser) {
                     toast({
                         title: "Account Created!",
-                        description: "Please create a password to secure your account.",
+                        description: "Welcome to HealthLink Hub. Your account is ready!",
                     });
                      // Add a welcome notification
                     addNotification(user.id, {
@@ -89,36 +89,27 @@ export default function LoginPage() {
                         icon: 'login',
                         href: `/${user.role}/profile`
                     });
-                    router.push('/set-password');
                 } else {
                     toast({
                         title: "Login Successful!",
                         description: "Welcome back to HealthLink Hub.",
                     });
-                    addNotification(user.id, {
+                     addNotification(user.id, {
                         title: 'Login Successful',
                         message: 'You have successfully logged in.',
                         icon: 'login',
-                        href: `/${user.role}/dashboard`
+                        href: dashboardPath
                     });
-                    
-                    if (user.status === 'pending') {
-                        toast({
-                            title: "Account Pending Approval",
-                            description: "Your account is active for viewing and profile updates, but some features are disabled until admin approval.",
-                            duration: 9000,
-                        });
-                    }
-
-                    if(selectedRole === 'admin') {
-                        router.push('/admin');
-                    } else if (selectedRole === 'patient' || selectedRole === 'health-coordinator') {
-                        router.push('/book-appointment');
-                    }
-                    else {
-                        router.push(`/${selectedRole}/dashboard`);
-                    }
                 }
+                 if (user.status === 'pending') {
+                    toast({
+                        title: "Account Pending Approval",
+                        description: "Your account is active for viewing and profile updates, but some features are disabled until admin approval.",
+                        duration: 9000,
+                    });
+                }
+                router.push(dashboardPath);
+
             } else {
                 toast({
                     title: "Login Failed",
@@ -133,31 +124,6 @@ export default function LoginPage() {
 
 
   function onSubmit(values: z.infer<typeof loginSchema>) {
-    // If password is provided, try password login
-    if (values.password && selectedRole) {
-        const { user, error } = signInWithPassword(values.email, values.password, selectedRole);
-
-        if (user) {
-            sessionStorage.setItem('user', JSON.stringify(user));
-            toast({
-                title: "Login Successful!",
-                description: "Welcome back to HealthLink Hub.",
-            });
-            const dashboardPath = user.role === 'admin' ? '/admin' 
-                           : user.role === 'patient' ? '/patient/my-health'
-                           : `/${user.role}/dashboard`;
-            router.push(dashboardPath);
-        } else {
-             toast({
-                title: "Login Failed",
-                description: error,
-                variant: "destructive",
-            });
-        }
-        return;
-    }
-    
-    // Otherwise, use magic link
     sendAuthenticationLink(values.email);
     if(values.referralCode) {
         sessionStorage.setItem('referralCode', values.referralCode);
@@ -185,7 +151,7 @@ export default function LoginPage() {
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-headline">{roleDisplayName} Login</CardTitle>
             {!linkSent ? (
-                <CardDescription>Enter your credentials to log in.</CardDescription>
+                <CardDescription>Enter your email to receive a secure sign-in link.</CardDescription>
             ) : (
                 <CardDescription>A sign-in link has been sent to your email address.</CardDescription>
             )}
@@ -209,42 +175,13 @@ export default function LoginPage() {
                         )}
                     />
                     
-                    <FormField
-                        control={form.control}
-                        name="password"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Password (for testing)</FormLabel>
-                            <FormControl>
-                                 <div className="relative">
-                                    <Input type="password" placeholder="••••••••" {...field} />
-                                    <KeyRound className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                </div>
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    
-                    <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-                        {form.formState.isSubmitting ? <Loader2 className="animate-spin" /> : "Login"}
-                    </Button>
-
-                    <div className="relative">
-                        <Separator />
-                        <span className="absolute left-1/2 -translate-x-1/2 top-[-13px] bg-card px-2 text-sm text-muted-foreground">OR</span>
-                    </div>
-                    
-                    <Button type="button" variant="outline" className="w-full" disabled={form.formState.isSubmitting} onClick={() => onSubmit(form.getValues())}>
-                        {form.formState.isSubmitting ? <Loader2 className="animate-spin" /> : "Send Secure Sign-in Link"}
-                    </Button>
                      {selectedRole !== 'patient' && (
                         <FormField
                             control={form.control}
                             name="referralCode"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Referral Code (for new users)</FormLabel>
+                                <FormLabel>Referral Code (Optional)</FormLabel>
                                 <FormControl>
                                     <Input placeholder="Enter referral code if you have one" {...field} />
                                 </FormControl>
@@ -253,6 +190,10 @@ export default function LoginPage() {
                             )}
                         />
                     )}
+
+                    <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+                        {form.formState.isSubmitting ? <Loader2 className="animate-spin" /> : "Send Secure Sign-in Link"}
+                    </Button>
                 </form>
                 </Form>
             ) : (
@@ -263,7 +204,7 @@ export default function LoginPage() {
                         We've sent a magic link to <span className="font-medium text-foreground">{form.getValues('email')}</span>. Click the link in the email to sign in instantly.
                     </p>
                     <Button variant="link" onClick={() => setLinkSent(false)} className="mt-4">
-                        Use a different email or method
+                        Use a different email
                     </Button>
                 </div>
             )}

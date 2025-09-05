@@ -9,7 +9,7 @@ export default function PatientDashboardRedirect() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/book-appointment');
+    router.replace('/patient/my-health');
   }, [router]);
 
   return (

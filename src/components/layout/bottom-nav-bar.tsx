@@ -29,8 +29,8 @@ export function BottomNavBar() {
   let navItems = [];
   if (user.role === 'patient') {
       navItems = [
-        { href: '/book-appointment', label: 'Dashboard', icon: LayoutDashboard },
-        { href: '/book-appointment?tab=services', label: 'Book', icon: Calendar },
+        { href: '/patient/my-health', label: 'My Health', icon: LayoutDashboard },
+        { href: '/book-appointment', label: 'Book', icon: Calendar },
       ];
   } else if (user.role === 'health-coordinator') {
       navItems = [

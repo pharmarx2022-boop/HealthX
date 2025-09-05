@@ -1,6 +1,8 @@
 
 'use client';
 
+import { Header } from '@/components/layout/header';
+import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { User, Calendar, Clock, Stethoscope, RefreshCw, Bell, Star, Users, Wallet, History, FileText, Loader2, Store, KeyRound, Share2 } from 'lucide-react';
 import { useState, useEffect, useMemo, useRef } from 'react';
@@ -33,7 +35,7 @@ type ReviewTarget = {
     transactionId?: string; // Appointment or Transaction ID to mark as reviewed
 };
 
-export function MyHealthPage() {
+export default function MyHealthPage() {
     const { toast } = useToast();
     const [myAppointments, setMyAppointments] = useState<any[]>([]);
     const [isClient, setIsClient] = useState(false);
@@ -175,11 +177,13 @@ export function MyHealthPage() {
 
 
     return (
-        <>
-            <div className="space-y-8 pt-8">
+        <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-1 bg-slate-50/50 pb-20 md:pb-0">
+                <div className="container mx-auto py-12 space-y-8">
                     <div className="mb-8">
                         <h1 className="text-3xl font-headline font-bold">My Health</h1>
-                        <p className="text-muted-foreground">Manage your appointments and health records.</p>
+                        <p className="text-muted-foreground">Welcome, {user?.fullName || 'Patient'}! Manage your appointments and health records.</p>
                     </div>
 
                     {isClient && nextReminder && (
@@ -196,17 +200,13 @@ export function MyHealthPage() {
                     <div className="grid lg:grid-cols-3 gap-8">
                         <div className="lg:col-span-2 space-y-8">
                              <Card className="shadow-sm">
-                                <CardHeader className="flex flex-row items-center gap-4">
-                                    <User className="w-8 h-8 text-primary" />
-                                    <div>
-                                        <CardTitle>Welcome, {user?.fullName || 'Patient'}!</CardTitle>
-                                        <CardDescription>
-                                            Book new appointments, view your upcoming visits, and track your refunds.
-                                        </CardDescription>
-                                    </div>
+                                <CardHeader>
+                                    <CardTitle>Your Appointments</CardTitle>
+                                    <CardDescription>
+                                        View your upcoming visits, and track your refunds.
+                                    </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <h2 className="text-xl font-semibold mb-4">Your Appointments</h2>
                                     <div className="space-y-6">
                                         {isClient && myAppointments.length > 0 ? (
                                             myAppointments.map(appt => (
@@ -306,8 +306,10 @@ export function MyHealthPage() {
                             </Card>
                         </div>
                     </div>
-
                 </div>
+            </main>
+            <Footer />
+            <BottomNavBar />
 
             {/* Review Dialog */}
             <Dialog open={isReviewOpen} onOpenChange={setIsReviewOpen}>
@@ -398,6 +400,6 @@ export function MyHealthPage() {
                     </div>
                 </DialogContent>
             </Dialog>
-        </>
+        </div>
     );
 }

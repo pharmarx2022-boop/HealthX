@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { HeartPulse, Menu, X, UserCircle, LogOut, Settings, Briefcase, Users, Pill, Beaker, Gift, Bell, Calendar } from 'lucide-react';
+import { HeartPulse, Menu, X, UserCircle, LogOut, Settings, Briefcase, Users, Pill, Beaker, Gift, Bell, Calendar, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { useState, useEffect } from 'react';
@@ -52,7 +52,7 @@ export function Header() {
     if (user) {
       const roleDisplayName = (user.role.charAt(0).toUpperCase() + user.role.slice(1)).replace('-coordinator', ' Coordinator');
       const dashboardPath = user.role === 'admin' ? '/admin' 
-                           : user.role === 'patient' ? '/book-appointment'
+                           : user.role === 'patient' ? '/patient/my-health'
                            : `/${user.role}/dashboard`;
 
       return (
@@ -60,7 +60,7 @@ export function Header() {
             <NotificationPopover userId={user.id} />
              {(user.role === 'patient' || user.role === 'health-coordinator') && (
                 <Button asChild>
-                    <Link href="/book-appointment?tab=services">
+                    <Link href="/book-appointment">
                         <Calendar className="mr-2 h-4 w-4" />
                         Book Appointment
                     </Link>
@@ -99,8 +99,8 @@ export function Header() {
                     </>
                 )}
                 {user.role === 'patient' && (
-                    <DropdownMenuItem asChild>
-                        <Link href="/book-appointment#family">
+                     <DropdownMenuItem asChild>
+                        <Link href="/patient/my-health#family">
                             <Users className="mr-2" />
                             <span>Family Members</span>
                         </Link>
@@ -146,7 +146,7 @@ export function Header() {
     const renderMobileAuthButtons = () => {
     if (user) {
        const dashboardPath = user.role === 'admin' ? '/admin' 
-                           : user.role === 'patient' ? '/book-appointment'
+                           : user.role === 'patient' ? '/patient/my-health'
                            : `/${user.role}/dashboard`;
       return (
         <>
@@ -174,7 +174,7 @@ export function Header() {
            )}
            {user.role === 'patient' && (
                 <Button variant="ghost" asChild className="justify-start text-lg">
-                    <Link href="/book-appointment#family" onClick={() => setIsSheetOpen(false)}>
+                    <Link href="/patient/my-health#family" onClick={() => setIsSheetOpen(false)}>
                         <Users className="mr-2" />
                         Family Members
                     </Link>

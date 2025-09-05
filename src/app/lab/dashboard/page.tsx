@@ -7,14 +7,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Beaker, Search, User, Wallet, History, BadgePercent, Banknote, Upload, Gift, Loader2, Briefcase } from 'lucide-react';
+import { Beaker, Search, User, History, BadgePercent, Banknote, Upload, Gift, Loader2, Briefcase } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useMemo, useEffect } from 'react';
 import { initialLabs, mockPatientData, mockReports, type MockReport } from '@/lib/mock-data';
 import { getTransactionHistory, recordTransaction, type Transaction } from '@/lib/transactions';
-import { getLabData, recordCommission as recordLabTransaction, LabTransaction } from '@/lib/lab-data';
-import { getCommissionWalletData, requestWithdrawal as requestCommissionWithdrawal, type CommissionTransaction } from '@/lib/commission-wallet';
-import { requestWithdrawal as requestHealthPointWithdrawal } from '@/lib/healthpoint-wallet';
+import { getCommissionWalletData, requestWithdrawal as requestCommissionWithdrawal, recordCommission, type CommissionTransaction } from '@/lib/commission-wallet';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -44,7 +42,6 @@ export default function LabDashboardPage() {
     const [otpSent, setOtpSent] = useState(false);
     const [totalBill, setTotalBill] = useState('');
     const [patientTransactionHistory, setPatientTransactionHistory] = useState<{ balance: number; transactions: Transaction[] }>({ balance: 0, transactions: [] });
-    const [labData, setLabData] = useState<{ balance: number; transactions: LabTransaction[] }>({ balance: 0, transactions: [] });
     const [commissionWallet, setCommissionWallet] = useState<{ balance: number; transactions: CommissionTransaction[] }>({ balance: 0, transactions: [] });
     const [labDetails, setLabDetails] = useState<any | null>(null);
     const [reportFile, setReportFile] = useState<File | null>(null);
@@ -64,7 +61,6 @@ export default function LabDashboardPage() {
                 const allLabs = storedLabs ? JSON.parse(storedLabs) : initialLabs;
                 const myDetails = allLabs.find((p: any) => p.id === u.id);
                 setLabDetails(myDetails);
-                setLabData(getLabData(u.id));
                 setCommissionWallet(getCommissionWalletData(u.id));
             }
              if (!sessionStorage.getItem(REPORTS_KEY)) {
@@ -145,7 +141,7 @@ export default function LabDashboardPage() {
         }
 
         const { pointsToPay } = calculatedAmounts;
-        const commissionAmount = pointsToPay * 0.95; // Lab gets 95%
+        const commissionAmount = pointsToPay * 0.05; // Partner gets 5%
 
         if (pointsToPay > patientTransactionHistory.balance) {
             toast({
@@ -169,12 +165,13 @@ export default function LabDashboardPage() {
         });
         addNotification(patient.id, `You have successfully redeemed INR ${pointsToPay.toFixed(2)} in Health Points at ${labDetails.name}.`);
         
-        // Credit points to lab
-        recordLabTransaction(user.id, {
+        // Credit commission to lab
+        recordCommission(user.id, {
             type: 'credit',
             amount: commissionAmount,
             description: `Commission from ${patient.name}'s bill`,
             date: new Date(),
+            status: 'success'
         });
         
         // Check for referral milestone
@@ -189,7 +186,7 @@ export default function LabDashboardPage() {
         // Refresh data
         setPatient(null);
         setPatientSearch('');
-        setLabData(getLabData(user.id));
+        setCommissionWallet(getCommissionWalletData(user.id));
         setOtpSent(false);
         setOtp('');
         setTotalBill('');
@@ -242,20 +239,6 @@ export default function LabDashboardPage() {
         }
         requestCommissionWithdrawal(user.id, labDetails.name, withdrawalAmount);
         setCommissionWallet(getCommissionWalletData(user.id));
-    }
-    
-     const handleHealthPointWithdrawal = () => {
-        const withdrawalAmount = labData.balance;
-         if (withdrawalAmount <= 0) {
-            toast({
-                title: "No Health Points to Withdraw",
-                description: "You have no balance to withdraw.",
-                variant: "destructive"
-            });
-            return;
-        }
-        requestHealthPointWithdrawal(user.id, labDetails.name, withdrawalAmount, 'lab');
-        setLabData(getLabData(user.id));
     }
 
   return (
@@ -425,56 +408,10 @@ export default function LabDashboardPage() {
                     </Card>
                 </div>
                 <div className="lg:col-span-1 space-y-8">
-                    <Card className="shadow-sm">
-                        <CardHeader>
-                            <CardTitle>Collected Health Points</CardTitle>
-                            <CardDescription>Points collected from patient bills.</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-4xl font-bold">INR {labData.balance.toFixed(2)}</p>
-                        </CardContent>
-                        <CardFooter className="flex-col items-start gap-4">
-                            <Button className="w-full" onClick={handleHealthPointWithdrawal} disabled={!isClient || labData.balance <= 0}>
-                                <Banknote className="mr-2"/> Request Withdrawal
-                            </Button>
-                            <Dialog>
-                                <DialogTrigger asChild>
-                                    <Button variant="link" className="p-0 h-auto self-center">
-                                        <History className="mr-2"/> View Collection History
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                    <DialogHeader>
-                                        <DialogTitle>Collection History</DialogTitle>
-                                        <DialogDescription>A record of Health Points collected from patient bills.</DialogDescription>
-                                    </DialogHeader>
-                                    <div className="max-h-[50vh] overflow-y-auto -mx-6 px-6">
-                                        <ul className="space-y-4 py-4">
-                                            {labData.transactions.length > 0 ? (
-                                                labData.transactions.map((tx, index) => (
-                                                    <li key={index} className="flex items-center justify-between">
-                                                        <div>
-                                                            <p className="font-medium">{tx.description}</p>
-                                                            <p className="text-xs text-muted-foreground mt-1">{format(new Date(tx.date), 'PP, p')}</p>
-                                                        </div>
-                                                        <span className={`font-semibold ${tx.type === 'credit' ? 'text-green-600' : 'text-destructive'}`}>
-                                                            {tx.type === 'credit' ? '+' : '-'} INR {tx.amount.toFixed(2)}
-                                                        </span>
-                                                    </li>
-                                                ))
-                                            ) : (
-                                                <p className="text-center text-muted-foreground py-4">No transactions yet.</p>
-                                            )}
-                                        </ul>
-                                    </div>
-                                </DialogContent>
-                            </Dialog>
-                        </CardFooter>
-                    </Card>
                      <Card className="shadow-sm">
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2"><Gift/> Referral Commissions</CardTitle>
-                            <CardDescription>Your earnings from referring new partners.</CardDescription>
+                            <CardTitle className="flex items-center gap-2"><Gift/> Total Earnings</CardTitle>
+                            <CardDescription>Your earnings from referrals and patient transactions.</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <p className="text-4xl font-bold">INR {isClient ? commissionWallet.balance.toFixed(2) : '0.00'}</p>
@@ -486,13 +423,13 @@ export default function LabDashboardPage() {
                             <Dialog>
                                 <DialogTrigger asChild>
                                     <Button variant="link" className="p-0 h-auto self-center">
-                                        <History className="mr-2"/> View Commission History
+                                        <History className="mr-2"/> View Earnings History
                                     </Button>
                                 </DialogTrigger>
                                 <DialogContent>
                                     <DialogHeader>
-                                        <DialogTitle>Commission History</DialogTitle>
-                                        <DialogDescription>A record of your referral earnings and withdrawals.</DialogDescription>
+                                        <DialogTitle>Earnings History</DialogTitle>
+                                        <DialogDescription>A record of your referral bonuses, patient transaction commissions, and withdrawals.</DialogDescription>
                                     </DialogHeader>
                                     <div className="max-h-[50vh] overflow-y-auto -mx-6 px-6">
                                         <ul className="space-y-4 py-4">
@@ -509,7 +446,7 @@ export default function LabDashboardPage() {
                                                     </li>
                                                 ))
                                             ) : (
-                                                <p className="text-center text-muted-foreground py-4">No commission transactions yet.</p>
+                                                <p className="text-center text-muted-foreground py-4">No transactions yet.</p>
                                             )}
                                         </ul>
                                     </div>
@@ -521,7 +458,7 @@ export default function LabDashboardPage() {
                         <Banknote className="h-4 w-4" />
                         <AlertTitle>How Payments Work</AlertTitle>
                         <AlertDescription>
-                          Enter the patient's total bill amount. The system calculates how much they can pay with Health Points based on your discount. The patient pays the rest in cash. The Health Points you collect are added to your balance, which you can request as a cash payout from the admin (minus a 5% admin fee).
+                          Enter the patient's total bill amount. The system calculates how much they can pay with Health Points based on your discount. You earn a 5% commission on the value of redeemed points. All earnings can be withdrawn from your Total Earnings wallet.
                         </AlertDescription>
                     </Alert>
                 </div>

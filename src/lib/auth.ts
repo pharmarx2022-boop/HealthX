@@ -3,7 +3,6 @@
 // A simple in-memory store for users
 const users: any[] = [];
 import { createReferral } from './referrals';
-export const MOCK_OTP = '123456';
 
 // A secure, hardcoded list of admin accounts.
 // In a real application, this would be stored securely in a database.
@@ -48,17 +47,39 @@ const populateAllUsersForLookup = () => {
 }
 
 
-export function loginWithOtp(email: string, otp: string, role: string, referralCode?: string) {
-    if (otp !== MOCK_OTP) {
-        return { user: null, error: "Invalid OTP. Please try again.", isNewUser: false };
+// This function simulates sending an authentication link.
+// In a real Firebase app, this would use `sendSignInLinkToEmail` from the Firebase SDK.
+export function sendAuthenticationLink(email: string) {
+    // We store the email in localStorage because when the user clicks the link and comes back,
+    // we need to know which email to sign in. Firebase's SDK handles this automatically.
+    if (typeof window !== 'undefined') {
+        window.localStorage.setItem('emailForSignIn', email);
+    }
+    console.log(`SIGN-IN LINK: A sign-in link has been sent to ${email}. In this demo, you don't need to check your email. The link is simulated.`);
+    // In a real app, you would not return the link. The user gets it via email.
+    // For demo purposes, we can construct a "magic link" that the user can use.
+    return `${window.location.href}?signIn=true`;
+}
+
+
+export function completeSignIn(href: string, role: string, referralCode?: string) {
+    if (typeof window === 'undefined') {
+        return { user: null, error: "Sign-in must be completed in a browser.", isNewUser: false };
+    }
+
+    const email = window.localStorage.getItem('emailForSignIn');
+    if (!email) {
+        return { user: null, error: "Sign-in session expired or invalid. Please try again.", isNewUser: false };
     }
 
     // Special handling for admin login
     if (role === 'admin') {
         const adminUser = ADMIN_ACCOUNTS.find(admin => admin.email === email);
         if (adminUser) {
+            window.localStorage.removeItem('emailForSignIn');
             return { user: { ...adminUser, fullName: 'Admin' }, error: null, isNewUser: false };
         } else {
+             window.localStorage.removeItem('emailForSignIn');
             return { user: null, error: "This email is not registered as an admin.", isNewUser: false };
         }
     }
@@ -126,28 +147,11 @@ export function loginWithOtp(email: string, otp: string, role: string, referralC
         return { user: null, error: "Your registration has been rejected.", isNewUser: false };
     }
     
+    window.localStorage.removeItem('emailForSignIn');
     return { user, error: null, isNewUser };
 }
 
 
-export function registerUser(userData: any) {
-    const existingUser = users.find(u => u.email === userData.email);
-    if (existingUser) {
-        return false; // User already exists
-    }
-    users.push(userData);
-    console.log('Registered Users:', users);
-    return true;
-}
-
-export function loginUser(email: string, password: string, role: string) {
-    const user = users.find(u => (u.email === email) && u.role === role);
-
-    if (user && user.password === password) {
-        return user;
-    }
-    return null;
-}
 
 export function getAllPendingUsers() {
     const doctors = JSON.parse(sessionStorage.getItem('doctorsData') || '[]').filter((u: any) => u.status === 'pending');

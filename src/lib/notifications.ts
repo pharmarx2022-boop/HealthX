@@ -2,8 +2,6 @@
 
 'use client';
 
-import { MOCK_OTP } from './auth';
-
 export type Notification = {
     id: string;
     userId: string;
@@ -55,18 +53,10 @@ export function markNotificationsAsRead(userId: string) {
 
 // --- OTP Related Notifications ---
 
-export function sendLoginOtpNotification(email: string) {
-    // This function now simulates sending the notification. 
-    // The actual notification is added after a successful login when we have the userId.
-    const message = `Your login OTP is ${MOCK_OTP}. It's valid for 10 minutes.`;
-    console.log(`Simulating OTP notification for ${email}: ${message}`);
-}
-
-
 export function sendRedemptionOtpNotification(patientId: string, patientName: string) {
     addNotification(patientId, {
         title: 'Your OTP is here!',
-        message: `Use OTP ${MOCK_OTP} to confirm your payment.`,
+        message: `Use OTP 123456 to confirm your payment.`,
         icon: 'wallet',
     });
 }
@@ -74,8 +64,7 @@ export function sendRedemptionOtpNotification(patientId: string, patientName: st
 export function sendBookingOtpNotification(patientId: string, patientName: string) {
      addNotification(patientId, {
         title: 'Confirm Your Booking',
-        message: `Your OTP to confirm the appointment is ${MOCK_OTP}.`,
+        message: `Your OTP to confirm the appointment is 123456.`,
         icon: 'calendar',
     });
 }
-

@@ -15,12 +15,12 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { loginWithOtp, MOCK_OTP } from '@/lib/auth';
-import { sendLoginOtpNotification, addNotification } from '@/lib/notifications';
+import { sendAuthenticationLink, completeSignIn } from '@/lib/auth';
+import { addNotification } from '@/lib/notifications';
+import { MailCheck, Loader2 } from 'lucide-react';
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'A valid email address is required.' }),
-  otp: z.string().optional(),
   referralCode: z.string().optional(),
 });
 
@@ -37,14 +37,14 @@ export default function LoginPage() {
   const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [otpSent, setOtpSent] = useState(false);
+  const [linkSent, setLinkSent] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: '',
-      otp: '',
       referralCode: '',
     },
   });
@@ -54,7 +54,6 @@ export default function LoginPage() {
     if (isValidRole(roleFromQuery)) {
         setSelectedRole(roleFromQuery);
     } else {
-        // Redirect or show an error if the role is invalid/missing
         toast({
             title: "Invalid Role",
             description: "Please select a role from the homepage.",
@@ -62,82 +61,80 @@ export default function LoginPage() {
         });
         router.push('/');
     }
-  }, [searchParams, router, toast]);
+    
+    // Check if the URL is a sign-in link
+    if (searchParams.get('signIn') === 'true' && roleFromQuery) {
+        setIsVerifying(true);
+        const referralCode = sessionStorage.getItem('referralCode') || undefined;
+        
+        // Simulate a small delay for UX
+        setTimeout(() => {
+            const { user, error, isNewUser } = completeSignIn(window.location.href, roleFromQuery, referralCode);
 
+            if (user) {
+                toast({
+                    title: "Login Successful!",
+                    description: "Welcome to HealthLink Hub.",
+                });
+                sessionStorage.setItem('user', JSON.stringify(user));
+                sessionStorage.removeItem('referralCode');
 
-  const handleSendOtp = () => {
-    const email = form.getValues('email');
-    if (form.getValues('email')) {
-      setOtpSent(true);
-      sendLoginOtpNotification(email);
-      toast({
-        title: "OTP Sent!",
-        description: `An OTP has been sent to ${email} and as an in-app notification. For testing purposes, your OTP is: ${MOCK_OTP}`,
-      });
-    } else {
-        form.setError("email", { type: "manual", message: "Please enter a valid email address." })
+                // Add a welcome notification
+                addNotification(user.id, {
+                    title: isNewUser ? 'Welcome to HealthLink Hub!' : 'Login Successful',
+                    message: isNewUser ? 'Your account is ready. Complete your profile to get started.' : 'You have successfully logged in.',
+                    icon: 'login',
+                    href: isNewUser && user.role !== 'patient' ? `/${user.role}/profile` : `/${user.role}/dashboard`
+                });
+                
+                if (user.status === 'pending') {
+                    toast({
+                        title: "Account Pending Approval",
+                        description: "Your account is active for viewing and profile updates, but some features are disabled until admin approval.",
+                        duration: 9000,
+                    });
+                }
+
+                if(selectedRole === 'admin') {
+                    router.push('/admin');
+                } else if (selectedRole === 'patient' || selectedRole === 'health-coordinator') {
+                    router.push('/book-appointment');
+                }
+                else {
+                    router.push(`/${selectedRole}/dashboard`);
+                }
+            } else {
+                toast({
+                    title: "Login Failed",
+                    description: error || "Invalid sign-in link. Please try again.",
+                    variant: "destructive",
+                });
+            }
+             setIsVerifying(false);
+        }, 1000);
     }
-  };
+  }, [searchParams, router, toast, selectedRole]);
+
 
   function onSubmit(values: z.infer<typeof loginSchema>) {
-    if (!selectedRole) {
-        toast({
-            title: "Login Failed",
-            description: "No role selected. Please go back to the homepage and select a role.",
-            variant: "destructive",
-        });
-        return;
+    sendAuthenticationLink(values.email);
+    if(values.referralCode) {
+        sessionStorage.setItem('referralCode', values.referralCode);
     }
-
-    if (!otpSent) {
-        handleSendOtp();
-        return;
-    }
-
-    const { user, error, isNewUser } = loginWithOtp(values.email, values.otp!, selectedRole, values.referralCode);
-    if (user) {
-        toast({
-            title: "Login Successful!",
-            description: "Welcome back to HealthLink Hub.",
-        });
-        if (typeof window !== 'undefined') {
-            sessionStorage.setItem('user', JSON.stringify(user));
-        }
-
-        // Add a welcome notification
-        addNotification(user.id, {
-            title: isNewUser ? 'Welcome to HealthLink Hub!' : 'Login Successful',
-            message: isNewUser ? 'Your account is ready. Complete your profile to get started.' : 'You have successfully logged in.',
-            icon: 'login',
-            href: isNewUser && user.role !== 'patient' ? `/${user.role}/profile` : `/${user.role}/dashboard`
-        });
-        
-        if (user.status === 'pending') {
-             toast({
-                title: "Account Pending Approval",
-                description: "Your account is active for viewing and profile updates, but some features are disabled until admin approval.",
-                duration: 9000,
-            });
-        }
-
-        if(selectedRole === 'admin') {
-            router.push('/admin');
-        } else if (selectedRole === 'patient' || selectedRole === 'health-coordinator') {
-            router.push('/book-appointment');
-        }
-        else {
-            router.push(`/${selectedRole}/dashboard`);
-        }
-    } else {
-        toast({
-            title: "Login Failed",
-            description: error || "Invalid OTP. Please try again.",
-            variant: "destructive",
-        })
-    }
+    setLinkSent(true);
   }
   
   const roleDisplayName = selectedRole ? (selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)).replace('-coordinator', ' Coordinator') : '';
+
+  if (isVerifying) {
+      return (
+        <div className="flex h-screen w-full flex-col items-center justify-center bg-background">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <h1 className="mt-4 text-2xl font-bold">Verifying your sign-in...</h1>
+            <p className="text-muted-foreground">Please wait while we securely log you in.</p>
+        </div>
+      );
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -146,40 +143,29 @@ export default function LoginPage() {
         <Card className="w-full max-w-md mx-auto shadow-lg">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-headline">{roleDisplayName} Login / Sign Up</CardTitle>
-            <CardDescription>Sign in with your email address to continue.</CardDescription>
+            {!linkSent ? (
+                <CardDescription>Enter your email to receive a secure sign-in link.</CardDescription>
+            ) : (
+                <CardDescription>A sign-in link has been sent to your email address.</CardDescription>
+            )}
           </CardHeader>
           <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email Address</FormLabel>
-                      <FormControl>
-                        <Input type="email" placeholder="you@example.com" {...field} disabled={otpSent} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                {otpSent && (
-                  <>
+            {!linkSent ? (
+                <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    
                     <FormField
-                      control={form.control}
-                      name="otp"
-                      render={({ field }) => (
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
                         <FormItem>
-                          <FormLabel>OTP</FormLabel>
-                          <FormControl>
-                            <Input type="text" placeholder="Enter the 6-digit OTP" {...field} />
-                          </FormControl>
-                          <FormMessage />
+                        <FormLabel>Email Address</FormLabel>
+                        <FormControl>
+                            <Input type="email" placeholder="you@example.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
                         </FormItem>
-                      )}
+                    )}
                     />
                     
                     {selectedRole !== 'patient' && (
@@ -197,15 +183,24 @@ export default function LoginPage() {
                             )}
                         />
                     )}
-                  </>
-                )}
-                
-                <Button type="submit" className="w-full">
-                  {otpSent ? 'Verify OTP & Login' : 'Send OTP'}
-                </Button>
-                {otpSent && <Button type="button" variant="link" className="w-full" onClick={() => setOtpSent(false)}>Change Email</Button>}
-              </form>
-            </Form>
+                    
+                    <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+                        {form.formState.isSubmitting ? <Loader2 className="animate-spin" /> : "Send Sign-in Link"}
+                    </Button>
+                </form>
+                </Form>
+            ) : (
+                <div className="text-center flex flex-col items-center">
+                    <MailCheck className="w-16 h-16 text-primary mb-4"/>
+                    <h3 className="font-semibold text-lg">Check Your Email</h3>
+                    <p className="text-muted-foreground mt-2">
+                        We've sent a magic link to <span className="font-medium text-foreground">{form.getValues('email')}</span>. Click the link in the email to sign in instantly.
+                    </p>
+                    <Button variant="link" onClick={() => setLinkSent(false)} className="mt-4">
+                        Use a different email
+                    </Button>
+                </div>
+            )}
             <div className="mt-4 text-center text-sm">
                 Not a {roleDisplayName}? <Link href="/" className="underline">Go back</Link>
             </div>

@@ -58,7 +58,7 @@ export function sendAuthenticationLink(email: string) {
     console.log(`SIGN-IN LINK: A sign-in link has been sent to ${email}. In this demo, you don't need to check your email. The link is simulated.`);
     // In a real app, you would not return the link. The user gets it via email.
     // For demo purposes, we can construct a "magic link" that the user can use.
-    return `${window.location.href}?signIn=true`;
+    return `${window.location.origin}/login?signIn=true&role=${new URLSearchParams(window.location.search).get('role')}`;
 }
 
 
@@ -85,7 +85,7 @@ export function completeSignIn(href: string, role: string, referralCode?: string
     }
     
     // Combine all user data sources for lookup
-    const allUsers = [
+    const allKnownUsers = [
         ...users,
         ...(JSON.parse(sessionStorage.getItem('doctorsData') || '[]')),
         ...(JSON.parse(sessionStorage.getItem('mockLabs') || '[]')),
@@ -94,7 +94,7 @@ export function completeSignIn(href: string, role: string, referralCode?: string
 
 
     // Find user or create a new one
-    let user = allUsers.find(u => u.email === email && u.role === role);
+    let user = allKnownUsers.find(u => u.email === email && u.role === role);
     let isNewUser = false;
     
     if (!user) {
@@ -108,7 +108,7 @@ export function completeSignIn(href: string, role: string, referralCode?: string
             role, 
             referralCode: isProfessional ? generateReferralCode() : null,
             fullName: `${(role.charAt(0).toUpperCase() + role.slice(1)).replace('-coordinator', ' Coordinator')} ${emailPrefix}`, // Mock name
-            phone: '9876543210', // Mock phone for backward compatibility
+            phone: '',
             status: isProfessional ? 'pending' : 'approved', // New users need approval
             dateJoined: new Date().toISOString(),
             // Professional registration details
@@ -155,7 +155,10 @@ export function completeSignIn(href: string, role: string, referralCode?: string
         return { user: null, error: "Your registration has been rejected.", isNewUser: false };
     }
     
-    window.localStorage.removeItem('emailForSignIn');
+    // For new users, don't remove the email yet. We need it on the set-password page.
+    if (!isNewUser) {
+        window.localStorage.removeItem('emailForSignIn');
+    }
     return { user, error: null, isNewUser };
 }
 
@@ -242,4 +245,61 @@ export function verifyAdmin(): boolean {
     } catch (e) {
         return false;
     }
+}
+
+export function signInWithPassword(email: string, password: string, role: string) {
+    let allKnownUsers: any[] = [...users, ...ADMIN_ACCOUNTS];
+    if (role === 'doctor') allKnownUsers = [...allKnownUsers, ...(JSON.parse(sessionStorage.getItem('doctorsData') || '[]'))];
+    if (role === 'lab') allKnownUsers = [...allKnownUsers, ...(JSON.parse(sessionStorage.getItem('mockLabs') || '[]'))];
+    if (role === 'pharmacy') allKnownUsers = [...allKnownUsers, ...(JSON.parse(sessionStorage.getItem('mockPharmacies') || '[]'))];
+
+    const user = allKnownUsers.find(u => u.email === email && u.role === role);
+
+    if (user && user.password === password) {
+        return { user, error: null };
+    }
+    
+    if (user && !user.password) {
+        return { user: null, error: "This account uses magic link sign-in. Please use the link sent to your email." };
+    }
+
+    return { user: null, error: "Invalid email or password." };
+}
+
+export function updateUserPassword(userId: string, role: string, newPassword: string): boolean {
+    let key: string | null = null;
+    let dataArray: any[] | null = null;
+
+    switch (role) {
+        case 'doctor':
+            key = 'doctorsData';
+            break;
+        case 'lab':
+            key = 'mockLabs';
+            break;
+        case 'pharmacy':
+            key = 'mockPharmacies';
+            break;
+        case 'patient':
+        case 'health-coordinator':
+            const userIndex = users.findIndex(u => u.id === userId);
+            if (userIndex > -1) {
+                users[userIndex].password = newPassword;
+                return true;
+            }
+            return false;
+    }
+
+    if (key) {
+        const storedData = sessionStorage.getItem(key);
+        dataArray = storedData ? JSON.parse(storedData) : [];
+        const userIndex = dataArray.findIndex(u => u.id === userId);
+        if (userIndex > -1) {
+            dataArray[userIndex].password = newPassword;
+            sessionStorage.setItem(key, JSON.stringify(dataArray));
+            return true;
+        }
+    }
+    
+    return false;
 }

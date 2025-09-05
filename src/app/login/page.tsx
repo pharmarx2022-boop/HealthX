@@ -14,12 +14,13 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { sendAuthenticationLink, completeSignIn } from '@/lib/auth';
+import { sendAuthenticationLink, completeSignIn, signInWithPassword } from '@/lib/auth';
 import { addNotification } from '@/lib/notifications';
 import { MailCheck, Loader2 } from 'lucide-react';
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'A valid email address is required.' }),
+  password: z.string().optional(),
   referralCode: z.string().optional(),
 });
 
@@ -44,6 +45,7 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: '',
+      password: '',
       referralCode: '',
     },
   });
@@ -78,10 +80,6 @@ export default function LoginPage() {
                            : `/${user.role}/dashboard`;
 
                 if (isNewUser) {
-                    toast({
-                        title: "Account Created!",
-                        description: "Welcome to HealthLink Hub. Your account is ready!",
-                    });
                      // Add a welcome notification
                     addNotification(user.id, {
                         title: 'Welcome to HealthLink Hub!',
@@ -89,6 +87,9 @@ export default function LoginPage() {
                         icon: 'login',
                         href: `/${user.role}/profile`
                     });
+                     // Redirect to set password
+                    router.push('/set-password');
+
                 } else {
                     toast({
                         title: "Login Successful!",
@@ -100,15 +101,15 @@ export default function LoginPage() {
                         icon: 'login',
                         href: dashboardPath
                     });
+                     if (user.status === 'pending') {
+                        toast({
+                            title: "Account Pending Approval",
+                            description: "Your account is active for viewing and profile updates, but some features are disabled until admin approval.",
+                            duration: 9000,
+                        });
+                    }
+                    router.push(dashboardPath);
                 }
-                 if (user.status === 'pending') {
-                    toast({
-                        title: "Account Pending Approval",
-                        description: "Your account is active for viewing and profile updates, but some features are disabled until admin approval.",
-                        duration: 9000,
-                    });
-                }
-                router.push(dashboardPath);
 
             } else {
                 toast({
@@ -116,19 +117,44 @@ export default function LoginPage() {
                     description: error || "Invalid sign-in link. Please try again.",
                     variant: "destructive",
                 });
+                 setIsVerifying(false);
             }
-             setIsVerifying(false);
         }, 1000);
     }
   }, [searchParams, router, toast, selectedRole]);
 
 
   function onSubmit(values: z.infer<typeof loginSchema>) {
-    sendAuthenticationLink(values.email);
-    if(values.referralCode) {
-        sessionStorage.setItem('referralCode', values.referralCode);
+    if (values.password) {
+        // Password login flow
+        if (!selectedRole) return;
+        const { user, error } = signInWithPassword(values.email, values.password, selectedRole);
+
+        if (user) {
+             sessionStorage.setItem('user', JSON.stringify(user));
+             const dashboardPath = user.role === 'admin' ? '/admin' 
+                           : user.role === 'patient' ? '/patient/my-health'
+                           : `/${user.role}/dashboard`;
+             toast({
+                title: "Login Successful!",
+                description: "Welcome back to HealthLink Hub.",
+             });
+             router.push(dashboardPath);
+        } else {
+             toast({
+                title: "Login Failed",
+                description: error,
+                variant: "destructive",
+             });
+        }
+    } else {
+        // Magic link flow
+        sendAuthenticationLink(values.email);
+        if(values.referralCode) {
+            sessionStorage.setItem('referralCode', values.referralCode);
+        }
+        setLinkSent(true);
     }
-    setLinkSent(true);
   }
   
   const roleDisplayName = selectedRole ? (selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)).replace('-coordinator', ' Coordinator') : '';
@@ -151,7 +177,7 @@ export default function LoginPage() {
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-headline">{roleDisplayName} Login</CardTitle>
             {!linkSent ? (
-                <CardDescription>Enter your email to receive a secure sign-in link.</CardDescription>
+                <CardDescription>Enter your email and password, or get a secure sign-in link.</CardDescription>
             ) : (
                 <CardDescription>A sign-in link has been sent to your email address.</CardDescription>
             )}
@@ -159,7 +185,7 @@ export default function LoginPage() {
           <CardContent>
             {!linkSent ? (
                 <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                     
                     <FormField
                         control={form.control}
@@ -169,6 +195,19 @@ export default function LoginPage() {
                             <FormLabel>Email Address</FormLabel>
                             <FormControl>
                                 <Input type="email" placeholder="you@example.com" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                     <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Password (Optional)</FormLabel>
+                            <FormControl>
+                                <Input type="password" placeholder="Enter your password" {...field} />
                             </FormControl>
                             <FormMessage />
                             </FormItem>
@@ -190,10 +229,14 @@ export default function LoginPage() {
                             )}
                         />
                     )}
-
-                    <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-                        {form.formState.isSubmitting ? <Loader2 className="animate-spin" /> : "Send Secure Sign-in Link"}
-                    </Button>
+                    <div className="space-y-2">
+                        <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+                            {form.formState.isSubmitting ? <Loader2 className="animate-spin" /> : "Sign In"}
+                        </Button>
+                         <Button type="button" variant="outline" className="w-full" onClick={() => form.handleSubmit(onSubmit)()} disabled={form.formState.isSubmitting || !!form.watch('password')}>
+                            Send Secure Sign-in Link
+                        </Button>
+                    </div>
                 </form>
                 </Form>
             ) : (

@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useState, useMemo, useEffect } from 'react';
 import { initialPharmacies, mockPatientData } from '@/lib/mock-data';
 import { getTransactionHistory, recordTransaction, type Transaction } from '@/lib/transactions';
-import { getPharmacyData, recordCommission, type PharmacyTransaction } from '@/lib/pharmacy-data';
+import { getPharmacyData, recordCommission as recordPharmacyTransaction } from '@/lib/pharmacy-data';
 import { getCommissionWalletData, requestWithdrawal as requestCommissionWithdrawal, type CommissionTransaction } from '@/lib/commission-wallet';
 import { requestWithdrawal as requestHealthPointWithdrawal } from '@/lib/healthpoint-wallet';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
@@ -20,6 +20,7 @@ import { format } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import dynamic from 'next/dynamic';
 import { addNotification, sendRedemptionOtpNotification } from '@/lib/notifications';
+import { checkPartnerMilestone } from '@/lib/referrals';
 
 const AnalyticsDashboard = dynamic(() => import('@/components/pharmacy/analytics-dashboard').then(mod => mod.AnalyticsDashboard), {
     ssr: false,
@@ -153,12 +154,16 @@ export default function PharmacyDashboardPage() {
         addNotification(patient.id, `You have successfully redeemed INR ${pointsToPay.toFixed(2)} in Health Points at ${pharmacyDetails.name}.`);
         
         // Credit points to pharmacy
-        recordCommission(user.id, {
+        recordPharmacyTransaction(user.id, {
             type: 'credit',
             amount: commissionAmount,
             description: `Health Points collected from ${patient.name}`,
             date: new Date(),
         });
+        
+        // Check for referral milestone
+        checkPartnerMilestone(user.id, 'pharmacy');
+
 
         toast({
             title: "Payment Successful!",

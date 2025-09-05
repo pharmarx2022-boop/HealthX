@@ -20,6 +20,7 @@ import { recordTransaction } from '@/lib/transactions';
 import { recordHealthCoordinatorCommission } from '@/lib/health-coordinator-data';
 import { addNotification } from '@/lib/notifications';
 import { initialDoctors } from '@/lib/mock-data';
+import { checkDoctorMilestone } from '@/lib/referrals';
 
 export default function PatientDetailPage() {
   const params = useParams();
@@ -64,17 +65,12 @@ export default function PatientDetailPage() {
 
     // If a health coordinator booked this, credit commission to them
     if(patient.healthCoordinatorId) {
-        const commissionAmount = patient.consultationFee * 0.05; // 5% commission for demo
-        recordHealthCoordinatorCommission(patient.healthCoordinatorId, {
-            type: 'credit',
-            amount: commissionAmount,
-            description: `Commission from booking for ${patient.name}`,
-            date: new Date(),
-        });
-        toast({
-            title: "Health Coordinator Commission Paid",
-            description: `A commission of INR ${commissionAmount.toFixed(2)} has been credited to health coordinator ${patient.healthCoordinatorId}.`
-        });
+        // This is where you might check the health coordinator's milestone
+    }
+
+    // Check for doctor referral milestone
+    if (doctor) {
+        checkDoctorMilestone(doctor.id);
     }
     
     // Update patient status

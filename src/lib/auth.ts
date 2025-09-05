@@ -2,7 +2,7 @@
 
 // A simple in-memory store for users
 const users: any[] = [];
-const referrals: any[] = []; // To track referrals
+import { createReferral } from './referrals';
 export const MOCK_OTP = '123456';
 
 const generateReferralCode = () => {
@@ -97,16 +97,7 @@ export function loginWithOtp(email: string, otp: string, role: string, referralC
             populateAllUsersForLookup(); // Ensure our lookup list is up-to-date
             const referrer = findUserByReferralCode(referralCode);
             if (referrer) {
-                 const newReferral = {
-                    referralId: `ref_${Date.now()}`,
-                    referrerId: referrer.id,
-                    referredUserId: user.id,
-                    referredUserRole: user.role,
-                    status: 'pending',
-                };
-                referrals.push(newReferral);
-                console.log('Referral successful:', newReferral);
-                sessionStorage.setItem('referrals', JSON.stringify(referrals));
+                 createReferral(referrer.id, user.id, user.role);
             } else {
                  return { user: null, error: "Invalid referral code.", isNewUser: false };
             }

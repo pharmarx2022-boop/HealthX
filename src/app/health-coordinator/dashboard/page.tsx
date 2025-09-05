@@ -15,6 +15,7 @@ import { format } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import { NearbySearch } from '@/components/booking/nearby-search';
 
 const AnalyticsDashboard = dynamic(() => import('@/components/health-coordinator/analytics-dashboard').then(mod => mod.AnalyticsDashboard), {
     ssr: false,
@@ -90,26 +91,25 @@ export default function HealthCoordinatorDashboardPage() {
 
                     <AnalyticsDashboard />
                     
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        <Card className="shadow-sm lg:col-span-2">
-                            <CardHeader className="flex flex-row items-center gap-4">
-                                <Briefcase className="w-8 h-8 text-primary"/>
-                                <div>
-                                    <CardTitle>Welcome, {user?.fullName || 'Health Coordinator'}!</CardTitle>
-                                    <CardDescription>
-                                        This is your portal to book appointments for patients and track your earnings.
-                                    </CardDescription>
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                 <p className="text-lg font-semibold">Start booking appointments to earn Health Points!</p>
-                                <Button asChild className="mt-4">
-                                    <Link href="/book-appointment">Book a New Appointment</Link>
-                                </Button>
-                            </CardContent>
-                        </Card>
+                    <div className="grid lg:grid-cols-3 gap-8 items-start mt-8">
+                        <div className="lg:col-span-2 space-y-8">
+                             <Card className="shadow-sm">
+                                <CardHeader className="flex flex-row items-center gap-4">
+                                    <Briefcase className="w-8 h-8 text-primary"/>
+                                    <div>
+                                        <CardTitle>Book an Appointment</CardTitle>
+                                        <CardDescription>
+                                           Find doctors, labs, and pharmacies for your patients.
+                                        </CardDescription>
+                                    </div>
+                                </CardHeader>
+                                <CardContent>
+                                     <NearbySearch />
+                                </CardContent>
+                            </Card>
+                        </div>
 
-                        <div className="space-y-8">
+                        <div className="lg:col-span-1 space-y-8">
                             <Card className="shadow-sm">
                                 <CardHeader>
                                     <CardTitle>Collected Health Points</CardTitle>
@@ -203,18 +203,20 @@ export default function HealthCoordinatorDashboardPage() {
                                     </Dialog>
                                 </CardFooter>
                             </Card>
+                             <Alert variant="outline" className="w-full">
+                                <BadgePercent className="h-4 w-4" />
+                                <AlertTitle>How Earnings Work</AlertTitle>
+                                <AlertDescription>
+                                    You earn a commission in Health Points for every appointment you book for a patient. Once you've collected points, you can request a cash conversion. The admin will process your request and transfer the amount to your registered bank account.
+                                </AlertDescription>
+                            </Alert>
                         </div>
                     </div>
-                     <Alert variant="outline" className="mt-8">
-                        <BadgePercent className="h-4 w-4" />
-                        <AlertTitle>How Earnings Work</AlertTitle>
-                        <AlertDescription>
-                            You earn a commission in Health Points for every appointment you book for a patient. Once you've collected points, you can request a cash conversion. The admin will process your request and transfer the amount to your registered bank account.
-                        </AlertDescription>
-                    </Alert>
                 </div>
             </main>
             <Footer />
         </div>
     );
 }
+
+    

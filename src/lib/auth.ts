@@ -10,7 +10,7 @@ const ADMIN_ACCOUNTS = [
     { email: 'admin@example.com', id: 'admin_001', role: 'admin' },
 ];
 
-const MOCK_OTP = '123456';
+export const MOCK_OTP = '123456';
 
 const generateReferralCode = () => {
     return `HLH-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;

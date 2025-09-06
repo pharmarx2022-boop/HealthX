@@ -11,14 +11,15 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
-import { Loader2, Upload, Briefcase, MapPin, Copy, FileText, BadgeCheck, Phone } from 'lucide-react';
+import { Loader2, Upload, Briefcase, MapPin, Copy, FileText, BadgeCheck, Phone, Mail } from 'lucide-react';
 import { initialDoctors } from '@/lib/mock-data';
-import { isRegistrationNumberUnique } from '@/lib/auth';
+import { isRegistrationNumberUnique, isPhoneUnique, MOCK_OTP, sendOtp } from '@/lib/auth';
 
 const DOCTORS_KEY = 'doctorsData';
 
 const profileSchema = z.object({
   name: z.string().min(1, 'Full name is required.'),
+  email: z.string().email(),
   phone: z.string().min(10, "A valid 10-digit phone number is required."),
   specialty: z.string().min(1, 'Specialty is required.'),
   location: z.string().min(1, 'Location is required.'),
@@ -29,6 +30,7 @@ const profileSchema = z.object({
   referralCode: z.string().optional(),
   registrationNumber: z.string().min(1, 'Registration number is required.'),
   registrationCertificate: z.string().min(1, 'Registration certificate is required.'),
+  otp: z.string().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -37,11 +39,14 @@ export function ProfileForm() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<any | null>(null);
+  const [isVerifyingPhone, setIsVerifyingPhone] = useState(false);
+  const [originalPhone, setOriginalPhone] = useState('');
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       name: '',
+      email: '',
       phone: '',
       specialty: '',
       location: '',
@@ -51,7 +56,8 @@ export function ProfileForm() {
       googleMapsLink: '',
       referralCode: '',
       registrationNumber: '',
-      registrationCertificate: ''
+      registrationCertificate: '',
+      otp: '',
     },
   });
 
@@ -72,6 +78,7 @@ export function ProfileForm() {
       
       if (doctorData) {
         form.reset(doctorData);
+        setOriginalPhone(doctorData.phone);
       }
       setIsLoading(false);
     }
@@ -102,9 +109,28 @@ export function ProfileForm() {
   const onSubmit = (data: ProfileFormValues) => {
     if (!user?.id) return;
     
+    // Uniqueness checks
     if (!isRegistrationNumberUnique('doctor', data.registrationNumber, user.id)) {
         form.setError('registrationNumber', { type: 'manual', message: 'This registration number is already in use.' });
         return;
+    }
+    if (!isPhoneUnique(data.phone, user.id)) {
+        form.setError('phone', { type: 'manual', message: 'This phone number is already in use.' });
+        return;
+    }
+
+    // Phone verification logic
+    if (data.phone !== originalPhone) {
+      if (!isVerifyingPhone) {
+        setIsVerifyingPhone(true);
+        toast({ title: 'Verify New Phone Number', description: `An OTP has been sent to ${data.phone}. Please enter it to confirm the change. (Demo OTP: ${MOCK_OTP})` });
+        return;
+      }
+      
+      if (data.otp !== MOCK_OTP) {
+        form.setError('otp', { type: 'manual', message: 'Invalid OTP.' });
+        return;
+      }
     }
 
     const storedDoctors = sessionStorage.getItem(DOCTORS_KEY);
@@ -112,17 +138,20 @@ export function ProfileForm() {
 
     const updatedDoctors = allDoctors.map((d: any) => {
         if (d.id === user.id) {
-            return { ...d, ...data };
+            return { ...d, ...data, otp: undefined }; // Don't save OTP
         }
         return d;
     });
 
     sessionStorage.setItem(DOCTORS_KEY, JSON.stringify(updatedDoctors));
     
-    // Also update the user object in session storage if name/phone changes
-    const updatedUser = { ...user, fullName: data.name, phone: data.phone };
+    const updatedUser = { ...user, fullName: data.name, phone: data.phone, email: data.email };
     sessionStorage.setItem('user', JSON.stringify(updatedUser));
-
+    
+    setOriginalPhone(data.phone);
+    setIsVerifyingPhone(false);
+    form.setValue('otp', '');
+    form.clearErrors('otp');
 
     toast({
       title: 'Profile Updated!',
@@ -199,37 +228,66 @@ export function ProfileForm() {
                 )}
             />
 
-            <div className="grid grid-cols-2 gap-4">
+            <FormField control={form.control} name="email" render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Email Address</FormLabel>
+                    <FormControl>
+                         <div className="relative">
+                            <Input type="email" readOnly disabled {...field} className="pl-8"/>
+                            <Mail className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        </div>
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+            )} />
+
+             <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Full Name</FormLabel>
+                    <FormControl>
+                        <Input placeholder="e.g., Dr. Anjali Sharma" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
+             <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Phone Number</FormLabel>
+                    <FormControl>
+                         <div className="relative">
+                            <Input type="tel" placeholder="e.g., 9876543210" {...field} className="pl-8"/>
+                            <Phone className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        </div>
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
+
+            {isVerifyingPhone && (
                  <FormField
                     control={form.control}
-                    name="name"
+                    name="otp"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Full Name</FormLabel>
+                        <FormLabel>Enter OTP</FormLabel>
                         <FormControl>
-                            <Input placeholder="e.g., Dr. Anjali Sharma" {...field} />
+                            <Input placeholder="6-digit OTP" {...field} />
                         </FormControl>
                         <FormMessage />
                         </FormItem>
                     )}
                 />
-                 <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Phone Number</FormLabel>
-                        <FormControl>
-                             <div className="relative">
-                                <Input type="tel" placeholder="e.g., 9876543210" {...field} className="pl-8"/>
-                                <Phone className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            </div>
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
-            </div>
+            )}
+
+
             <div className="grid grid-cols-2 gap-4">
                 <FormField
                     control={form.control}
@@ -329,7 +387,7 @@ export function ProfileForm() {
                                     className="hidden"
                                     disabled={regNumberIsSet}
                                 />
-                                <label htmlFor="cert-upload" className={regNumberIsSet ? "cursor-not-allowed opacity-50 inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background h-9 px-3 w-full" : "cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 w-full"}>
+                                <label htmlFor="cert-upload" className={cn("cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 w-full", regNumberIsSet && "cursor-not-allowed opacity-50")}>
                                     <Upload className="mr-2 h-4 w-4" />
                                     {currentCertificate ? 'Change File' : 'Upload File'}
                                 </label>
@@ -341,8 +399,8 @@ export function ProfileForm() {
                 )} />
             </div>
             
-            <Button type="submit" disabled={form.formState.isSubmitting || regNumberIsSet} className="w-full">
-                {form.formState.isSubmitting ? <Loader2 className="animate-spin mr-2" /> : (regNumberIsSet ? 'Profile Saved' : 'Save Profile Changes')}
+            <Button type="submit" disabled={form.formState.isSubmitting} className="w-full">
+                {form.formState.isSubmitting ? <Loader2 className="animate-spin mr-2" /> : 'Save Profile Changes'}
             </Button>
         </form>
     </Form>

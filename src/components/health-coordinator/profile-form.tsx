@@ -10,16 +10,19 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import Image from 'next/image';
-import { Loader2, Upload, Copy, BadgeCheck, FileText, IdCard, Phone } from 'lucide-react';
-import { isAadharNumberUnique } from '@/lib/auth';
+import { Loader2, Upload, Copy, BadgeCheck, FileText, IdCard, Phone, Mail } from 'lucide-react';
+import { isAadharNumberUnique, isPhoneUnique, MOCK_OTP } from '@/lib/auth';
+import { cn } from '@/lib/utils';
 
 const profileSchema = z.object({
   fullName: z.string().min(1, 'Full name is required.'),
+  email: z.string().email(),
   phone: z.string().min(10, 'A valid 10-digit phone number is required.'),
   referralCode: z.string().optional(),
   aadharNumber: z.string().min(12, 'Aadhar must be 12 digits.').max(12, 'Aadhar must be 12 digits.'),
   aadharFrontImage: z.string().min(1, 'Front image is required.'),
   aadharBackImage: z.string().min(1, 'Back image is required.'),
+  otp: z.string().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -28,16 +31,20 @@ export function HealthCoordinatorProfileForm() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<any | null>(null);
+  const [isVerifyingPhone, setIsVerifyingPhone] = useState(false);
+  const [originalPhone, setOriginalPhone] = useState('');
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       fullName: '',
+      email: '',
       phone: '',
       referralCode: '',
       aadharNumber: '',
       aadharFrontImage: '',
       aadharBackImage: '',
+      otp: ''
     },
   });
 
@@ -50,12 +57,14 @@ export function HealthCoordinatorProfileForm() {
       if (u) {
         form.reset({
             fullName: u.fullName || '',
+            email: u.email || '',
             phone: u.phone || '',
             referralCode: u.referralCode || '',
             aadharNumber: u.aadharNumber || '',
             aadharFrontImage: u.aadharFrontImage || '',
             aadharBackImage: u.aadharBackImage || '',
         });
+        setOriginalPhone(u.phone || '');
       }
       setIsLoading(false);
     }
@@ -90,11 +99,34 @@ export function HealthCoordinatorProfileForm() {
         form.setError('aadharNumber', { type: 'manual', message: 'This Aadhar number is already in use.' });
         return;
     }
+    if (!isPhoneUnique(data.phone, user.id)) {
+        form.setError('phone', { type: 'manual', message: 'This phone number is already in use.'});
+        return;
+    }
+
+     // Phone verification logic
+    if (data.phone !== originalPhone) {
+      if (!isVerifyingPhone) {
+        setIsVerifyingPhone(true);
+        toast({ title: 'Verify New Phone Number', description: `An OTP has been sent to ${data.phone}. Please enter it to confirm the change. (Demo OTP: ${MOCK_OTP})` });
+        return;
+      }
+      
+      if (data.otp !== MOCK_OTP) {
+        form.setError('otp', { type: 'manual', message: 'Invalid OTP.' });
+        return;
+      }
+    }
     
     // In a real app, you'd save this to a database. Here we update sessionStorage.
-    const updatedUser = { ...user, ...data };
+    const updatedUser = { ...user, ...data, otp: undefined };
     sessionStorage.setItem('user', JSON.stringify(updatedUser));
     setUser(updatedUser);
+
+    setOriginalPhone(data.phone);
+    setIsVerifyingPhone(false);
+    form.setValue('otp', '');
+    form.clearErrors('otp');
 
     toast({
       title: 'Profile Updated!',
@@ -141,6 +173,19 @@ export function HealthCoordinatorProfileForm() {
                 )}
             />
 
+            <FormField control={form.control} name="email" render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Email Address</FormLabel>
+                    <FormControl>
+                         <div className="relative">
+                            <Input type="email" readOnly disabled {...field} className="pl-8"/>
+                            <Mail className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        </div>
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+            )} />
+
             <FormField
                 control={form.control}
                 name="fullName"
@@ -170,6 +215,22 @@ export function HealthCoordinatorProfileForm() {
                     </FormItem>
                 )}
             />
+
+            {isVerifyingPhone && (
+                 <FormField
+                    control={form.control}
+                    name="otp"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Enter OTP</FormLabel>
+                        <FormControl>
+                            <Input placeholder="6-digit OTP" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            )}
 
             <div className="space-y-4 p-4 border rounded-md bg-slate-50">
                 <h3 className="font-semibold text-base flex items-center gap-2"><BadgeCheck/> Verification Details</h3>
@@ -204,7 +265,7 @@ export function HealthCoordinatorProfileForm() {
                                         className="hidden" 
                                         disabled={aadharNumberIsSet}
                                     />
-                                    <label htmlFor="aadhar-front-upload" className={aadharNumberIsSet ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}>
+                                    <label htmlFor="aadhar-front-upload" className={cn("cursor-pointer", aadharNumberIsSet && 'cursor-not-allowed opacity-50')}>
                                         <div className="relative w-full aspect-video rounded-md border-2 border-dashed flex items-center justify-center text-muted-foreground hover:border-primary transition-colors">
                                             {aadharFrontImage ? (
                                                 <Image src={aadharFrontImage} alt="Aadhar Front Preview" fill className="object-contain p-2" />
@@ -234,7 +295,7 @@ export function HealthCoordinatorProfileForm() {
                                         className="hidden" 
                                         disabled={aadharNumberIsSet}
                                     />
-                                    <label htmlFor="aadhar-back-upload" className={aadharNumberIsSet ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}>
+                                    <label htmlFor="aadhar-back-upload" className={cn("cursor-pointer", aadharNumberIsSet && 'cursor-not-allowed opacity-50')}>
                                         <div className="relative w-full aspect-video rounded-md border-2 border-dashed flex items-center justify-center text-muted-foreground hover:border-primary transition-colors">
                                             {aadharBackImage ? (
                                                 <Image src={aadharBackImage} alt="Aadhar Back Preview" fill className="object-contain p-2" />
@@ -254,8 +315,8 @@ export function HealthCoordinatorProfileForm() {
                 </div>
             </div>
             
-            <Button type="submit" disabled={form.formState.isSubmitting || aadharNumberIsSet} className="w-full">
-                {form.formState.isSubmitting ? <Loader2 className="animate-spin mr-2"/> : (aadharNumberIsSet ? 'Profile Saved' : 'Save Profile Changes')}
+            <Button type="submit" disabled={form.formState.isSubmitting} className="w-full">
+                {form.formState.isSubmitting ? <Loader2 className="animate-spin mr-2"/> : 'Save Profile Changes'}
             </Button>
         </form>
     </Form>

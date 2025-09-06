@@ -10,14 +10,16 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import Image from 'next/image';
-import { Loader2, Upload, Percent, Phone, Copy, Link as LinkIcon, MapPin, BadgeCheck, FileText } from 'lucide-react';
+import { Loader2, Upload, Percent, Phone, Copy, Link as LinkIcon, MapPin, BadgeCheck, FileText, Mail } from 'lucide-react';
 import { initialPharmacies } from '@/lib/mock-data';
-import { isRegistrationNumberUnique } from '@/lib/auth';
+import { isRegistrationNumberUnique, isPhoneUnique, MOCK_OTP } from '@/lib/auth';
+import { cn } from '@/lib/utils';
 
 const PHARMACIES_KEY = 'mockPharmacies';
 
 const profileSchema = z.object({
   name: z.string().min(1, 'Pharmacy name is required.'),
+  email: z.string().email(),
   location: z.string().min(1, 'Location is required.'),
   image: z.string().min(1, 'A pharmacy picture is required.'),
   discount: z.coerce.number().min(15, 'Discount must be at least 15%.').max(100, 'Discount cannot exceed 100%.'),
@@ -26,6 +28,7 @@ const profileSchema = z.object({
   googleMapsLink: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
   registrationNumber: z.string().min(1, 'Registration number is required.'),
   registrationCertificate: z.string().min(1, 'Registration certificate is required.'),
+  otp: z.string().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -34,11 +37,14 @@ export function PharmacyProfileForm() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<any | null>(null);
+  const [isVerifyingPhone, setIsVerifyingPhone] = useState(false);
+  const [originalPhone, setOriginalPhone] = useState('');
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       name: '',
+      email: '',
       location: '',
       image: '',
       discount: 15,
@@ -46,7 +52,8 @@ export function PharmacyProfileForm() {
       referralCode: '',
       googleMapsLink: '',
       registrationNumber: '',
-      registrationCertificate: ''
+      registrationCertificate: '',
+      otp: '',
     },
   });
 
@@ -68,8 +75,10 @@ export function PharmacyProfileForm() {
       if (pharmacyData) {
         form.reset({
             ...pharmacyData,
+            email: u.email,
             phoneNumber: pharmacyData.phoneNumber || pharmacyData.whatsappNumber, // Handle legacy data
         });
+        setOriginalPhone(pharmacyData.phoneNumber || pharmacyData.whatsappNumber);
       }
        if (u) {
         form.setValue('referralCode', u.referralCode);
@@ -97,21 +106,43 @@ export function PharmacyProfileForm() {
         form.setError('registrationNumber', { type: 'manual', message: 'This registration number is already in use.' });
         return;
     }
+    if (!isPhoneUnique(data.phoneNumber, user.id)) {
+        form.setError('phoneNumber', { type: 'manual', message: 'This phone number is already in use.' });
+        return;
+    }
+
+    if (data.phoneNumber !== originalPhone) {
+      if (!isVerifyingPhone) {
+        setIsVerifyingPhone(true);
+        toast({ title: 'Verify New Phone Number', description: `An OTP has been sent to ${data.phoneNumber}. Please enter it to confirm the change. (Demo OTP: ${MOCK_OTP})` });
+        return;
+      }
+      
+      if (data.otp !== MOCK_OTP) {
+        form.setError('otp', { type: 'manual', message: 'Invalid OTP.' });
+        return;
+      }
+    }
 
     const storedPharmacies = sessionStorage.getItem(PHARMACIES_KEY);
     const allPharmacies = storedPharmacies ? JSON.parse(storedPharmacies) : initialPharmacies;
 
     const updatedPharmacies = allPharmacies.map((p: any) => {
         if (p.id === user.id) {
-            return { ...p, ...data };
+            return { ...p, ...data, otp: undefined };
         }
         return p;
     });
 
     sessionStorage.setItem(PHARMACIES_KEY, JSON.stringify(updatedPharmacies));
     
-    const updatedUser = { ...user, fullName: data.name, phone: data.phoneNumber };
+    const updatedUser = { ...user, fullName: data.name, phone: data.phoneNumber, email: data.email };
     sessionStorage.setItem('user', JSON.stringify(updatedUser));
+    
+    setOriginalPhone(data.phoneNumber);
+    setIsVerifyingPhone(false);
+    form.setValue('otp', '');
+    form.clearErrors('otp');
 
     toast({
       title: 'Profile Updated!',
@@ -193,6 +224,19 @@ export function PharmacyProfileForm() {
                     </FormItem>
                 )} />
 
+                <FormField control={form.control} name="email" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Email Address</FormLabel>
+                        <FormControl>
+                            <div className="relative">
+                                <Input type="email" readOnly disabled {...field} className="pl-8"/>
+                                <Mail className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            </div>
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )} />
+
                  <FormField control={form.control} name="name" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Pharmacy Name</FormLabel>
@@ -209,7 +253,7 @@ export function PharmacyProfileForm() {
                 )} />
                  <FormField control={form.control} name="phoneNumber" render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Contact Phone Number (WhatsApp)</FormLabel>
+                        <FormLabel>Contact Phone Number</FormLabel>
                         <FormControl>
                             <div className="relative">
                                  <Input type="tel" placeholder="e.g., 919876543210" {...field} className="pl-8"/>
@@ -219,6 +263,19 @@ export function PharmacyProfileForm() {
                          <FormMessage />
                     </FormItem>
                 )} />
+
+                {isVerifyingPhone && (
+                    <FormField control={form.control} name="otp" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Enter OTP</FormLabel>
+                            <FormControl>
+                                <Input placeholder="6-digit OTP" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )} />
+                )}
+
                  <FormField control={form.control} name="googleMapsLink" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Google Map Link</FormLabel>
@@ -274,7 +331,7 @@ export function PharmacyProfileForm() {
                                         className="hidden" 
                                         disabled={regNumberIsSet}
                                     />
-                                    <label htmlFor="cert-upload-pharmacy" className={regNumberIsSet ? "cursor-not-allowed opacity-50 inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background h-9 px-3 w-full" : "cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 w-full"}>
+                                    <label htmlFor="cert-upload-pharmacy" className={cn("cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 w-full", regNumberIsSet && "cursor-not-allowed opacity-50")}>
                                         <Upload className="mr-2 h-4 w-4" />
                                         {currentCertificate ? 'Change File' : 'Upload File'}
                                     </label>
@@ -286,8 +343,8 @@ export function PharmacyProfileForm() {
                     )} />
                 </div>
                 
-                <Button type="submit" disabled={form.formState.isSubmitting || regNumberIsSet}>
-                    {form.formState.isSubmitting ? <Loader2 className="animate-spin mr-2" /> : (regNumberIsSet ? 'Profile Saved' : 'Save Profile Changes')}
+                <Button type="submit" disabled={form.formState.isSubmitting}>
+                    {form.formState.isSubmitting ? <Loader2 className="animate-spin mr-2" /> : 'Save Changes'}
                 </Button>
             </div>
         </form>

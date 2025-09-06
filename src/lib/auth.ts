@@ -16,15 +16,7 @@ const generateReferralCode = () => {
     return `HLH-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 }
 
-const findUserByReferralCode = (code: string) => {
-    // In a real app, this would be a database query.
-    // For now, we search all known users.
-    const allUsers = JSON.parse(sessionStorage.getItem('all_users_for_referral_lookup') || '[]');
-    return allUsers.find((u: any) => u.referralCode === code);
-}
-
-// Helper to populate all users for referral lookup
-const populateAllUsersForLookup = () => {
+const getAllUsers = () => {
     // This is a mock function. In a real app, you would fetch this from the DB.
     // Here we'll just combine all mock data user types that can refer.
     const allKnownUsers: any[] = [];
@@ -37,17 +29,19 @@ const populateAllUsersForLookup = () => {
     addUsers('mockPharmacies');
     addUsers('mockLabs');
     addUsers('doctorsData');
-    // Assuming health coordinators are stored in a key like 'mockHealthCoordinators' if they existed separately
-    // Or we rely on the dynamically created users array.
     users.forEach(u => {
         if(!allKnownUsers.find(k => k.id === u.id)) {
             allKnownUsers.push(u);
         }
     });
 
-    sessionStorage.setItem('all_users_for_referral_lookup', JSON.stringify(allKnownUsers));
+   return allKnownUsers;
 }
 
+const findUserByReferralCode = (code: string) => {
+    const allUsers = getAllUsers();
+    return allUsers.find((u: any) => u.referralCode === code);
+}
 
 // This function simulates sending an OTP.
 export async function sendOtp(email: string) {
@@ -59,6 +53,17 @@ export async function sendOtp(email: string) {
     // Simulate a network delay
     await new Promise(resolve => setTimeout(resolve, 500));
     return true;
+}
+
+// Check for uniqueness across all users
+const isEmailUnique = (email: string) => {
+    const allUsers = getAllUsers();
+    return !allUsers.some(u => u.email === email);
+}
+
+const isPhoneUnique = (phone: string, currentUserId: string) => {
+    const allUsers = getAllUsers();
+    return !allUsers.some(u => u.phone === phone && u.id !== currentUserId);
 }
 
 
@@ -88,20 +93,18 @@ export function signInWithOtp(email: string, otp: string, role: string, referral
         }
     }
     
-    // Combine all user data sources for lookup
-    const allKnownUsers = [
-        ...users,
-        ...(JSON.parse(sessionStorage.getItem('doctorsData') || '[]')),
-        ...(JSON.parse(sessionStorage.getItem('mockLabs') || '[]')),
-        ...(JSON.parse(sessionStorage.getItem('mockPharmacies') || '[]')),
-    ];
-
+    const allKnownUsers = getAllUsers();
 
     // Find user or create a new one
     let user = allKnownUsers.find(u => u.email === email && u.role === role);
     let isNewUser = false;
     
     if (!user) {
+        // Before creating, check if email is globally unique
+        if (!allKnownUsers.every(u => u.email !== email)) {
+            return { user: null, error: "This email address is already in use with a different role.", isNewUser: false };
+        }
+
         isNewUser = true;
         const emailPrefix = email.split('@')[0];
         const isProfessional = ['doctor', 'pharmacy', 'lab', 'health-coordinator'].includes(role);
@@ -130,17 +133,16 @@ export function signInWithOtp(email: string, otp: string, role: string, referral
             sessionStorage.setItem('doctorsData', JSON.stringify([...doctors, { ...user, specialty: 'General', experience: 0, location: 'City', bio: '', image: 'https://picsum.photos/400/400', reviewsList: [] }]));
         } else if (role === 'pharmacy') {
             const pharmacies = JSON.parse(sessionStorage.getItem('mockPharmacies') || '[]');
-            sessionStorage.setItem('mockPharmacies', JSON.stringify([...pharmacies, { ...user, location: 'City', image: 'https://picsum.photos/400/300', discount: 15, whatsappNumber: '', reviewsList: [] }]));
+            sessionStorage.setItem('mockPharmacies', JSON.stringify([...pharmacies, { ...user, location: 'City', image: 'https://picsum.photos/400/300', discount: 15, phoneNumber: '', reviewsList: [] }]));
         } else if (role === 'lab') {
             const labs = JSON.parse(sessionStorage.getItem('mockLabs') || '[]');
-            sessionStorage.setItem('mockLabs', JSON.stringify([...labs, { ...user, location: 'City', image: 'https://picsum.photos/400/300', discount: 30, whatsappNumber: '', reviewsList: [] }]));
+            sessionStorage.setItem('mockLabs', JSON.stringify([...labs, { ...user, location: 'City', image: 'https://picsum.photos/400/300', discount: 30, phoneNumber: '', reviewsList: [] }]));
         } else {
              users.push(user); // For patients and health coordinators
         }
         
         // Handle referral logic for new users
         if (referralCode) {
-            populateAllUsersForLookup(); // Ensure our lookup list is up-to-date
             const referrer = findUserByReferralCode(referralCode);
             if (referrer) {
                  createReferral(referrer.id, user.id, user.role);
@@ -206,24 +208,22 @@ export function updateUserStatus(userId: string, role: string, newStatus: 'appro
 }
 
 export function isRegistrationNumberUnique(role: 'doctor' | 'lab' | 'pharmacy', regNumber: string, currentUserId: string): boolean {
-    const keys = {
-        doctor: 'doctorsData',
-        lab: 'mockLabs',
-        pharmacy: 'mockPharmacies',
-    };
-    const key = keys[role];
-    const allPartners = JSON.parse(sessionStorage.getItem(key) || '[]');
-    const existingPartner = allPartners.find((p: any) => p.registrationNumber === regNumber && p.id !== currentUserId);
-    return !existingPartner;
-}
-
-export function isAadharNumberUnique(aadharNumber: string, currentUserId: string): boolean {
-    // For this mock setup, we only check the `users` array which contains health coordinators and patients.
-    const existingUser = users.find(
-        (u: any) => u.role === 'health-coordinator' && u.aadharNumber === aadharNumber && u.id !== currentUserId
+    const allUsers = getAllUsers();
+    const existingUser = allUsers.find(
+        (u: any) => u.registrationNumber === regNumber && u.id !== currentUserId
     );
     return !existingUser;
 }
+
+export function isAadharNumberUnique(aadharNumber: string, currentUserId: string): boolean {
+    const allUsers = getAllUsers();
+    const existingUser = allUsers.find(
+        (u: any) => u.aadharNumber === aadharNumber && u.id !== currentUserId
+    );
+    return !existingUser;
+}
+
+export { isPhoneUnique };
 
 
 /**

@@ -1,4 +1,5 @@
 
+
 export type MockReport = {
     id: string;
     patientId: string;
@@ -142,7 +143,7 @@ export const initialPharmacies = [
         image: 'https://picsum.photos/id/24/400/300',
         acceptsHealthPoints: true,
         discount: 15,
-        phoneNumber: '919876543210',
+        phoneNumber: '919876543213',
         googleMapsLink: 'https://maps.app.goo.gl/d3sUjZAd5a5A5A5A5',
         reviewsList: [
             { patientName: 'Rohan Sharma', rating: 5, comment: 'Great service and quick delivery.' },
@@ -162,7 +163,7 @@ export const initialPharmacies = [
         image: 'https://picsum.photos/id/219/400/300',
         acceptsHealthPoints: true,
         discount: 20,
-        phoneNumber: '919876543211',
+        phoneNumber: '919876543214',
         googleMapsLink: 'https://maps.app.goo.gl/d3sUjZAd5a5A5A5A5',
         reviewsList: [
             { patientName: 'Amit Singh', rating: 5, comment: 'Very helpful staff.' },
@@ -181,7 +182,7 @@ export const initialPharmacies = [
         image: 'https://picsum.photos/id/183/400/300',
         acceptsHealthPoints: false,
         discount: 0,
-        phoneNumber: '919876543212',
+        phoneNumber: '919876543215',
         googleMapsLink: 'https://maps.app.goo.gl/d3sUjZAd5a5A5A5A5',
         reviewsList: [],
         registrationNumber: 'PHM-MH-778899',
@@ -201,7 +202,7 @@ export const initialLabs = [
         image: 'https://picsum.photos/id/30/400/300',
         acceptsHealthPoints: true,
         discount: 30,
-        phoneNumber: '919876543213',
+        phoneNumber: '919876543216',
         googleMapsLink: 'https://maps.app.goo.gl/d3sUjZAd5a5A5A5A5',
         reviewsList: [
             { patientName: 'Sunita Patil', rating: 5, comment: 'Quick and efficient sample collection.' },
@@ -221,7 +222,7 @@ export const initialLabs = [
         image: 'https://picsum.photos/id/31/400/300',
         acceptsHealthPoints: true,
         discount: 35,
-        phoneNumber: '919876543214',
+        phoneNumber: '919876543217',
         googleMapsLink: 'https://maps.app.goo.gl/d3sUjZAd5a5A5A5A5',
         reviewsList: [],
         registrationNumber: 'LAB-MH-DDEEFF',
@@ -231,8 +232,8 @@ export const initialLabs = [
 
 
 export const mockPatientData = [
-    { id: 'rohan_sharma', name: 'Rohan Sharma', phone: '9876543210', email: 'rohan.sharma@example.com' },
-    { id: 'priya_mehta', name: 'Priya Mehta', phone: '9876543211', email: 'priya.mehta@example.com' },
+    { id: 'rohan_sharma', name: 'Rohan Sharma', phone: '9876543218', email: 'rohan.sharma@example.com' },
+    { id: 'priya_mehta', name: 'Priya Mehta', phone: '9876543219', email: 'priya.mehta@example.com' },
 ];
 
 

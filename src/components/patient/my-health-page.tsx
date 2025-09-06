@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -297,7 +296,7 @@ export function MyHealthPage() {
                                         <KeyRound className="h-4 w-4"/>
                                         <AlertTitle>How to Redeem?</AlertTitle>
                                         <AlertDescription>
-                                            Ask any partner to initiate a redemption. You will receive an OTP on your registered mobile to confirm the payment.
+                                            Ask any partner to initiate a redemption. You will receive an OTP on your app notification to confirm the payment.
                                         </AlertDescription>
                                     </Alert>
                                 </CardFooter>
@@ -413,5 +412,3 @@ export function MyHealthPage() {
         </>
     );
 }
-
-    

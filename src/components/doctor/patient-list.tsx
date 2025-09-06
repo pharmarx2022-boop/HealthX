@@ -8,7 +8,7 @@ import { Calendar as CalendarIcon, Trash2, CalendarClock, DownloadIcon } from 'l
 import Link from 'next/link';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { mockPatients } from '@/lib/mock-data';
+import { mockPatientData as mockPatients } from '@/lib/mock-data';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -346,3 +346,5 @@ export function PatientList() {
     </div>
   )
 }
+
+    

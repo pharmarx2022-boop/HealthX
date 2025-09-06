@@ -16,7 +16,7 @@ import { Separator } from '@/components/ui/separator';
 import { BookingDialog } from '@/components/booking/booking-dialog';
 import { mockFamilyMembers } from '@/lib/family-members';
 import { useToast } from '@/hooks/use-toast';
-import { mockPatients } from '@/components/doctor/patient-list';
+import { mockPatientData as mockPatients } from '@/lib/mock-data';
 import Link from 'next/link';
 
 const DOCTORS_KEY = 'doctorsData';
@@ -282,3 +282,5 @@ export default function DoctorDetailPage() {
     </div>
   );
 }
+
+    

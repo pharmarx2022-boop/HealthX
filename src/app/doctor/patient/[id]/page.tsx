@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, User, Calendar, Clock, Stethoscope, FileText, MessageSquare, CreditCard, RefreshCw, BadgeCheck, BellPlus } from 'lucide-react';
 import Link from 'next/link';
-import { mockPatients } from '@/components/doctor/patient-list';
+import { mockPatientData as mockPatients } from '@/lib/mock-data';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -293,3 +293,5 @@ export default function PatientDetailPage() {
     </div>
   );
 }
+
+    

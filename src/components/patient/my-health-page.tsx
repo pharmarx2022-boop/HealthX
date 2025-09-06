@@ -1,10 +1,11 @@
 
+
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { User, Calendar, Clock, Stethoscope, RefreshCw, Bell, Star, Users, Wallet, History, FileText, Loader2, Store, KeyRound, Share2, Gift, Briefcase } from 'lucide-react';
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { mockPatients } from '@/components/doctor/patient-list';
+import { mockPatientData as mockPatients } from '@/lib/mock-data';
 import { initialDoctors, initialLabs, initialPharmacies } from '@/lib/mock-data';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
@@ -412,3 +413,5 @@ export function MyHealthPage() {
         </>
     );
 }
+
+    

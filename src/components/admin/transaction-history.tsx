@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { mockPatients } from '@/components/doctor/patient-list';
+import { mockPatientData as mockPatients } from '@/lib/mock-data';
 import { initialDoctors } from '@/lib/mock-data';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { format } from 'date-fns';
@@ -76,3 +76,5 @@ export function TransactionHistory() {
         </div>
     );
 }
+
+    

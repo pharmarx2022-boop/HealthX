@@ -21,6 +21,7 @@ import { addNotification, sendRedemptionOtpNotification } from '@/lib/notificati
 import { checkPartnerMilestone } from '@/lib/referrals';
 import Link from 'next/link';
 import { NearbySearch } from '@/components/booking/nearby-search';
+import { BottomNavBar } from '@/components/layout/bottom-nav-bar';
 
 const AnalyticsDashboard = dynamic(() => import('@/components/lab/analytics-dashboard').then(mod => mod.AnalyticsDashboard), {
     ssr: false,

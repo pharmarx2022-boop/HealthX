@@ -26,41 +26,37 @@ export function BottomNavBar() {
     return null; // Don't show for admins or if not logged in
   }
   
-  const homePath = user ? (user.role === 'patient' ? '/patient/my-health' : `/${user.role}/dashboard`) : '/';
+  const dashboardPath = user.role === 'patient' ? '/patient/my-health' : `/${user.role}/dashboard`;
 
   let navItems = [
-     { href: homePath, label: 'Home', icon: Home },
+     { href: '/', label: 'Home', icon: Home },
   ];
   
   if (user.role === 'patient') {
-      navItems.push(
-        { href: '/book-appointment', label: 'Book', icon: Calendar }
-      );
-  } else if (user.role === 'health-coordinator') {
-      navItems.push(
+      navItems = [
+        { href: '/patient/my-health', label: 'My Health', icon: Home },
         { href: '/book-appointment', label: 'Book', icon: Calendar },
-        { href: '/health-coordinator/dashboard', label: 'Dashboard', icon: LayoutDashboard }
-      );
+        { href: '/patient/profile', label: 'Profile', icon: User }
+      ];
+  } else if (user.role === 'health-coordinator') {
+      navItems = [
+        { href: '/health-coordinator/dashboard', label: 'Dashboard', icon: Home },
+        { href: '/book-appointment', label: 'Book', icon: Calendar },
+        { href: '/health-coordinator/profile', label: 'Profile', icon: User }
+      ];
   } else if (user.role === 'doctor') {
       navItems = [
-        { href: `/${user.role}/dashboard`, label: 'Dashboard', icon: LayoutDashboard },
-        { href: `/${user.role}/profile`, label: 'Profile', icon: User },
+        { href: '/doctor/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+        { href: '/doctor/clinics', label: 'Clinics', icon: Calendar },
+        { href: '/doctor/profile', label: 'Profile', icon: User },
       ]
   } else { // Lab and Pharmacy
        navItems = [
-        { href: homePath, label: 'Home', icon: Home },
-        { href: '/book-appointment', label: 'Book', icon: Calendar },
         { href: `/${user.role}/dashboard`, label: 'Dashboard', icon: LayoutDashboard },
+        { href: '/book-appointment', label: 'Book', icon: Calendar },
+        { href: `/${user.role}/profile`, label: 'Profile', icon: User },
       ];
   }
-
-  // Remove potential duplicates if home path is the same as dashboard path
-  navItems = navItems.filter((item, index, self) =>
-    index === self.findIndex((t) => (
-      t.href === item.href && t.label === item.label
-    ))
-  );
-
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 z-50 w-full h-16 bg-background border-t border-border">

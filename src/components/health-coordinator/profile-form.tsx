@@ -157,7 +157,7 @@ export function HealthCoordinatorProfileForm() {
 
   const aadharFrontImage = form.watch('aadharFrontImage');
   const aadharBackImage = form.watch('aadharBackImage');
-  const aadharNumberIsSet = !!form.watch('aadharNumber');
+  const aadharNumberIsSet = !!form.getValues('aadharNumber');
 
 
   return (

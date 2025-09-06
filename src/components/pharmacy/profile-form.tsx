@@ -197,7 +197,7 @@ export function PharmacyProfileForm() {
 
   const currentImage = form.watch('image');
   const currentCertificate = form.watch('registrationCertificate');
-  const regNumberIsSet = !!form.watch('registrationNumber');
+  const regNumberIsSet = !!form.getValues('registrationNumber');
   const homeDeliveryEnabled = form.watch('homeDeliveryEnabled');
 
 

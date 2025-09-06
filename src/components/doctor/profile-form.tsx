@@ -15,6 +15,7 @@ import Image from 'next/image';
 import { Loader2, Upload, Briefcase, MapPin, Copy, FileText, BadgeCheck, Phone, Mail, KeyRound } from 'lucide-react';
 import { initialDoctors } from '@/lib/mock-data';
 import { isRegistrationNumberUnique, isPhoneUnique, MOCK_OTP, sendOtp } from '@/lib/auth';
+import { cn } from '@/lib/utils';
 
 const DOCTORS_KEY = 'doctorsData';
 
@@ -183,7 +184,7 @@ export function ProfileForm() {
 
   const currentImage = form.watch('image');
   const currentCertificate = form.watch('registrationCertificate');
-  const regNumberIsSet = !!form.watch('registrationNumber');
+  const regNumberIsSet = !!form.getValues('registrationNumber');
 
 
   return (

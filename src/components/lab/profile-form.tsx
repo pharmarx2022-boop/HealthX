@@ -197,7 +197,7 @@ export function LabProfileForm() {
 
   const currentImage = form.watch('image');
   const currentCertificate = form.watch('registrationCertificate');
-  const regNumberIsSet = !!form.watch('registrationNumber');
+  const regNumberIsSet = !!form.getValues('registrationNumber');
   const homeCollectionEnabled = form.watch('homeCollectionEnabled');
 
   return (

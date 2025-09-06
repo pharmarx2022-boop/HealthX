@@ -281,7 +281,7 @@ export function PharmacyProfileForm() {
                 )} />
                  <FormField control={form.control} name="phoneNumber" render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Contact Phone Number</FormLabel>
+                        <FormLabel>WhatsApp Contact Number</FormLabel>
                         <FormControl>
                             <div className="relative">
                                  <Input type="tel" placeholder="e.g., 919876543210" {...field} className="pl-8"/>

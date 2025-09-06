@@ -423,6 +423,10 @@ export function ClinicManager() {
                                                     onSelect={field.onChange}
                                                     className="rounded-md border"
                                                     disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                                                    numberOfMonths={2}
+                                                    captionLayout="dropdown-buttons"
+                                                    fromYear={new Date().getFullYear()}
+                                                    toYear={new Date().getFullYear() + 2}
                                                 />
                                             </FormControl>
                                             <FormMessage />

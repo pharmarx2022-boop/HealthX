@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Badge } from '../ui/badge';
-import { Check, X, Pill, Beaker, Briefcase, Stethoscope, FileText, IdCard } from 'lucide-react';
+import { Check, X, Pill, Beaker, Briefcase, Stethoscope, FileText, IdCard, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import {
   Dialog,
@@ -22,15 +22,21 @@ import {
 
 export function ApprovalRequests() {
     const [requests, setRequests] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const { toast } = useToast();
 
     useEffect(() => {
-        if (verifyAdmin()) {
-            setRequests(getAllPendingUsers());
+        const fetchRequests = async () => {
+            if (verifyAdmin()) {
+                const pendingUsers = await getAllPendingUsers();
+                setRequests(pendingUsers);
+            }
+            setIsLoading(false);
         }
+        fetchRequests();
     }, []);
 
-    const handleUpdateRequest = (userId: string, role: string, newStatus: 'approved' | 'rejected') => {
+    const handleUpdateRequest = async (userId: string, role: string, newStatus: 'approved' | 'rejected') => {
         if (!verifyAdmin()) {
             toast({
                 title: "Permission Denied",
@@ -40,8 +46,9 @@ export function ApprovalRequests() {
             return;
         }
 
-        updateUserStatus(userId, role, newStatus);
-        setRequests(getAllPendingUsers()); // Refresh list
+        await updateUserStatus(userId, role, newStatus);
+        const pendingUsers = await getAllPendingUsers();
+        setRequests(pendingUsers); // Refresh list
         toast({
             title: `Request ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}`,
             description: `The user has been ${newStatus}.`,
@@ -61,6 +68,15 @@ export function ApprovalRequests() {
     const getRoleDisplayName = (role: string) => {
         return (role.charAt(0).toUpperCase() + role.slice(1)).replace('-coordinator', ' Coordinator');
     };
+
+    if (isLoading) {
+        return (
+             <div className="flex items-center justify-center p-8">
+                <Loader2 className="animate-spin" />
+                <p className="ml-2">Loading requests...</p>
+            </div>
+        )
+    }
 
     return (
         <div>

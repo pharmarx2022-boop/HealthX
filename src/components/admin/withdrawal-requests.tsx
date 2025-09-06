@@ -8,20 +8,27 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Badge } from '../ui/badge';
-import { Check, X } from 'lucide-react';
+import { Check, X, Loader2 } from 'lucide-react';
 import { verifyAdmin } from '@/lib/auth';
 
 export function WithdrawalRequests() {
     const [requests, setRequests] = useState<WithdrawalRequest[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const { toast } = useToast();
 
-    useEffect(() => {
+    const fetchRequests = async () => {
         if (verifyAdmin()) {
-            setRequests(getWithdrawalRequests());
+            const fetchedRequests = await getWithdrawalRequests();
+            setRequests(fetchedRequests);
         }
+        setIsLoading(false);
+    }
+
+    useEffect(() => {
+        fetchRequests();
     }, []);
 
-    const handleUpdateRequest = (requestId: string, newStatus: 'approved' | 'rejected') => {
+    const handleUpdateRequest = async (requestId: string, newStatus: 'approved' | 'rejected') => {
         if (!verifyAdmin()) {
             toast({
                 title: "Permission Denied",
@@ -30,13 +37,22 @@ export function WithdrawalRequests() {
             });
             return;
         }
-        updateWithdrawalRequest(requestId, newStatus);
-        setRequests(getWithdrawalRequests()); // Refresh list
+        await updateWithdrawalRequest(requestId, newStatus);
+        await fetchRequests(); // Refresh list
         toast({
             title: `Request ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}`,
             description: `The withdrawal request has been updated.`,
         });
     };
+    
+    if (isLoading) {
+        return (
+             <div className="flex items-center justify-center p-8">
+                <Loader2 className="animate-spin" />
+                <p className="ml-2">Loading requests...</p>
+            </div>
+        )
+    }
 
     return (
         <div>

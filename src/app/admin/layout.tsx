@@ -26,6 +26,7 @@ import {
   Contact,
   FileText,
   MessageSquare,
+  HelpCircle,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -74,6 +75,11 @@ export default function AdminLayout({
       href: '/admin/support',
       label: 'Support',
       icon: MessageSquare,
+    },
+    {
+      href: '/admin/inquiries',
+      label: 'Inquiries',
+      icon: HelpCircle,
     },
     {
       href: '/admin/approvals',

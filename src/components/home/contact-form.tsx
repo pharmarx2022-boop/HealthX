@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { saveSubmission } from '@/lib/contact-submissions';
 
 const contactSchema = z.object({
   name: z.string().min(1, 'Name is required.'),
@@ -32,21 +33,14 @@ export function ContactForm() {
     },
   });
 
-  const onSubmit: SubmitHandler<ContactFormValues> = (data) => {
-    // In a real app, you would handle form submission here, e.g., send an email or save to a database.
-    console.log(data);
+  const onSubmit: SubmitHandler<ContactFormValues> = async (data) => {
+    await saveSubmission(data);
     
-    // Simulate API call
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            toast({
-              title: 'Message Sent!',
-              description: 'Thank you for contacting us. We will get back to you shortly.',
-            });
-            form.reset();
-            resolve(true);
-        }, 1000);
+    toast({
+      title: 'Message Sent!',
+      description: 'Thank you for contacting us. We will get back to you shortly.',
     });
+    form.reset();
   };
 
   return (

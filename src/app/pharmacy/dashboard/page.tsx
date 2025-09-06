@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Pill, Search, User, History, BadgePercent, Banknote, Gift, Loader2, Briefcase } from 'lucide-react';
+import { Pill, Search, User, History, BadgePercent, Banknote, Gift, Loader2, Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useMemo, useEffect } from 'react';
 import { initialPharmacies, mockPatientData } from '@/lib/mock-data';
@@ -216,7 +216,7 @@ export default function PharmacyDashboardPage() {
                  <div className="lg:col-span-2 space-y-8">
                     <Card className="shadow-sm">
                         <CardHeader className="flex flex-row items-center gap-4">
-                             <Briefcase className="w-8 h-8 text-primary"/>
+                             <Calendar className="w-8 h-8 text-primary"/>
                              <div>
                                  <CardTitle>Book for a Patient</CardTitle>
                                  <CardDescription>

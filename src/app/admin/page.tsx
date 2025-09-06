@@ -46,7 +46,7 @@ export default function AdminPage() {
                         <RefundTool />
                     </CardContent>
                 </Card>
-                    <Card className="shadow-sm">
+                <Card className="shadow-sm">
                     <CardHeader>
                         <CardTitle>Transaction History</CardTitle>
                         <CardDescription>
@@ -58,7 +58,7 @@ export default function AdminPage() {
                     </CardContent>
                 </Card>
             </div>
-                <div className="space-y-8 lg:col-span-1">
+            <div className="space-y-8 lg:col-span-1">
                 <Card className="shadow-sm">
                     <CardHeader>
                         <CardTitle>Commission Withdrawal Requests</CardTitle>

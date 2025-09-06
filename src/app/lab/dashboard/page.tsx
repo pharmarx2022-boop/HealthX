@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Beaker, Search, User, History, BadgePercent, Banknote, Upload, Gift, Loader2, Briefcase } from 'lucide-react';
+import { Beaker, Search, User, History, BadgePercent, Banknote, Upload, Gift, Loader2, Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useMemo, useEffect } from 'react';
 import { initialLabs, mockPatientData, mockReports, type MockReport } from '@/lib/mock-data';
@@ -264,7 +264,7 @@ export default function LabDashboardPage() {
                 <div className="lg:col-span-2 grid gap-8">
                      <Card className="shadow-sm">
                         <CardHeader className="flex flex-row items-center gap-4">
-                             <Briefcase className="w-8 h-8 text-primary"/>
+                             <Calendar className="w-8 h-8 text-primary"/>
                              <div>
                                  <CardTitle>Book for a Patient</CardTitle>
                                  <CardDescription>

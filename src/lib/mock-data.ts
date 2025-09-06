@@ -170,11 +170,29 @@ export const initialLabs = [
     },
 ];
 
+// Add more statuses to mock data
+const today = new Date();
+const yesterday = new Date(today);
+yesterday.setDate(yesterday.getDate() - 1);
+const lastWeek = new Date(today);
+lastWeek.setDate(lastWeek.getDate() - 7);
+const nextWeek = new Date(today);
+nextWeek.setDate(nextWeek.getDate() + 7);
+
 
 export const mockPatientData = [
   { id: 'patient_1', name: 'Rohan Sharma', email: 'rohan@example.com', phone: '9876543210' },
   { id: 'patient_2', name: 'Priya Singh', email: 'priya@example.com', phone: '9876543211' },
+  // Add appointment-like data here for analytics
+  { id: 'appt_1', doctorId: 'doctor_1', status: 'done', appointmentDate: lastWeek.toISOString(), consultationFee: 1500 },
+  { id: 'appt_2', doctorId: 'doctor_1', status: 'done', appointmentDate: yesterday.toISOString(), consultationFee: 1200 },
+  { id: 'appt_3', doctorId: 'doctor_2', status: 'done', appointmentDate: today.toISOString(), consultationFee: 1000 },
+  { id: 'appt_4', doctorId: 'doctor_1', status: 'upcoming', appointmentDate: nextWeek.toISOString(), consultationFee: 1500 },
+  { id: 'appt_5', doctorId: 'doctor_3', status: 'done', appointmentDate: lastWeek.toISOString(), consultationFee: 800 },
+  { id: 'appt_6', doctorId: 'doctor_1', status: 'cancelled', appointmentDate: lastWeek.toISOString(), consultationFee: 1200 },
+  { id: 'appt_7', doctorId: 'doctor_2', status: 'absent', appointmentDate: yesterday.toISOString(), consultationFee: 1000 },
 ];
+
 
 export const mockReports: MockReport[] = [
     { id: 'rep1', patientId: 'patient_1', name: 'Complete Blood Count', lab: 'Metropolis Labs', date: '2024-05-10T10:00:00Z', file: 'mock.pdf' },

@@ -1,15 +1,20 @@
 
+
 'use client';
 
 import { useState, useMemo } from 'react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Pie, PieChart, Cell } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart';
-import { Users, Briefcase, Banknote, ShieldCheck, Stethoscope, Pill, Beaker } from 'lucide-react';
+import { Users, Briefcase, Banknote, ShieldCheck, Stethoscope, Pill, Beaker, Calendar as CalendarIcon, X as XIcon, UserX, UserCheck } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, isToday } from 'date-fns';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { Button } from '@/components/ui/button';
+import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, isToday, isSameDay } from 'date-fns';
 import { initialDoctors, mockPatientData } from '@/lib/mock-data';
+import { cn } from '@/lib/utils';
 
 const userGrowthData = [
   { month: 'January', users: 12 },
@@ -98,12 +103,13 @@ const recentActivities = [
 
 export function AnalyticsDashboard() {
   const [timeFilter, setTimeFilter] = useState('all');
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   const doctorPerformanceData = useMemo(() => {
-    const completedAppointments = mockPatientData.filter(p => p.status === 'done');
-
-    const filteredAppointments = completedAppointments.filter(appt => {
+    
+    const filteredAppointments = mockPatientData.filter(appt => {
         const apptDate = new Date(appt.appointmentDate);
+        if (selectedDate) return isSameDay(apptDate, selectedDate);
         if (timeFilter === 'today') return isToday(apptDate);
         if (timeFilter === 'week') {
             const today = new Date();
@@ -118,21 +124,41 @@ export function AnalyticsDashboard() {
 
     const performance = initialDoctors.map(doctor => {
         const doctorAppointments = filteredAppointments.filter(appt => appt.doctorId === doctor.id);
-        const totalConsultations = doctorAppointments.length;
-        const totalRevenue = doctorAppointments.reduce((sum, appt) => sum + appt.consultationFee, 0);
+        
+        const countByStatus = (status: string) => doctorAppointments.filter(a => a.status === status).length;
+
+        const completed = countByStatus('done');
+        const cancelled = countByStatus('cancelled');
+        const absent = countByStatus('absent');
+
+        const totalRevenue = doctorAppointments
+            .filter(appt => appt.status === 'done')
+            .reduce((sum, appt) => sum + appt.consultationFee, 0);
         
         return {
             id: doctor.id,
             name: doctor.name,
             specialty: doctor.specialty,
-            consultations: totalConsultations,
+            completed,
+            cancelled,
+            absent,
             revenue: totalRevenue,
         };
     });
 
     return performance.sort((a,b) => b.revenue - a.revenue);
 
-  }, [timeFilter]);
+  }, [timeFilter, selectedDate]);
+
+  const handleTimeFilterChange = (value: string) => {
+      setTimeFilter(value);
+      setSelectedDate(null); // Clear specific date when preset is chosen
+  }
+
+  const handleDateSelect = (date: Date | undefined) => {
+      setSelectedDate(date || null);
+      setTimeFilter('custom'); // Set to custom to indicate a date is picked
+  }
 
   return (
     <div className="space-y-8">
@@ -199,17 +225,41 @@ export function AnalyticsDashboard() {
                     <CardTitle>Doctor Performance</CardTitle>
                     <CardDescription>Consultation and revenue metrics for each doctor.</CardDescription>
                 </div>
-                <Select value={timeFilter} onValueChange={setTimeFilter}>
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                        <SelectValue placeholder="Select time frame" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">All Time</SelectItem>
-                        <SelectItem value="today">Today</SelectItem>
-                        <SelectItem value="week">This Week</SelectItem>
-                        <SelectItem value="month">This Month</SelectItem>
-                    </SelectContent>
-                </Select>
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                    <Popover>
+                        <PopoverTrigger asChild>
+                        <Button
+                            variant={"outline"}
+                            className={cn(
+                                "w-full sm:w-[240px] justify-start text-left font-normal",
+                                !selectedDate && "text-muted-foreground"
+                            )}
+                        >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
+                        </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                                mode="single"
+                                selected={selectedDate ?? undefined}
+                                onSelect={handleDateSelect}
+                                initialFocus
+                            />
+                        </PopoverContent>
+                    </Popover>
+                    <Select value={timeFilter} onValueChange={handleTimeFilterChange}>
+                        <SelectTrigger className="w-full sm:w-[180px]">
+                            <SelectValue placeholder="Select time frame" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Time</SelectItem>
+                            <SelectItem value="today">Today</SelectItem>
+                            <SelectItem value="week">This Week</SelectItem>
+                            <SelectItem value="month">This Month</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
             </CardHeader>
             <CardContent>
                  <div className="w-full overflow-x-auto">
@@ -217,7 +267,9 @@ export function AnalyticsDashboard() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Doctor</TableHead>
-                                <TableHead className="text-center">Completed Consultations</TableHead>
+                                <TableHead className="text-center">Completed</TableHead>
+                                <TableHead className="text-center">Cancelled</TableHead>
+                                <TableHead className="text-center">Absent</TableHead>
                                 <TableHead className="text-right">Total Revenue</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -228,13 +280,15 @@ export function AnalyticsDashboard() {
                                         <div className="font-medium">{doctor.name}</div>
                                         <div className="text-xs text-muted-foreground">{doctor.specialty}</div>
                                     </TableCell>
-                                    <TableCell className="text-center font-medium">{doctor.consultations}</TableCell>
+                                    <TableCell className="text-center font-medium">{doctor.completed}</TableCell>
+                                    <TableCell className="text-center font-medium">{doctor.cancelled}</TableCell>
+                                    <TableCell className="text-center font-medium">{doctor.absent}</TableCell>
                                     <TableCell className="text-right font-medium">INR {doctor.revenue.toFixed(2)}</TableCell>
                                 </TableRow>
                             )) : (
                                 <TableRow>
-                                    <TableCell colSpan={3} className="text-center h-24">
-                                        No completed consultations for the selected period.
+                                    <TableCell colSpan={5} className="text-center h-24">
+                                        No appointment data for the selected period.
                                     </TableCell>
                                 </TableRow>
                             )}

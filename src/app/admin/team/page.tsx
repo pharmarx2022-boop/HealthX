@@ -115,7 +115,7 @@ export default function TeamManagementPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
             <h1 className="text-3xl font-headline font-bold">Manage Team</h1>
             <p className="text-muted-foreground">Add, edit, or remove members from the "About Us" page.</p>
@@ -125,7 +125,7 @@ export default function TeamManagementPage() {
             if (!isOpen) setEditingMember(null);
         }}>
             <DialogTrigger asChild>
-                <Button onClick={() => { setEditingMember(null); setIsDialogOpen(true); }}>
+                <Button onClick={() => { setEditingMember(null); setIsDialogOpen(true); }} className="w-full sm:w-auto">
                     <PlusCircle className="mr-2" /> Add Member
                 </Button>
             </DialogTrigger>
@@ -199,16 +199,16 @@ export default function TeamManagementPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {members.map((member) => (
           <Card key={member.id} className="flex flex-col">
-            <CardHeader className="flex-row gap-4 items-center">
+            <CardHeader className="flex-col items-center text-center sm:flex-row sm:text-left sm:items-start gap-4">
                 <div className="relative w-20 h-20 rounded-full overflow-hidden shrink-0 border-2 border-primary/20">
                     <Image src={member.image} alt={member.name} fill className="object-cover" />
                 </div>
-                <div>
+                <div className="flex-grow">
                     <CardTitle>{member.name}</CardTitle>
                     <CardDescription>{member.title}</CardDescription>
                 </div>
             </CardHeader>
-            <CardContent className="flex-grow">
+            <CardContent className="flex-grow text-center sm:text-left">
               <p className="text-sm text-muted-foreground">{member.bio}</p>
             </CardContent>
             <CardFooter className="bg-slate-50/70 p-2 border-t flex justify-end gap-2">

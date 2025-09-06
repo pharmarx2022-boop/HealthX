@@ -80,7 +80,7 @@ export function ApprovalRequests() {
                                 <TableRow key={req.id}>
                                     <TableCell>
                                         <div className="font-medium">{req.fullName}</div>
-                                        <div className="text-xs text-muted-foreground">{req.email}</div>
+                                        <div className="text-xs text-muted-foreground break-all">{req.email}</div>
                                         <div className="text-xs text-muted-foreground hidden md:block">Joined: {format(new Date(req.dateJoined), 'PP')}</div>
                                     </TableCell>
                                     <TableCell>
@@ -105,7 +105,7 @@ export function ApprovalRequests() {
                                                                 <DialogHeader>
                                                                     <DialogTitle>Aadhar Verification for {req.fullName}</DialogTitle>
                                                                 </DialogHeader>
-                                                                <div className="grid grid-cols-2 gap-4 mt-4">
+                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                                                                     {req.aadharFrontImage && <div className="space-y-2"><p className="text-sm font-medium text-center">Front</p><div className="relative w-full aspect-video rounded-md overflow-hidden border"><Image src={req.aadharFrontImage} alt="Aadhar Front" fill className="object-contain"/></div></div>}
                                                                     {req.aadharBackImage && <div className="space-y-2"><p className="text-sm font-medium text-center">Back</p><div className="relative w-full aspect-video rounded-md overflow-hidden border"><Image src={req.aadharBackImage} alt="Aadhar Back" fill className="object-contain"/></div></div>}
                                                                 </div>

@@ -165,7 +165,7 @@ export default function PatientDetailPage() {
           </div>
 
           <Card className="max-w-4xl mx-auto shadow-lg">
-            <CardHeader className="flex flex-row items-start justify-between">
+            <CardHeader className="flex flex-col md:flex-row items-start justify-between gap-4">
               <div>
                 <CardTitle className="font-headline text-3xl">{patient.name}</CardTitle>
                 <CardDescription className="flex items-center gap-2 pt-1 text-base">
@@ -230,19 +230,19 @@ export default function PatientDetailPage() {
               </div>
                <div className="space-y-6 md:col-span-2">
                 <h3 className="font-semibold text-lg border-b pb-2">Next Appointment Reminder</h3>
-                 <div className="flex items-center text-muted-foreground gap-3">
-                  <BellPlus className="w-5 h-5 text-primary"/> 
-                  <div>
+                 <div className="flex flex-col md:flex-row md:items-center gap-3">
+                  <BellPlus className="w-5 h-5 text-primary shrink-0"/> 
+                  <div className="flex-grow">
                     <p className="font-medium text-foreground">
                         {patient.nextAppointmentDate && !isNaN(new Date(patient.nextAppointmentDate).getTime())
                             ? `Next check-up scheduled for: ${format(new Date(patient.nextAppointmentDate), 'PPP')}` 
                             : "No reminder set."
                         }
                     </p>
-                    <div className="flex items-center gap-4 mt-2">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mt-2">
                         <Popover>
                             <PopoverTrigger asChild>
-                                <Button variant="outline">
+                                <Button variant="outline" className="w-full sm:w-auto">
                                     <Calendar className="mr-2"/>
                                     {nextAppointment ? format(nextAppointment, 'PPP') : 'Select Date'}
                                 </Button>
@@ -257,7 +257,7 @@ export default function PatientDetailPage() {
                                 />
                             </PopoverContent>
                         </Popover>
-                        <Button onClick={handleSetReminder}>Set Reminder</Button>
+                        <Button onClick={handleSetReminder} className="w-full sm:w-auto">Set Reminder</Button>
                     </div>
                   </div>
                 </div>
@@ -267,7 +267,7 @@ export default function PatientDetailPage() {
                 <CardFooter className="bg-slate-50/70 mt-6 py-4 px-6 border-t">
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button size="lg">
+                            <Button size="lg" className="w-full sm:w-auto">
                                <BadgeCheck className="mr-2"/> Consultation done & God bless you
                             </Button>
                         </AlertDialogTrigger>

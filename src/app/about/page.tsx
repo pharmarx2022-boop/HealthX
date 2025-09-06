@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Header } from '@/components/layout/header';
@@ -43,7 +42,7 @@ export default function AboutUsPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-center text-muted-foreground">
-                  To create a self-sustaining healthcare economy where every transaction is rewarding, making quality care not just accessible, but financially advantageous for every patient.
+                  To create a world where quality healthcare is simple, accessible, and financially rewarding for everyone. We envision a connected digital ecosystem that empowers patients and providers alike, fostering a healthier future for all communities.
                 </p>
               </CardContent>
             </Card>
@@ -56,7 +55,7 @@ export default function AboutUsPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-center text-muted-foreground">
-                  To build a unified digital platform that seamlessly integrates patients, doctors, pharmacies, and labs through innovative technology, a unique cash-refund system, and a shared rewards program, fostering a healthier and more connected community.
+                    To seamlessly connect patients with doctors, pharmacies, and labs on a single, intuitive platform. We are on a mission to revolutionize the healthcare experience through our unique cash-refund and Health Point rewards system, making every interaction within the HealthLink Hub ecosystem both valuable and convenient.
                 </p>
               </CardContent>
             </Card>

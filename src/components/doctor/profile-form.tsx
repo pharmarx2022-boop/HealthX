@@ -141,6 +141,8 @@ export function ProfileForm() {
 
   const currentImage = form.watch('image');
   const currentCertificate = form.watch('registrationCertificate');
+  const regNumberIsSet = !!form.watch('registrationNumber');
+
 
   return (
     <Form {...form}>
@@ -300,7 +302,7 @@ export function ProfileForm() {
 
             <div className="space-y-4 p-4 border rounded-md bg-slate-50">
                 <h3 className="font-semibold text-base flex items-center gap-2"><BadgeCheck/> Verification Details</h3>
-                <p className="text-sm text-muted-foreground">This information is required for admin approval and is not displayed publicly.</p>
+                <p className="text-sm text-muted-foreground">This information is required for admin approval and is not displayed publicly. Once saved, it cannot be changed.</p>
                 <FormField
                     control={form.control}
                     name="registrationNumber"
@@ -308,7 +310,7 @@ export function ProfileForm() {
                         <FormItem>
                         <FormLabel>Medical Registration Number</FormLabel>
                         <FormControl>
-                            <Input placeholder="Enter your official registration number" {...field} />
+                            <Input placeholder="Enter your official registration number" {...field} disabled={regNumberIsSet} />
                         </FormControl>
                         <FormMessage />
                         </FormItem>
@@ -324,9 +326,10 @@ export function ProfileForm() {
                                     type="file"
                                     accept="image/*,application/pdf"
                                     onChange={(e) => handleImageUpload(e, 'registrationCertificate')}
-                                    className="hidden" 
+                                    className="hidden"
+                                    disabled={regNumberIsSet}
                                 />
-                                <label htmlFor="cert-upload" className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 w-full">
+                                <label htmlFor="cert-upload" className={regNumberIsSet ? "cursor-not-allowed opacity-50 inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background h-9 px-3 w-full" : "cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 w-full"}>
                                     <Upload className="mr-2 h-4 w-4" />
                                     {currentCertificate ? 'Change File' : 'Upload File'}
                                 </label>
@@ -338,9 +341,8 @@ export function ProfileForm() {
                 )} />
             </div>
             
-            <Button type="submit" disabled={form.formState.isSubmitting} className="w-full">
-                {form.formState.isSubmitting && <Loader2 className="animate-spin mr-2" />}
-                Save Profile Changes
+            <Button type="submit" disabled={form.formState.isSubmitting || regNumberIsSet} className="w-full">
+                {form.formState.isSubmitting ? <Loader2 className="animate-spin mr-2" /> : (regNumberIsSet ? 'Profile Saved' : 'Save Profile Changes')}
             </Button>
         </form>
     </Form>

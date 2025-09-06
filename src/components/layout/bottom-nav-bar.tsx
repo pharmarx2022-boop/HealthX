@@ -6,7 +6,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Home, Calendar, User, LayoutDashboard, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
-import { Button } from '../ui/button';
 
 export function BottomNavBar() {
   const pathname = usePathname();
@@ -39,9 +38,7 @@ export function BottomNavBar() {
       href: '#back' // Dummy href for key
   };
 
-  let navItems = [
-     { href: '/', label: 'Home', icon: Home },
-  ];
+  let navItems = [];
   
   if (user.role === 'patient') {
       navItems = [
@@ -63,17 +60,13 @@ export function BottomNavBar() {
       ]
   } else { // Lab and Pharmacy
        const dashboardPath = `/${user.role}/dashboard`;
+       const profilePath = `/${user.role}/profile`;
+       
        navItems = [
-        // Ensure "Home" and "Dashboard" are not duplicated if they point to the same URL
-        { href: '/', label: 'Home', icon: Home },
-      ];
-      if (dashboardPath !== '/') {
-        navItems.push({ href: dashboardPath, label: 'Dashboard', icon: LayoutDashboard });
-      }
-       navItems.push(
+        { href: dashboardPath, label: 'Dashboard', icon: LayoutDashboard },
         { href: '/book-appointment', label: 'Book', icon: Calendar },
-        { href: `/${user.role}/profile`, label: 'Profile', icon: User },
-      );
+        { href: profilePath, label: 'Profile', icon: User },
+      ];
   }
 
   // Add the back button to the beginning of the list

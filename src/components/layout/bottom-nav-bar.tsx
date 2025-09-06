@@ -25,18 +25,22 @@ export function BottomNavBar() {
   if (!isClient || !user || user.role === 'admin') {
     return null; // Don't show for admins or if not logged in
   }
+  
+  const homePath = user ? (user.role === 'patient' ? '/patient/my-health' : `/${user.role}/dashboard`) : '/';
 
-  let navItems = [];
+  let navItems = [
+     { href: homePath, label: 'Home', icon: Home },
+  ];
+  
   if (user.role === 'patient') {
-      navItems = [
-        { href: '/patient/my-health', label: 'My Health', icon: LayoutDashboard },
-        { href: '/book-appointment', label: 'Book', icon: Calendar },
-      ];
+      navItems.push(
+        { href: '/book-appointment', label: 'Book', icon: Calendar }
+      );
   } else if (user.role === 'health-coordinator') {
-      navItems = [
+      navItems.push(
         { href: '/book-appointment', label: 'Book', icon: Calendar },
-        { href: '/health-coordinator/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-      ];
+        { href: '/health-coordinator/dashboard', label: 'Dashboard', icon: LayoutDashboard }
+      );
   } else if (user.role === 'doctor') {
       navItems = [
         { href: `/${user.role}/dashboard`, label: 'Dashboard', icon: LayoutDashboard },
@@ -44,17 +48,25 @@ export function BottomNavBar() {
       ]
   } else { // Lab and Pharmacy
        navItems = [
+        { href: homePath, label: 'Home', icon: Home },
         { href: '/book-appointment', label: 'Book', icon: Calendar },
         { href: `/${user.role}/dashboard`, label: 'Dashboard', icon: LayoutDashboard },
       ];
   }
+
+  // Remove potential duplicates if home path is the same as dashboard path
+  navItems = navItems.filter((item, index, self) =>
+    index === self.findIndex((t) => (
+      t.href === item.href && t.label === item.label
+    ))
+  );
 
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 z-50 w-full h-16 bg-background border-t border-border">
       <div className={`grid h-full max-w-lg grid-cols-${navItems.length} mx-auto font-medium`}>
         {navItems.map((item) => {
-          const isActive = pathname.startsWith(item.href);
+          const isActive = pathname === item.href;
           return (
             <Link
               key={item.href}

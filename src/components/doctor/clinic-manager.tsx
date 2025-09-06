@@ -64,6 +64,7 @@ const clinicSchema = z.object({
   name: z.string().min(1, 'Clinic name is required.'),
   location: z.string().min(1, 'Location is required.'),
   image: z.string().min(1, 'A clinic picture is required.'),
+  googleMapsLink: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
   dataAiHint: z.string().optional(),
   consultationFee: z.coerce.number().positive('Fee must be a positive number.'),
   patientLimit: z.coerce.number().positive('Limit must be a positive number.').optional(),
@@ -124,6 +125,7 @@ export function ClinicManager() {
         name: '',
         location: '',
         image: '',
+        googleMapsLink: '',
         dataAiHint: 'clinic interior',
         consultationFee: 0,
         patientLimit: 20,
@@ -150,6 +152,7 @@ export function ClinicManager() {
             name: '',
             location: '',
             image: '',
+            googleMapsLink: '',
             dataAiHint: 'clinic interior',
             consultationFee: 0,
             patientLimit: 20,
@@ -280,6 +283,14 @@ export function ClinicManager() {
                                 <FormItem>
                                     <FormLabel>Location / Address</FormLabel>
                                     <FormControl><Input placeholder="e.g., 123 Health St, Andheri West" {...field} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+
+                             <FormField control={form.control} name="googleMapsLink" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Google Map Link</FormLabel>
+                                    <FormControl><Input placeholder="https://maps.app.goo.gl/..." {...field} /></FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )} />
@@ -457,9 +468,11 @@ export function ClinicManager() {
                              <MapPin className="w-4 h-4 mt-0.5 shrink-0"/>
                              <div className="flex items-center gap-2">
                                  <span>{clinic.location}</span>
-                                 <Link href={`https://www.google.com/maps?q=${encodeURIComponent(clinic.location)}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-primary hover:underline">
-                                    <LinkIcon className="w-4 h-4" />
-                                </Link>
+                                  {clinic.googleMapsLink && (
+                                     <Link href={clinic.googleMapsLink} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-primary hover:underline">
+                                        <LinkIcon className="w-4 h-4" />
+                                    </Link>
+                                 )}
                              </div>
                         </div>
                         {renderAvailability(clinic)}

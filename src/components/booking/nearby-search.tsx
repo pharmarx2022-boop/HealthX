@@ -410,7 +410,7 @@ export function NearbySearch({ allowedServices = ['doctor', 'pharmacy', 'lab'] }
                                         <Card className="overflow-hidden h-full group-hover:shadow-xl transition-shadow duration-300 flex flex-col">
                                              <CardHeader className="p-0">
                                                 <div className="relative w-full h-40">
-                                                     <Image src={lab.image} alt={lab.name} fill style={{objectFit:"cover"}} data-ai-hint="lab exterior" />
+                                                     <Image src={lab.image} alt={lab.name || 'Lab image'} fill style={{objectFit:"cover"}} data-ai-hint="lab exterior" />
                                                 </div>
                                             </CardHeader>
                                             <CardContent className="p-4 flex-grow">

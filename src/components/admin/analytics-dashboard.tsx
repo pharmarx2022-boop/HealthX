@@ -1,12 +1,15 @@
 
 'use client';
 
+import { useState, useMemo } from 'react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Pie, PieChart, Cell } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart';
 import { Users, Briefcase, Banknote, ShieldCheck, Stethoscope, Pill, Beaker } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { format } from 'date-fns';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, isToday } from 'date-fns';
+import { initialDoctors, mockPatientData } from '@/lib/mock-data';
 
 const userGrowthData = [
   { month: 'January', users: 12 },
@@ -94,6 +97,43 @@ const recentActivities = [
 ]
 
 export function AnalyticsDashboard() {
+  const [timeFilter, setTimeFilter] = useState('all');
+
+  const doctorPerformanceData = useMemo(() => {
+    const completedAppointments = mockPatientData.filter(p => p.status === 'done');
+
+    const filteredAppointments = completedAppointments.filter(appt => {
+        const apptDate = new Date(appt.appointmentDate);
+        if (timeFilter === 'today') return isToday(apptDate);
+        if (timeFilter === 'week') {
+            const today = new Date();
+            return isWithinInterval(apptDate, { start: startOfWeek(today), end: endOfWeek(today) });
+        }
+        if (timeFilter === 'month') {
+             const today = new Date();
+            return isWithinInterval(apptDate, { start: startOfMonth(today), end: endOfMonth(today) });
+        }
+        return true; // 'all'
+    });
+
+    const performance = initialDoctors.map(doctor => {
+        const doctorAppointments = filteredAppointments.filter(appt => appt.doctorId === doctor.id);
+        const totalConsultations = doctorAppointments.length;
+        const totalRevenue = doctorAppointments.reduce((sum, appt) => sum + appt.consultationFee, 0);
+        
+        return {
+            id: doctor.id,
+            name: doctor.name,
+            specialty: doctor.specialty,
+            consultations: totalConsultations,
+            revenue: totalRevenue,
+        };
+    });
+
+    return performance.sort((a,b) => b.revenue - a.revenue);
+
+  }, [timeFilter]);
+
   return (
     <div className="space-y-8">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -153,6 +193,56 @@ export function AnalyticsDashboard() {
                 </CardContent>
             </Card>
         </div>
+        <Card>
+            <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                    <CardTitle>Doctor Performance</CardTitle>
+                    <CardDescription>Consultation and revenue metrics for each doctor.</CardDescription>
+                </div>
+                <Select value={timeFilter} onValueChange={setTimeFilter}>
+                    <SelectTrigger className="w-full sm:w-[180px]">
+                        <SelectValue placeholder="Select time frame" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Time</SelectItem>
+                        <SelectItem value="today">Today</SelectItem>
+                        <SelectItem value="week">This Week</SelectItem>
+                        <SelectItem value="month">This Month</SelectItem>
+                    </SelectContent>
+                </Select>
+            </CardHeader>
+            <CardContent>
+                 <div className="w-full overflow-x-auto">
+                     <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Doctor</TableHead>
+                                <TableHead className="text-center">Completed Consultations</TableHead>
+                                <TableHead className="text-right">Total Revenue</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {doctorPerformanceData.length > 0 ? doctorPerformanceData.map((doctor) => (
+                                <TableRow key={doctor.id}>
+                                    <TableCell>
+                                        <div className="font-medium">{doctor.name}</div>
+                                        <div className="text-xs text-muted-foreground">{doctor.specialty}</div>
+                                    </TableCell>
+                                    <TableCell className="text-center font-medium">{doctor.consultations}</TableCell>
+                                    <TableCell className="text-right font-medium">INR {doctor.revenue.toFixed(2)}</TableCell>
+                                </TableRow>
+                            )) : (
+                                <TableRow>
+                                    <TableCell colSpan={3} className="text-center h-24">
+                                        No completed consultations for the selected period.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                     </Table>
+                 </div>
+            </CardContent>
+        </Card>
         <Card>
             <CardHeader>
                 <CardTitle>Recent Platform Activity</CardTitle>

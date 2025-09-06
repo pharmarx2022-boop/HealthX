@@ -1,5 +1,4 @@
 
-
 // THIS IS A MOCK AUTHENTICATION FILE FOR PROTOTYPING ONLY
 // In a real application, this would be replaced with a secure authentication service like Firebase Authentication.
 
@@ -10,6 +9,20 @@ const USERS_KEY = 'allUsers';
 const ADMIN_ACCOUNTS = [
     { email: 'admin@example.com', id: 'admin_001', role: 'admin' },
 ];
+
+export type UserData = {
+    id: string;
+    email: string;
+    role: string;
+    fullName: string;
+    phone: string;
+    referralCode?: string;
+    status: 'pending' | 'approved' | 'rejected' | 'disabled';
+    dateJoined: string;
+    // Role-specific fields that might exist on a user object
+    [key: string]: any; 
+};
+
 
 const generateReferralCode = () => {
     return `HX-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
@@ -23,13 +36,13 @@ const initializeUsers = () => {
 initializeUsers();
 
 
-const getAllUsers = (): any[] => {
+const getAllUsers = (): UserData[] => {
     if (typeof window === 'undefined') return [];
     const users = sessionStorage.getItem(USERS_KEY);
     return users ? JSON.parse(users) : [];
 }
 
-const saveAllUsers = (users: any[]) => {
+const saveAllUsers = (users: UserData[]) => {
     sessionStorage.setItem(USERS_KEY, JSON.stringify(users));
 }
 
@@ -84,7 +97,7 @@ export function signInWithOtp(email: string, otp: string, role: string, referral
     const emailPrefix = email.split('@')[0];
     const isProfessional = ['doctor', 'pharmacy', 'lab', 'health-coordinator'].includes(role);
 
-    const user = { 
+    const user: UserData = { 
         id: `${role}_${emailPrefix}_${Date.now()}`,
         email,
         role, 
@@ -157,7 +170,7 @@ export function verifyAdmin(): boolean {
 }
 
 
-export function getAllUsersForAdmin(): any[] {
+export function getAllUsersForAdmin(): UserData[] {
      const allUsers = getAllUsers();
      return allUsers.filter(user => user.role !== 'admin');
 }
@@ -174,4 +187,35 @@ export function toggleUserStatus(userId: string, role: string) {
         return true;
     }
     return false;
+}
+
+export async function updateUserByAdmin(userId: string, role: string, updatedData: Partial<UserData>): Promise<void> {
+    const allUsers = getAllUsers();
+    const userIndex = allUsers.findIndex(u => u.id === userId);
+    if (userIndex !== -1) {
+        allUsers[userIndex] = { ...allUsers[userIndex], ...updatedData };
+        saveAllUsers(allUsers);
+    }
+
+    // Also update the specific data store if it's a professional role
+    let dataKey: string | null = null;
+    switch (role) {
+        case 'doctor': dataKey = 'doctorsData'; break;
+        case 'lab': dataKey = 'mockLabs'; break;
+        case 'pharmacy': dataKey = 'mockPharmacies'; break;
+        case 'patient': dataKey = 'mockPatientData'; break;
+    }
+
+    if (dataKey) {
+        const storedData = sessionStorage.getItem(dataKey);
+        if (storedData) {
+            const allData = JSON.parse(storedData);
+            const dataIndex = allData.findIndex((d: any) => d.id === userId);
+            if (dataIndex !== -1) {
+                const nameKey = allData[dataIndex].name ? 'name' : 'fullName';
+                allData[dataIndex] = { ...allData[dataIndex], ...updatedData, [nameKey]: updatedData.fullName };
+                sessionStorage.setItem(dataKey, JSON.stringify(allData));
+            }
+        }
+    }
 }

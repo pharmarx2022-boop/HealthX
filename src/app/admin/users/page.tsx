@@ -2,22 +2,25 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { getAllUsersForAdmin, toggleUserStatus } from '@/lib/auth';
+import { getAllUsersForAdmin, toggleUserStatus, updateUserByAdmin, UserData } from '@/lib/auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Ban, CheckCircle, MoreHorizontal, Loader2 } from 'lucide-react';
+import { Ban, CheckCircle, MoreHorizontal, Loader2, Edit } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
+import { EditUserDialog } from '@/components/admin/edit-user-dialog';
 
 export default function UserManagementPage() {
-    const [users, setUsers] = useState<any[]>([]);
+    const [users, setUsers] = useState<UserData[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [roleFilter, setRoleFilter] = useState('all');
+    const [editingUser, setEditingUser] = useState<UserData | null>(null);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
     const { toast } = useToast();
 
     const fetchUsers = async () => {
@@ -39,6 +42,24 @@ export default function UserManagementPage() {
             description: "The user's account status has been changed.",
         });
     };
+    
+    const handleEditUser = (user: UserData) => {
+        setEditingUser(user);
+        setIsDialogOpen(true);
+    }
+    
+    const handleUpdateUser = async (updatedData: Partial<UserData>) => {
+        if (!editingUser) return;
+        
+        await updateUserByAdmin(editingUser.id, editingUser.role, updatedData);
+        fetchUsers();
+        setIsDialogOpen(false);
+        setEditingUser(null);
+        toast({
+            title: "User Updated",
+            description: "The user's details have been successfully saved.",
+        });
+    }
 
     const filteredUsers = useMemo(() => {
         return users.filter(user => {
@@ -134,6 +155,9 @@ export default function UserManagementPage() {
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem onClick={() => handleEditUser(user)}>
+                                                        <Edit className="mr-2 h-4 w-4" /> Edit User
+                                                    </DropdownMenuItem>
                                                     <DropdownMenuItem onClick={() => handleToggleStatus(user.id, user.role)}>
                                                         {user.status === 'disabled' ? (
                                                             <><CheckCircle className="mr-2 h-4 w-4" /> Enable Account</>
@@ -157,6 +181,14 @@ export default function UserManagementPage() {
                     </div>
                 </CardContent>
             </Card>
+            {editingUser && (
+                <EditUserDialog 
+                    isOpen={isDialogOpen}
+                    onOpenChange={setIsDialogOpen}
+                    user={editingUser}
+                    onSave={handleUpdateUser}
+                />
+            )}
         </div>
     );
 }

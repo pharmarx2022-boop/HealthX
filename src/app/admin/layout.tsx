@@ -23,6 +23,7 @@ import {
   Loader2,
   Lock,
   LineChart,
+  Contact,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -63,6 +64,11 @@ export default function AdminLayout({
       icon: LineChart,
     },
     {
+      href: '/admin/users',
+      label: 'Users',
+      icon: Users,
+    },
+    {
       href: '/admin/approvals',
       label: 'Approvals',
       icon: ShieldCheck,
@@ -75,7 +81,7 @@ export default function AdminLayout({
      {
       href: '/admin/team',
       label: 'Team',
-      icon: Users,
+      icon: Contact,
     },
   ];
 

@@ -3,6 +3,7 @@
 // A simple in-memory store for users
 const users: any[] = [];
 import { createReferral } from './referrals';
+import { initialDoctors, initialLabs, initialPharmacies } from './mock-data';
 
 // A secure, hardcoded list of admin accounts.
 // In a real application, this would be stored securely in a database.
@@ -20,15 +21,17 @@ const getAllUsers = () => {
     // This is a mock function. In a real app, you would fetch this from the DB.
     // Here we'll just combine all mock data user types that can refer.
     const allKnownUsers: any[] = [];
-    const addUsers = (key: string) => {
+    const addUsers = (key: string, defaultData: any[]) => {
         const stored = sessionStorage.getItem(key);
         if(stored) {
             allKnownUsers.push(...JSON.parse(stored));
+        } else {
+             allKnownUsers.push(...defaultData);
         }
     };
-    addUsers('mockPharmacies');
-    addUsers('mockLabs');
-    addUsers('doctorsData');
+    addUsers('mockPharmacies', initialPharmacies);
+    addUsers('mockLabs', initialLabs);
+    addUsers('doctorsData', initialDoctors);
     users.forEach(u => {
         if(!allKnownUsers.find(k => k.id === u.id)) {
             allKnownUsers.push(u);
@@ -157,8 +160,8 @@ export function signInWithOtp(email: string, otp: string, role: string, referral
         console.log('Existing user logging in:', user);
     }
     
-    if (user.status === 'rejected') {
-        return { user: null, error: "Your registration has been rejected.", isNewUser: false };
+    if (user.status === 'rejected' || user.status === 'disabled') {
+        return { user: null, error: "Your account has been rejected or disabled by the administrator.", isNewUser: false };
     }
     
     window.sessionStorage.removeItem('emailForSignIn');
@@ -180,6 +183,7 @@ export function updateUserStatus(userId: string, role: string, newStatus: 'appro
          case 'lab': key = 'mockLabs'; break;
          case 'pharmacy': key = 'mockPharmacies'; break;
          case 'health-coordinator':
+         case 'patient':
             const userIndex = users.findIndex(u => u.id === userId);
             if(userIndex > -1) {
                 users[userIndex].status = newStatus;
@@ -240,9 +244,65 @@ export function verifyAdmin(): boolean {
 
     try {
         const user = JSON.parse(storedUser);
-        // Check if the user from session exists in our secure admin list
+        // Check if the user from session exists in our secure list
         return user.role === 'admin' && ADMIN_ACCOUNTS.some(admin => admin.id === user.id && admin.email === user.email);
     } catch (e) {
         return false;
     }
+}
+
+export function getAllUsersForAdmin() {
+    const doctors = JSON.parse(sessionStorage.getItem('doctorsData') || '[]');
+    const labs = JSON.parse(sessionStorage.getItem('mockLabs') || '[]');
+    const pharmacies = JSON.parse(sessionStorage.getItem('mockPharmacies') || '[]');
+    // For patients and health coordinators, we assume they are in the in-memory `users` array
+    return [...doctors, ...labs, ...pharmacies, ...users];
+}
+
+export function toggleUserStatus(userId: string, role: string) {
+    let key: string | null = null;
+    let dataArray: any[] | null = null;
+    let inMemory = false;
+
+    switch(role) {
+        case 'doctor': key = 'doctorsData'; break;
+        case 'lab': key = 'mockLabs'; break;
+        case 'pharmacy': key = 'mockPharmacies'; break;
+        case 'patient':
+        case 'health-coordinator':
+            inMemory = true;
+            dataArray = users;
+            break;
+    }
+
+    if (!inMemory && key) {
+        const stored = sessionStorage.getItem(key);
+        dataArray = stored ? JSON.parse(stored) : [];
+    }
+
+    if (!dataArray) return false;
+
+    let userFound = false;
+    const updatedArray = dataArray.map((user: any) => {
+        if (user.id === userId) {
+            userFound = true;
+            const newStatus = user.status === 'disabled' ? 'approved' : 'disabled';
+            return { ...user, status: newStatus };
+        }
+        return user;
+    });
+
+    if (userFound) {
+        if (inMemory) {
+            // This is tricky as we are modifying the original `users` array.
+            const userIndex = users.findIndex(u => u.id === userId);
+            if(userIndex > -1) {
+                users[userIndex].status = users[userIndex].status === 'disabled' ? 'approved' : 'disabled';
+            }
+        } else if (key) {
+            sessionStorage.setItem(key, JSON.stringify(updatedArray));
+        }
+    }
+
+    return userFound;
 }

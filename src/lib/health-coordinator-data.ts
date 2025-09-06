@@ -27,10 +27,12 @@ function initializeTransactions(healthCoordinatorId: string): HealthCoordinatorT
     return mockInitialTransactions;
 }
 
-export function getHealthCoordinatorData(healthCoordinatorId: string): { balance: number; transactions: HealthCoordinatorTransaction[] } {
+export async function getHealthCoordinatorData(healthCoordinatorId: string): Promise<{ balance: number; transactions: HealthCoordinatorTransaction[] }> {
     const key = TRANSACTIONS_KEY_PREFIX + healthCoordinatorId;
     let transactions: HealthCoordinatorTransaction[] = [];
 
+    // This part remains sessionStorage-based for demo purposes.
+    // In production, you'd fetch from Firestore.
     const storedTransactions = sessionStorage.getItem(key);
     if (storedTransactions) {
         transactions = JSON.parse(storedTransactions).map((t: any) => ({...t, date: new Date(t.date)}));
@@ -48,9 +50,9 @@ export function getHealthCoordinatorData(healthCoordinatorId: string): { balance
     };
 }
 
-export function convertPointsToCash(healthCoordinatorId: string) {
+export async function convertPointsToCash(healthCoordinatorId: string) {
     const key = TRANSACTIONS_KEY_PREFIX + healthCoordinatorId;
-    const { balance, transactions } = getHealthCoordinatorData(healthCoordinatorId);
+    const { balance, transactions } = await getHealthCoordinatorData(healthCoordinatorId);
 
     if (balance <= 0) return;
 
@@ -65,10 +67,10 @@ export function convertPointsToCash(healthCoordinatorId: string) {
     sessionStorage.setItem(key, JSON.stringify(updatedTransactions));
 }
 
-export function recordHealthCoordinatorCommission(healthCoordinatorId: string, transaction: Omit<HealthCoordinatorTransaction, 'date'> & { date: Date }) {
+export async function recordHealthCoordinatorCommission(healthCoordinatorId: string, transaction: Omit<HealthCoordinatorTransaction, 'date'> & { date: Date }) {
     const key = TRANSACTIONS_KEY_PREFIX + healthCoordinatorId;
-    const history = getHealthCoordinatorData(healthCoordinatorId);
+    const history = await getHealthCoordinatorData(healthCoordinatorId);
     const updatedTransactions = [...history.transactions, transaction];
     sessionStorage.setItem(key, JSON.stringify(updatedTransactions));
-    checkHealthCoordinatorMilestone(healthCoordinatorId);
+    await checkHealthCoordinatorMilestone(healthCoordinatorId);
 }

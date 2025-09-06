@@ -9,23 +9,31 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Ban, CheckCircle, MoreHorizontal } from 'lucide-react';
+import { Ban, CheckCircle, MoreHorizontal, Loader2 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 
 export default function UserManagementPage() {
     const [users, setUsers] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [roleFilter, setRoleFilter] = useState('all');
     const { toast } = useToast();
 
+    const fetchUsers = async () => {
+        setIsLoading(true);
+        const allUsers = await getAllUsersForAdmin();
+        setUsers(allUsers);
+        setIsLoading(false);
+    };
+
     useEffect(() => {
-        setUsers(getAllUsersForAdmin());
+        fetchUsers();
     }, []);
 
-    const handleToggleStatus = (userId: string, role: string) => {
-        toggleUserStatus(userId, role);
-        setUsers(getAllUsersForAdmin()); // Refresh the user list
+    const handleToggleStatus = async (userId: string, role: string) => {
+        await toggleUserStatus(userId, role);
+        fetchUsers(); // Refresh the user list
         toast({
             title: "User Status Updated",
             description: "The user's account status has been changed.",
@@ -99,7 +107,13 @@ export default function UserManagementPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {filteredUsers.length > 0 ? filteredUsers.map(user => (
+                                {isLoading ? (
+                                     <TableRow>
+                                        <TableCell colSpan={5} className="text-center h-24">
+                                            <Loader2 className="animate-spin inline-block mr-2" /> Loading users...
+                                        </TableCell>
+                                    </TableRow>
+                                ) : filteredUsers.length > 0 ? filteredUsers.map(user => (
                                     <TableRow key={user.id}>
                                         <TableCell className="font-medium">{user.fullName || user.name}</TableCell>
                                         <TableCell className="hidden md:table-cell capitalize">

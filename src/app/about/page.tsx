@@ -16,8 +16,13 @@ export default function AboutUsPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setTeamMembers(getTeamMembers());
-    setIsLoading(false);
+    const fetchTeam = async () => {
+      setIsLoading(true);
+      const members = await getTeamMembers();
+      setTeamMembers(members);
+      setIsLoading(false);
+    }
+    fetchTeam();
   }, []);
 
   return (

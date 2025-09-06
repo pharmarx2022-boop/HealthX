@@ -1,6 +1,8 @@
 
 'use client';
 
+// This file should be refactored to use a backend service like Firestore.
+
 const TEAM_MEMBERS_KEY = 'teamMembers';
 
 export type TeamMember = {
@@ -51,15 +53,18 @@ const initialTeamMembers: TeamMember[] = [
   },
 ];
 
-function initializeTeamMembers(): TeamMember[] {
-    sessionStorage.setItem(TEAM_MEMBERS_KEY, JSON.stringify(initialTeamMembers));
-    return initialTeamMembers;
-}
-
-export function getTeamMembers(): TeamMember[] {
-    if (typeof window === 'undefined') return [];
+// Placeholder for fetching team members from a database
+export async function getTeamMembers(): Promise<TeamMember[]> {
+    console.warn("Using placeholder for getTeamMembers. Connect to your database.");
+    // In a real app, you would fetch from Firestore here.
+    // For now, we'll continue to use sessionStorage for demo purposes.
+     if (typeof window === 'undefined') return [];
     const stored = sessionStorage.getItem(TEAM_MEMBERS_KEY);
-    return stored ? JSON.parse(stored) : initializeTeamMembers();
+    if (!stored) {
+      sessionStorage.setItem(TEAM_MEMBERS_KEY, JSON.stringify(initialTeamMembers));
+      return initialTeamMembers;
+    }
+    return JSON.parse(stored);
 }
 
 function saveTeamMembers(members: TeamMember[]): void {
@@ -67,20 +72,26 @@ function saveTeamMembers(members: TeamMember[]): void {
     sessionStorage.setItem(TEAM_MEMBERS_KEY, JSON.stringify(members));
 }
 
-export function addTeamMember(member: Omit<TeamMember, 'id'>): void {
-    const members = getTeamMembers();
+// Placeholder for adding a team member to a database
+export async function addTeamMember(member: Omit<TeamMember, 'id'>): Promise<void> {
+    console.warn("Using placeholder for addTeamMember. Connect to your database.");
+    const members = await getTeamMembers();
     const newMember: TeamMember = { ...member, id: `team_${Date.now()}` };
     saveTeamMembers([...members, newMember]);
 }
 
-export function updateTeamMember(updatedMember: TeamMember): void {
-    const members = getTeamMembers();
+// Placeholder for updating a team member in a database
+export async function updateTeamMember(updatedMember: TeamMember): Promise<void> {
+    console.warn("Using placeholder for updateTeamMember. Connect to your database.");
+    const members = await getTeamMembers();
     const updatedMembers = members.map(m => m.id === updatedMember.id ? updatedMember : m);
     saveTeamMembers(updatedMembers);
 }
 
-export function deleteTeamMember(memberId: string): void {
-    const members = getTeamMembers();
+// Placeholder for deleting a team member from a database
+export async function deleteTeamMember(memberId: string): Promise<void> {
+    console.warn("Using placeholder for deleteTeamMember. Connect to your database.");
+    const members = await getTeamMembers();
     const updatedMembers = members.filter(m => m.id !== memberId);
     saveTeamMembers(updatedMembers);
 }

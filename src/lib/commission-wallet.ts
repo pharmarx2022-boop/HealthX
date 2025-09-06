@@ -24,7 +24,8 @@ export type WithdrawalRequest = {
     status: 'pending' | 'approved' | 'rejected';
 }
 
-function getCommissionTransactions(userId: string): CommissionTransaction[] {
+// In a real app, this would fetch from Firestore.
+async function getCommissionTransactions(userId: string): Promise<CommissionTransaction[]> {
     const key = COMMISSION_WALLET_KEY_PREFIX + userId;
     const stored = sessionStorage.getItem(key);
     if(stored) {
@@ -34,8 +35,8 @@ function getCommissionTransactions(userId: string): CommissionTransaction[] {
 }
 
 
-export function getCommissionWalletData(userId: string): { balance: number; transactions: CommissionTransaction[] } {
-    const transactions = getCommissionTransactions(userId);
+export async function getCommissionWalletData(userId: string): Promise<{ balance: number; transactions: CommissionTransaction[] }> {
+    const transactions = await getCommissionTransactions(userId);
     
     const balance = transactions.reduce((acc, curr) => {
         if(curr.type === 'credit' && curr.status === 'success') {
@@ -53,15 +54,15 @@ export function getCommissionWalletData(userId: string): { balance: number; tran
     };
 }
 
-export function recordCommission(userId: string, transaction: Omit<CommissionTransaction, 'date'> & { date: Date }) {
+export async function recordCommission(userId: string, transaction: Omit<CommissionTransaction, 'date'> & { date: Date }) {
     const key = COMMISSION_WALLET_KEY_PREFIX + userId;
-    const history = getCommissionWalletData(userId);
+    const history = await getCommissionWalletData(userId);
     const updatedTransactions = [...history.transactions, transaction];
     sessionStorage.setItem(key, JSON.stringify(updatedTransactions));
 }
 
-export function requestWithdrawal(userId: string, userName: string, amount: number) {
-    const requests = getWithdrawalRequests();
+export async function requestWithdrawal(userId: string, userName: string, amount: number) {
+    const requests = await getWithdrawalRequests();
     const newRequest: WithdrawalRequest = {
         id: `withdraw_${Date.now()}`,
         userId,
@@ -79,7 +80,7 @@ export function requestWithdrawal(userId: string, userName: string, amount: numb
         status: 'pending'
     };
 
-    recordCommission(userId, debitTransaction);
+    await recordCommission(userId, debitTransaction);
 
     sessionStorage.setItem(WITHDRAWAL_REQUESTS_KEY, JSON.stringify([...requests, newRequest]));
     toast({
@@ -88,22 +89,20 @@ export function requestWithdrawal(userId: string, userName: string, amount: numb
     })
 }
 
-export function getWithdrawalRequests(): WithdrawalRequest[] {
+export async function getWithdrawalRequests(): Promise<WithdrawalRequest[]> {
     const stored = sessionStorage.getItem(WITHDRAWAL_REQUESTS_KEY);
     return stored ? JSON.parse(stored).map((r: any) => ({...r, date: new Date(r.date)})) : [];
 }
 
-export function updateWithdrawalRequest(requestId: string, newStatus: 'approved' | 'rejected') {
-    const requests = getWithdrawalRequests();
+export async function updateWithdrawalRequest(requestId: string, newStatus: 'approved' | 'rejected') {
+    const requests = await getWithdrawalRequests();
     const request = requests.find(r => r.id === requestId);
     if(!request) return;
 
-    // Update request status
     const updatedRequests = requests.map(r => r.id === requestId ? {...r, status: newStatus} : r);
     sessionStorage.setItem(WITHDRAWAL_REQUESTS_KEY, JSON.stringify(updatedRequests));
 
-    // Update user's commission wallet transaction
-    const transactions = getCommissionTransactions(request.userId);
+    const transactions = await getCommissionTransactions(request.userId);
     const updatedTransactions = transactions.map(t => {
         if(t.description === 'Withdrawal request' && t.status === 'pending') {
             return {...t, status: newStatus === 'approved' ? 'paid' : 'rejected' };
@@ -111,7 +110,6 @@ export function updateWithdrawalRequest(requestId: string, newStatus: 'approved'
         return t;
     });
 
-    // If rejected, credit the amount back
     if (newStatus === 'rejected') {
         const creditTransaction: CommissionTransaction = {
             type: 'credit',

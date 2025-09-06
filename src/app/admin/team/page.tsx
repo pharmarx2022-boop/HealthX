@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { PlusCircle, Edit, Trash2, Upload, Loader2, Link as LinkIcon } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const memberSchema = z.object({
   id: z.string().optional(),
@@ -34,6 +35,7 @@ type TeamMemberFormValues = z.infer<typeof memberSchema>;
 export default function TeamManagementPage() {
   const { toast } = useToast();
   const [members, setMembers] = useState<TeamMember[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
 
@@ -50,9 +52,16 @@ export default function TeamManagementPage() {
       instagram: ''
     },
   });
+  
+  const fetchTeam = async () => {
+      setIsLoading(true);
+      const team = await getTeamMembers();
+      setMembers(team);
+      setIsLoading(false);
+  };
 
   useEffect(() => {
-    setMembers(getTeamMembers());
+    fetchTeam();
   }, []);
   
    useEffect(() => {
@@ -73,15 +82,15 @@ export default function TeamManagementPage() {
       }
   }, [editingMember, form]);
 
-  const handleFormSubmit = (data: TeamMemberFormValues) => {
+  const handleFormSubmit = async (data: TeamMemberFormValues) => {
     if (editingMember) {
-      updateTeamMember({ ...data, id: editingMember.id });
+      await updateTeamMember({ ...data, id: editingMember.id });
       toast({ title: 'Member Updated', description: `${data.name}'s details have been saved.` });
     } else {
-      addTeamMember(data);
+      await addTeamMember(data);
       toast({ title: 'Member Added', description: `${data.name} has been added to the team.` });
     }
-    setMembers(getTeamMembers());
+    fetchTeam();
     setIsDialogOpen(false);
     setEditingMember(null);
   };
@@ -91,9 +100,9 @@ export default function TeamManagementPage() {
     setIsDialogOpen(true);
   };
   
-  const handleDeleteClick = (memberId: string) => {
-    deleteTeamMember(memberId);
-    setMembers(getTeamMembers());
+  const handleDeleteClick = async (memberId: string) => {
+    await deleteTeamMember(memberId);
+    fetchTeam();
     toast({ title: 'Member Removed', variant: 'destructive' });
   };
   
@@ -195,40 +204,61 @@ export default function TeamManagementPage() {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {members.map((member) => (
-          <Card key={member.id} className="flex flex-col">
-            <CardHeader className="flex-col items-center text-center sm:flex-row sm:text-left sm:items-start gap-4">
-                <div className="relative w-20 h-20 rounded-full overflow-hidden shrink-0 border-2 border-primary/20">
-                    <Image src={member.image} alt={member.name} fill className="object-cover" />
-                </div>
-                <div className="flex-grow">
-                    <CardTitle>{member.name}</CardTitle>
-                    <CardDescription>{member.title}</CardDescription>
-                </div>
-            </CardHeader>
-            <CardContent className="flex-grow text-center sm:text-left">
-              <p className="text-sm text-muted-foreground">{member.bio}</p>
-            </CardContent>
-            <CardFooter className="bg-slate-50/70 p-2 border-t flex justify-end gap-2">
-              <Button variant="outline" size="sm" onClick={() => handleEditClick(member)}><Edit className="mr-2 h-4 w-4" /> Edit</Button>
-              <AlertDialog>
-                <AlertDialogTrigger asChild><Button variant="destructive" size="sm"><Trash2 className="mr-2 h-4 w-4" /> Delete</Button></AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                    <AlertDialogDescription>This action will permanently delete {member.name} from the team page.</AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => handleDeleteClick(member.id)}>Confirm</AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
+      {isLoading ? (
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+             {Array.from({length: 3}).map((_, i) => (
+                <Card key={i}>
+                    <CardHeader className="flex-col items-center text-center sm:flex-row sm:text-left sm:items-start gap-4">
+                        <Skeleton className="w-20 h-20 rounded-full"/>
+                        <div className="flex-grow space-y-2">
+                             <Skeleton className="h-6 w-3/4"/>
+                             <Skeleton className="h-4 w-1/2"/>
+                        </div>
+                    </CardHeader>
+                    <CardContent><Skeleton className="h-10 w-full"/></CardContent>
+                    <CardFooter className="bg-slate-50/70 p-2 border-t flex justify-end gap-2">
+                         <Skeleton className="h-8 w-20"/>
+                         <Skeleton className="h-8 w-20"/>
+                    </CardFooter>
+                </Card>
+             ))}
+         </div>
+      ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {members.map((member) => (
+              <Card key={member.id} className="flex flex-col">
+                <CardHeader className="flex-col items-center text-center sm:flex-row sm:text-left sm:items-start gap-4">
+                    <div className="relative w-20 h-20 rounded-full overflow-hidden shrink-0 border-2 border-primary/20">
+                        <Image src={member.image} alt={member.name} fill className="object-cover" />
+                    </div>
+                    <div className="flex-grow">
+                        <CardTitle>{member.name}</CardTitle>
+                        <CardDescription>{member.title}</CardDescription>
+                    </div>
+                </CardHeader>
+                <CardContent className="flex-grow text-center sm:text-left">
+                  <p className="text-sm text-muted-foreground">{member.bio}</p>
+                </CardContent>
+                <CardFooter className="bg-slate-50/70 p-2 border-t flex justify-end gap-2">
+                  <Button variant="outline" size="sm" onClick={() => handleEditClick(member)}><Edit className="mr-2 h-4 w-4" /> Edit</Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild><Button variant="destructive" size="sm"><Trash2 className="mr-2 h-4 w-4" /> Delete</Button></AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>This action will permanently delete {member.name} from the team page.</AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDeleteClick(member.id)}>Confirm</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+      )}
     </div>
   );
 }

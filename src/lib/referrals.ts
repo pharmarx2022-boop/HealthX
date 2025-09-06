@@ -15,7 +15,7 @@ type Referral = {
     referredUserId: string;
     referredUserRole: ReferredUserRole;
     status: ReferralStatus;
-    progress: number; // e.g., number of consultations, total transaction amount
+    progress: number; 
     dateCreated: string;
 };
 
@@ -28,17 +28,17 @@ const MILESTONES = {
 };
 
 
-function getReferrals(): Referral[] {
+async function getReferrals(): Promise<Referral[]> {
     const stored = sessionStorage.getItem(REFERRALS_KEY);
     return stored ? JSON.parse(stored) : [];
 }
 
-function saveReferrals(referrals: Referral[]) {
+async function saveReferrals(referrals: Referral[]) {
     sessionStorage.setItem(REFERRALS_KEY, JSON.stringify(referrals));
 }
 
-export function createReferral(referrerId: string, referredUserId: string, referredUserRole: ReferredUserRole) {
-    const referrals = getReferrals();
+export async function createReferral(referrerId: string, referredUserId: string, referredUserRole: ReferredUserRole) {
+    const referrals = await getReferrals();
     const newReferral: Referral = {
         referralId: `ref_${Date.now()}`,
         referrerId,
@@ -49,14 +49,14 @@ export function createReferral(referrerId: string, referredUserId: string, refer
         dateCreated: new Date().toISOString(),
     };
     referrals.push(newReferral);
-    saveReferrals(referrals);
+    await saveReferrals(referrals);
     console.log('Referral created:', newReferral);
 }
 
-function completeReferral(referral: Referral) {
+async function completeReferral(referral: Referral) {
     const milestone = MILESTONES[referral.referredUserRole];
     
-    recordCommission(referral.referrerId, {
+    await recordCommission(referral.referrerId, {
         type: 'credit',
         amount: milestone.reward,
         description: `Referral bonus for ${referral.referredUserRole} ${referral.referredUserId}`,
@@ -69,24 +69,23 @@ function completeReferral(referral: Referral) {
         description: `You've received INR ${milestone.reward} for referring a new ${referral.referredUserRole}.`
     });
 
-    // Update the referral's status to completed
-    const allReferrals = getReferrals();
+    const allReferrals = await getReferrals();
     const updatedReferrals = allReferrals.map(r => 
         r.referralId === referral.referralId ? { ...r, status: 'completed' } : r
     );
-    saveReferrals(updatedReferrals);
+    await saveReferrals(updatedReferrals);
 }
 
 
 // --- Milestone Check Functions ---
 
-export function checkDoctorMilestone(doctorId: string) {
-    const referrals = getReferrals();
+export async function checkDoctorMilestone(doctorId: string) {
+    const referrals = await getReferrals();
     const referral = referrals.find(r => r.referredUserId === doctorId && r.status === 'pending');
 
     if (!referral) return;
 
-    // In a real app, you'd fetch this from a DB. Here, we count from mock data.
+    // This needs to be a DB query. Using mock data for now.
     const allAppointments = JSON.parse(sessionStorage.getItem('mockPatients') || '[]');
     const completedConsultations = allAppointments.filter((appt: any) => 
         appt.doctorId === doctorId && appt.status === 'done'
@@ -95,41 +94,37 @@ export function checkDoctorMilestone(doctorId: string) {
     referral.progress = completedConsultations;
     
     if (referral.progress >= MILESTONES.doctor.threshold) {
-        completeReferral(referral);
+        await completeReferral(referral);
     } else {
-        saveReferrals(referrals); // Save progress
+        await saveReferrals(referrals); // Save progress
     }
 }
 
-export function checkPartnerMilestone(partnerId: string, partnerType: 'lab' | 'pharmacy') {
-    const referrals = getReferrals();
+export async function checkPartnerMilestone(partnerId: string, partnerType: 'lab' | 'pharmacy') {
+    const referrals = await getReferrals();
     const referral = referrals.find(r => r.referredUserId === partnerId && r.status === 'pending');
     
     if (!referral) return;
 
-    const partnerDataKey = partnerType === 'lab' ? 'lab_transactions_' : 'pharmacy_transactions_';
-    const transactions = JSON.parse(sessionStorage.getItem(partnerDataKey + partnerId) || '[]');
-    const totalCollected = transactions
-        .filter((tx: any) => tx.type === 'credit')
-        .reduce((sum: number, tx: any) => sum + tx.amount, 0);
-
-    referral.progress = totalCollected;
+    // This needs to be a DB query. Using mock data for now.
+    const { balance } = await getCommissionWalletData(partnerId);
+    referral.progress = balance;
     
     const milestone = MILESTONES[partnerType];
     if (referral.progress >= milestone.threshold) {
-        completeReferral(referral);
+        await completeReferral(referral);
     } else {
-        saveReferrals(referrals); // Save progress
+        await saveReferrals(referrals);
     }
 }
 
-export function checkHealthCoordinatorMilestone(coordinatorId: string) {
-    const referrals = getReferrals();
+export async function checkHealthCoordinatorMilestone(coordinatorId: string) {
+    const referrals = await getReferrals();
     const referral = referrals.find(r => r.referredUserId === coordinatorId && r.status === 'pending');
 
     if (!referral) return;
 
-    // In a real app, this would be a DB query.
+    // This needs to be a DB query. Using mock data for now.
     const allAppointments = JSON.parse(sessionStorage.getItem('mockPatients') || '[]');
     const completedBookings = allAppointments.filter((appt: any) =>
         appt.healthCoordinatorId === coordinatorId && appt.status === 'done'
@@ -138,8 +133,27 @@ export function checkHealthCoordinatorMilestone(coordinatorId: string) {
     referral.progress = completedBookings;
     
     if (referral.progress >= MILESTONES['health-coordinator'].threshold) {
-        completeReferral(referral);
+        await completeReferral(referral);
     } else {
-        saveReferrals(referrals); // Save progress
+        await saveReferrals(referrals);
     }
+}
+
+// Function to get wallet data from commission-wallet, needed here for partner milestone checks.
+async function getCommissionWalletData(userId: string): Promise<{ balance: number; transactions: any[] }> {
+    const key = `commission_wallet_${userId}`;
+    const stored = sessionStorage.getItem(key);
+    const transactions = stored ? JSON.parse(stored) : [];
+    
+    const balance = transactions.reduce((acc: number, curr: any) => {
+        if(curr.type === 'credit' && curr.status === 'success') {
+            return acc + curr.amount;
+        }
+        if(curr.type === 'debit' && (curr.status === 'paid' || curr.status === 'pending')) {
+             return acc - curr.amount;
+        }
+        return acc;
+    }, 0);
+
+    return { balance, transactions };
 }

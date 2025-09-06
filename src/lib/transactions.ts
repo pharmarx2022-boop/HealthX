@@ -15,9 +15,11 @@ export type Transaction = {
     partnerName?: string;
 }
 
-// Function to get transactions from sessionStorage
-function getStoredTransactions(patientId: string): Transaction[] {
+// In a real app, this would fetch from Firestore.
+async function getStoredTransactions(patientId: string): Promise<Transaction[]> {
     if (typeof window === 'undefined') return [];
+    // For demo purposes, we'll continue using sessionStorage.
+    // In production, you'd replace this with a Firestore query.
     const storedTransactions = sessionStorage.getItem(TRANSACTIONS_KEY_PREFIX + patientId);
     if (storedTransactions) {
         return JSON.parse(storedTransactions).map((t: any) => ({ ...t, date: new Date(t.date) }));
@@ -25,9 +27,8 @@ function getStoredTransactions(patientId: string): Transaction[] {
     return [];
 }
 
-
-export function getTransactionHistory(patientId: string): { balance: number; transactions: Transaction[] } {
-    const transactions = getStoredTransactions(patientId);
+export async function getTransactionHistory(patientId: string): Promise<{ balance: number; transactions: Transaction[] }> {
+    const transactions = await getStoredTransactions(patientId);
     
     const balance = transactions.reduce((acc, curr) => {
         return acc + (curr.type === 'credit' ? curr.amount : -curr.amount);
@@ -39,10 +40,10 @@ export function getTransactionHistory(patientId: string): { balance: number; tra
     };
 }
 
-export function recordTransaction(patientId: string, transaction: Omit<Transaction, 'date' | 'id'> & { date: Date }) {
+export async function recordTransaction(patientId: string, transaction: Omit<Transaction, 'date' | 'id'> & { date: Date }) {
     if (typeof window === 'undefined') return;
     const key = TRANSACTIONS_KEY_PREFIX + patientId;
-    const history = getTransactionHistory(patientId);
+    const history = await getTransactionHistory(patientId);
     const newTransaction = {
         ...transaction,
         id: `txn_${Date.now()}`

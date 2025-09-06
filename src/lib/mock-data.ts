@@ -152,6 +152,8 @@ export const initialPharmacies = [
         registrationCertificate: 'https://picsum.photos/id/20/800/600',
         days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
         hours: '24 Hours',
+        homeDeliveryEnabled: true,
+        deliveryRadius: 5,
     },
     {
         id: 'pharm2',
@@ -173,6 +175,8 @@ export const initialPharmacies = [
         registrationCertificate: 'https://picsum.photos/id/21/800/600',
         days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
         hours: '9:00 AM - 11:00 PM',
+        homeDeliveryEnabled: false,
+        deliveryRadius: 0,
     },
     {
         id: 'pharm3',
@@ -192,6 +196,8 @@ export const initialPharmacies = [
         registrationCertificate: 'https://picsum.photos/id/22/800/600',
         days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
         hours: '10:00 AM - 10:00 PM',
+        homeDeliveryEnabled: true,
+        deliveryRadius: 3,
     }
 ];
 

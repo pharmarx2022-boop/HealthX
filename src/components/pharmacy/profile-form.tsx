@@ -10,11 +10,12 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import Image from 'next/image';
-import { Loader2, Upload, Percent, Phone, Copy, Link as LinkIcon, MapPin, BadgeCheck, FileText, Mail, Calendar, Clock } from 'lucide-react';
+import { Loader2, Upload, Percent, Phone, Copy, Link as LinkIcon, MapPin, BadgeCheck, FileText, Mail, Calendar, Clock, Truck } from 'lucide-react';
 import { initialPharmacies } from '@/lib/mock-data';
 import { isRegistrationNumberUnique, isPhoneUnique, MOCK_OTP } from '@/lib/auth';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '../ui/checkbox';
+import { Switch } from '../ui/switch';
 
 const PHARMACIES_KEY = 'mockPharmacies';
 
@@ -36,6 +37,8 @@ const profileSchema = z.object({
     message: 'You have to select at least one operating day.',
   }),
   hours: z.string().min(1, 'Operating hours are required.'),
+  homeDeliveryEnabled: z.boolean().default(false),
+  deliveryRadius: z.coerce.number().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -62,7 +65,9 @@ export function PharmacyProfileForm() {
       registrationCertificate: '',
       otp: '',
       days: [],
-      hours: ''
+      hours: '',
+      homeDeliveryEnabled: false,
+      deliveryRadius: 5,
     },
   });
 
@@ -181,6 +186,8 @@ export function PharmacyProfileForm() {
   const currentImage = form.watch('image');
   const currentCertificate = form.watch('registrationCertificate');
   const regNumberIsSet = !!form.watch('registrationNumber');
+  const homeDeliveryEnabled = form.watch('homeDeliveryEnabled');
+
 
   return (
     <Form {...form}>
@@ -310,6 +317,45 @@ export function PharmacyProfileForm() {
                         <FormMessage />
                     </FormItem>
                 )} />
+
+                <div className="space-y-4 p-4 border rounded-md bg-slate-50">
+                    <h3 className="font-semibold text-base flex items-center gap-2"><Truck/> Home Delivery</h3>
+                     <FormField
+                        control={form.control}
+                        name="homeDeliveryEnabled"
+                        render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                            <div className="space-y-0.5">
+                                <FormLabel>Enable Home Delivery</FormLabel>
+                                <FormDescription>
+                                Offer home delivery to nearby patients.
+                                </FormDescription>
+                            </div>
+                            <FormControl>
+                                <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                                />
+                            </FormControl>
+                            </FormItem>
+                        )}
+                    />
+                    {homeDeliveryEnabled && (
+                        <FormField
+                            control={form.control}
+                            name="deliveryRadius"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Delivery Radius (in km)</FormLabel>
+                                    <FormControl>
+                                        <Input type="number" placeholder="e.g., 5" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    )}
+                </div>
                 
                 <div className="space-y-4 p-4 border rounded-md bg-slate-50">
                     <h3 className="font-semibold text-base flex items-center gap-2"><Calendar/> Business Hours</h3>

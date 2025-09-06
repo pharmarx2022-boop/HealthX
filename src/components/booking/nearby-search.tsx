@@ -1,12 +1,11 @@
 
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Stethoscope, MapPin, Pill, Loader2, AlertTriangle, Building, Link as LinkIcon, Search, PercentCircle, Beaker, Calendar, Star, Briefcase, Filter, Clock } from 'lucide-react';
+import { Stethoscope, MapPin, Pill, Loader2, AlertTriangle, Building, Link as LinkIcon, Search, PercentCircle, Beaker, Calendar, Star, Briefcase, Filter, Clock, Truck } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
@@ -412,22 +411,29 @@ export function NearbySearch({ allowedServices = ['doctor', 'pharmacy', 'lab'] }
                                                     </Badge>
                                                 </div>
                                             </CardHeader>
-                                            <CardContent className="p-4 flex-grow">
+                                            <CardContent className="p-4 flex-grow space-y-2">
                                                  <CardTitle className="font-headline text-xl ">{pharmacy.name}</CardTitle>
                                                 <div className="flex items-center text-muted-foreground gap-2 mt-2 text-sm">
                                                     <MapPin className="w-4 h-4"/> 
                                                     <span>{pharmacy.location}</span>
                                                 </div>
-                                                <div className="flex items-center gap-1 text-amber-500 mt-2">
+                                                <div className="flex items-center gap-1 text-amber-500">
                                                     <Star className="w-4 h-4 fill-current" />
                                                     <span className="font-bold text-sm">{getAverageRating(pharmacy.reviewsList)}</span>
                                                     <span className="text-xs text-muted-foreground ml-1">({pharmacy.reviewsList?.length ?? 0} reviews)</span>
                                                 </div>
-                                                {pharmacy.acceptsHealthPoints && (
-                                                    <Badge className="mt-4" variant="secondary">
-                                                        <PercentCircle className="mr-2 text-primary" /> Accepts Health Points ({pharmacy.discount}%)
-                                                    </Badge>
-                                                )}
+                                                <div className="flex flex-wrap gap-2 pt-1">
+                                                    {pharmacy.acceptsHealthPoints && (
+                                                        <Badge variant="secondary">
+                                                            <PercentCircle className="mr-2 text-primary" /> Accepts Health Points ({pharmacy.discount}%)
+                                                        </Badge>
+                                                    )}
+                                                    {pharmacy.homeDeliveryEnabled && (
+                                                        <Badge variant="secondary">
+                                                            <Truck className="mr-2 text-primary" /> Home Delivery
+                                                        </Badge>
+                                                    )}
+                                                </div>
                                             </CardContent>
                                         </Card>
                                     </Link>

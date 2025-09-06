@@ -1,11 +1,12 @@
 
+
 'use client';
 
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MapPin, Star, Loader2, PercentCircle, Link as LinkIcon, Globe, Calendar, Clock, Truck } from 'lucide-react';
+import { MapPin, Star, Loader2, PercentCircle, Link as LinkIcon, Globe, Calendar, Clock, Truck, Beaker, CheckCircle } from 'lucide-react';
 import Image from 'next/image';
 import { notFound, useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -15,6 +16,7 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { getOpeningStatus } from '@/lib/utils';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 const LABS_KEY = 'mockLabs';
 
@@ -141,6 +143,42 @@ export default function LabDetailPage() {
                         </a>
                     </Button>
                 </CardContent>
+                 {lab.healthPackages && lab.healthPackages.length > 0 && (
+                    <>
+                        <Separator/>
+                        <CardContent className="p-6">
+                             <h3 className="text-xl font-semibold font-headline mb-4 flex items-center gap-2"><Beaker/> Health Checkup Plans</h3>
+                             <Accordion type="single" collapsible className="w-full">
+                                {lab.healthPackages.map(pkg => (
+                                    <AccordionItem key={pkg.id} value={pkg.id}>
+                                        <AccordionTrigger>
+                                            <div className="flex justify-between items-center w-full pr-4 text-left">
+                                                <span className="font-medium text-base">{pkg.name}</span>
+                                                <span className="text-lg font-bold text-primary">INR {pkg.price}</span>
+                                            </div>
+                                        </AccordionTrigger>
+                                        <AccordionContent>
+                                            <div className="p-4 bg-slate-50 border rounded-md space-y-4">
+                                                <p className="text-muted-foreground">{pkg.description}</p>
+                                                <div>
+                                                    <h4 className="font-semibold mb-2">Tests Included:</h4>
+                                                    <ul className="space-y-1">
+                                                        {pkg.tests.map((test, i) => (
+                                                            <li key={i} className="flex items-center gap-2 text-sm">
+                                                                <CheckCircle className="w-4 h-4 text-green-600"/>
+                                                                <span>{test}</span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                ))}
+                            </Accordion>
+                        </CardContent>
+                    </>
+                )}
                  <Separator/>
                  <CardContent className="p-6">
                     <h3 className="text-xl font-semibold font-headline mb-4">Operating Hours</h3>

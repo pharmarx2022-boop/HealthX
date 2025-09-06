@@ -166,6 +166,29 @@ export const initialLabs = [
         hours: '7:00 AM - 9:00 PM',
         reviewsList: [
              { patientName: 'Vijay Kumar', rating: 4, comment: 'Home collection was on time.' },
+        ],
+        healthPackages: [
+            {
+                id: 'pkg1',
+                name: 'Basic Wellness Check',
+                price: 1499,
+                description: 'A comprehensive package covering essential health parameters, ideal for a routine check-up.',
+                tests: ['Complete Blood Count (CBC)', 'Lipid Profile', 'Liver Function Test (LFT)', 'Kidney Function Test (KFT)', 'Blood Sugar (Fasting)', 'Urine Routine & Microscopy']
+            },
+            {
+                id: 'pkg2',
+                name: 'Advanced Heart Health',
+                price: 2999,
+                description: 'In-depth analysis of cardiac risk factors, including key vitamins and markers.',
+                tests: ['Basic Wellness Package+', 'Hs-CRP', 'Apolipoprotein (A1 & B)', 'Vitamin D', 'Vitamin B12']
+            },
+            {
+                id: 'pkg3',
+                name: 'Full Body Checkup',
+                price: 4999,
+                description: 'Our most extensive package for a 360-degree view of your health.',
+                tests: ['Advanced Heart Health Package+', 'Thyroid Profile (T3, T4, TSH)', 'Iron Studies', 'HbA1c']
+            }
         ]
     },
 ];

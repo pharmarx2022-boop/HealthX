@@ -3,7 +3,7 @@
 'use client';
 
 import { useState, useEffect, ChangeEvent } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
@@ -11,16 +11,26 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import Image from 'next/image';
-import { Loader2, Upload, Percent, Phone, Copy, Link as LinkIcon, MapPin, BadgeCheck, FileText, Mail, Calendar, Clock, Truck, KeyRound } from 'lucide-react';
+import { Loader2, Upload, Percent, Phone, Copy, Link as LinkIcon, MapPin, BadgeCheck, FileText, Mail, Calendar, Clock, Truck, KeyRound, Beaker, PlusCircle, Trash2 } from 'lucide-react';
 import { initialLabs } from '@/lib/mock-data';
 import { isRegistrationNumberUnique, isPhoneUnique, MOCK_OTP } from '@/lib/auth';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '../ui/checkbox';
 import { Switch } from '../ui/switch';
+import { Textarea } from '../ui/textarea';
+import { Separator } from '../ui/separator';
 
 const LABS_KEY = 'mockLabs';
 
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as const;
+
+const healthPackageSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(1, 'Package name is required.'),
+  price: z.coerce.number().positive('Price must be a positive number.'),
+  description: z.string().min(1, 'Description is required.'),
+  tests: z.string().min(1, 'Please list at least one test.'),
+});
 
 const profileSchema = z.object({
   name: z.string().min(1, 'Lab name is required.'),
@@ -42,6 +52,7 @@ const profileSchema = z.object({
   collectionRadius: z.coerce.number().optional(),
   password: z.string().optional(),
   confirmPassword: z.string().optional(),
+  healthPackages: z.array(healthPackageSchema).optional(),
 }).refine(data => data.password === data.confirmPassword, {
   message: "Passwords do not match",
   path: ["confirmPassword"],
@@ -77,7 +88,13 @@ export function LabProfileForm() {
       collectionRadius: 5,
       password: '',
       confirmPassword: '',
+      healthPackages: [],
     },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "healthPackages",
   });
 
   useEffect(() => {
@@ -99,7 +116,11 @@ export function LabProfileForm() {
         form.reset({
             ...labData,
             email: u.email,
-            phoneNumber: labData.phoneNumber || labData.whatsappNumber, // Handle legacy data
+            phoneNumber: labData.phoneNumber || labData.whatsappNumber,
+            healthPackages: labData.healthPackages?.map((pkg: any) => ({
+                ...pkg,
+                tests: Array.isArray(pkg.tests) ? pkg.tests.join(', ') : pkg.tests
+            })) || []
         });
          setOriginalPhone(labData.phoneNumber || labData.whatsappNumber);
       }
@@ -149,11 +170,20 @@ export function LabProfileForm() {
 
     const storedLabs = sessionStorage.getItem(LABS_KEY);
     const allLabs = storedLabs ? JSON.parse(storedLabs) : initialLabs;
+    
+    const formattedData = {
+        ...data,
+        healthPackages: data.healthPackages?.map(pkg => ({
+            ...pkg,
+            id: pkg.id || `pkg${Date.now()}`,
+            tests: pkg.tests.split(',').map(t => t.trim())
+        }))
+    };
 
     const updatedLabs = allLabs.map((p: any) => {
         if (p.id === user.id) {
             const newPassword = data.password ? data.password : p.password;
-            return { ...p, ...data, password: newPassword, otp: undefined };
+            return { ...p, ...formattedData, password: newPassword, otp: undefined };
         }
         return p;
     });
@@ -424,6 +454,43 @@ export function LabProfileForm() {
                             <FormMessage />
                         </FormItem>
                     )} />
+                </div>
+
+                 <div className="space-y-4 p-4 border rounded-md bg-slate-50">
+                    <h3 className="font-semibold text-base flex items-center gap-2"><Beaker/> Health Checkup Packages</h3>
+                    <FormDescription>
+                        Add predefined health checkup packages that will be displayed on your public profile.
+                    </FormDescription>
+                    <div className="space-y-4">
+                        {fields.map((field, index) => (
+                            <div key={field.id} className="p-4 border rounded-md relative space-y-3">
+                                <FormField control={form.control} name={`healthPackages.${index}.name`} render={({ field }) => (
+                                    <FormItem><FormLabel>Package Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                                )} />
+                                <FormField control={form.control} name={`healthPackages.${index}.price`} render={({ field }) => (
+                                    <FormItem><FormLabel>Price (INR)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+                                )} />
+                                <FormField control={form.control} name={`healthPackages.${index}.description`} render={({ field }) => (
+                                    <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
+                                )} />
+                                <FormField control={form.control} name={`healthPackages.${index}.tests`} render={({ field }) => (
+                                    <FormItem><FormLabel>Tests Included</FormLabel><FormControl><Textarea {...field} /></FormControl><FormDescription>Enter comma-separated test names.</FormDescription><FormMessage /></FormItem>
+                                )} />
+                                <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2" onClick={() => remove(index)}>
+                                    <Trash2 className="w-4 h-4 text-destructive" />
+                                </Button>
+                            </div>
+                        ))}
+                    </div>
+                     <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => append({ name: '', price: 0, description: '', tests: '' })}
+                        className="mt-2"
+                        >
+                        <PlusCircle className="mr-2"/> Add Package
+                    </Button>
                 </div>
                 
                  <div className="space-y-4 p-4 border rounded-md bg-slate-50">

@@ -2,7 +2,7 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { User, Calendar, Clock, Stethoscope, RefreshCw, Bell, Star, Users, Wallet, History, FileText, Loader2, Store, KeyRound, Share2, Gift, Briefcase } from 'lucide-react';
+import { User, Calendar, Clock, Stethoscope, RefreshCw, Bell, Star, Users, Wallet, History, FileText, Loader2, Store, KeyRound, Share2, Gift, Briefcase, Pill } from 'lucide-react';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { mockPatientData as mockPatients } from '@/lib/mock-data';
 import { initialDoctors, initialLabs, initialPharmacies } from '@/lib/mock-data';
@@ -18,6 +18,7 @@ import { MyReports } from '@/components/patient/my-reports';
 import { getTransactionHistory, type Transaction } from '@/lib/transactions';
 import { getNotifications } from '@/lib/notifications';
 import { NearbySearch } from '../booking/nearby-search';
+import { getRemindersForPatient, type MedicineReminder } from '@/lib/reminders';
 
 
 const DOCTORS_KEY = 'doctorsData';
@@ -45,6 +46,7 @@ export function MyHealthPage() {
     const [comment, setComment] = useState('');
     const [user, setUser] = useState<any | null>(null);
     const [nextReminder, setNextReminder] = useState<any | null>(null);
+    const [medicineReminders, setMedicineReminders] = useState<MedicineReminder[]>([]);
 
 
     useEffect(() => {
@@ -62,6 +64,8 @@ export function MyHealthPage() {
                 
                 const reminder = userAppointments.find(appt => appt.nextAppointmentDate && !isNaN(new Date(appt.nextAppointmentDate).getTime()) && new Date(appt.nextAppointmentDate) > new Date());
                 setNextReminder(reminder);
+
+                setMedicineReminders(getRemindersForPatient(u.id));
             }
         }
     }, [isClient, isReviewOpen]); // Re-check appointments when review dialog closes
@@ -300,6 +304,27 @@ export function MyHealthPage() {
                                         </AlertDescription>
                                     </Alert>
                                 </CardFooter>
+                            </Card>
+                             <Card className="shadow-sm">
+                                <CardHeader>
+                                    <CardTitle>Medicine Reminders</CardTitle>
+                                    <CardDescription>Monthly reminders set by your pharmacies.</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    {medicineReminders.length > 0 ? (
+                                        <div className="space-y-3">
+                                            {medicineReminders.map(r => (
+                                                <div key={r.id} className="p-3 border rounded-md bg-slate-50/70">
+                                                    <p className="font-semibold">{r.medicineDetails}</p>
+                                                    <p className="text-sm text-muted-foreground">From: {r.pharmacyName}</p>
+                                                    <p className="text-xs text-muted-foreground mt-1">Next reminder on: {format(new Date(r.nextReminderDate), 'PPP')}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm text-muted-foreground text-center py-4">You have no active medicine reminders.</p>
+                                    )}
+                                </CardContent>
                             </Card>
                             <Card id="family" className="shadow-sm">
                                 <CardHeader className="flex flex-row items-center gap-4">

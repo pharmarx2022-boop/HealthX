@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Pill, Search, User, History, BadgePercent, Banknote, Gift, Loader2, Calendar } from 'lucide-react';
+import { Pill, Search, User, History, BadgePercent, Banknote, Gift, Loader2, Calendar, BellPlus, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useMemo, useEffect } from 'react';
 import { initialPharmacies, mockPatientData } from '@/lib/mock-data';
@@ -16,13 +16,12 @@ import { getCommissionWalletData, requestWithdrawal as requestCommissionWithdraw
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import dynamic from 'next/dynamic';
 import { addNotification, sendRedemptionOtpNotification } from '@/lib/notifications';
 import { checkPartnerMilestone } from '@/lib/referrals';
-import Link from 'next/link';
-import { NearbySearch } from '@/components/booking/nearby-search';
 import { BottomNavBar } from '@/components/layout/bottom-nav-bar';
 import { AnalyticsDashboard } from '@/components/pharmacy/analytics-dashboard';
+import { Textarea } from '@/components/ui/textarea';
+import { getRemindersForPharmacy, addReminder, deleteReminder, type MedicineReminder } from '@/lib/reminders';
 
 
 const PHARMACIES_KEY = 'mockPharmacies';
@@ -41,6 +40,12 @@ export default function PharmacyDashboardPage() {
     const [pharmacyDetails, setPharmacyDetails] = useState<any>(null);
     const [isClient, setIsClient] = useState(false);
 
+    // Reminder state
+    const [reminderPatientSearch, setReminderPatientSearch] = useState('');
+    const [reminderPatient, setReminderPatient] = useState<any | null>(null);
+    const [medicineDetails, setMedicineDetails] = useState('');
+    const [activeReminders, setActiveReminders] = useState<MedicineReminder[]>([]);
+
 
     useEffect(() => {
         setIsClient(true);
@@ -55,6 +60,7 @@ export default function PharmacyDashboardPage() {
                 const myDetails = allPharmacies.find((p: any) => p.id === u.id);
                 setPharmacyDetails(myDetails);
                 setCommissionWallet(getCommissionWalletData(u.id));
+                setActiveReminders(getRemindersForPharmacy(u.id));
             }
              if (!sessionStorage.getItem(PATIENTS_KEY)) {
                 sessionStorage.setItem(PATIENTS_KEY, JSON.stringify(mockPatientData));
@@ -62,24 +68,30 @@ export default function PharmacyDashboardPage() {
         }
     }, []);
 
-    const handleSearchPatient = () => {
+    const handleSearchPatient = (searchTermValue: string, type: 'payment' | 'reminder') => {
         const allPatients = JSON.parse(sessionStorage.getItem(PATIENTS_KEY) || '[]');
-        const searchTerm = patientSearch.toLowerCase();
-        const foundPatient = allPatients.find((p: any) => p.phone === searchTerm || p.email.toLowerCase() === searchTerm);
-
+        const searchTerm = searchTermValue.toLowerCase();
+        const foundPatient = allPatients.find((p: any) => p.phone === searchTerm || (p.email && p.email.toLowerCase() === searchTerm));
+    
         if (foundPatient) {
-            setPatient(foundPatient);
-            setPatientTransactionHistory(getTransactionHistory(foundPatient.id));
-            setOtpSent(false);
-            setOtp('');
-            setTotalBill('');
+            if (type === 'payment') {
+                setPatient(foundPatient);
+                setPatientTransactionHistory(getTransactionHistory(foundPatient.id));
+                setOtpSent(false);
+                setOtp('');
+                setTotalBill('');
+            } else {
+                setReminderPatient(foundPatient);
+                setMedicineDetails('');
+            }
         } else {
             toast({
                 title: "Patient Not Found",
                 description: "No patient found with that phone number or email.",
                 variant: "destructive"
             });
-            setPatient(null);
+            if (type === 'payment') setPatient(null);
+            if (type === 'reminder') setReminderPatient(null);
         }
     };
     
@@ -195,6 +207,51 @@ export default function PharmacyDashboardPage() {
         setCommissionWallet(getCommissionWalletData(user.id));
     }
 
+    const handleSetReminder = () => {
+        if (!medicineDetails) {
+            toast({
+                title: "Missing Details",
+                description: "Please enter the medicine details for the reminder.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        addReminder({
+            pharmacyId: user.id,
+            pharmacyName: pharmacyDetails.name,
+            patientId: reminderPatient.id,
+            patientName: reminderPatient.name,
+            medicineDetails: medicineDetails,
+        });
+
+        addNotification(reminderPatient.id, {
+            title: 'Monthly Reminder Set',
+            message: `${pharmacyDetails.name} has set a monthly reminder for your medicines.`,
+            icon: 'bell',
+            href: '/patient/my-health'
+        });
+
+        toast({
+            title: "Reminder Set!",
+            description: `A monthly medicine reminder has been set for ${reminderPatient.name}.`,
+        });
+
+        setActiveReminders(getRemindersForPharmacy(user.id));
+        setReminderPatient(null);
+        setReminderPatientSearch('');
+        setMedicineDetails('');
+    };
+    
+    const handleDeleteReminder = (reminderId: string) => {
+        deleteReminder(reminderId);
+        setActiveReminders(getRemindersForPharmacy(user.id));
+        toast({
+            title: "Reminder Removed",
+            variant: "destructive",
+        })
+    };
+
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -210,20 +267,6 @@ export default function PharmacyDashboardPage() {
             
             <div className="grid lg:grid-cols-3 gap-8 items-start mt-8">
                  <div className="lg:col-span-2 space-y-8">
-                    <Card className="shadow-sm">
-                        <CardHeader className="flex flex-row items-center gap-4">
-                             <Calendar className="w-8 h-8 text-primary"/>
-                             <div>
-                                 <CardTitle>Book for a Patient</CardTitle>
-                                 <CardDescription>
-                                    Find doctors, labs, and pharmacies for patients.
-                                 </CardDescription>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                             <NearbySearch allowedServices={['doctor', 'lab', 'pharmacy']} />
-                        </CardContent>
-                    </Card>
                     <Card className="shadow-sm">
                         <CardHeader className="flex flex-row items-center gap-4">
                             <Pill className="w-8 h-8 text-primary"/>
@@ -245,7 +288,7 @@ export default function PharmacyDashboardPage() {
                                         onChange={(e) => setPatientSearch(e.target.value)}
                                         disabled={!!patient}
                                     />
-                                    <Button onClick={handleSearchPatient} disabled={!!patient}>
+                                    <Button onClick={() => handleSearchPatient(patientSearch, 'payment')} disabled={!!patient}>
                                         <Search className="mr-2"/> Search
                                     </Button>
                             </div>
@@ -308,7 +351,67 @@ export default function PharmacyDashboardPage() {
                                     )}
                                 </Card>
                             )}
-
+                        </CardContent>
+                    </Card>
+                    <Card className="shadow-sm">
+                        <CardHeader>
+                            <CardTitle>Set Medicine Reminders</CardTitle>
+                            <CardDescription>Set monthly reminders for patients who need regular refills.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="space-y-2 max-w-sm">
+                                <Label htmlFor="reminderPatientSearch">Patient Phone or Email</Label>
+                                <div className="flex gap-2">
+                                    <Input 
+                                        id="reminderPatientSearch" 
+                                        placeholder="Enter phone or email..." 
+                                        value={reminderPatientSearch}
+                                        onChange={(e) => setReminderPatientSearch(e.target.value)}
+                                        disabled={!!reminderPatient}
+                                    />
+                                    <Button onClick={() => handleSearchPatient(reminderPatientSearch, 'reminder')} disabled={!!reminderPatient}>
+                                        <Search className="mr-2"/> Search
+                                    </Button>
+                                </div>
+                            </div>
+                            {reminderPatient && (
+                                <Card className="bg-slate-50 p-6">
+                                     <div className="flex items-center gap-3 mb-4">
+                                        <User className="text-primary"/>
+                                        <div>
+                                            <p className="font-semibold text-lg">{reminderPatient.name}</p>
+                                            <Button variant="link" className="p-0 h-auto text-sm" onClick={() => { setReminderPatient(null); setReminderPatientSearch(''); }}>
+                                                Search for another patient
+                                            </Button>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <Label htmlFor="medicineDetails">Medicine & Refill Details</Label>
+                                            <Textarea id="medicineDetails" placeholder="e.g., Thyronorm 50mg, 1 month supply" value={medicineDetails} onChange={(e) => setMedicineDetails(e.target.value)} />
+                                        </div>
+                                        <Button className="w-full" onClick={handleSetReminder}>
+                                            <BellPlus className="mr-2"/> Set Monthly Reminder
+                                        </Button>
+                                    </div>
+                                </Card>
+                            )}
+                            {activeReminders.length > 0 && (
+                                <div className="space-y-2 pt-4">
+                                    <h4 className="font-medium">Active Reminders</h4>
+                                    {activeReminders.map(r => (
+                                        <div key={r.id} className="flex items-center justify-between p-2 border rounded-md">
+                                            <div>
+                                                <p className="font-semibold">{r.patientName}</p>
+                                                <p className="text-sm text-muted-foreground">{r.medicineDetails}</p>
+                                            </div>
+                                            <Button variant="ghost" size="icon" onClick={() => handleDeleteReminder(r.id)}>
+                                                <Trash2 className="w-4 h-4 text-destructive" />
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                  </div>

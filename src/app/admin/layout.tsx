@@ -27,6 +27,7 @@ import {
   FileText,
   MessageSquare,
   HelpCircle,
+  ClipboardList,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -65,6 +66,11 @@ export default function AdminLayout({
       href: '/admin/analytics',
       label: 'Analytics',
       icon: LineChart,
+    },
+     {
+      href: '/admin/appointments',
+      label: 'Appointments',
+      icon: ClipboardList,
     },
     {
       href: '/admin/users',

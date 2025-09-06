@@ -22,6 +22,7 @@ import {
   ShieldCheck,
   Loader2,
   Lock,
+  LineChart,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -55,6 +56,11 @@ export default function AdminLayout({
       href: '/admin',
       label: 'Dashboard',
       icon: LayoutDashboard,
+    },
+    {
+      href: '/admin/analytics',
+      label: 'Analytics',
+      icon: LineChart,
     },
     {
       href: '/admin/approvals',

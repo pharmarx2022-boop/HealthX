@@ -7,15 +7,18 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import Image from 'next/image';
-import { Loader2, Upload, Percent, Phone, Copy, Link as LinkIcon, MapPin, BadgeCheck, FileText, Mail } from 'lucide-react';
+import { Loader2, Upload, Percent, Phone, Copy, Link as LinkIcon, MapPin, BadgeCheck, FileText, Mail, Calendar, Clock } from 'lucide-react';
 import { initialLabs } from '@/lib/mock-data';
 import { isRegistrationNumberUnique, isPhoneUnique, MOCK_OTP } from '@/lib/auth';
 import { cn } from '@/lib/utils';
+import { Checkbox } from '../ui/checkbox';
 
 const LABS_KEY = 'mockLabs';
+
+const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as const;
 
 const profileSchema = z.object({
   name: z.string().min(1, 'Lab name is required.'),
@@ -29,6 +32,10 @@ const profileSchema = z.object({
   registrationNumber: z.string().min(1, 'Registration number is required.'),
   registrationCertificate: z.string().min(1, 'Registration certificate is required.'),
   otp: z.string().optional(),
+  days: z.array(z.string()).refine((value) => value.some((item) => item), {
+    message: 'You have to select at least one operating day.',
+  }),
+  hours: z.string().min(1, 'Operating hours are required.'),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -54,6 +61,8 @@ export function LabProfileForm() {
       registrationNumber: '',
       registrationCertificate: '',
       otp: '',
+      days: [],
+      hours: ''
     },
   });
 
@@ -303,6 +312,64 @@ export function LabProfileForm() {
                 )} />
                 
                  <div className="space-y-4 p-4 border rounded-md bg-slate-50">
+                    <h3 className="font-semibold text-base flex items-center gap-2"><Calendar /> Business Hours</h3>
+                     <FormField
+                        control={form.control}
+                        name="days"
+                        render={() => (
+                            <FormItem>
+                            <div className="mb-4">
+                                <FormLabel className="text-base">Operating Days</FormLabel>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2">
+                                {daysOfWeek.map((day) => (
+                                <FormField
+                                    key={day}
+                                    control={form.control}
+                                    name="days"
+                                    render={({ field }) => {
+                                    return (
+                                        <FormItem
+                                        key={day}
+                                        className="flex flex-row items-center space-x-3 space-y-0"
+                                        >
+                                        <FormControl>
+                                            <Checkbox
+                                            checked={field.value?.includes(day)}
+                                            onCheckedChange={(checked) => {
+                                                return checked
+                                                ? field.onChange([...(field.value || []), day])
+                                                : field.onChange(field.value?.filter((value) => value !== day)
+                                                )
+                                            }}
+                                            />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">{day}</FormLabel>
+                                        </FormItem>
+                                    )
+                                    }}
+                                />
+                                ))}
+                            </div>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField control={form.control} name="hours" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Operating Hours</FormLabel>
+                            <FormControl>
+                                <div className="relative">
+                                    <Input placeholder="e.g., 8:00 AM - 8:00 PM" {...field} className="pl-8"/>
+                                    <Clock className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                </div>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )} />
+                </div>
+                
+                 <div className="space-y-4 p-4 border rounded-md bg-slate-50">
                     <h3 className="font-semibold text-base flex items-center gap-2"><BadgeCheck/> Verification Details</h3>
                     <p className="text-sm text-muted-foreground">This information is required for admin approval and is not displayed publicly. Once saved, it cannot be changed.</p>
                     <FormField
@@ -351,3 +418,5 @@ export function LabProfileForm() {
     </Form>
   );
 }
+
+    

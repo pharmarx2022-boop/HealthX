@@ -5,7 +5,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MapPin, Star, Loader2, PercentCircle, Link as LinkIcon, Globe } from 'lucide-react';
+import { MapPin, Star, Loader2, PercentCircle, Link as LinkIcon, Globe, Calendar, Clock } from 'lucide-react';
 import Image from 'next/image';
 import { notFound, useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -127,6 +127,20 @@ export default function LabDetailPage() {
                 </CardContent>
                  <Separator/>
                  <CardContent className="p-6">
+                    <h3 className="text-xl font-semibold font-headline mb-4">Operating Hours</h3>
+                    <div className="space-y-2">
+                        <div className="flex items-center text-muted-foreground gap-3">
+                            <Calendar className="w-5 h-5 text-primary" />
+                            <span>{lab.days.join(', ')}</span>
+                        </div>
+                         <div className="flex items-center text-muted-foreground gap-3">
+                            <Clock className="w-5 h-5 text-primary" />
+                            <span>{lab.hours}</span>
+                        </div>
+                    </div>
+                 </CardContent>
+                 <Separator/>
+                 <CardContent className="p-6">
                     <h3 className="text-xl font-semibold mb-4">Patient Reviews</h3>
                     {lab.reviewsList && lab.reviewsList.length > 0 ? (
                         <div className="space-y-6">
@@ -161,3 +175,5 @@ export default function LabDetailPage() {
     </div>
   );
 }
+
+    

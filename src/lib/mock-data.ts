@@ -151,6 +151,8 @@ export const initialPharmacies = [
         ],
         registrationNumber: 'PHM-MH-112233',
         registrationCertificate: 'https://picsum.photos/id/20/800/600',
+        days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+        hours: '24 Hours',
     },
     {
         id: 'pharm2',
@@ -170,6 +172,8 @@ export const initialPharmacies = [
         ],
         registrationNumber: 'PHM-MH-445566',
         registrationCertificate: 'https://picsum.photos/id/21/800/600',
+        days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+        hours: '9:00 AM - 11:00 PM',
     },
     {
         id: 'pharm3',
@@ -187,6 +191,8 @@ export const initialPharmacies = [
         reviewsList: [],
         registrationNumber: 'PHM-MH-778899',
         registrationCertificate: 'https://picsum.photos/id/22/800/600',
+        days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+        hours: '10:00 AM - 10:00 PM',
     }
 ];
 
@@ -210,6 +216,8 @@ export const initialLabs = [
         ],
         registrationNumber: 'LAB-MH-AABBCC',
         registrationCertificate: 'https://picsum.photos/id/33/800/600',
+        days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+        hours: '7:00 AM - 8:00 PM',
     },
     {
         id: 'lab2',
@@ -227,6 +235,8 @@ export const initialLabs = [
         reviewsList: [],
         registrationNumber: 'LAB-MH-DDEEFF',
         registrationCertificate: 'https://picsum.photos/id/34/800/600',
+        days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+        hours: '8:00 AM - 7:00 PM',
     }
 ];
 
@@ -238,3 +248,5 @@ export const mockPatientData = [
 
 
 export const mockReports: MockReport[] = [];
+
+    

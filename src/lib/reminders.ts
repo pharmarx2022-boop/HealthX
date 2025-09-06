@@ -60,9 +60,9 @@ export function deleteReminder(reminderId: string) {
     const reminder = allReminders.find(r => r.id === reminderId);
     
     if (reminder) {
-        addNotification(reminder.patientId, {
-            title: 'Reminder Canceled',
-            message: `${reminder.pharmacyName} has canceled your monthly medicine reminder.`,
+        addNotification(reminder.pharmacyId, {
+            title: 'Patient Canceled Reminder',
+            message: `${reminder.patientName} has disabled the monthly reminder for "${reminder.medicineDetails}".`,
             icon: 'bell'
         });
     }

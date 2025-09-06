@@ -2,7 +2,7 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { User, Calendar, Clock, Stethoscope, RefreshCw, Bell, Star, Users, Wallet, History, FileText, Loader2, Store, KeyRound, Share2, Gift, Briefcase, Pill } from 'lucide-react';
+import { User, Calendar, Clock, Stethoscope, RefreshCw, Bell, Star, Users, Wallet, History, FileText, Loader2, Store, KeyRound, Share2, Gift, Briefcase, Pill, Trash2 } from 'lucide-react';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { mockPatientData as mockPatients } from '@/lib/mock-data';
 import { initialDoctors, initialLabs, initialPharmacies } from '@/lib/mock-data';
@@ -18,7 +18,7 @@ import { MyReports } from '@/components/patient/my-reports';
 import { getTransactionHistory, type Transaction } from '@/lib/transactions';
 import { getNotifications } from '@/lib/notifications';
 import { NearbySearch } from '../booking/nearby-search';
-import { getRemindersForPatient, type MedicineReminder } from '@/lib/reminders';
+import { getRemindersForPatient, deleteReminder, type MedicineReminder } from '@/lib/reminders';
 
 
 const DOCTORS_KEY = 'doctorsData';
@@ -177,6 +177,18 @@ export function MyHealthPage() {
             }
         }
     };
+    
+    const handleDeleteReminder = (reminderId: string) => {
+        deleteReminder(reminderId);
+        if (user) {
+            setMedicineReminders(getRemindersForPatient(user.id));
+        }
+        toast({
+            title: "Reminder Disabled",
+            description: "You will no longer receive notifications for this medicine.",
+            variant: "destructive",
+        });
+    };
 
 
     return (
@@ -314,10 +326,15 @@ export function MyHealthPage() {
                                     {medicineReminders.length > 0 ? (
                                         <div className="space-y-3">
                                             {medicineReminders.map(r => (
-                                                <div key={r.id} className="p-3 border rounded-md bg-slate-50/70">
-                                                    <p className="font-semibold">{r.medicineDetails}</p>
-                                                    <p className="text-sm text-muted-foreground">From: {r.pharmacyName}</p>
-                                                    <p className="text-xs text-muted-foreground mt-1">Next reminder on: {format(new Date(r.nextReminderDate), 'PPP')}</p>
+                                                <div key={r.id} className="flex items-start justify-between p-3 border rounded-md bg-slate-50/70">
+                                                    <div className="flex-1">
+                                                        <p className="font-semibold">{r.medicineDetails}</p>
+                                                        <p className="text-sm text-muted-foreground">From: {r.pharmacyName}</p>
+                                                        <p className="text-xs text-muted-foreground mt-1">Next reminder on: {format(new Date(r.nextReminderDate), 'PPP')}</p>
+                                                    </div>
+                                                    <Button variant="ghost" size="icon" className="shrink-0" onClick={() => handleDeleteReminder(r.id)}>
+                                                        <Trash2 className="w-4 h-4 text-destructive" />
+                                                    </Button>
                                                 </div>
                                             ))}
                                         </div>

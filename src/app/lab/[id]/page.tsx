@@ -5,7 +5,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MapPin, Star, Loader2, PercentCircle, Link as LinkIcon, Globe, Calendar, Clock } from 'lucide-react';
+import { MapPin, Star, Loader2, PercentCircle, Link as LinkIcon, Globe, Calendar, Clock, Truck } from 'lucide-react';
 import Image from 'next/image';
 import { notFound, useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -121,11 +121,18 @@ export default function LabDetailPage() {
                             <LinkIcon className="w-4 h-4" />
                         </Link>
                     </div>
-                    {lab.acceptsHealthPoints && (
-                        <Badge className="mt-4" variant="secondary">
-                            <PercentCircle className="mr-2 text-primary" /> Accepts Health Points ({lab.discount}%)
-                        </Badge>
-                    )}
+                    <div className="flex flex-wrap gap-4">
+                        {lab.acceptsHealthPoints && (
+                            <Badge variant="secondary">
+                                <PercentCircle className="mr-2 text-primary" /> Accepts Health Points ({lab.discount}%)
+                            </Badge>
+                        )}
+                        {lab.homeCollectionEnabled && (
+                            <Badge variant="secondary">
+                                <Truck className="mr-2 text-primary" /> Home Collection (up to {lab.collectionRadius}km)
+                            </Badge>
+                        )}
+                    </div>
                    
                     <Button asChild size="lg" className="w-full mt-4">
                         <a href={`https://wa.me/${lab.phoneNumber}`} target="_blank" rel="noopener noreferrer">

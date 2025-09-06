@@ -223,6 +223,8 @@ export const initialLabs = [
         registrationCertificate: 'https://picsum.photos/id/33/800/600',
         days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
         hours: '7:00 AM - 8:00 PM',
+        homeCollectionEnabled: true,
+        collectionRadius: 10,
     },
     {
         id: 'lab2',
@@ -242,6 +244,8 @@ export const initialLabs = [
         registrationCertificate: 'https://picsum.photos/id/34/800/600',
         days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
         hours: '8:00 AM - 7:00 PM',
+        homeCollectionEnabled: false,
+        collectionRadius: 0,
     }
 ];
 

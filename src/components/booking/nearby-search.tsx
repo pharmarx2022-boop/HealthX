@@ -471,11 +471,18 @@ export function NearbySearch({ allowedServices = ['doctor', 'pharmacy', 'lab'] }
                                                     <span className="font-bold text-sm">{getAverageRating(lab.reviewsList)}</span>
                                                      <span className="text-xs text-muted-foreground ml-1">({lab.reviewsList?.length ?? 0} reviews)</span>
                                                 </div>
-                                                {lab.acceptsHealthPoints && (
-                                                    <Badge className="mt-4" variant="secondary">
-                                                        <PercentCircle className="mr-2 text-primary" /> Accepts Health Points ({lab.discount}%)
-                                                    </Badge>
-                                                )}
+                                                <div className="flex flex-wrap gap-2 pt-2">
+                                                    {lab.acceptsHealthPoints && (
+                                                        <Badge variant="secondary">
+                                                            <PercentCircle className="mr-2 text-primary" /> Accepts Health Points ({lab.discount}%)
+                                                        </Badge>
+                                                    )}
+                                                     {lab.homeCollectionEnabled && (
+                                                        <Badge variant="secondary">
+                                                            <Truck className="mr-2 text-primary" /> Home Collection
+                                                        </Badge>
+                                                    )}
+                                                </div>
                                             </CardContent>
                                         </Card>
                                     </Link>

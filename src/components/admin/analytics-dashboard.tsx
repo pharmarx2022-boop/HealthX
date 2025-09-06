@@ -6,7 +6,7 @@ import { useState, useMemo } from 'react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Pie, PieChart, Cell } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart';
-import { Users, Briefcase, Banknote, ShieldCheck, Stethoscope, Pill, Beaker, Calendar as CalendarIcon, UserX, UserCheck, Activity, Building, Badge } from 'lucide-react';
+import { Users, Briefcase, Banknote, ShieldCheck, Stethoscope, Pill, Beaker, Calendar as CalendarIcon, Activity, Building, Badge as BadgeIcon, RefreshCw } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
@@ -103,7 +103,7 @@ const recentActivities = [
 ]
 
 const appointmentStatuses = ['All', 'Done', 'Upcoming', 'Cancelled', 'Absent'];
-const clinicNames = ['All', ...initialClinics.map(c => c.name)];
+const refundStatuses = ['All', 'Refunded', 'Not Refunded'];
 
 export function AnalyticsDashboard() {
   const [timeFilter, setTimeFilter] = useState('all');
@@ -111,8 +111,10 @@ export function AnalyticsDashboard() {
   const [allUsers, setAllUsers] = useState<UserData[]>([]);
   
   // New filters for doctor performance
+  const [doctorFilter, setDoctorFilter] = useState('All');
   const [clinicFilter, setClinicFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [refundFilter, setRefundFilter] = useState('All');
 
   React.useEffect(() => {
     const users = getAllUsersForAdmin();
@@ -139,13 +141,17 @@ export function AnalyticsDashboard() {
 
   const doctorPerformanceData = useMemo(() => {
     const fullyFilteredAppointments = timeFilteredAppointments.filter(appt => {
+        if (doctorFilter !== 'All' && appt.doctorId !== doctorFilter) return false;
         if (clinicFilter !== 'All' && appt.clinic !== clinicFilter) return false;
         if (statusFilter !== 'All' && appt.status.toLowerCase() !== statusFilter.toLowerCase()) return false;
+        if (refundFilter !== 'All' && appt.refundStatus !== refundFilter) return false;
         return true;
     });
 
     return initialDoctors.map(doctor => {
         const doctorAppointments = fullyFilteredAppointments.filter(appt => appt.doctorId === doctor.id);
+        if(doctorFilter !== 'All' && doctor.id !== doctorFilter) return null;
+
         const countByStatus = (status: string) => doctorAppointments.filter(a => a.status === status).length;
 
         return {
@@ -157,8 +163,8 @@ export function AnalyticsDashboard() {
             absent: countByStatus('absent'),
             revenue: doctorAppointments.filter(a => a.status === 'done').reduce((sum, appt) => sum + appt.consultationFee, 0),
         };
-    }).sort((a,b) => b.revenue - a.revenue);
-  }, [timeFilteredAppointments, clinicFilter, statusFilter]);
+    }).filter(Boolean).sort((a,b) => b!.revenue - a!.revenue);
+  }, [timeFilteredAppointments, clinicFilter, statusFilter, doctorFilter, refundFilter]);
   
   const partnerPerformanceData = useMemo(() => {
     const labs = initialLabs.map(lab => {
@@ -187,12 +193,25 @@ export function AnalyticsDashboard() {
 
   const handleDateSelect = (date: Date | undefined) => {
       setSelectedDate(date || null);
-      setTimeFilter('custom'); // Set to custom to indicate a date is picked
+      if (date) {
+        setTimeFilter('custom'); // Set to custom to indicate a date is picked
+      }
   }
   
   const renderFilterControls = () => (
      <div className="flex flex-col sm:flex-row flex-wrap items-center gap-2 w-full">
-        <Popover>
+        <Select value={timeFilter} onValueChange={handleTimeFilterChange}>
+            <SelectTrigger className="w-full sm:w-[150px]">
+                <SelectValue placeholder="Select period" />
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem value="all">All Time</SelectItem>
+                <SelectItem value="today">Today</SelectItem>
+                <SelectItem value="week">This Week</SelectItem>
+                <SelectItem value="month">This Month</SelectItem>
+            </SelectContent>
+        </Select>
+         <Popover>
             <PopoverTrigger asChild>
             <Button
                 variant={"outline"}
@@ -214,33 +233,42 @@ export function AnalyticsDashboard() {
                 />
             </PopoverContent>
         </Popover>
-        <Select value={timeFilter} onValueChange={handleTimeFilterChange}>
-            <SelectTrigger className="w-full sm:w-[150px]">
-                <SelectValue placeholder="Select period" />
+         <Select value={doctorFilter} onValueChange={setDoctorFilter}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+                 <Stethoscope className="mr-2 h-4 w-4 text-muted-foreground"/>
+                <SelectValue placeholder="All Doctors" />
             </SelectTrigger>
             <SelectContent>
-                <SelectItem value="all">All Time</SelectItem>
-                <SelectItem value="today">Today</SelectItem>
-                <SelectItem value="week">This Week</SelectItem>
-                <SelectItem value="month">This Month</SelectItem>
+                <SelectItem value="All">All Doctors</SelectItem>
+                {initialDoctors.map(d => <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>)}
             </SelectContent>
         </Select>
         <Select value={clinicFilter} onValueChange={setClinicFilter}>
             <SelectTrigger className="w-full sm:w-[180px]">
                  <Building className="mr-2 h-4 w-4 text-muted-foreground"/>
-                <SelectValue placeholder="Filter by clinic" />
+                <SelectValue placeholder="All Clinics" />
             </SelectTrigger>
             <SelectContent>
-                {clinicNames.map(name => <SelectItem key={name} value={name}>{name}</SelectItem>)}
+                <SelectItem value="All">All Clinics</SelectItem>
+                {initialClinics.map(c => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
             </SelectContent>
         </Select>
          <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-full sm:w-[180px]">
-                <Badge className="mr-2 h-4 w-4 text-muted-foreground"/>
-                <SelectValue placeholder="Filter by status" />
+                <BadgeIcon className="mr-2 h-4 w-4 text-muted-foreground"/>
+                <SelectValue placeholder="All Statuses" />
             </SelectTrigger>
             <SelectContent>
                 {appointmentStatuses.map(status => <SelectItem key={status} value={status}>{status}</SelectItem>)}
+            </SelectContent>
+        </Select>
+         <Select value={refundFilter} onValueChange={setRefundFilter}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+                <RefreshCw className="mr-2 h-4 w-4 text-muted-foreground"/>
+                <SelectValue placeholder="All Refunds" />
+            </SelectTrigger>
+            <SelectContent>
+                {refundStatuses.map(status => <SelectItem key={status} value={status}>{status}</SelectItem>)}
             </SelectContent>
         </Select>
     </div>
@@ -329,15 +357,15 @@ export function AnalyticsDashboard() {
                         </TableHeader>
                         <TableBody>
                             {doctorPerformanceData.length > 0 ? doctorPerformanceData.map((doctor) => (
-                                <TableRow key={doctor.id}>
+                                <TableRow key={doctor!.id}>
                                     <TableCell>
-                                        <div className="font-medium">{doctor.name}</div>
-                                        <div className="text-xs text-muted-foreground">{doctor.specialty}</div>
+                                        <div className="font-medium">{doctor!.name}</div>
+                                        <div className="text-xs text-muted-foreground">{doctor!.specialty}</div>
                                     </TableCell>
-                                    <TableCell className="text-center font-medium">{doctor.completed}</TableCell>
-                                    <TableCell className="text-center font-medium">{doctor.cancelled}</TableCell>
-                                    <TableCell className="text-center font-medium">{doctor.absent}</TableCell>
-                                    <TableCell className="text-right font-medium">INR {doctor.revenue.toFixed(2)}</TableCell>
+                                    <TableCell className="text-center font-medium">{doctor!.completed}</TableCell>
+                                    <TableCell className="text-center font-medium">{doctor!.cancelled}</TableCell>
+                                    <TableCell className="text-center font-medium">{doctor!.absent}</TableCell>
+                                    <TableCell className="text-right font-medium">INR {doctor!.revenue.toFixed(2)}</TableCell>
                                 </TableRow>
                             )) : (
                                 <TableRow>

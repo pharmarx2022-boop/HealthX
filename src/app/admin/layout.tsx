@@ -67,11 +67,6 @@ export default function AdminLayout({
       label: 'Analytics',
       icon: LineChart,
     },
-     {
-      href: '/admin/appointments',
-      label: 'Appointments',
-      icon: ClipboardList,
-    },
     {
       href: '/admin/users',
       label: 'Users',

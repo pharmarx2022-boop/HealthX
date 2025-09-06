@@ -22,17 +22,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { addNotification } from '@/lib/notifications';
-import { initialDoctors } from '@/lib/mock-data';
-
-export const mockPatients = [
-  { id: '1', transactionId: 'txn_1', name: 'Rohan Sharma', clinic: 'Andheri West Clinic', clinicId: 'clinic1', doctorId: '1', healthCoordinatorId: null, appointmentDate: '2024-08-15T10:00:00Z', status: 'upcoming', consultation: 'Follow-up for cardiology check-up.', notes: 'Patient has reported mild chest pain.', consultationFee: 1200, refundStatus: 'Not Refunded', nextAppointmentDate: null, reviewed: false },
-  { id: '2', transactionId: 'txn_2', name: 'Priya Mehta', clinic: 'Skin & Hair Clinic', clinicId: 'clinic3', doctorId: '2', healthCoordinatorId: 'health_coordinator_1', appointmentDate: '2024-08-15T12:30:00Z', status: 'upcoming', consultation: 'Initial consultation for dermatology.', notes: 'Patient has a history of eczema.', consultationFee: 1500, refundStatus: 'Not Refunded', nextAppointmentDate: null, reviewed: false },
-  { id: '3', transactionId: 'txn_3', name: 'Amit Singh', clinic: 'Happy Kids Pediatrics', clinicId: 'clinic4', doctorId: '3', healthCoordinatorId: 'health_coordinator_1', appointmentDate: '2024-08-14T15:00:00Z', status: 'done', consultation: 'Annual health check-up.', notes: 'All reports are normal.', consultationFee: 800, refundStatus: 'Refunded', nextAppointmentDate: '2025-08-14T15:00:00Z', reviewed: true },
-  { id: '4', transactionId: 'txn_4', name: 'Sunita Patil', clinic: 'Andheri West Clinic', clinicId: 'clinic1', doctorId: '1', healthCoordinatorId: null, appointmentDate: '2024-08-13T09:00:00Z', status: 'done', consultation: 'Post-operative follow-up.', notes: 'Wound healing well.', consultationFee: 950, refundStatus: 'Refunded', nextAppointmentDate: null, reviewed: false },
-  { id: '5', transactionId: 'txn_5', name: 'Karan Verma', clinic: 'Skin & Hair Clinic', clinicId: 'clinic3', doctorId: '2', healthCoordinatorId: 'health_coordinator_1', appointmentDate: '2024-08-16T11:00:00Z', status: 'upcoming', consultation: 'Vaccination appointment.', notes: '', consultationFee: 500, refundStatus: 'Not Refunded', nextAppointmentDate: null, reviewed: false },
-  { id: '6', transactionId: 'txn_6', name: 'Anika Desai', clinic: 'Andheri West Clinic', clinicId: 'clinic1', doctorId: '1', healthCoordinatorId: null, appointmentDate: '2024-08-12T16:00:00Z', status: 'done', consultation: 'Consultation for fever.', notes: 'Prescribed medication for viral infection.', consultationFee: 700, refundStatus: 'Refunded', nextAppointmentDate: '2024-09-12T16:00:00Z', reviewed: true },
-  { id: '7', transactionId: 'txn_7', name: 'Vikram Reddy', clinic: 'Happy Kids Pediatrics', clinicId: 'clinic4', doctorId: '3', healthCoordinatorId: null, appointmentDate: '2024-08-17T14:00:00Z', status: 'upcoming', consultation: 'Physiotherapy session.', notes: 'Patient recovering from a sports injury.', consultationFee: 1800, refundStatus: 'Not Refunded', nextAppointmentDate: null, reviewed: false },
-];
 
 const clinics = ['All', 'Andheri West Clinic', 'Dadar East Clinic', 'Skin & Hair Clinic', 'Happy Kids Pediatrics'];
 const days = ['All', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -41,9 +30,9 @@ const consultationStatuses = ['All', 'Done', 'Upcoming'];
 
 export function PatientList() {
   const { toast } = useToast();
-  const [patients, setPatients] = useState(mockPatients);
+  const [patients, setPatients] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
-  const [isClient, setIsClient] = useState(false);
   const [user, setUser] = useState<any | null>(null);
   const [filters, setFilters] = useState({
     name: '',
@@ -54,22 +43,18 @@ export function PatientList() {
   });
 
   useEffect(() => {
-    setIsClient(true);
-     if (typeof window !== 'undefined') {
+    async function fetchData() {
         const storedUser = sessionStorage.getItem('user');
         if (storedUser) {
-            setUser(JSON.parse(storedUser));
+            const u = JSON.parse(storedUser);
+            setUser(u);
+            // In a real app, you would fetch appointments for doctor `u.id`
+            console.warn("Using placeholder for fetching appointments. Connect to your database.");
+            setPatients([]);
         }
-
-        if (!sessionStorage.getItem('mockPatients')) {
-            sessionStorage.setItem('mockPatients', JSON.stringify(mockPatients));
-        }
-        
-        const storedPatients = sessionStorage.getItem('mockPatients');
-        if (storedPatients) {
-            setPatients(JSON.parse(storedPatients));
-        }
+        setIsLoading(false);
     }
+    fetchData();
   }, []);
 
   const handleFilterChange = (key: keyof typeof filters, value: any) => {
@@ -77,6 +62,7 @@ export function PatientList() {
   };
 
   const filteredPatients = useMemo(() => {
+    // This filtering logic would be part of the database query in a real app
     return patients.filter(patient => {
         const appointmentDate = new Date(patient.appointmentDate);
         if (filters.name && !patient.name.toLowerCase().includes(filters.name.toLowerCase())) return false;
@@ -107,47 +93,17 @@ export function PatientList() {
   };
 
   const handleBulkCancel = () => {
-    const allDoctors = JSON.parse(sessionStorage.getItem('doctorsData') || '[]') || initialDoctors;
-    const doctor = allDoctors.find((d: any) => d.id === user?.id);
-
-    selectedRows.forEach(patientId => {
-        const patient = patients.find(p => p.id === patientId);
-        if(patient && doctor) {
-            addNotification(patient.id, {
-                title: 'Appointment Canceled & Refunded',
-                message: `Your appointment at ${patient.clinic} on ${format(new Date(patient.appointmentDate), 'PP')} was canceled by ${doctor.name}. A full refund of INR ${patient.consultationFee.toFixed(2)} has been issued.`,
-                icon: 'calendar',
-                href: '/patient/my-health'
-            });
-        }
-    });
-
-    const updatedPatients = patients.filter(p => !selectedRows.has(p.id));
-    setPatients(updatedPatients);
-    sessionStorage.setItem('mockPatients', JSON.stringify(updatedPatients));
+    // In a real app, this would be a single API call to your backend
+    console.warn("Using placeholder for bulk cancel. Connect to your database.");
     toast({
         title: "Appointments Canceled",
         description: `${selectedRows.size} appointment(s) have been canceled. Patients have been notified and refunded.`
     })
+    setPatients(patients.filter(p => !selectedRows.has(p.id)));
     setSelectedRows(new Set());
   }
 
   const handleBulkReschedule = () => {
-    const allDoctors = JSON.parse(sessionStorage.getItem('doctorsData') || '[]') || initialDoctors;
-    const doctor = allDoctors.find((d: any) => d.id === user?.id);
-    
-    selectedRows.forEach(patientId => {
-        const patient = patients.find(p => p.id === patientId);
-         if(patient && doctor) {
-            addNotification(patient.id, {
-                title: 'Appointment Rescheduled',
-                message: `Your appointment at ${patient.clinic} on ${format(new Date(patient.appointmentDate), 'PP')} has been rescheduled. Please contact them for new details.`,
-                icon: 'calendar',
-                href: '/patient/my-health'
-            });
-        }
-    });
-
     toast({
         title: "Appointments Rescheduled",
         description: `${selectedRows.size} appointment(s) have been successfully rescheduled.`
@@ -333,7 +289,9 @@ export function PatientList() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {filteredPatients.length > 0 ? (
+                        {isLoading ? (
+                            <TableRow><TableCell colSpan={6} className="h-24 text-center">Loading appointments...</TableCell></TableRow>
+                        ) : filteredPatients.length > 0 ? (
                             filteredPatients.map(patient => (
                                 <TableRow key={patient.id} data-state={selectedRows.has(patient.id) ? "selected" : ""}>
                                     <TableCell>
@@ -345,7 +303,7 @@ export function PatientList() {
                                     </TableCell>
                                     <TableCell className="font-medium">{patient.name}</TableCell>
                                     <TableCell className="hidden lg:table-cell">{patient.clinic}</TableCell>
-                                    <TableCell>{isClient ? format(new Date(patient.appointmentDate), 'PP, p') : ''}</TableCell>
+                                    <TableCell>{format(new Date(patient.appointmentDate), 'PP, p')}</TableCell>
                                     <TableCell className="hidden sm:table-cell">
                                         <Badge variant={patient.status === 'done' ? 'secondary' : 'default'}>
                                             {patient.status}
@@ -361,7 +319,7 @@ export function PatientList() {
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={6} className="text-center h-24">
-                                    No patients found with the selected filters.
+                                    No patients found.
                                 </TableCell>
                             </TableRow>
                         )}

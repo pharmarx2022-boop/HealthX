@@ -1,9 +1,8 @@
 
+
 'use client';
 
 // This file should be refactored to use a backend service like Firestore.
-
-const TEAM_MEMBERS_KEY = 'teamMembers';
 
 export type TeamMember = {
     id: string;

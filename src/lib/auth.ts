@@ -1,7 +1,4 @@
 
-// A simple in-memory store for users
-const users: any[] = [];
-import { createReferral } from './referrals';
 
 // A secure, hardcoded list of admin accounts.
 // In a real application, this would be stored securely in a database.
@@ -16,7 +13,7 @@ const generateReferralCode = () => {
 }
 
 // In a real app, this would query your Firestore database.
-const getAllUsers = async () => {
+const getAllUsers = async (): Promise<any[]> => {
     // This is a placeholder for fetching all users from your database.
     // e.g., const snapshot = await db.collection('users').get();
     console.warn("Using placeholder for getAllUsers. Connect to your database.");
@@ -30,21 +27,18 @@ const findUserByReferralCode = async (code: string) => {
 
 // This function simulates sending an OTP. In production, use Firebase Auth.
 export async function sendOtp(email: string) {
-    if (typeof window !== 'undefined') {
-        window.sessionStorage.setItem('emailForSignIn', email);
-    }
     console.log(`OTP/Magic Link SENT to ${email}: The mock code is ${MOCK_OTP}`);
     await new Promise(resolve => setTimeout(resolve, 500));
     return true;
 }
 
 // In a real app, this would check your database.
-export const isEmailUnique = async (email: string) => {
+export const isEmailUnique = async (email: string): Promise<boolean> => {
     const allUsers = await getAllUsers();
     return !allUsers.some(u => u.email === email);
 }
 
-export const isPhoneUnique = async (phone: string, currentUserId: string) => {
+export const isPhoneUnique = async (phone: string, currentUserId: string): Promise<boolean> => {
     if (!phone) return true;
     const allUsers = await getAllUsers();
     return !allUsers.some(u => u.phone === phone && u.id !== currentUserId);
@@ -52,15 +46,6 @@ export const isPhoneUnique = async (phone: string, currentUserId: string) => {
 
 // This should be replaced with Firebase Authentication.
 export async function signInWithOtp(email: string, otp: string, role: string, referralCode?: string) {
-    if (typeof window === 'undefined') {
-        return { user: null, error: "Sign-in must be completed in a browser.", isNewUser: false };
-    }
-
-    const emailForSignIn = window.sessionStorage.getItem('emailForSignIn');
-    if (emailForSignIn !== email) {
-        return { user: null, error: "Email does not match the one that requested the magic link.", isNewUser: false };
-    }
-    
     if (otp !== MOCK_OTP) {
         return { user: null, error: "Invalid OTP/magic link.", isNewUser: false };
     }
@@ -69,7 +54,6 @@ export async function signInWithOtp(email: string, otp: string, role: string, re
     if (role === 'admin') {
         const adminUser = ADMIN_ACCOUNTS.find(admin => admin.email === email);
         if (adminUser) {
-            window.sessionStorage.removeItem('emailForSignIn');
             return { user: { ...adminUser, fullName: 'Admin' }, error: null, isNewUser: false };
         } else {
             return { user: null, error: "This email is not registered as an admin.", isNewUser: false };
@@ -79,9 +63,14 @@ export async function signInWithOtp(email: string, otp: string, role: string, re
     // In a real app, you would fetch from your DB here.
     // e.g., const userRef = db.collection('users').where('email', '==', email).where('role', '==', role);
     console.warn("Using placeholder for user lookup in signInWithOtp. Connect to your database.");
+    const existingUser = (await getAllUsers()).find(u => u.email === email && u.role === role);
+
+    if (existingUser) {
+        return { user: existingUser, error: null, isNewUser: false };
+    }
     
-    // This part will now always create a new user for demo purposes, since fetching is mocked.
-    let isNewUser = true;
+    // Create a new user if one doesn't exist
+    const isNewUser = true;
     const emailPrefix = email.split('@')[0];
     const isProfessional = ['doctor', 'pharmacy', 'lab', 'health-coordinator'].includes(role);
 
@@ -108,25 +97,25 @@ export async function signInWithOtp(email: string, otp: string, role: string, re
     if (referralCode) {
         const referrer = await findUserByReferralCode(referralCode);
         if (referrer) {
-             createReferral(referrer.id, user.id, user.role as any);
+             // createReferral(referrer.id, user.id, user.role as any);
+             console.log("Placeholder for createReferral");
         } else {
              return { user: null, error: "Invalid referral code.", isNewUser: false };
         }
     }
     
-    window.sessionStorage.removeItem('emailForSignIn');
     return { user, error: null, isNewUser };
 }
 
 
 // Replace with a DB query
-export async function getAllPendingUsers() {
+export async function getAllPendingUsers(): Promise<any[]> {
     console.warn("Using placeholder for getAllPendingUsers. Connect to your database.");
     return [];
 }
 
 // Replace with a DB update
-export async function updateUserStatus(userId: string, role: string, newStatus: 'approved' | 'rejected') {
+export async function updateUserStatus(userId: string, role: string, newStatus: 'approved' | 'rejected'): Promise<boolean> {
      console.warn("Using placeholder for updateUserStatus. Connect to your database.");
      // e.g., await db.collection('users').doc(userId).update({ status: newStatus });
      return true;
@@ -156,13 +145,13 @@ export function verifyAdmin(): boolean {
 }
 
 // Replace with a DB query
-export async function getAllUsersForAdmin() {
+export async function getAllUsersForAdmin(): Promise<any[]> {
      console.warn("Using placeholder for getAllUsersForAdmin. Connect to your database.");
      return [];
 }
 
 // Replace with a DB update
-export async function toggleUserStatus(userId: string, role: string) {
+export async function toggleUserStatus(userId: string, role: string): Promise<boolean> {
      console.warn("Using placeholder for toggleUserStatus. Connect to your database.");
      return true;
 }

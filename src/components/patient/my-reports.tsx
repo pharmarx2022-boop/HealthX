@@ -8,9 +8,15 @@ import { FileText, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { useState, useEffect } from "react";
-import { mockReports as initialReports, type MockReport } from "@/lib/mock-data";
 
-const REPORTS_KEY = 'mockReports';
+export type MockReport = {
+    id: string;
+    patientId: string;
+    name: string;
+    lab: string;
+    date: string;
+    file: string; // URL or path to the file
+};
 
 export function MyReports() {
     const { toast } = useToast();
@@ -18,18 +24,17 @@ export function MyReports() {
     const [user, setUser] = useState<any | null>(null);
 
     useEffect(() => {
-        const storedUser = sessionStorage.getItem('user');
-        if (storedUser) {
-            const u = JSON.parse(storedUser);
-            setUser(u);
-
-            const allReports = JSON.parse(sessionStorage.getItem(REPORTS_KEY) || '[]')
-            setMyReports(allReports.filter((r: MockReport) => r.patientId === u.id || r.patientId === u.fullName)); // a bit of a hack to support old data
-        } else {
-             if (!sessionStorage.getItem(REPORTS_KEY)) {
-                sessionStorage.setItem(REPORTS_KEY, JSON.stringify(initialReports));
+       async function fetchData() {
+            const storedUser = sessionStorage.getItem('user');
+            if (storedUser) {
+                const u = JSON.parse(storedUser);
+                setUser(u);
+                 // In a real app, you would fetch reports for user `u.id`
+                console.warn("Using placeholder for fetching reports. Connect to your database.");
+                setMyReports([]);
             }
-        }
+       }
+       fetchData();
     }, []);
 
 

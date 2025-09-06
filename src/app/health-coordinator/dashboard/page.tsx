@@ -16,6 +16,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { NearbySearch } from '@/components/booking/nearby-search';
+import { BottomNavBar } from '@/components/layout/bottom-nav-bar';
 
 const AnalyticsDashboard = dynamic(() => import('@/components/health-coordinator/analytics-dashboard').then(mod => mod.AnalyticsDashboard), {
     ssr: false,
@@ -82,7 +83,7 @@ export default function HealthCoordinatorDashboardPage() {
     return (
         <div className="flex flex-col min-h-screen">
             <Header />
-            <main className="flex-1 bg-slate-50/50">
+            <main className="flex-1 bg-slate-50/50 pb-20 md:pb-0">
                 <div className="container mx-auto py-12">
                     <div className="mb-8">
                         <h1 className="text-3xl font-headline font-bold">Health Coordinator Dashboard</h1>
@@ -215,8 +216,7 @@ export default function HealthCoordinatorDashboardPage() {
                 </div>
             </main>
             <Footer />
+            <BottomNavBar />
         </div>
     );
 }
-
-    

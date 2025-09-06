@@ -8,6 +8,7 @@ import { Calendar as CalendarIcon, Trash2, CalendarClock, DownloadIcon } from 'l
 import Link from 'next/link';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { mockPatients } from '@/lib/mock-data';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -43,18 +44,18 @@ export function PatientList() {
   });
 
   useEffect(() => {
-    async function fetchData() {
-        const storedUser = sessionStorage.getItem('user');
-        if (storedUser) {
-            const u = JSON.parse(storedUser);
-            setUser(u);
-            // In a real app, you would fetch appointments for doctor `u.id`
-            console.warn("Using placeholder for fetching appointments. Connect to your database.");
-            setPatients([]);
-        }
-        setIsLoading(false);
+    const storedUser = sessionStorage.getItem('user');
+    if (storedUser) {
+        const u = JSON.parse(storedUser);
+        setUser(u);
+        const storedPatients = sessionStorage.getItem('mockPatients');
+        const allAppointments = storedPatients ? JSON.parse(storedPatients) : mockPatients;
+        setPatients(allAppointments.filter((p: any) => p.doctorId === u.id));
     }
-    fetchData();
+     if (!sessionStorage.getItem('mockPatients')) {
+        sessionStorage.setItem('mockPatients', JSON.stringify(mockPatients));
+    }
+    setIsLoading(false);
   }, []);
 
   const handleFilterChange = (key: keyof typeof filters, value: any) => {
@@ -62,7 +63,6 @@ export function PatientList() {
   };
 
   const filteredPatients = useMemo(() => {
-    // This filtering logic would be part of the database query in a real app
     return patients.filter(patient => {
         const appointmentDate = new Date(patient.appointmentDate);
         if (filters.name && !patient.name.toLowerCase().includes(filters.name.toLowerCase())) return false;
@@ -93,13 +93,29 @@ export function PatientList() {
   };
 
   const handleBulkCancel = () => {
-    // In a real app, this would be a single API call to your backend
-    console.warn("Using placeholder for bulk cancel. Connect to your database.");
+    const allStoredAppointments = JSON.parse(sessionStorage.getItem('mockPatients') || '[]');
+    const remainingAppointments = allStoredAppointments.filter((p: any) => !selectedRows.has(p.id));
+    sessionStorage.setItem('mockPatients', JSON.stringify(remainingAppointments));
+    
+    // Also update the local state for the current doctor
+    setPatients(patients.filter(p => !selectedRows.has(p.id)));
+
+    selectedRows.forEach(id => {
+        const patient = patients.find(p => p.id === id);
+        if (patient) {
+            addNotification(patient.id, {
+                title: 'Appointment Canceled',
+                message: 'Your doctor has canceled your upcoming appointment. Your payment has been refunded.',
+                icon: 'calendar',
+                href: '/patient/my-health'
+            });
+        }
+    });
+
     toast({
         title: "Appointments Canceled",
         description: `${selectedRows.size} appointment(s) have been canceled. Patients have been notified and refunded.`
     })
-    setPatients(patients.filter(p => !selectedRows.has(p.id)));
     setSelectedRows(new Set());
   }
 

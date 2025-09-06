@@ -16,30 +16,65 @@ export type TeamMember = {
     instagram?: string;
 }
 
+const initialTeam: TeamMember[] = [
+    {
+        id: '1',
+        name: 'Dr. Sameer Sharma',
+        title: 'Founder & CEO',
+        image: 'https://picsum.photos/seed/ceo/400/400',
+        dataAiHint: "professional man",
+        bio: 'With a vision to revolutionize healthcare access, Dr. Sharma founded HealthX to bridge the gap between patients and providers through technology.',
+        linkedin: 'https://linkedin.com',
+        twitter: 'https://x.com'
+    },
+    {
+        id: '2',
+        name: 'Aisha Khan',
+        title: 'Chief Technology Officer',
+        image: 'https://picsum.photos/seed/cto/400/400',
+        dataAiHint: "professional woman",
+        bio: 'Aisha leads our engineering team, driving the development of our innovative platform with a passion for user-centric design and scalable solutions.',
+        linkedin: 'https://linkedin.com',
+    },
+    {
+        id: '3',
+        name: 'Raj Patel',
+        title: 'Head of Operations',
+        image: 'https://picsum.photos/seed/ops/400/400',
+        dataAiHint: "smiling man",
+        bio: 'Raj ensures the seamless operation of the HealthX ecosystem, managing partner relations and ensuring a high-quality experience for all users.',
+        instagram: 'https://instagram.com'
+    }
+];
 
-// Placeholder for fetching team members from a database
-export async function getTeamMembers(): Promise<TeamMember[]> {
-    console.warn("Using placeholder for getTeamMembers. Connect to your database.");
-    // In a real app, you would fetch from Firestore here, e.g., `db.collection('team').get()`
-    // For now, return an empty array as sessionStorage is no longer used for data.
-    return [];
+const TEAM_KEY = 'teamMembers';
+
+// In a real app, this would fetch from Firestore, scoped to the logged-in user.
+export function getTeamMembers(): TeamMember[] {
+     if (typeof window === 'undefined') return [];
+     const stored = sessionStorage.getItem(TEAM_KEY);
+     if (stored) {
+        return JSON.parse(stored);
+     }
+     sessionStorage.setItem(TEAM_KEY, JSON.stringify(initialTeam));
+     return initialTeam;
 }
 
-
-// Placeholder for adding a team member to a database
-export async function addTeamMember(member: Omit<TeamMember, 'id'>): Promise<void> {
-    console.warn("Using placeholder for addTeamMember. Connect to your database.");
-    // In a real app, you would use `db.collection('team').add(member)`
+export function addTeamMember(member: Omit<TeamMember, 'id'>) {
+    const members = getTeamMembers();
+    const newMember = { ...member, id: `team_${Date.now()}` };
+    const updatedMembers = [...members, newMember];
+    sessionStorage.setItem(TEAM_KEY, JSON.stringify(updatedMembers));
 }
 
-// Placeholder for updating a team member in a database
-export async function updateTeamMember(updatedMember: TeamMember): Promise<void> {
-    console.warn("Using placeholder for updateTeamMember. Connect to your database.");
-     // In a real app, you would use `db.collection('team').doc(updatedMember.id).update(updatedMember)`
+export function updateTeamMember(updatedMember: TeamMember) {
+    const members = getTeamMembers();
+    const updatedMembers = members.map(m => m.id === updatedMember.id ? updatedMember : m);
+    sessionStorage.setItem(TEAM_KEY, JSON.stringify(updatedMembers));
 }
 
-// Placeholder for deleting a team member from a database
-export async function deleteTeamMember(memberId: string): Promise<void> {
-    console.warn("Using placeholder for deleteTeamMember. Connect to your database.");
-    // In a real app, you would use `db.collection('team').doc(memberId).delete()`
+export function deleteTeamMember(memberId: string) {
+    const members = getTeamMembers();
+    const updatedMembers = members.filter(m => m.id !== memberId);
+    sessionStorage.setItem(TEAM_KEY, JSON.stringify(updatedMembers));
 }

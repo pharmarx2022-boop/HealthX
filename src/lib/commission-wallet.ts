@@ -2,13 +2,14 @@
 
 'use client';
 
+import { addNotification } from "./notifications";
 import { toast } from "@/hooks/use-toast";
 
 const COMMISSION_WALLET_KEY_PREFIX = 'commission_wallet_';
 const WITHDRAWAL_REQUESTS_KEY = 'commission_withdrawal_requests';
 
-
 export type CommissionTransaction = {
+    id?: string;
     type: 'credit' | 'debit';
     amount: number;
     description: string;
@@ -19,23 +20,28 @@ export type CommissionTransaction = {
 export type WithdrawalRequest = {
     id: string;
     userId: string;
-    userName: string; // for display in admin panel
+    userName: string;
     amount: number;
     date: string | Date;
     status: 'pending' | 'approved' | 'rejected';
 }
 
-// In a real app, this would fetch from Firestore.
-async function getCommissionTransactions(userId: string): Promise<CommissionTransaction[]> {
-    // This function would fetch from Firestore, e.g., `db.collection('users').doc(userId).collection('commissionWallet').get()`
-    // For now, it will return an empty array as we are no longer using sessionStorage.
-    console.warn("Using placeholder for getCommissionTransactions. Connect to your database.");
-    return [];
+function getCommissionTransactions(userId: string): CommissionTransaction[] {
+    if (typeof window === 'undefined') return [];
+    const key = COMMISSION_WALLET_KEY_PREFIX + userId;
+    const stored = sessionStorage.getItem(key);
+    return stored ? JSON.parse(stored) : [];
+}
+
+function saveCommissionTransactions(userId: string, transactions: CommissionTransaction[]) {
+    if (typeof window === 'undefined') return;
+    const key = COMMISSION_WALLET_KEY_PREFIX + userId;
+    sessionStorage.setItem(key, JSON.stringify(transactions));
 }
 
 
-export async function getCommissionWalletData(userId: string): Promise<{ balance: number; transactions: CommissionTransaction[] }> {
-    const transactions = await getCommissionTransactions(userId);
+export function getCommissionWalletData(userId: string): { balance: number; transactions: CommissionTransaction[] } {
+    const transactions = getCommissionTransactions(userId);
     
     const balance = transactions.reduce((acc, curr) => {
         if(curr.type === 'credit' && curr.status === 'success') {
@@ -53,28 +59,98 @@ export async function getCommissionWalletData(userId: string): Promise<{ balance
     };
 }
 
-export async function recordCommission(userId: string, transaction: Omit<CommissionTransaction, 'date'> & { date: Date }) {
-    // This function would write to Firestore, e.g., `db.collection('users').doc(userId).collection('commissionWallet').add(transaction)`
-    console.warn("Using placeholder for recordCommission. Connect to your database.");
+
+export function recordCommission(userId: string, transaction: Omit<CommissionTransaction, 'date' | 'id'> & { date: Date }) {
+    const transactions = getCommissionTransactions(userId);
+    const newTransaction = {
+        ...transaction,
+        id: `ctx_${Date.now()}`,
+        date: transaction.date.toISOString(),
+    };
+    transactions.push(newTransaction);
+    saveCommissionTransactions(userId, transactions);
 }
 
-export async function requestWithdrawal(userId: string, userName: string, amount: number) {
-    // This function would create a withdrawal request document in Firestore
-    console.warn("Using placeholder for requestWithdrawal. Connect to your database.");
-    
+function getWithdrawalRequestsData(): WithdrawalRequest[] {
+    if (typeof window === 'undefined') return [];
+    const stored = sessionStorage.getItem(WITHDRAWAL_REQUESTS_KEY);
+    return stored ? JSON.parse(stored) : [];
+}
+
+function saveWithdrawalRequests(requests: WithdrawalRequest[]) {
+     if (typeof window === 'undefined') return;
+     sessionStorage.setItem(WITHDRAWAL_REQUESTS_KEY, JSON.stringify(requests));
+}
+
+
+export function requestWithdrawal(userId: string, userName: string, amount: number) {
+    const allRequests = getWithdrawalRequestsData();
+    const newRequest: WithdrawalRequest = {
+        id: `wd_${Date.now()}`,
+        userId,
+        userName,
+        amount,
+        date: new Date().toISOString(),
+        status: 'pending'
+    };
+    allRequests.push(newRequest);
+    saveWithdrawalRequests(allRequests);
+
+    // Also record a debit in the user's wallet
+    const userTransactions = getCommissionTransactions(userId);
+    userTransactions.push({
+        id: newRequest.id,
+        type: 'debit',
+        amount: amount,
+        description: `Withdrawal request`,
+        date: newRequest.date,
+        status: 'pending'
+    });
+    saveCommissionTransactions(userId, userTransactions);
+
     toast({
         title: "Withdrawal Request Sent",
         description: `Your request to withdraw INR ${amount.toFixed(2)} has been sent to the admin for approval.`
     })
 }
 
-export async function getWithdrawalRequests(): Promise<WithdrawalRequest[]> {
-    // This function would fetch from Firestore, e.g., `db.collection('withdrawalRequests').where('status', '==', 'pending').get()`
-    console.warn("Using placeholder for getWithdrawalRequests. Connect to your database.");
-    return [];
+
+export function getWithdrawalRequests(): WithdrawalRequest[] {
+    return getWithdrawalRequestsData().sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
-export async function updateWithdrawalRequest(requestId: string, newStatus: 'approved' | 'rejected') {
-   // This function would update a withdrawal request document in Firestore and the user's wallet transactions
-   console.warn("Using placeholder for updateWithdrawalRequest. Connect to your database.");
+
+export function updateWithdrawalRequest(requestId: string, newStatus: 'approved' | 'rejected') {
+    const allRequests = getWithdrawalRequestsData();
+    const requestIndex = allRequests.findIndex(r => r.id === requestId);
+    if(requestIndex === -1) return;
+
+    allRequests[requestIndex].status = newStatus;
+    saveWithdrawalRequests(allRequests);
+
+    const request = allRequests[requestIndex];
+    const userTransactions = getCommissionTransactions(request.userId);
+    const transactionIndex = userTransactions.findIndex(tx => tx.id === requestId);
+
+    if (transactionIndex !== -1) {
+        if(newStatus === 'approved') {
+            userTransactions[transactionIndex].status = 'paid';
+             addNotification(request.userId, {
+                title: "Withdrawal Approved",
+                message: `Your withdrawal of INR ${request.amount.toFixed(2)} has been approved and processed.`,
+                icon: 'wallet',
+                href: '#',
+            });
+        }
+        else if (newStatus === 'rejected') {
+            userTransactions[transactionIndex].status = 'rejected';
+             addNotification(request.userId, {
+                title: "Withdrawal Rejected",
+                message: `Your withdrawal of INR ${request.amount.toFixed(2)} was rejected. The amount has been credited back.`,
+                icon: 'wallet',
+                href: '#',
+            });
+        }
+        saveCommissionTransactions(request.userId, userTransactions);
+    }
 }

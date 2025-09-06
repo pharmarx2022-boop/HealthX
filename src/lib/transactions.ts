@@ -16,16 +16,21 @@ export type Transaction = {
     partnerName?: string;
 }
 
-// In a real app, this would fetch from Firestore.
-async function getStoredTransactions(patientId: string): Promise<Transaction[]> {
+function getStoredTransactions(patientId: string): Transaction[] {
     if (typeof window === 'undefined') return [];
-    // This function is now a placeholder.
-    console.warn("Using placeholder for getStoredTransactions. Connect to your database.");
-    return [];
+    const key = TRANSACTIONS_KEY_PREFIX + patientId;
+    const stored = sessionStorage.getItem(key);
+    return stored ? JSON.parse(stored).map((t: any) => ({ ...t, date: new Date(t.date) })) : [];
 }
 
-export async function getTransactionHistory(patientId: string): Promise<{ balance: number; transactions: Transaction[] }> {
-    const transactions = await getStoredTransactions(patientId);
+function saveTransactions(patientId: string, transactions: Transaction[]) {
+     if (typeof window === 'undefined') return;
+    const key = TRANSACTIONS_KEY_PREFIX + patientId;
+    sessionStorage.setItem(key, JSON.stringify(transactions));
+}
+
+export function getTransactionHistory(patientId: string): { balance: number; transactions: Transaction[] } {
+    const transactions = getStoredTransactions(patientId);
     
     const balance = transactions.reduce((acc, curr) => {
         return acc + (curr.type === 'credit' ? curr.amount : -curr.amount);
@@ -37,7 +42,11 @@ export async function getTransactionHistory(patientId: string): Promise<{ balanc
     };
 }
 
-export async function recordTransaction(patientId: string, transaction: Omit<Transaction, 'date' | 'id'> & { date: Date }) {
-    console.warn("Using placeholder for recordTransaction. Connect to your database.");
-    // In a real app, this function would write to Firestore.
+export function recordTransaction(patientId: string, transaction: Omit<Transaction, 'date' | 'id'> & { date: Date }) {
+    const transactions = getStoredTransactions(patientId);
+    const newTransaction = {
+        ...transaction,
+        id: `txn_${Date.now()}`
+    };
+    saveTransactions(patientId, [...transactions, newTransaction]);
 }

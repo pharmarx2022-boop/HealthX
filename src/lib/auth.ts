@@ -1,62 +1,68 @@
 
 
-// A secure, hardcoded list of admin accounts.
-// In a real application, this would be stored securely in a database.
+// THIS IS A MOCK AUTHENTICATION FILE FOR PROTOTYPING ONLY
+// In a real application, this would be replaced with a secure authentication service like Firebase Authentication.
+
+export const MOCK_OTP = '123456';
+
+const USERS_KEY = 'allUsers';
+
 const ADMIN_ACCOUNTS = [
     { email: 'admin@example.com', id: 'admin_001', role: 'admin' },
 ];
-
-export const MOCK_OTP = '123456';
 
 const generateReferralCode = () => {
     return `HX-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 }
 
-// In a real app, this would query your Firestore database.
-const getAllUsers = async (): Promise<any[]> => {
-    // This function is a placeholder for fetching all users from your database.
-    // e.g., const snapshot = await db.collection('users').get();
-    console.warn("Using placeholder for getAllUsers. Connect to your database.");
-    return [];
+const initializeUsers = () => {
+     if (typeof window !== 'undefined' && !sessionStorage.getItem(USERS_KEY)) {
+        sessionStorage.setItem(USERS_KEY, JSON.stringify([]));
+    }
+}
+initializeUsers();
+
+
+const getAllUsers = (): any[] => {
+    if (typeof window === 'undefined') return [];
+    const users = sessionStorage.getItem(USERS_KEY);
+    return users ? JSON.parse(users) : [];
 }
 
-const findUserByReferralCode = async (code: string) => {
-    const allUsers = await getAllUsers();
+const saveAllUsers = (users: any[]) => {
+    sessionStorage.setItem(USERS_KEY, JSON.stringify(users));
+}
+
+const findUserByReferralCode = (code: string) => {
+    const allUsers = getAllUsers();
     return allUsers.find((u: any) => u.referralCode === code);
 }
 
-// This function simulates sending an OTP. In production, use Firebase Auth.
+// This function simulates sending an OTP.
 export async function sendOtp(email: string) {
     console.log(`OTP/Magic Link SENT to ${email}: The mock code is ${MOCK_OTP}`);
     await new Promise(resolve => setTimeout(resolve, 500));
     return true;
 }
 
-// In a real app, this would check your database.
-export const isEmailUnique = async (email: string): Promise<boolean> => {
-    // In a real app, you would query your database.
-    // e.g., const snapshot = await db.collection('users').where('email', '==', email).limit(1).get();
-    // return snapshot.empty;
-    console.warn("Using placeholder for isEmailUnique. Connect to your database.");
-    return true;
+
+export const isEmailUnique = (email: string): boolean => {
+    const allUsers = getAllUsers();
+    return !allUsers.some(user => user.email === email);
 }
 
-export const isPhoneUnique = async (phone: string, currentUserId: string): Promise<boolean> => {
-    // In a real app, you would query your database.
-    // e.g., const snapshot = await db.collection('users').where('phone', '==', phone).limit(1).get();
-    // if(snapshot.empty) return true;
-    // return snapshot.docs[0].id === currentUserId;
-    console.warn("Using placeholder for isPhoneUnique. Connect to your database.");
-    return true;
+export const isPhoneUnique = (phone: string, currentUserId: string): boolean => {
+    const allUsers = getAllUsers();
+    const foundUser = allUsers.find(user => user.phone === phone);
+    return !foundUser || foundUser.id === currentUserId;
 }
 
-// This should be replaced with Firebase Authentication.
-export async function signInWithOtp(email: string, otp: string, role: string, referralCode?: string) {
+export function signInWithOtp(email: string, otp: string, role: string, referralCode?: string) {
     if (otp !== MOCK_OTP) {
         return { user: null, error: "Invalid OTP/magic link.", isNewUser: false };
     }
     
-    // Admin login remains a hardcoded check for this prototype.
+    // Admin login check
     if (role === 'admin') {
         const adminUser = ADMIN_ACCOUNTS.find(admin => admin.email === email);
         if (adminUser) {
@@ -66,19 +72,14 @@ export async function signInWithOtp(email: string, otp: string, role: string, re
         }
     }
     
-    // In a real app, you would fetch from your DB here.
-    // e.g., const userRef = db.collection('users').where('email', '==', email).where('role', '==', role);
-    console.warn("Using placeholder for user lookup in signInWithOtp. Connect to your database.");
-    
-    // This simulates a database lookup. Replace with a real query.
-    const allUsers = await getAllUsers();
-    const existingUser = allUsers.find(u => u.email === email && u.role === role);
+    const allUsers = getAllUsers();
+    let existingUser = allUsers.find(u => u.email === email && u.role === role);
 
     if (existingUser) {
         return { user: existingUser, error: null, isNewUser: false };
     }
-    
-    // Create a new user if one doesn't exist
+
+    // Create new user if they don't exist
     const isNewUser = true;
     const emailPrefix = email.split('@')[0];
     const isProfessional = ['doctor', 'pharmacy', 'lab', 'health-coordinator'].includes(role);
@@ -87,57 +88,59 @@ export async function signInWithOtp(email: string, otp: string, role: string, re
         id: `${role}_${emailPrefix}_${Date.now()}`,
         email,
         role, 
-        referralCode: isProfessional ? generateReferralCode() : null,
         fullName: `${(role.charAt(0).toUpperCase() + role.slice(1)).replace('-coordinator', ' Coordinator')} ${emailPrefix}`,
         phone: '',
+        referralCode: isProfessional ? generateReferralCode() : undefined,
         status: isProfessional ? 'pending' : 'approved',
         dateJoined: new Date().toISOString(),
-        registrationNumber: '',
-        registrationCertificate: '',
-        aadharNumber: '',
-        aadharFrontImage: '',
-        aadharBackImage: '',
     };
     
-     // In a real app, you would now SAVE this user to your database.
-     // e.g., await db.collection('users').doc(user.id).set(user);
-     console.log('New user would be created:', user);
-
-    if (referralCode) {
-        const referrer = await findUserByReferralCode(referralCode);
+    allUsers.push(user);
+    saveAllUsers(allUsers);
+    
+     if (referralCode) {
+        const referrer = findUserByReferralCode(referralCode);
         if (referrer) {
-             // createReferral(referrer.id, user.id, user.role as any);
-             console.log("Placeholder for createReferral");
+            // Placeholder for creating referral record
+            console.log(`Referral created: ${referrer.id} referred ${user.id}`);
         } else {
              return { user: null, error: "Invalid referral code.", isNewUser: false };
         }
     }
-    
+
     return { user, error: null, isNewUser };
 }
 
 
-// Replace with a DB query
-export async function getAllPendingUsers(): Promise<any[]> {
-    console.warn("Using placeholder for getAllPendingUsers. Connect to your database.");
-    return [];
+export function getAllPendingUsers(): any[] {
+    const allUsers = getAllUsers();
+    return allUsers.filter(user => user.status === 'pending');
 }
 
-// Replace with a DB update
-export async function updateUserStatus(userId: string, role: string, newStatus: 'approved' | 'rejected'): Promise<boolean> {
-     console.warn("Using placeholder for updateUserStatus. Connect to your database.");
-     // e.g., await db.collection('users').doc(userId).update({ status: newStatus });
-     return true;
+
+export function updateUserStatus(userId: string, role: string, newStatus: 'approved' | 'rejected') {
+    const allUsers = getAllUsers();
+    const userIndex = allUsers.findIndex(user => user.id === userId);
+
+    if(userIndex !== -1) {
+        allUsers[userIndex].status = newStatus;
+        saveAllUsers(allUsers);
+        return true;
+    }
+    return false;
 }
 
-export async function isRegistrationNumberUnique(role: 'doctor' | 'lab' | 'pharmacy', regNumber: string, currentUserId: string): Promise<boolean> {
-    console.warn("Using placeholder for isRegistrationNumberUnique. Connect to your database.");
-    return true; // Assume unique for prototype
+export const isRegistrationNumberUnique = (role: 'doctor' | 'lab' | 'pharmacy', regNumber: string, currentUserId: string): boolean => {
+    const key = role === 'doctor' ? 'doctorsData' : role === 'lab' ? 'mockLabs' : 'mockPharmacies';
+    const allPartners = JSON.parse(sessionStorage.getItem(key) || '[]');
+    const foundPartner = allPartners.find((p: any) => p.registrationNumber === regNumber);
+    return !foundPartner || foundPartner.id === currentUserId;
 }
 
-export async function isAadharNumberUnique(aadharNumber: string, currentUserId: string): Promise<boolean> {
-    console.warn("Using placeholder for isAadharNumberUnique. Connect to your database.");
-    return true; // Assume unique for prototype
+export const isAadharNumberUnique = (aadharNumber: string, currentUserId: string): boolean => {
+    const allUsers = getAllUsers();
+    const foundUser = allUsers.find(user => user.aadharNumber === aadharNumber);
+    return !foundUser || foundUser.id === currentUserId;
 }
 
 export function verifyAdmin(): boolean {
@@ -153,14 +156,22 @@ export function verifyAdmin(): boolean {
     }
 }
 
-// Replace with a DB query
-export async function getAllUsersForAdmin(): Promise<any[]> {
-     console.warn("Using placeholder for getAllUsersForAdmin. Connect to your database.");
-     return [];
+
+export function getAllUsersForAdmin(): any[] {
+     const allUsers = getAllUsers();
+     return allUsers.filter(user => user.role !== 'admin');
 }
 
-// Replace with a DB update
-export async function toggleUserStatus(userId: string, role: string): Promise<boolean> {
-     console.warn("Using placeholder for toggleUserStatus. Connect to your database.");
-     return true;
+
+export function toggleUserStatus(userId: string, role: string) {
+    const allUsers = getAllUsers();
+    const userIndex = allUsers.findIndex(user => user.id === userId);
+
+    if(userIndex !== -1) {
+        const currentStatus = allUsers[userIndex].status;
+        allUsers[userIndex].status = currentStatus === 'disabled' ? (role === 'patient' ? 'approved' : 'pending') : 'disabled';
+        saveAllUsers(allUsers);
+        return true;
+    }
+    return false;
 }

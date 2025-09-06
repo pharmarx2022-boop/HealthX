@@ -113,6 +113,8 @@ export function HealthCoordinatorProfileForm() {
 
   const aadharFrontImage = form.watch('aadharFrontImage');
   const aadharBackImage = form.watch('aadharBackImage');
+  const aadharNumberIsSet = !!form.watch('aadharNumber');
+
 
   return (
     <Form {...form}>
@@ -171,7 +173,7 @@ export function HealthCoordinatorProfileForm() {
 
             <div className="space-y-4 p-4 border rounded-md bg-slate-50">
                 <h3 className="font-semibold text-base flex items-center gap-2"><BadgeCheck/> Verification Details</h3>
-                <p className="text-sm text-muted-foreground">This information is required for admin approval and is not displayed publicly.</p>
+                <p className="text-sm text-muted-foreground">This information is required for admin approval and is not displayed publicly. Once saved, it cannot be changed.</p>
                  <FormField
                     control={form.control}
                     name="aadharNumber"
@@ -180,7 +182,7 @@ export function HealthCoordinatorProfileForm() {
                         <FormLabel>Aadhar Card Number</FormLabel>
                         <FormControl>
                              <div className="relative">
-                                <Input placeholder="Enter your 12-digit Aadhar number" {...field} className="pl-8"/>
+                                <Input placeholder="Enter your 12-digit Aadhar number" {...field} className="pl-8" disabled={aadharNumberIsSet} />
                                 <IdCard className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             </div>
                         </FormControl>
@@ -200,8 +202,9 @@ export function HealthCoordinatorProfileForm() {
                                         accept="image/*"
                                         onChange={(e) => handleImageUpload(e, 'aadharFrontImage')}
                                         className="hidden" 
+                                        disabled={aadharNumberIsSet}
                                     />
-                                    <label htmlFor="aadhar-front-upload" className="cursor-pointer">
+                                    <label htmlFor="aadhar-front-upload" className={aadharNumberIsSet ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}>
                                         <div className="relative w-full aspect-video rounded-md border-2 border-dashed flex items-center justify-center text-muted-foreground hover:border-primary transition-colors">
                                             {aadharFrontImage ? (
                                                 <Image src={aadharFrontImage} alt="Aadhar Front Preview" fill className="object-contain p-2" />
@@ -229,8 +232,9 @@ export function HealthCoordinatorProfileForm() {
                                         accept="image/*"
                                         onChange={(e) => handleImageUpload(e, 'aadharBackImage')}
                                         className="hidden" 
+                                        disabled={aadharNumberIsSet}
                                     />
-                                    <label htmlFor="aadhar-back-upload" className="cursor-pointer">
+                                    <label htmlFor="aadhar-back-upload" className={aadharNumberIsSet ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}>
                                         <div className="relative w-full aspect-video rounded-md border-2 border-dashed flex items-center justify-center text-muted-foreground hover:border-primary transition-colors">
                                             {aadharBackImage ? (
                                                 <Image src={aadharBackImage} alt="Aadhar Back Preview" fill className="object-contain p-2" />
@@ -250,9 +254,8 @@ export function HealthCoordinatorProfileForm() {
                 </div>
             </div>
             
-            <Button type="submit" disabled={form.formState.isSubmitting} className="w-full">
-                {form.formState.isSubmitting && <Loader2 className="animate-spin mr-2" />}
-                Save Profile Changes
+            <Button type="submit" disabled={form.formState.isSubmitting || aadharNumberIsSet} className="w-full">
+                {form.formState.isSubmitting ? <Loader2 className="animate-spin mr-2"/> : (aadharNumberIsSet ? 'Profile Saved' : 'Save Profile Changes')}
             </Button>
         </form>
     </Form>

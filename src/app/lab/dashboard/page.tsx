@@ -20,6 +20,7 @@ import dynamic from 'next/dynamic';
 import { addNotification, sendRedemptionOtpNotification } from '@/lib/notifications';
 import { checkPartnerMilestone } from '@/lib/referrals';
 import Link from 'next/link';
+import { NearbySearch } from '@/components/booking/nearby-search';
 
 const AnalyticsDashboard = dynamic(() => import('@/components/lab/analytics-dashboard').then(mod => mod.AnalyticsDashboard), {
     ssr: false,
@@ -215,7 +216,12 @@ export default function LabDashboardPage() {
         const updatedReports = [...allReports, newReport];
         sessionStorage.setItem(REPORTS_KEY, JSON.stringify(updatedReports));
 
-        addNotification(uploadPatient.id, `Your report "${reportName}" from ${labDetails.name} is now available to view.`);
+        addNotification(uploadPatient.id, {
+            title: 'New Report Available',
+            message: `Your report "${reportName}" from ${labDetails.name} is now available to view.`,
+            icon: 'file-text',
+            href: '/patient/my-health'
+        });
         toast({
             title: "Report Uploaded!",
             description: `"${reportName}" has been uploaded for ${uploadPatient.name}.`
@@ -244,7 +250,7 @@ export default function LabDashboardPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <main className="flex-1 bg-slate-50/50">
+      <main className="flex-1 bg-slate-50/50 pb-20 md:pb-0">
         <div className="container mx-auto py-12">
             <div className="mb-8">
                 <h1 className="text-3xl font-headline font-bold">Lab Dashboard</h1>
@@ -256,11 +262,28 @@ export default function LabDashboardPage() {
             <div className="grid lg:grid-cols-3 gap-8 items-start mt-8">
                 <div className="lg:col-span-2 grid gap-8">
                      <Card className="shadow-sm">
-                        <CardHeader>
-                            <CardTitle>Process Patient Bill</CardTitle>
-                            <CardDescription>
-                                Help patients pay using their Health Points.
-                            </CardDescription>
+                        <CardHeader className="flex flex-row items-center gap-4">
+                             <Briefcase className="w-8 h-8 text-primary"/>
+                             <div>
+                                 <CardTitle>Book for a Patient</CardTitle>
+                                 <CardDescription>
+                                    Find doctors, labs, and pharmacies for patients.
+                                 </CardDescription>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                             <NearbySearch allowedServices={['doctor', 'lab', 'pharmacy']} />
+                        </CardContent>
+                    </Card>
+                     <Card className="shadow-sm">
+                        <CardHeader className="flex flex-row items-center gap-4">
+                             <Beaker className="w-8 h-8 text-primary"/>
+                            <div>
+                                <CardTitle>Process Patient Bill</CardTitle>
+                                <CardDescription>
+                                    Help patients pay using their Health Points.
+                                </CardDescription>
+                            </div>
                         </CardHeader>
                         <CardContent className="space-y-6">
                             <div className="space-y-2 max-w-sm">
@@ -337,24 +360,6 @@ export default function LabDashboardPage() {
                                 </Card>
                             )}
 
-                        </CardContent>
-                    </Card>
-                    <Card className="shadow-sm">
-                        <CardHeader className="flex flex-row items-center gap-4">
-                            <Briefcase className="w-8 h-8 text-primary"/>
-                            <div>
-                                <CardTitle>Book a Doctor Appointment</CardTitle>
-                                <CardDescription>
-                                   Find and book a doctor for a patient.
-                                </CardDescription>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                             <Button asChild className="w-full">
-                                <Link href="/book-doctor-appointment">
-                                    Book Appointment
-                                </Link>
-                             </Button>
                         </CardContent>
                     </Card>
                     <Card className="shadow-sm">
@@ -466,6 +471,7 @@ export default function LabDashboardPage() {
         </div>
       </main>
       <Footer />
+      <BottomNavBar />
     </div>
   );
 }

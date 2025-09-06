@@ -4,6 +4,7 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { MyHealthPage } from '@/components/patient/my-health-page';
+import { BottomNavBar } from '@/components/layout/bottom-nav-bar';
 
 export default function MyHealthWrapper() {
     return (
@@ -15,6 +16,7 @@ export default function MyHealthWrapper() {
                 </div>
             </main>
             <Footer />
+            <BottomNavBar />
         </div>
     );
 }

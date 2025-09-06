@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Header } from '@/components/layout/header';
@@ -21,6 +20,8 @@ import dynamic from 'next/dynamic';
 import { addNotification, sendRedemptionOtpNotification } from '@/lib/notifications';
 import { checkPartnerMilestone } from '@/lib/referrals';
 import Link from 'next/link';
+import { NearbySearch } from '@/components/booking/nearby-search';
+import { BottomNavBar } from '@/components/layout/bottom-nav-bar';
 
 const AnalyticsDashboard = dynamic(() => import('@/components/pharmacy/analytics-dashboard').then(mod => mod.AnalyticsDashboard), {
     ssr: false,
@@ -202,7 +203,7 @@ export default function PharmacyDashboardPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <main className="flex-1 bg-slate-50/50">
+      <main className="flex-1 bg-slate-50/50 pb-20 md:pb-0">
         <div className="container mx-auto py-12">
             <div className="mb-8">
                 <h1 className="text-3xl font-headline font-bold">Pharmacy Dashboard</h1>
@@ -214,11 +215,28 @@ export default function PharmacyDashboardPage() {
             <div className="grid lg:grid-cols-3 gap-8 items-start mt-8">
                  <div className="lg:col-span-2 space-y-8">
                     <Card className="shadow-sm">
-                        <CardHeader>
-                            <CardTitle>Process Patient Bill</CardTitle>
-                            <CardDescription>
-                                Help patients pay for their medicines using their Health Points.
-                            </CardDescription>
+                        <CardHeader className="flex flex-row items-center gap-4">
+                             <Briefcase className="w-8 h-8 text-primary"/>
+                             <div>
+                                 <CardTitle>Book for a Patient</CardTitle>
+                                 <CardDescription>
+                                    Find doctors, labs, and pharmacies for patients.
+                                 </CardDescription>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                             <NearbySearch allowedServices={['doctor', 'lab', 'pharmacy']} />
+                        </CardContent>
+                    </Card>
+                    <Card className="shadow-sm">
+                        <CardHeader className="flex flex-row items-center gap-4">
+                            <Pill className="w-8 h-8 text-primary"/>
+                            <div>
+                                <CardTitle>Process Patient Bill</CardTitle>
+                                <CardDescription>
+                                    Help patients pay for their medicines using their Health Points.
+                                </CardDescription>
+                            </div>
                         </CardHeader>
                         <CardContent className="space-y-6">
                             <div className="space-y-2 max-w-sm">
@@ -297,24 +315,6 @@ export default function PharmacyDashboardPage() {
 
                         </CardContent>
                     </Card>
-                     <Card className="shadow-sm">
-                        <CardHeader className="flex flex-row items-center gap-4">
-                            <Briefcase className="w-8 h-8 text-primary"/>
-                            <div>
-                                <CardTitle>Book a Doctor Appointment</CardTitle>
-                                <CardDescription>
-                                   Find and book a doctor for a patient.
-                                </CardDescription>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <Button asChild className="w-full">
-                                <Link href="/book-doctor-appointment">
-                                    Book Appointment
-                                </Link>
-                             </Button>
-                        </CardContent>
-                    </Card>
                  </div>
                 <div className="lg:col-span-1 space-y-8">
                     <Card className="shadow-sm">
@@ -376,6 +376,7 @@ export default function PharmacyDashboardPage() {
         </div>
       </main>
       <Footer />
+      <BottomNavBar />
     </div>
   );
 }

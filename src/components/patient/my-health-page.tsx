@@ -2,7 +2,7 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { User, Calendar, Clock, Stethoscope, RefreshCw, Bell, Star, Users, Wallet, History, FileText, Loader2, Store, KeyRound, Share2, Gift } from 'lucide-react';
+import { User, Calendar, Clock, Stethoscope, RefreshCw, Bell, Star, Users, Wallet, History, FileText, Loader2, Store, KeyRound, Share2, Gift, Briefcase } from 'lucide-react';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { mockPatients } from '@/components/doctor/patient-list';
 import { initialDoctors, initialLabs, initialPharmacies } from '@/lib/mock-data';
@@ -17,7 +17,8 @@ import { FamilyManager } from '@/components/patient/family-manager';
 import { MyReports } from '@/components/patient/my-reports';
 import { getTransactionHistory, type Transaction } from '@/lib/transactions';
 import { getNotifications } from '@/lib/notifications';
-import { BottomNavBar } from '@/components/layout/bottom-nav-bar';
+import { NearbySearch } from '../booking/nearby-search';
+
 
 const DOCTORS_KEY = 'doctorsData';
 const PATIENTS_KEY = 'mockPatients';
@@ -195,6 +196,20 @@ export function MyHealthPage() {
 
                     <div className="grid lg:grid-cols-3 gap-8 items-start">
                         <div className="lg:col-span-2 space-y-8">
+                             <Card className="shadow-sm">
+                                <CardHeader className="flex flex-row items-center gap-4">
+                                    <Briefcase className="w-8 h-8 text-primary"/>
+                                    <div>
+                                        <CardTitle>Book New Appointment</CardTitle>
+                                        <CardDescription>
+                                           Find doctors, labs, and pharmacies near you.
+                                        </CardDescription>
+                                    </div>
+                                </CardHeader>
+                                <CardContent>
+                                     <NearbySearch />
+                                </CardContent>
+                            </Card>
                              <Card className="shadow-sm">
                                 <CardHeader>
                                     <CardTitle>Your Appointments</CardTitle>

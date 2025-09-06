@@ -6,7 +6,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Stethoscope, MapPin, Pill, Loader2, AlertTriangle, Building, Link as LinkIcon, Search, PercentCircle, Beaker, Calendar, Star, Briefcase, Filter } from 'lucide-react';
+import { Stethoscope, MapPin, Pill, Loader2, AlertTriangle, Building, Link as LinkIcon, Search, PercentCircle, Beaker, Calendar, Star, Briefcase, Filter, Clock } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
@@ -19,6 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Slider } from '../ui/slider';
 import { Label } from '../ui/label';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '../ui/sheet';
+import { getOpeningStatus } from '@/lib/utils';
 
 const BookingDialog = dynamic(() => import('./booking-dialog').then(mod => mod.BookingDialog), {
     ssr: false
@@ -398,12 +399,17 @@ export function NearbySearch({ allowedServices = ['doctor', 'pharmacy', 'lab'] }
                          <section>
                             <h2 className="text-2xl font-headline font-bold mb-4 flex items-center gap-2"><Pill/> Pharmacies</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {pharmacies.map((pharmacy) => (
+                                {pharmacies.map((pharmacy) => {
+                                    const { isOpen, text } = getOpeningStatus(pharmacy.days, pharmacy.hours);
+                                    return (
                                      <Link href={`/pharmacy/${pharmacy.id}`} key={pharmacy.id} className="group">
                                         <Card className="overflow-hidden h-full group-hover:shadow-xl transition-shadow duration-300 flex flex-col">
                                             <CardHeader className="p-0">
                                                 <div className="relative w-full h-40">
                                                      <Image src={pharmacy.image} alt={pharmacy.name} fill style={{objectFit:"cover"}} data-ai-hint="pharmacy exterior" />
+                                                     <Badge className={isOpen ? 'bg-green-600 text-white' : 'bg-destructive text-white'} style={{position: 'absolute', top: '10px', left: '10px'}}>
+                                                        <Clock className="w-3 h-3 mr-1.5"/> {text}
+                                                    </Badge>
                                                 </div>
                                             </CardHeader>
                                             <CardContent className="p-4 flex-grow">
@@ -425,7 +431,8 @@ export function NearbySearch({ allowedServices = ['doctor', 'pharmacy', 'lab'] }
                                             </CardContent>
                                         </Card>
                                     </Link>
-                                ))}
+                                    )
+                                })}
                             </div>
                         </section>
                     )}
@@ -434,12 +441,17 @@ export function NearbySearch({ allowedServices = ['doctor', 'pharmacy', 'lab'] }
                          <section>
                             <h2 className="text-2xl font-headline font-bold mb-4 flex items-center gap-2"><Beaker/> Labs</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {labs.map((lab) => (
+                                {labs.map((lab) => {
+                                    const { isOpen, text } = getOpeningStatus(lab.days, lab.hours);
+                                    return (
                                      <Link href={`/lab/${lab.id}`} key={lab.id} className="group">
                                         <Card className="overflow-hidden h-full group-hover:shadow-xl transition-shadow duration-300 flex flex-col">
                                              <CardHeader className="p-0">
                                                 <div className="relative w-full h-40">
                                                      <Image src={lab.image || 'https://picsum.photos/400/300'} alt={lab.name || 'Lab image'} fill style={{objectFit:"cover"}} data-ai-hint="lab exterior" />
+                                                     <Badge className={isOpen ? 'bg-green-600 text-white' : 'bg-destructive text-white'} style={{position: 'absolute', top: '10px', left: '10px'}}>
+                                                        <Clock className="w-3 h-3 mr-1.5"/> {text}
+                                                    </Badge>
                                                 </div>
                                             </CardHeader>
                                             <CardContent className="p-4 flex-grow">
@@ -461,7 +473,8 @@ export function NearbySearch({ allowedServices = ['doctor', 'pharmacy', 'lab'] }
                                             </CardContent>
                                         </Card>
                                     </Link>
-                                ))}
+                                    )
+                                })}
                             </div>
                         </section>
                     )}

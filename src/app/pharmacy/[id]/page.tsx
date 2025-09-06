@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
+import { getOpeningStatus } from '@/lib/utils';
 
 const PHARMACIES_KEY = 'mockPharmacies';
 
@@ -74,6 +75,9 @@ export default function PharmacyDetailPage() {
   const averageRating = totalReviews > 0
     ? (pharmacy.reviewsList.reduce((acc, review) => acc + review.rating, 0) / totalReviews).toFixed(1)
     : 'N/A';
+    
+  const { isOpen, text } = getOpeningStatus(pharmacy.days, pharmacy.hours);
+
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -87,7 +91,12 @@ export default function PharmacyDetailPage() {
                     </div>
                 </div>
                 <CardHeader>
-                    <CardTitle className="font-headline text-3xl">{pharmacy.name}</CardTitle>
+                    <div className="flex justify-between items-start">
+                        <CardTitle className="font-headline text-3xl">{pharmacy.name}</CardTitle>
+                        <Badge className={isOpen ? 'bg-green-600 text-white' : 'bg-destructive text-white'}>
+                            <Clock className="w-4 h-4 mr-2"/> {text}
+                        </Badge>
+                    </div>
                     <div className="flex items-center gap-4 pt-2 flex-wrap">
                         <div className="flex items-center gap-1 text-amber-500">
                             <Star className="w-5 h-5 fill-current" />

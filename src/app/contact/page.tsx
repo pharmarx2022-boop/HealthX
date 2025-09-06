@@ -3,7 +3,6 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ContactForm } from '@/components/home/contact-form';
-import { FloatingWhatsApp } from '@/components/layout/floating-whatsapp';
 
 export default function ContactUsPage() {
   return (
@@ -25,7 +24,6 @@ export default function ContactUsPage() {
         </div>
       </main>
       <Footer />
-      <FloatingWhatsApp />
     </div>
   );
 }

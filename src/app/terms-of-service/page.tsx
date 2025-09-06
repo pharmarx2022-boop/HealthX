@@ -1,7 +1,6 @@
 
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
-import { FloatingWhatsApp } from '@/components/layout/floating-whatsapp';
 
 export default function TermsOfServicePage() {
   return (
@@ -51,7 +50,6 @@ export default function TermsOfServicePage() {
         </div>
       </main>
       <Footer />
-      <FloatingWhatsApp />
     </div>
   );
 }

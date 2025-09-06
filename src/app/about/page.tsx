@@ -7,7 +7,6 @@ import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import Image from 'next/image';
 import { Target, Eye, Users, Linkedin, Twitter, Instagram } from 'lucide-react';
-import { FloatingWhatsApp } from '@/components/layout/floating-whatsapp';
 import { useEffect, useState } from 'react';
 import { getTeamMembers, type TeamMember } from '@/lib/team-members';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -101,7 +100,6 @@ export default function AboutUsPage() {
         </div>
       </main>
       <Footer />
-      <FloatingWhatsApp />
     </div>
   );
 }

@@ -21,6 +21,7 @@ import { recordTransaction } from '@/lib/transactions';
 import { addNotification } from '@/lib/notifications';
 import { initialDoctors } from '@/lib/mock-data';
 import { checkDoctorMilestone } from '@/lib/referrals';
+import { recordCommission } from '@/lib/commission-wallet';
 
 export default function PatientDetailPage() {
   const params = useParams();
@@ -74,6 +75,24 @@ export default function PatientDetailPage() {
         checkDoctorMilestone(doctor.id);
     }
     
+    // Award commission if booked by a partner
+    if (patient.bookedById && patient.bookedByRole) {
+        const commissionAmount = patient.consultationFee * 0.05;
+        recordCommission(patient.bookedById, {
+            type: 'credit',
+            amount: commissionAmount,
+            description: `Commission for booking for ${patient.name}`,
+            date: new Date(),
+            status: 'success'
+        });
+        addNotification(patient.bookedById, {
+            title: 'Commission Earned!',
+            message: `You earned INR ${commissionAmount.toFixed(2)} for a completed appointment.`,
+            icon: 'gift',
+            href: `/${patient.bookedByRole}/dashboard`
+        });
+    }
+
     // Update patient status
     const updatedPatients = allPatients.map(p => {
       if (p.id === id) {

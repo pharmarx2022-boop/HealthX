@@ -205,6 +205,8 @@ export function NearbySearch({ allowedServices = ['doctor', 'pharmacy', 'lab'] }
         if(member) patientName = member.name;
     }
 
+    const isPartnerBooking = user?.role === 'health-coordinator' || user?.role === 'lab' || user?.role === 'pharmacy';
+
     const newAppointment = {
         id: `appt_${Date.now()}`,
         transactionId,
@@ -212,7 +214,8 @@ export function NearbySearch({ allowedServices = ['doctor', 'pharmacy', 'lab'] }
         clinic: clinic.name,
         clinicId: clinic.id,
         doctorId: selectedDoctor.id,
-        healthCoordinatorId: user?.role === 'health-coordinator' ? user.id : null,
+        bookedById: isPartnerBooking ? user.id : null,
+        bookedByRole: isPartnerBooking ? user.role : null,
         appointmentDate: new Date(date.getFullYear(), date.getMonth(), date.getDate(), parseInt(time.split(':')[0]), parseInt(time.split(':')[1].split(' ')[0])).toISOString(),
         status: 'upcoming',
         consultation: 'General Consultation',
@@ -227,7 +230,7 @@ export function NearbySearch({ allowedServices = ['doctor', 'pharmacy', 'lab'] }
     const updatedPatients = [...allPatients, newAppointment];
     sessionStorage.setItem(PATIENTS_KEY, JSON.stringify(updatedPatients));
 
-    const toastDescription = user?.role === 'health-coordinator' || user?.role === 'lab' || user?.role === 'pharmacy'
+    const toastDescription = isPartnerBooking
       ? `The appointment for ${patientName} at ${clinic.name} is booked. A receipt has been sent to the patient's email.`
       : `Your appointment at ${clinic.name} is booked. A receipt has been sent to your email. Your fee is secured and will be refunded as Health Points after the consultation is marked complete by the doctor.`;
 

@@ -173,25 +173,6 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
             });
 
             if (paymentResult.success) {
-                // Handle commission for partners
-                if (isPartnerBooking) {
-                    const commissionAmount = selectedClinic.consultationFee * 0.05;
-                    recordCommission(user.id, {
-                        type: 'credit',
-                        amount: commissionAmount,
-                        description: `Commission for booking for ${foundPatient.name}`,
-                        date: new Date(),
-                        status: 'success'
-                    });
-                     addNotification(user.id, {
-                        title: 'Commission Earned!',
-                        message: `You earned INR ${commissionAmount.toFixed(2)} for booking an appointment.`,
-                        icon: 'gift',
-                        href: `/${user.role}/dashboard`
-                    });
-                }
-
-
                 addNotification(patientId, {
                     title: 'Appointment Confirmed!',
                     message: `Your booking with ${doctor.name} at ${selectedClinic?.name} for ${format(selectedDate, 'PPP')} is confirmed.`,

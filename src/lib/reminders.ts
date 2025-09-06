@@ -3,48 +3,49 @@
 
 import { addNotification } from "./notifications";
 
-export type MedicineReminder = {
+export type HealthReminder = {
     id: string;
-    pharmacyId: string;
-    pharmacyName: string;
+    partnerId: string;
+    partnerName: string;
+    partnerType: 'pharmacy' | 'lab';
     patientId: string;
     patientName: string;
-    medicineDetails: string;
+    details: string;
     dateSet: string;
     nextReminderDate: string;
 };
 
-const REMINDERS_KEY = 'medicineReminders';
+const REMINDERS_KEY = 'healthReminders';
 
-function getAllReminders(): MedicineReminder[] {
+function getAllReminders(): HealthReminder[] {
     if (typeof window === 'undefined') return [];
     const stored = sessionStorage.getItem(REMINDERS_KEY);
     return stored ? JSON.parse(stored) : [];
 }
 
-function saveAllReminders(reminders: MedicineReminder[]) {
+function saveAllReminders(reminders: HealthReminder[]) {
     if (typeof window === 'undefined') return;
     sessionStorage.setItem(REMINDERS_KEY, JSON.stringify(reminders));
 }
 
-export function getRemindersForPharmacy(pharmacyId: string): MedicineReminder[] {
+export function getRemindersForPartner(partnerId: string): HealthReminder[] {
     const allReminders = getAllReminders();
-    return allReminders.filter(r => r.pharmacyId === pharmacyId);
+    return allReminders.filter(r => r.partnerId === partnerId);
 }
 
-export function getRemindersForPatient(patientId: string): MedicineReminder[] {
+export function getRemindersForPatient(patientId: string): HealthReminder[] {
     const allReminders = getAllReminders();
     return allReminders.filter(r => r.patientId === patientId);
 }
 
-export function addReminder(data: Omit<MedicineReminder, 'id' | 'dateSet' | 'nextReminderDate'>) {
+export function addReminder(data: Omit<HealthReminder, 'id' | 'dateSet' | 'nextReminderDate'>) {
     const allReminders = getAllReminders();
     
     // Calculate next reminder date (e.g., 30 days from now)
     const nextDate = new Date();
     nextDate.setDate(nextDate.getDate() + 30);
 
-    const newReminder: MedicineReminder = {
+    const newReminder: HealthReminder = {
         ...data,
         id: `rem_${Date.now()}`,
         dateSet: new Date().toISOString(),
@@ -60,9 +61,9 @@ export function deleteReminder(reminderId: string) {
     const reminder = allReminders.find(r => r.id === reminderId);
     
     if (reminder) {
-        addNotification(reminder.pharmacyId, {
+        addNotification(reminder.partnerId, {
             title: 'Patient Canceled Reminder',
-            message: `${reminder.patientName} has disabled the monthly reminder for "${reminder.medicineDetails}".`,
+            message: `${reminder.patientName} has disabled the monthly reminder for "${reminder.details}".`,
             icon: 'bell'
         });
     }
@@ -79,16 +80,16 @@ export function checkForDueReminders(userId: string) {
 
     allReminders.forEach(reminder => {
         const reminderDate = new Date(reminder.nextReminderDate);
-        if (reminderDate <= today && (reminder.patientId === userId || reminder.pharmacyId === userId)) {
+        if (reminderDate <= today && (reminder.patientId === userId || reminder.partnerId === userId)) {
             // Send notifications
             addNotification(reminder.patientId, {
-                title: 'Time to Refill!',
-                message: `It's time to refill your medicines: ${reminder.medicineDetails} from ${reminder.pharmacyName}.`,
+                title: 'Time for your health check!',
+                message: `It's time for your reminder: ${reminder.details} from ${reminder.partnerName}.`,
                 icon: 'bell'
             });
-            addNotification(reminder.pharmacyId, {
+            addNotification(reminder.partnerId, {
                 title: 'Patient Reminder Sent',
-                message: `A monthly reminder for ${reminder.medicineDetails} was sent to ${reminder.patientName}.`,
+                message: `A monthly reminder for ${reminder.details} was sent to ${reminder.patientName}.`,
                 icon: 'bell'
             });
 

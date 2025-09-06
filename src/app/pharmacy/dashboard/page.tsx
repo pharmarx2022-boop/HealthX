@@ -21,7 +21,7 @@ import { checkPartnerMilestone } from '@/lib/referrals';
 import { BottomNavBar } from '@/components/layout/bottom-nav-bar';
 import { AnalyticsDashboard } from '@/components/pharmacy/analytics-dashboard';
 import { Textarea } from '@/components/ui/textarea';
-import { getRemindersForPharmacy, addReminder, deleteReminder, type MedicineReminder } from '@/lib/reminders';
+import { getRemindersForPartner, addReminder, deleteReminder, type HealthReminder } from '@/lib/reminders';
 
 
 const PHARMACIES_KEY = 'mockPharmacies';
@@ -44,7 +44,7 @@ export default function PharmacyDashboardPage() {
     const [reminderPatientSearch, setReminderPatientSearch] = useState('');
     const [reminderPatient, setReminderPatient] = useState<any | null>(null);
     const [medicineDetails, setMedicineDetails] = useState('');
-    const [activeReminders, setActiveReminders] = useState<MedicineReminder[]>([]);
+    const [activeReminders, setActiveReminders] = useState<HealthReminder[]>([]);
 
 
     useEffect(() => {
@@ -60,7 +60,7 @@ export default function PharmacyDashboardPage() {
                 const myDetails = allPharmacies.find((p: any) => p.id === u.id);
                 setPharmacyDetails(myDetails);
                 setCommissionWallet(getCommissionWalletData(u.id));
-                setActiveReminders(getRemindersForPharmacy(u.id));
+                setActiveReminders(getRemindersForPartner(u.id));
             }
              if (!sessionStorage.getItem(PATIENTS_KEY)) {
                 sessionStorage.setItem(PATIENTS_KEY, JSON.stringify(mockPatientData));
@@ -218,11 +218,12 @@ export default function PharmacyDashboardPage() {
         }
 
         addReminder({
-            pharmacyId: user.id,
-            pharmacyName: pharmacyDetails.name,
+            partnerId: user.id,
+            partnerName: pharmacyDetails.name,
+            partnerType: 'pharmacy',
             patientId: reminderPatient.id,
             patientName: reminderPatient.name,
-            medicineDetails: medicineDetails,
+            details: medicineDetails,
         });
 
         addNotification(reminderPatient.id, {
@@ -237,7 +238,7 @@ export default function PharmacyDashboardPage() {
             description: `A monthly medicine reminder has been set for ${reminderPatient.name}.`,
         });
 
-        setActiveReminders(getRemindersForPharmacy(user.id));
+        setActiveReminders(getRemindersForPartner(user.id));
         setReminderPatient(null);
         setReminderPatientSearch('');
         setMedicineDetails('');
@@ -245,7 +246,7 @@ export default function PharmacyDashboardPage() {
     
     const handleDeleteReminder = (reminderId: string) => {
         deleteReminder(reminderId);
-        setActiveReminders(getRemindersForPharmacy(user.id));
+        setActiveReminders(getRemindersForPartner(user.id));
         toast({
             title: "Reminder Removed",
             variant: "destructive",
@@ -355,7 +356,7 @@ export default function PharmacyDashboardPage() {
                     </Card>
                     <Card className="shadow-sm">
                         <CardHeader>
-                            <CardTitle>Set Medicine Reminders</CardTitle>
+                            <CardTitle>Set Health Reminders</CardTitle>
                             <CardDescription>Set monthly reminders for patients who need regular refills.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
@@ -403,7 +404,7 @@ export default function PharmacyDashboardPage() {
                                         <div key={r.id} className="flex items-center justify-between p-2 border rounded-md">
                                             <div>
                                                 <p className="font-semibold">{r.patientName}</p>
-                                                <p className="text-sm text-muted-foreground">{r.medicineDetails}</p>
+                                                <p className="text-sm text-muted-foreground">{r.details}</p>
                                             </div>
                                             <Button variant="ghost" size="icon" onClick={() => handleDeleteReminder(r.id)}>
                                                 <Trash2 className="w-4 h-4 text-destructive" />

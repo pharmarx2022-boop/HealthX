@@ -12,36 +12,31 @@ const roles = [
     name: 'Doctor',
     description: 'Manage your appointments and clinics.',
     loginLink: '/login?role=doctor',
-    image: 'https://picsum.photos/id/1018/200/200',
-    dataAiHint: 'doctor portrait',
+    icon: Stethoscope,
   },
   {
     name: 'Patient',
     description: 'Book appointments and view your records.',
     loginLink: '/login?role=patient',
-    image: 'https://picsum.photos/id/1025/200/200',
-    dataAiHint: 'patient portrait',
+    icon: User,
   },
   {
     name: 'Health Coordinator',
     description: 'Help others book and earn commissions.',
     loginLink: '/login?role=health-coordinator',
-    image: 'https://picsum.photos/id/1027/200/200',
-    dataAiHint: 'professional portrait',
+    icon: Briefcase,
   },
   {
     name: 'Pharmacy',
     description: 'Redeem Health Points for patients.',
     loginLink: '/login?role=pharmacy',
-    image: 'https://picsum.photos/id/24/200/200',
-    dataAiHint: 'pharmacy interior',
+    icon: Pill,
   },
   {
     name: 'Lab',
     description: 'Upload reports and redeem Health Points.',
     loginLink: '/login?role=lab',
-    image: 'https://picsum.photos/id/30/200/200',
-    dataAiHint: 'lab scientist',
+    icon: Beaker,
   },
 ];
 
@@ -58,20 +53,16 @@ export function RoleCards() {
         <div className="max-w-md mx-auto md:hidden">
             <div className="bg-white rounded-lg border shadow-sm divide-y">
                 {roles.map((role) => (
-                    <div key={role.name} className="p-4">
-                        <div className="flex items-center gap-4">
-                             <div className="relative w-16 h-16 rounded-full overflow-hidden shrink-0 border-2 border-primary/20">
-                                <Image src={role.image} alt={`${role.name} icon`} fill className="object-cover" data-ai-hint={role.dataAiHint} />
-                            </div>
-                            <div className="flex-grow">
-                                <p className="font-semibold text-lg">{role.name}</p>
-                                <p className="text-sm text-muted-foreground">{role.description}</p>
-                            </div>
+                    <Link key={role.name} href={role.loginLink} className="p-4 flex items-center gap-4 text-left w-full hover:bg-slate-50/70 transition-colors">
+                        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary shrink-0">
+                            <role.icon className="w-6 h-6" />
                         </div>
-                        <Button asChild className="w-full mt-3">
-                            <Link href={role.loginLink}>Login as {role.name}</Link>
-                        </Button>
-                    </div>
+                        <div className="flex-grow">
+                            <p className="font-semibold text-lg">{role.name}</p>
+                            <p className="text-sm text-muted-foreground">{role.description}</p>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" />
+                    </Link>
                 ))}
             </div>
         </div>
@@ -81,15 +72,15 @@ export function RoleCards() {
           {roles.map((role) => (
             <Card key={role.name} className="flex flex-col text-center items-center hover:shadow-xl transition-shadow duration-300 p-4 justify-between">
               <CardHeader className="items-center p-2">
-                <div className="relative w-24 h-24 rounded-full overflow-hidden mb-2 border-4 border-primary/10">
-                   <Image src={role.image} alt={`${role.name} icon`} fill className="object-cover" data-ai-hint={role.dataAiHint}/>
+                 <div className="flex items-center justify-center w-24 h-24 rounded-full bg-primary/10 text-primary mb-2 border-4 border-primary/20">
+                    <role.icon className="w-12 h-12" />
                 </div>
                 <CardTitle className="font-headline text-xl">{role.name}</CardTitle>
                  <CardDescription className="text-sm pt-1">{role.description}</CardDescription>
               </CardHeader>
               <CardContent className="flex-grow flex items-end w-full p-2">
                 <Button asChild className="w-full">
-                    <Link href={role.loginLink}>Login</Link>
+                    <Link href={role.loginLink}>Login as {role.name}</Link>
                 </Button>
               </CardContent>
             </Card>

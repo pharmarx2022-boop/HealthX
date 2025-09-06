@@ -1,4 +1,5 @@
 
+
 // THIS IS A MOCK AUTHENTICATION FILE FOR PROTOTYPING ONLY
 // In a real application, this would be replaced with a secure authentication service like Firebase Authentication.
 
@@ -96,6 +97,7 @@ export function signInWithOtp(email: string, otp: string, role: string, referral
     const isNewUser = true;
     const emailPrefix = email.split('@')[0];
     const isProfessional = ['doctor', 'pharmacy', 'lab', 'health-coordinator'].includes(role);
+    const canRefer = ['pharmacy', 'lab', 'health-coordinator'].includes(role);
 
     const user: UserData = { 
         id: `${role}_${emailPrefix}_${Date.now()}`,
@@ -103,7 +105,7 @@ export function signInWithOtp(email: string, otp: string, role: string, referral
         role, 
         fullName: `${(role.charAt(0).toUpperCase() + role.slice(1)).replace('-coordinator', ' Coordinator')} ${emailPrefix}`,
         phone: '',
-        referralCode: isProfessional ? generateReferralCode() : undefined,
+        referralCode: canRefer ? generateReferralCode() : undefined,
         status: isProfessional ? 'pending' : 'approved',
         dateJoined: new Date().toISOString(),
     };

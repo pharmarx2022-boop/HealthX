@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { toast } from "@/hooks/use-toast";
@@ -7,7 +8,7 @@ import { recordCommission } from "./commission-wallet";
 const REFERRALS_KEY = 'referrals';
 
 type ReferralStatus = 'pending' | 'completed';
-type ReferredUserRole = 'doctor' | 'pharmacy' | 'lab' | 'health-coordinator';
+type ReferredUserRole = 'pharmacy' | 'lab' | 'health-coordinator';
 
 type Referral = {
     referralId: string;
@@ -21,7 +22,6 @@ type Referral = {
 
 // --- Milestone Definitions ---
 const MILESTONES = {
-    doctor: { threshold: 10, reward: 1000, unit: 'consultations' },
     pharmacy: { threshold: 10000, reward: 500, unit: 'INR' },
     lab: { threshold: 10000, reward: 500, unit: 'INR' },
     'health-coordinator': { threshold: 50, reward: 250, unit: 'bookings' },
@@ -78,27 +78,6 @@ async function completeReferral(referral: Referral) {
 
 
 // --- Milestone Check Functions ---
-
-export async function checkDoctorMilestone(doctorId: string) {
-    const referrals = await getReferrals();
-    const referral = referrals.find(r => r.referredUserId === doctorId && r.status === 'pending');
-
-    if (!referral) return;
-
-    // This needs to be a DB query. Using mock data for now.
-    const allAppointments = JSON.parse(sessionStorage.getItem('mockPatients') || '[]');
-    const completedConsultations = allAppointments.filter((appt: any) => 
-        appt.doctorId === doctorId && appt.status === 'done'
-    ).length;
-
-    referral.progress = completedConsultations;
-    
-    if (referral.progress >= MILESTONES.doctor.threshold) {
-        await completeReferral(referral);
-    } else {
-        await saveReferrals(referrals); // Save progress
-    }
-}
 
 export async function checkPartnerMilestone(partnerId: string, partnerType: 'lab' | 'pharmacy') {
     const referrals = await getReferrals();

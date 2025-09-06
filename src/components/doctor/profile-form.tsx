@@ -223,25 +223,6 @@ export function ProfileForm() {
                 )} />
             </div>
             
-            <FormField
-                control={form.control}
-                name="referralCode"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Your Referral Code</FormLabel>
-                     <div className="flex items-center gap-2">
-                        <FormControl>
-                            <Input readOnly {...field} />
-                        </FormControl>
-                            <Button type="button" variant="outline" size="icon" onClick={copyToClipboard}>
-                            <Copy className="h-4 w-4" />
-                        </Button>
-                    </div>
-                    <FormMessage />
-                    </FormItem>
-                )}
-            />
-
             <FormField control={form.control} name="email" render={({ field }) => (
                 <FormItem>
                     <FormLabel>Email Address</FormLabel>

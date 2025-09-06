@@ -24,6 +24,7 @@ import {
   Lock,
   LineChart,
   Contact,
+  FileText,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -83,6 +84,11 @@ export default function AdminLayout({
       label: 'Team',
       icon: Contact,
     },
+    {
+      href: '/admin/content',
+      label: 'Site Content',
+      icon: FileText,
+    }
   ];
 
   if (isLoading) {

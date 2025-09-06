@@ -8,21 +8,27 @@ import Image from 'next/image';
 import { Target, Eye, Users, Linkedin, Twitter, Instagram } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getTeamMembers, type TeamMember } from '@/lib/team-members';
+import { getContent, type SiteContent } from '@/lib/content';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 
 export default function AboutUsPage() {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [content, setContent] = useState<Partial<SiteContent>>({});
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchTeam = async () => {
+    const fetchData = async () => {
       setIsLoading(true);
-      const members = await getTeamMembers();
+      const [members, siteContent] = await Promise.all([
+        getTeamMembers(),
+        getContent()
+      ]);
       setTeamMembers(members);
+      setContent(siteContent);
       setIsLoading(false);
     }
-    fetchTeam();
+    fetchData();
   }, []);
 
   return (
@@ -46,9 +52,13 @@ export default function AboutUsPage() {
                 <CardTitle className="font-headline text-2xl">Our Vision</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-center text-muted-foreground">
-                  To create a world where quality healthcare is simple, accessible, and financially rewarding for everyone. We envision a connected digital ecosystem that empowers patients and providers alike, fostering a healthier future for all communities.
-                </p>
+                {isLoading ? (
+                    <div className="space-y-2"><Skeleton className="h-4 w-full"/><Skeleton className="h-4 w-full"/><Skeleton className="h-4 w-3/4"/></div>
+                ) : (
+                    <p className="text-center text-muted-foreground">
+                        {content.vision}
+                    </p>
+                )}
               </CardContent>
             </Card>
             <Card className="shadow-lg">
@@ -59,9 +69,13 @@ export default function AboutUsPage() {
                 <CardTitle className="font-headline text-2xl">Our Mission</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-center text-muted-foreground">
-                    To seamlessly connect patients with doctors, pharmacies, and labs on a single, intuitive platform. We are on a mission to revolutionize the healthcare experience through our unique cash-refund and Health Point rewards system, making every interaction within the HealthX ecosystem both valuable and convenient.
-                </p>
+                 {isLoading ? (
+                    <div className="space-y-2"><Skeleton className="h-4 w-full"/><Skeleton className="h-4 w-full"/><Skeleton className="h-4 w-3/4"/></div>
+                ) : (
+                    <p className="text-center text-muted-foreground">
+                        {content.mission}
+                    </p>
+                )}
               </CardContent>
             </Card>
           </div>

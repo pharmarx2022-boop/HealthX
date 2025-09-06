@@ -136,7 +136,7 @@ export function LabProfileForm() {
     const storedLabs = sessionStorage.getItem(LABS_KEY);
     const allLabs = storedLabs ? JSON.parse(storedLabs) : initialLabs;
 
-    const updatedLabs = allLabs.map(p => {
+    const updatedLabs = allLabs.map((p: any) => {
         if (p.id === user.id) {
             return { ...p, ...data, otp: undefined };
         }

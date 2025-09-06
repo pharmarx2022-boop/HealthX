@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -7,7 +6,7 @@ import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Pie, PieChart, Cell } from 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart';
 import { Users, Briefcase, Banknote, ShieldCheck, Stethoscope, Pill, Beaker, Calendar as CalendarIcon, Activity, Building, Badge as BadgeIcon, RefreshCw, CheckCircle } from 'lucide-react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -396,7 +395,7 @@ export function AnalyticsDashboard() {
                                 </TableRow>
                             )}
                         </TableBody>
-                        <CardFooter className="bg-slate-50">
+                        <TableFooter className="bg-slate-50">
                             <TableRow>
                                 <TableHead className="font-bold">Totals</TableHead>
                                 <TableHead className="text-center font-bold">{doctorPerformanceData.totals.completed}</TableHead>
@@ -404,7 +403,7 @@ export function AnalyticsDashboard() {
                                 <TableHead className="text-center font-bold">{doctorPerformanceData.totals.absent}</TableHead>
                                 <TableHead className="text-right font-bold">INR {doctorPerformanceData.totals.revenue.toFixed(2)}</TableHead>
                             </TableRow>
-                        </CardFooter>
+                        </TableFooter>
                      </Table>
                  </div>
             </CardContent>

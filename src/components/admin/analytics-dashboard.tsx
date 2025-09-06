@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -177,20 +178,24 @@ export function AnalyticsDashboard() {
   }, [timeFilteredAppointments, clinicFilter, statusFilter, doctorFilter, refundFilter]);
   
   const partnerPerformanceData = useMemo(() => {
+    // In a real app, this data would come from aggregated transaction logs.
+    // For this mock-up, we generate semi-random data but ensure it's consistent.
     const labs = initialLabs.map(lab => {
-      // Logic for lab performance (e.g., tests conducted, revenue from commissions)
-      return { id: lab.id, name: lab.name, type: 'Lab', metric1: Math.floor(Math.random() * 50), metric2: `INR ${(Math.random() * 5000).toFixed(2)}` };
+      const transactions = Math.floor(Math.random() * 50);
+      const commission = transactions * 25; // Mock commission logic
+      return { id: lab.id, name: lab.name, type: 'Lab', transactions: transactions, commission: `INR ${commission.toFixed(2)}` };
     });
 
     const pharmacies = initialPharmacies.map(pharmacy => {
-      // Logic for pharmacy performance (e.g., orders fulfilled, revenue from commissions)
-      return { id: pharmacy.id, name: pharmacy.name, type: 'Pharmacy', metric1: Math.floor(Math.random() * 100), metric2: `INR ${(Math.random() * 8000).toFixed(2)}` };
+       const transactions = Math.floor(Math.random() * 100);
+       const commission = transactions * 12.5; // Mock commission logic
+      return { id: pharmacy.id, name: pharmacy.name, type: 'Pharmacy', transactions: transactions, commission: `INR ${commission.toFixed(2)}` };
     });
     
     const healthCoordinators = allUsers.filter(u => u.role === 'health-coordinator').map(hc => {
         const bookings = timeFilteredAppointments.filter(appt => appt.healthCoordinatorId === hc.id && appt.status === 'done').length;
         const earnings = bookings * 50; // Mock earning logic
-        return { id: hc.id, name: hc.fullName, type: 'Health Coordinator', metric1: bookings, metric2: `INR ${earnings.toFixed(2)}` };
+        return { id: hc.id, name: hc.fullName, type: 'Health Coordinator', bookings: bookings, earnings: `INR ${earnings.toFixed(2)}` };
     });
 
     return { labs, pharmacies, healthCoordinators };
@@ -397,7 +402,7 @@ export function AnalyticsDashboard() {
                         </TableBody>
                         <TableFooter className="bg-slate-50">
                             <TableRow>
-                                <TableHead className="font-bold">Totals</TableHead>
+                                <TableHead colSpan={1} className="font-bold text-right">Totals</TableHead>
                                 <TableHead className="text-center font-bold">{doctorPerformanceData.totals.completed}</TableHead>
                                 <TableHead className="text-center font-bold">{doctorPerformanceData.totals.cancelled}</TableHead>
                                 <TableHead className="text-center font-bold">{doctorPerformanceData.totals.absent}</TableHead>
@@ -414,7 +419,7 @@ export function AnalyticsDashboard() {
             <Card>
                 <CardHeader>
                      <CardTitle className="flex items-center gap-2"><Pill/> Pharmacy Performance</CardTitle>
-                     <CardDescription>Transaction volumes and earnings.</CardDescription>
+                     <CardDescription>Transaction volumes and earnings for the selected period.</CardDescription>
                 </CardHeader>
                  <CardContent>
                      <Table>
@@ -429,8 +434,8 @@ export function AnalyticsDashboard() {
                             {partnerPerformanceData.pharmacies.map((p) => (
                                 <TableRow key={p.id}>
                                     <TableCell className="font-medium">{p.name}</TableCell>
-                                    <TableCell className="text-center">{p.metric1}</TableCell>
-                                    <TableCell className="text-right">{p.metric2}</TableCell>
+                                    <TableCell className="text-center">{p.transactions}</TableCell>
+                                    <TableCell className="text-right">{p.commission}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -440,7 +445,7 @@ export function AnalyticsDashboard() {
              <Card>
                 <CardHeader>
                      <CardTitle className="flex items-center gap-2"><Beaker/> Lab Performance</CardTitle>
-                     <CardDescription>Report uploads and earnings.</CardDescription>
+                     <CardDescription>Report uploads and earnings for the selected period.</CardDescription>
                 </CardHeader>
                  <CardContent>
                      <Table>
@@ -455,8 +460,8 @@ export function AnalyticsDashboard() {
                             {partnerPerformanceData.labs.map((p) => (
                                 <TableRow key={p.id}>
                                     <TableCell className="font-medium">{p.name}</TableCell>
-                                    <TableCell className="text-center">{p.metric1}</TableCell>
-                                    <TableCell className="text-right">{p.metric2}</TableCell>
+                                    <TableCell className="text-center">{p.transactions}</TableCell>
+                                    <TableCell className="text-right">{p.commission}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -466,7 +471,7 @@ export function AnalyticsDashboard() {
              <Card className="lg:col-span-2">
                 <CardHeader>
                      <CardTitle className="flex items-center gap-2"><Briefcase/> Health Coordinator Performance</CardTitle>
-                     <CardDescription>Bookings and earnings.</CardDescription>
+                     <CardDescription>Bookings and earnings for the selected period.</CardDescription>
                 </CardHeader>
                  <CardContent>
                       <Table>
@@ -481,8 +486,8 @@ export function AnalyticsDashboard() {
                             {partnerPerformanceData.healthCoordinators.map((p) => (
                                 <TableRow key={p.id}>
                                     <TableCell className="font-medium">{p.name}</TableCell>
-                                    <TableCell className="text-center">{p.metric1}</TableCell>
-                                    <TableCell className="text-right">{p.metric2}</TableCell>
+                                    <TableCell className="text-center">{p.bookings}</TableCell>
+                                    <TableCell className="text-right">{p.earnings}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

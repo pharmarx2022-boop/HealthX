@@ -18,7 +18,6 @@ import { useState, useEffect } from 'react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Calendar as CalendarPicker } from '@/components/ui/calendar';
 import { recordTransaction } from '@/lib/transactions';
-import { recordHealthCoordinatorCommission } from '@/lib/health-coordinator-data';
 import { addNotification } from '@/lib/notifications';
 import { initialDoctors } from '@/lib/mock-data';
 import { checkDoctorMilestone } from '@/lib/referrals';
@@ -69,11 +68,6 @@ export default function PatientDetailPage() {
         icon: 'wallet',
         href: '/patient/my-health'
     });
-
-    // If a health coordinator booked this, credit commission to them
-    if(patient.healthCoordinatorId) {
-        // This is where you might check the health coordinator's milestone
-    }
 
     // Check for doctor referral milestone
     if (doctor) {
@@ -293,5 +287,3 @@ export default function PatientDetailPage() {
     </div>
   );
 }
-
-    

@@ -53,13 +53,3 @@ export function convertPointsToCash(healthCoordinatorId: string) {
     saveTransactions(healthCoordinatorId, [...transactions, newTransaction]);
     // In a real app, this would also create a withdrawal request for the admin.
 }
-
-export async function recordHealthCoordinatorCommission(healthCoordinatorId: string, transaction: Omit<HealthCoordinatorTransaction, 'date'> & { date: Date }) {
-    const transactions = getStoredTransactions(healthCoordinatorId);
-    transactions.push({
-        ...transaction,
-        date: transaction.date.toISOString(),
-    });
-    saveTransactions(healthCoordinatorId, transactions);
-    await checkHealthCoordinatorMilestone(healthCoordinatorId);
-}

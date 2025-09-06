@@ -23,6 +23,7 @@ import { Card, CardFooter } from '../ui/card';
 import { addNotification, sendBookingOtpNotification } from '@/lib/notifications';
 import { mockFamilyMembers } from '@/lib/family-members';
 import { processPayment } from '@/lib/payment';
+import { recordCommission } from '@/lib/commission-wallet';
 
 type Doctor = {
     id: string;
@@ -147,7 +148,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
     const isPartnerBooking = userRole === 'health-coordinator' || userRole === 'lab' || userRole === 'pharmacy';
 
     const handleConfirmBooking = async () => {
-        const patientId = isPartnerBooking ? selectedPatientId : user.id;
+        const patientId = isPartnerBooking && foundPatient ? foundPatient.id : user.id;
         if (!patientId || !selectedClinicId || !selectedClinic || !selectedDate || !selectedTime) {
              toast({ title: "Incomplete Details", description: "Please fill all the booking details before proceeding.", variant: "destructive" });
              return;
@@ -172,6 +173,25 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
             });
 
             if (paymentResult.success) {
+                // Handle commission for partners
+                if (isPartnerBooking) {
+                    const commissionAmount = selectedClinic.consultationFee * 0.05;
+                    recordCommission(user.id, {
+                        type: 'credit',
+                        amount: commissionAmount,
+                        description: `Commission for booking for ${foundPatient.name}`,
+                        date: new Date(),
+                        status: 'success'
+                    });
+                     addNotification(user.id, {
+                        title: 'Commission Earned!',
+                        message: `You earned INR ${commissionAmount.toFixed(2)} for booking an appointment.`,
+                        icon: 'gift',
+                        href: `/${user.role}/dashboard`
+                    });
+                }
+
+
                 addNotification(patientId, {
                     title: 'Appointment Confirmed!',
                     message: `Your booking with ${doctor.name} at ${selectedClinic?.name} for ${format(selectedDate, 'PPP')} is confirmed.`,

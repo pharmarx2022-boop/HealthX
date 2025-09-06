@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, ChangeEvent } from 'react';
@@ -10,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import Image from 'next/image';
-import { Loader2, Upload, Percent, Phone, Copy, Link as LinkIcon, MapPin, BadgeCheck, FileText, Mail, Calendar, Clock, Truck } from 'lucide-react';
+import { Loader2, Upload, Percent, Phone, Copy, Link as LinkIcon, MapPin, BadgeCheck, FileText, Mail, Calendar, Clock, Truck, KeyRound } from 'lucide-react';
 import { initialPharmacies } from '@/lib/mock-data';
 import { isRegistrationNumberUnique, isPhoneUnique, MOCK_OTP } from '@/lib/auth';
 import { cn } from '@/lib/utils';
@@ -39,7 +40,13 @@ const profileSchema = z.object({
   hours: z.string().min(1, 'Operating hours are required.'),
   homeDeliveryEnabled: z.boolean().default(false),
   deliveryRadius: z.coerce.number().optional(),
+  password: z.string().optional(),
+  confirmPassword: z.string().optional(),
+}).refine(data => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
 });
+
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
@@ -68,6 +75,8 @@ export function PharmacyProfileForm() {
       hours: '',
       homeDeliveryEnabled: false,
       deliveryRadius: 5,
+      password: '',
+      confirmPassword: '',
     },
   });
 
@@ -120,7 +129,7 @@ export function PharmacyProfileForm() {
         form.setError('registrationNumber', { type: 'manual', message: 'This registration number is already in use.' });
         return;
     }
-    if (!isPhoneUnique(data.phoneNumber, user.id)) {
+    if (data.phoneNumber !== originalPhone && !isPhoneUnique(data.phoneNumber, user.id)) {
         form.setError('phoneNumber', { type: 'manual', message: 'This phone number is already in use.' });
         return;
     }
@@ -143,7 +152,8 @@ export function PharmacyProfileForm() {
 
     const updatedPharmacies = allPharmacies.map((p: any) => {
         if (p.id === user.id) {
-            return { ...p, ...data, otp: undefined };
+            const newPassword = data.password ? data.password : p.password;
+            return { ...p, ...data, password: newPassword, otp: undefined };
         }
         return p;
     });
@@ -156,7 +166,9 @@ export function PharmacyProfileForm() {
     setOriginalPhone(data.phoneNumber);
     setIsVerifyingPhone(false);
     form.setValue('otp', '');
-    form.clearErrors('otp');
+    form.setValue('password', '');
+    form.setValue('confirmPassword', '');
+    form.clearErrors(['otp', 'password', 'confirmPassword']);
 
     toast({
       title: 'Profile Updated!',
@@ -410,6 +422,25 @@ export function PharmacyProfileForm() {
                                     <Clock className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 </div>
                             </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )} />
+                </div>
+                
+                 <div className="space-y-4 p-4 border rounded-md bg-slate-50">
+                    <h3 className="font-semibold text-base flex items-center gap-2"><KeyRound/> Security</h3>
+                    <p className="text-sm text-muted-foreground">Set a password for your account for an alternative way to sign in.</p>
+                     <FormField control={form.control} name="password" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>New Password</FormLabel>
+                            <FormControl><Input type="password" placeholder="Leave blank to keep unchanged" {...field} /></FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )} />
+                     <FormField control={form.control} name="confirmPassword" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Confirm New Password</FormLabel>
+                            <FormControl><Input type="password" placeholder="Confirm your new password" {...field} /></FormControl>
                             <FormMessage />
                         </FormItem>
                     )} />

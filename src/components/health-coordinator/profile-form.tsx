@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, ChangeEvent } from 'react';
@@ -10,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import Image from 'next/image';
-import { Loader2, Upload, Copy, BadgeCheck, FileText, IdCard, Phone, Mail } from 'lucide-react';
+import { Loader2, Upload, Copy, BadgeCheck, FileText, IdCard, Phone, Mail, KeyRound } from 'lucide-react';
 import { isAadharNumberUnique, isPhoneUnique, MOCK_OTP } from '@/lib/auth';
 import { cn } from '@/lib/utils';
 
@@ -23,7 +24,13 @@ const profileSchema = z.object({
   aadharFrontImage: z.string().min(1, 'Front image is required.'),
   aadharBackImage: z.string().min(1, 'Back image is required.'),
   otp: z.string().optional(),
+  password: z.string().optional(),
+  confirmPassword: z.string().optional(),
+}).refine(data => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
 });
+
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
@@ -44,7 +51,9 @@ export function HealthCoordinatorProfileForm() {
       aadharNumber: '',
       aadharFrontImage: '',
       aadharBackImage: '',
-      otp: ''
+      otp: '',
+      password: '',
+      confirmPassword: '',
     },
   });
 
@@ -99,7 +108,7 @@ export function HealthCoordinatorProfileForm() {
         form.setError('aadharNumber', { type: 'manual', message: 'This Aadhar number is already in use.' });
         return;
     }
-    if (!isPhoneUnique(data.phone, user.id)) {
+    if (data.phone !== originalPhone && !isPhoneUnique(data.phone, user.id)) {
         form.setError('phone', { type: 'manual', message: 'This phone number is already in use.'});
         return;
     }
@@ -118,15 +127,18 @@ export function HealthCoordinatorProfileForm() {
       }
     }
     
-    // In a real app, you'd save this to a database. Here we update sessionStorage.
-    const updatedUser = { ...user, ...data, otp: undefined };
+    // Only update password if a new one is provided
+    const newPassword = data.password ? data.password : user.password;
+    const updatedUser = { ...user, ...data, password: newPassword, otp: undefined };
     sessionStorage.setItem('user', JSON.stringify(updatedUser));
     setUser(updatedUser);
 
     setOriginalPhone(data.phone);
     setIsVerifyingPhone(false);
     form.setValue('otp', '');
-    form.clearErrors('otp');
+    form.setValue('password', '');
+    form.setValue('confirmPassword', '');
+    form.clearErrors(['otp', 'password', 'confirmPassword']);
 
     toast({
       title: 'Profile Updated!',
@@ -231,6 +243,25 @@ export function HealthCoordinatorProfileForm() {
                     )}
                 />
             )}
+
+            <div className="space-y-4 p-4 border rounded-md bg-slate-50">
+                <h3 className="font-semibold text-base flex items-center gap-2"><KeyRound/> Security</h3>
+                <p className="text-sm text-muted-foreground">Set a password for your account for an alternative way to sign in.</p>
+                 <FormField control={form.control} name="password" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>New Password</FormLabel>
+                        <FormControl><Input type="password" placeholder="Leave blank to keep unchanged" {...field} /></FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )} />
+                 <FormField control={form.control} name="confirmPassword" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Confirm New Password</FormLabel>
+                        <FormControl><Input type="password" placeholder="Confirm your new password" {...field} /></FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )} />
+            </div>
 
             <div className="space-y-4 p-4 border rounded-md bg-slate-50">
                 <h3 className="font-semibold text-base flex items-center gap-2"><BadgeCheck/> Verification Details</h3>

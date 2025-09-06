@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, ChangeEvent } from 'react';
@@ -11,7 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
-import { Loader2, Upload, Briefcase, MapPin, Copy, FileText, BadgeCheck, Phone, Mail } from 'lucide-react';
+import { Loader2, Upload, Briefcase, MapPin, Copy, FileText, BadgeCheck, Phone, Mail, KeyRound } from 'lucide-react';
 import { initialDoctors } from '@/lib/mock-data';
 import { isRegistrationNumberUnique, isPhoneUnique, MOCK_OTP, sendOtp } from '@/lib/auth';
 
@@ -31,7 +32,13 @@ const profileSchema = z.object({
   registrationNumber: z.string().min(1, 'Registration number is required.'),
   registrationCertificate: z.string().min(1, 'Registration certificate is required.'),
   otp: z.string().optional(),
+  password: z.string().optional(),
+  confirmPassword: z.string().optional(),
+}).refine(data => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
 });
+
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
@@ -58,6 +65,8 @@ export function ProfileForm() {
       registrationNumber: '',
       registrationCertificate: '',
       otp: '',
+      password: '',
+      confirmPassword: '',
     },
   });
 
@@ -114,7 +123,7 @@ export function ProfileForm() {
         form.setError('registrationNumber', { type: 'manual', message: 'This registration number is already in use.' });
         return;
     }
-    if (!isPhoneUnique(data.phone, user.id)) {
+    if (data.phone !== originalPhone && !isPhoneUnique(data.phone, user.id)) {
         form.setError('phone', { type: 'manual', message: 'This phone number is already in use.' });
         return;
     }
@@ -138,7 +147,9 @@ export function ProfileForm() {
 
     const updatedDoctors = allDoctors.map((d: any) => {
         if (d.id === user.id) {
-            return { ...d, ...data, otp: undefined }; // Don't save OTP
+            // Only update password if a new one is provided
+            const newPassword = data.password ? data.password : d.password;
+            return { ...d, ...data, password: newPassword, otp: undefined };
         }
         return d;
     });
@@ -151,7 +162,9 @@ export function ProfileForm() {
     setOriginalPhone(data.phone);
     setIsVerifyingPhone(false);
     form.setValue('otp', '');
-    form.clearErrors('otp');
+    form.setValue('password', '');
+    form.setValue('confirmPassword', '');
+    form.clearErrors(['otp', 'password', 'confirmPassword']);
 
     toast({
       title: 'Profile Updated!',
@@ -357,6 +370,25 @@ export function ProfileForm() {
                     </FormItem>
                 )}
             />
+
+             <div className="space-y-4 p-4 border rounded-md bg-slate-50">
+                <h3 className="font-semibold text-base flex items-center gap-2"><KeyRound/> Security</h3>
+                <p className="text-sm text-muted-foreground">Set a password for your account for an alternative way to sign in.</p>
+                 <FormField control={form.control} name="password" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>New Password</FormLabel>
+                        <FormControl><Input type="password" placeholder="Leave blank to keep unchanged" {...field} /></FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )} />
+                 <FormField control={form.control} name="confirmPassword" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Confirm New Password</FormLabel>
+                        <FormControl><Input type="password" placeholder="Confirm your new password" {...field} /></FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )} />
+            </div>
 
             <div className="space-y-4 p-4 border rounded-md bg-slate-50">
                 <h3 className="font-semibold text-base flex items-center gap-2"><BadgeCheck/> Verification Details</h3>

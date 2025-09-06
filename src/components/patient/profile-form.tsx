@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -9,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Loader2, Phone, Mail } from 'lucide-react';
+import { Loader2, Phone, Mail, KeyRound } from 'lucide-react';
 import { MOCK_OTP, isPhoneUnique } from '@/lib/auth';
 
 const profileSchema = z.object({
@@ -17,7 +18,13 @@ const profileSchema = z.object({
   email: z.string().email(),
   phone: z.string().min(10, 'A valid 10-digit phone number is required.'),
   otp: z.string().optional(),
+  password: z.string().optional(),
+  confirmPassword: z.string().optional(),
+}).refine(data => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
 });
+
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
@@ -35,6 +42,8 @@ export function PatientProfileForm() {
       email: '',
       phone: '',
       otp: '',
+      password: '',
+      confirmPassword: '',
     },
   });
 
@@ -59,7 +68,7 @@ export function PatientProfileForm() {
   const onSubmit = (data: ProfileFormValues) => {
     if (!user?.id) return;
     
-    if (!isPhoneUnique(data.phone, user.id)) {
+    if (data.phone !== originalPhone && !isPhoneUnique(data.phone, user.id)) {
       form.setError('phone', { type: 'manual', message: 'This phone number is already in use.' });
       return;
     }
@@ -76,8 +85,10 @@ export function PatientProfileForm() {
         return;
       }
     }
-
-    const updatedUser = { ...user, fullName: data.fullName, phone: data.phone, email: data.email };
+    
+    // Only update password if a new one is provided
+    const newPassword = data.password ? data.password : user.password;
+    const updatedUser = { ...user, fullName: data.fullName, phone: data.phone, email: data.email, password: newPassword };
     sessionStorage.setItem('user', JSON.stringify(updatedUser));
     setUser(updatedUser);
     
@@ -89,7 +100,9 @@ export function PatientProfileForm() {
     setOriginalPhone(data.phone);
     setIsVerifyingPhone(false);
     form.setValue('otp', '');
-    form.clearErrors('otp');
+    form.setValue('password', '');
+    form.setValue('confirmPassword', '');
+    form.clearErrors(['otp', 'password', 'confirmPassword']);
 
     toast({
       title: 'Profile Updated!',
@@ -171,6 +184,25 @@ export function PatientProfileForm() {
                 />
             )}
             
+             <div className="space-y-4 p-4 border rounded-md bg-slate-50">
+                <h3 className="font-semibold text-base flex items-center gap-2"><KeyRound/> Security</h3>
+                <p className="text-sm text-muted-foreground">Set a password for your account for an alternative way to sign in.</p>
+                 <FormField control={form.control} name="password" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>New Password</FormLabel>
+                        <FormControl><Input type="password" placeholder="Leave blank to keep unchanged" {...field} /></FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )} />
+                 <FormField control={form.control} name="confirmPassword" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Confirm New Password</FormLabel>
+                        <FormControl><Input type="password" placeholder="Confirm your new password" {...field} /></FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )} />
+            </div>
+
             <Button type="submit" disabled={form.formState.isSubmitting} className="w-full">
                 {form.formState.isSubmitting && <Loader2 className="animate-spin mr-2" />}
                 Save Profile Changes

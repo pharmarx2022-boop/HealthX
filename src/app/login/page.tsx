@@ -16,12 +16,11 @@ import { Footer } from '@/components/layout/footer';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { signInWithOtp, sendOtp } from '@/lib/auth';
-import { MailCheck, Loader2, KeyRound } from 'lucide-react';
+import { MailCheck, Loader2 } from 'lucide-react';
 import { addNotification } from '@/lib/notifications';
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'A valid email address is required.' }),
-  otp: z.string().optional(),
   referralCode: z.string().optional(),
 });
 
@@ -38,15 +37,14 @@ export default function LoginPage() {
   const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [otpSent, setOtpSent] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [isSigningIn, setIsSigningIn] = useState(false);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: '',
-      otp: '',
       referralCode: '',
     },
   });
@@ -66,32 +64,31 @@ export default function LoginPage() {
   }, [searchParams, router, toast]);
 
 
-  const handleSendOtp = async (values: z.infer<typeof loginSchema>) => {
+  const handleSendMagicLink = async (values: z.infer<typeof loginSchema>) => {
     try {
-        await sendOtp(values.email);
+        await sendOtp(values.email); // Re-using the same mock OTP sender
          if(values.referralCode) {
             sessionStorage.setItem('referralCode', values.referralCode);
         }
-        setOtpSent(true);
+        setMagicLinkSent(true);
         toast({
-            title: "OTP Sent!",
-            description: "An OTP has been sent to your email. (For demo, use 123456)",
+            title: "Magic Link Sent!",
+            description: "A sign-in link has been sent to your email. (For demo, click 'Sign In' below)",
         })
     } catch(error: any) {
         toast({ title: "Error", description: error.message, variant: "destructive" });
     }
   }
 
-  const handleVerifyOtp = async (values: z.infer<typeof loginSchema>) => {
-    if (!selectedRole || !values.otp) {
-        form.setError('otp', { message: 'OTP is required.' });
-        return;
-    };
-    setIsVerifying(true);
+  const handleSignIn = async () => {
+    if (!selectedRole) return;
+    setIsSigningIn(true);
+    const email = form.getValues('email');
     const referralCode = sessionStorage.getItem('referralCode') || undefined;
 
-    setTimeout(() => { // Simulate network delay
-        const { user, error, isNewUser } = signInWithOtp(values.email, values.otp, selectedRole, referralCode);
+    // Simulate clicking the magic link by using the mock OTP
+    setTimeout(() => { 
+        const { user, error, isNewUser } = signInWithOtp(email, '123456', selectedRole, referralCode);
 
         if (user) {
             sessionStorage.setItem('user', JSON.stringify(user));
@@ -131,7 +128,7 @@ export default function LoginPage() {
                 variant: "destructive"
             });
         }
-        setIsVerifying(false);
+        setIsSigningIn(false);
     }, 1000);
   }
   
@@ -146,84 +143,63 @@ export default function LoginPage() {
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-headline">{roleDisplayName} Login</CardTitle>
             <CardDescription>
-                {otpSent ? 'An OTP has been sent to your email.' : 'Enter your email to receive a One-Time Password (OTP).'}
+                {magicLinkSent ? 'Check your email for a sign-in link.' : 'Enter your email to receive a magic link to sign in.'}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Form {...form}>
-            <form className="space-y-4">
-                <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Email Address</FormLabel>
-                        <FormControl>
-                            <Input type="email" placeholder="you@example.com" {...field} disabled={otpSent} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                
-                {otpSent && (
-                    <FormField
-                        control={form.control}
-                        name="otp"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>One-Time Password (OTP)</FormLabel>
-                            <FormControl>
-                                 <div className="relative">
-                                    <Input placeholder="Enter your 6-digit OTP" {...field} />
-                                    <KeyRound className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                </div>
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                )}
+            {!magicLinkSent ? (
+              <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleSendMagicLink)} className="space-y-4">
+                  <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                          <FormItem>
+                          <FormLabel>Email Address</FormLabel>
+                          <FormControl>
+                              <Input type="email" placeholder="you@example.com" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                          </FormItem>
+                      )}
+                  />
 
-                 {selectedRole !== 'patient' && !otpSent && (
-                    <FormField
-                        control={form.control}
-                        name="referralCode"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Referral Code (Optional)</FormLabel>
-                            <FormControl>
-                                <Input placeholder="Enter referral code if you have one" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                )}
+                  {selectedRole !== 'patient' && (
+                      <FormField
+                          control={form.control}
+                          name="referralCode"
+                          render={({ field }) => (
+                              <FormItem>
+                              <FormLabel>Referral Code (Optional)</FormLabel>
+                              <FormControl>
+                                  <Input placeholder="Enter referral code if you have one" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                              </FormItem>
+                          )}
+                      />
+                  )}
 
-                <div className="space-y-2 pt-2">
-                     {!otpSent ? (
-                        <Button type="button" className="w-full" onClick={form.handleSubmit(handleSendOtp)} disabled={form.formState.isSubmitting}>
-                             {form.formState.isSubmitting ? <Loader2 className="animate-spin" /> : "Send OTP"}
-                        </Button>
-                     ) : (
-                        <Button type="button" className="w-full" onClick={form.handleSubmit(handleVerifyOtp)} disabled={isVerifying}>
-                            {isVerifying ? <Loader2 className="animate-spin" /> : "Sign In with OTP"}
-                        </Button>
-                     )}
-                </div>
-
-                {otpSent && (
-                     <Button variant="link" className="w-full" onClick={() => {
-                         setOtpSent(false);
-                         form.setValue('otp', '');
-                         form.clearErrors('otp');
-                     }}>
+                  <div className="space-y-2 pt-2">
+                      <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+                           {form.formState.isSubmitting ? <Loader2 className="animate-spin" /> : "Send Magic Link"}
+                      </Button>
+                  </div>
+              </form>
+              </Form>
+            ) : (
+                <div className="text-center space-y-4">
+                    <MailCheck className="mx-auto h-12 w-12 text-green-500"/>
+                    <p>A sign-in link has been sent to <strong>{form.getValues('email')}</strong>.</p>
+                    <p className="text-sm text-muted-foreground">(For demonstration purposes, you can click the button below to sign in immediately.)</p>
+                    <Button onClick={handleSignIn} className="w-full" disabled={isSigningIn}>
+                        {isSigningIn ? <Loader2 className="animate-spin" /> : "Sign In"}
+                    </Button>
+                     <Button variant="link" className="w-full" onClick={() => setMagicLinkSent(false)}>
                         Use a different email
                     </Button>
-                )}
-            </form>
-            </Form>
+                </div>
+            )}
             <CardFooter className="pt-6 text-center text-sm">
                 Not a {roleDisplayName}? <Link href="/" className="underline">Go back</Link>
             </CardFooter>

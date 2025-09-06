@@ -49,7 +49,7 @@ export async function sendOtp(email: string) {
         // We store the email to associate the OTP with it on the verification step.
         window.sessionStorage.setItem('emailForSignIn', email);
     }
-    console.log(`OTP SENT to ${email}: The OTP is ${MOCK_OTP}`);
+    console.log(`OTP/Magic Link SENT to ${email}: The mock code is ${MOCK_OTP}`);
     // Simulate a network delay
     await new Promise(resolve => setTimeout(resolve, 500));
     return true;
@@ -62,6 +62,7 @@ const isEmailUnique = (email: string) => {
 }
 
 const isPhoneUnique = (phone: string, currentUserId: string) => {
+    if (!phone) return true; // Don't validate empty strings
     const allUsers = getAllUsers();
     return !allUsers.some(u => u.phone === phone && u.id !== currentUserId);
 }
@@ -74,11 +75,11 @@ export function signInWithOtp(email: string, otp: string, role: string, referral
 
     const emailForSignIn = window.sessionStorage.getItem('emailForSignIn');
     if (emailForSignIn !== email) {
-        return { user: null, error: "Email does not match the one that requested the OTP.", isNewUser: false };
+        return { user: null, error: "Email does not match the one that requested the magic link.", isNewUser: false };
     }
     
     if (otp !== MOCK_OTP) {
-        return { user: null, error: "Invalid OTP.", isNewUser: false };
+        return { user: null, error: "Invalid OTP/magic link.", isNewUser: false };
     }
 
     // Special handling for admin login
@@ -100,8 +101,8 @@ export function signInWithOtp(email: string, otp: string, role: string, referral
     let isNewUser = false;
     
     if (!user) {
-        // Before creating, check if email is globally unique
-        if (!allKnownUsers.every(u => u.email !== email)) {
+        // Before creating, check if email is globally unique across all roles
+        if (allKnownUsers.some(u => u.email === email)) {
             return { user: null, error: "This email address is already in use with a different role.", isNewUser: false };
         }
 

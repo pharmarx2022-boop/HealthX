@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -17,6 +18,7 @@ import { Separator } from '../ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Slider } from '../ui/slider';
 import { Label } from '../ui/label';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '../ui/sheet';
 
 const BookingDialog = dynamic(() => import('./booking-dialog').then(mod => mod.BookingDialog), {
     ssr: false
@@ -62,6 +64,7 @@ export function NearbySearch({ allowedServices = ['doctor', 'pharmacy', 'lab'] }
   const [experience, setExperience] = useState(0);
   const [feeRange, setFeeRange] = useState('All');
   const [distance, setDistance] = useState(10);
+  const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
 
    useEffect(() => {
     setIsClient(true);
@@ -241,6 +244,45 @@ export function NearbySearch({ allowedServices = ['doctor', 'pharmacy', 'lab'] }
     return (totalRating / reviewsList.length).toFixed(1);
   };
 
+  const renderFilterControls = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="space-y-2">
+            <Label htmlFor="specialty">Specialty</Label>
+            <Select value={specialty} onValueChange={setSpecialty}>
+                <SelectTrigger id="specialty">
+                    <SelectValue placeholder="All Specialties"/>
+                </SelectTrigger>
+                <SelectContent>
+                    {specialties.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                </SelectContent>
+            </Select>
+        </div>
+        <div className="space-y-2">
+            <Label htmlFor="experience">Min. Experience: {experience} years</Label>
+            <Slider id="experience" value={[experience]} onValueChange={(val) => setExperience(val[0])} max={30} step={1}/>
+        </div>
+        <div className="space-y-2">
+            <Label htmlFor="fee">Consultation Fee</Label>
+            <Select value={feeRange} onValueChange={setFeeRange}>
+                <SelectTrigger id="fee">
+                    <SelectValue placeholder="Any"/>
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="All">All</SelectItem>
+                    <SelectItem value="0-500">Under INR 500</SelectItem>
+                    <SelectItem value="500-1000">INR 500 - 1000</SelectItem>
+                    <SelectItem value="1000-1500">INR 1000 - 1500</SelectItem>
+                    <SelectItem value="1500">Over INR 1500</SelectItem>
+                </SelectContent>
+            </Select>
+        </div>
+            <div className="space-y-2">
+            <Label htmlFor="distance">Distance: {distance} km</Label>
+            <Slider id="distance" value={[distance]} onValueChange={(val) => setDistance(val[0])} max={500} step={1}/>
+        </div>
+    </div>
+  );
+
 
   const renderContent = () => {
     switch(status) {
@@ -271,47 +313,34 @@ export function NearbySearch({ allowedServices = ['doctor', 'pharmacy', 'lab'] }
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-                     <Card className="shadow-sm bg-slate-50/70">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2"><Filter/> Filter Doctors</CardTitle>
-                        </CardHeader>
-                        <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="specialty">Specialty</Label>
-                                <Select value={specialty} onValueChange={setSpecialty}>
-                                    <SelectTrigger id="specialty">
-                                        <SelectValue placeholder="All Specialties"/>
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {specialties.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="experience">Min. Experience: {experience} years</Label>
-                                <Slider id="experience" value={[experience]} onValueChange={(val) => setExperience(val[0])} max={30} step={1}/>
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="fee">Consultation Fee</Label>
-                                <Select value={feeRange} onValueChange={setFeeRange}>
-                                    <SelectTrigger id="fee">
-                                        <SelectValue placeholder="Any"/>
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="All">All</SelectItem>
-                                        <SelectItem value="0-500">Under INR 500</SelectItem>
-                                        <SelectItem value="500-1000">INR 500 - 1000</SelectItem>
-                                        <SelectItem value="1000-1500">INR 1000 - 1500</SelectItem>
-                                        <SelectItem value="1500">Over INR 1500</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                             <div className="space-y-2">
-                                <Label htmlFor="distance">Distance: {distance} km</Label>
-                                <Slider id="distance" value={[distance]} onValueChange={(val) => setDistance(val[0])} max={500} step={1}/>
-                            </div>
-                        </CardContent>
-                    </Card>
+                     <div className="hidden md:block">
+                        <Card className="shadow-sm bg-slate-50/70">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2"><Filter/> Filter Doctors</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                {renderFilterControls()}
+                            </CardContent>
+                        </Card>
+                     </div>
+                      <div className="block md:hidden">
+                        <Sheet open={isFilterSheetOpen} onOpenChange={setIsFilterSheetOpen}>
+                            <SheetTrigger asChild>
+                                <Button variant="outline" className="w-full">
+                                    <Filter className="mr-2"/> Filters
+                                </Button>
+                            </SheetTrigger>
+                            <SheetContent side="bottom">
+                                <SheetHeader>
+                                    <SheetTitle>Filter Doctors</SheetTitle>
+                                </SheetHeader>
+                                <div className="p-4 space-y-6">
+                                    {renderFilterControls()}
+                                    <Button onClick={() => setIsFilterSheetOpen(false)} className="w-full">Apply Filters</Button>
+                                </div>
+                            </SheetContent>
+                        </Sheet>
+                     </div>
                     {doctors.length > 0 && (
                         <section>
                             <h2 className="text-2xl font-headline font-bold mb-4 flex items-center gap-2"><Stethoscope/> Doctors</h2>
@@ -410,7 +439,7 @@ export function NearbySearch({ allowedServices = ['doctor', 'pharmacy', 'lab'] }
                                         <Card className="overflow-hidden h-full group-hover:shadow-xl transition-shadow duration-300 flex flex-col">
                                              <CardHeader className="p-0">
                                                 <div className="relative w-full h-40">
-                                                     <Image src={lab.image} alt={lab.name || 'Lab image'} fill style={{objectFit:"cover"}} data-ai-hint="lab exterior" />
+                                                     <Image src={lab.image || 'https://picsum.photos/400/300'} alt={lab.name || 'Lab image'} fill style={{objectFit:"cover"}} data-ai-hint="lab exterior" />
                                                 </div>
                                             </CardHeader>
                                             <CardContent className="p-4 flex-grow">

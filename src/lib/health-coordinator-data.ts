@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { checkHealthCoordinatorMilestone } from "./referrals";
@@ -12,33 +13,13 @@ export type HealthCoordinatorTransaction = {
     date: string | Date;
 }
 
-// MOCK DATA: Simulate that this health coordinator has completed some bookings
-const mockInitialTransactions: HealthCoordinatorTransaction[] = Array.from({ length: 5 }, (_, i) => ({
-    type: 'credit' as 'credit',
-    amount: 50 + i,
-    description: `Commission from booking #${i+1}`,
-    date: new Date(`2024-07-${i+1}T10:00:00Z`),
-}));
-
-
-function initializeTransactions(healthCoordinatorId: string): HealthCoordinatorTransaction[] {
-    const key = TRANSACTIONS_KEY_PREFIX + healthCoordinatorId;
-    sessionStorage.setItem(key, JSON.stringify(mockInitialTransactions));
-    return mockInitialTransactions;
+async function getStoredTransactions(healthCoordinatorId: string): Promise<HealthCoordinatorTransaction[]> {
+    console.warn("Using placeholder for health coordinator transactions. Connect to your database.");
+    return [];
 }
 
 export async function getHealthCoordinatorData(healthCoordinatorId: string): Promise<{ balance: number; transactions: HealthCoordinatorTransaction[] }> {
-    const key = TRANSACTIONS_KEY_PREFIX + healthCoordinatorId;
-    let transactions: HealthCoordinatorTransaction[] = [];
-
-    // This part remains sessionStorage-based for demo purposes.
-    // In production, you'd fetch from Firestore.
-    const storedTransactions = sessionStorage.getItem(key);
-    if (storedTransactions) {
-        transactions = JSON.parse(storedTransactions).map((t: any) => ({...t, date: new Date(t.date)}));
-    } else {
-        transactions = initializeTransactions(healthCoordinatorId);
-    }
+    const transactions = await getStoredTransactions(healthCoordinatorId);
     
     const balance = transactions.reduce((acc, curr) => {
         return acc + (curr.type === 'credit' ? curr.amount : -curr.amount);
@@ -51,26 +32,15 @@ export async function getHealthCoordinatorData(healthCoordinatorId: string): Pro
 }
 
 export async function convertPointsToCash(healthCoordinatorId: string) {
-    const key = TRANSACTIONS_KEY_PREFIX + healthCoordinatorId;
     const { balance, transactions } = await getHealthCoordinatorData(healthCoordinatorId);
-
     if (balance <= 0) return;
-
-    const conversionTransaction: HealthCoordinatorTransaction = {
-        type: 'debit',
-        amount: balance,
-        description: 'Cash conversion request to admin',
-        date: new Date(),
-    };
-
-    const updatedTransactions = [...transactions, conversionTransaction];
-    sessionStorage.setItem(key, JSON.stringify(updatedTransactions));
+    
+    console.warn("Using placeholder for cash conversion. Connect to your database.");
+    // In a real app, this would create a debit transaction and likely a withdrawal request for the admin.
 }
 
 export async function recordHealthCoordinatorCommission(healthCoordinatorId: string, transaction: Omit<HealthCoordinatorTransaction, 'date'> & { date: Date }) {
-    const key = TRANSACTIONS_KEY_PREFIX + healthCoordinatorId;
-    const history = await getHealthCoordinatorData(healthCoordinatorId);
-    const updatedTransactions = [...history.transactions, transaction];
-    sessionStorage.setItem(key, JSON.stringify(updatedTransactions));
+    console.warn("Using placeholder for health coordinator commission. Connect to your database.");
+    // In a real app, you would add the transaction to the user's subcollection in Firestore.
     await checkHealthCoordinatorMilestone(healthCoordinatorId);
 }

@@ -14,7 +14,7 @@ const generateReferralCode = () => {
 
 // In a real app, this would query your Firestore database.
 const getAllUsers = async (): Promise<any[]> => {
-    // This is a placeholder for fetching all users from your database.
+    // This function is a placeholder for fetching all users from your database.
     // e.g., const snapshot = await db.collection('users').get();
     console.warn("Using placeholder for getAllUsers. Connect to your database.");
     return [];
@@ -34,14 +34,20 @@ export async function sendOtp(email: string) {
 
 // In a real app, this would check your database.
 export const isEmailUnique = async (email: string): Promise<boolean> => {
-    const allUsers = await getAllUsers();
-    return !allUsers.some(u => u.email === email);
+    // In a real app, you would query your database.
+    // e.g., const snapshot = await db.collection('users').where('email', '==', email).limit(1).get();
+    // return snapshot.empty;
+    console.warn("Using placeholder for isEmailUnique. Connect to your database.");
+    return true;
 }
 
 export const isPhoneUnique = async (phone: string, currentUserId: string): Promise<boolean> => {
-    if (!phone) return true;
-    const allUsers = await getAllUsers();
-    return !allUsers.some(u => u.phone === phone && u.id !== currentUserId);
+    // In a real app, you would query your database.
+    // e.g., const snapshot = await db.collection('users').where('phone', '==', phone).limit(1).get();
+    // if(snapshot.empty) return true;
+    // return snapshot.docs[0].id === currentUserId;
+    console.warn("Using placeholder for isPhoneUnique. Connect to your database.");
+    return true;
 }
 
 // This should be replaced with Firebase Authentication.
@@ -50,11 +56,11 @@ export async function signInWithOtp(email: string, otp: string, role: string, re
         return { user: null, error: "Invalid OTP/magic link.", isNewUser: false };
     }
     
-    // Admin login remains the same for now
+    // Admin login remains a hardcoded check for this prototype.
     if (role === 'admin') {
         const adminUser = ADMIN_ACCOUNTS.find(admin => admin.email === email);
         if (adminUser) {
-            return { user: { ...adminUser, fullName: 'Admin' }, error: null, isNewUser: false };
+            return { user: { ...adminUser, fullName: 'Admin', status: 'approved' }, error: null, isNewUser: false };
         } else {
             return { user: null, error: "This email is not registered as an admin.", isNewUser: false };
         }
@@ -63,7 +69,10 @@ export async function signInWithOtp(email: string, otp: string, role: string, re
     // In a real app, you would fetch from your DB here.
     // e.g., const userRef = db.collection('users').where('email', '==', email).where('role', '==', role);
     console.warn("Using placeholder for user lookup in signInWithOtp. Connect to your database.");
-    const existingUser = (await getAllUsers()).find(u => u.email === email && u.role === role);
+    
+    // This simulates a database lookup. Replace with a real query.
+    const allUsers = await getAllUsers();
+    const existingUser = allUsers.find(u => u.email === email && u.role === role);
 
     if (existingUser) {
         return { user: existingUser, error: null, isNewUser: false };

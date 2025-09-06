@@ -11,7 +11,6 @@ import { Label } from '@/components/ui/label';
 import { Beaker, Search, User, History, BadgePercent, Banknote, Upload, Gift, Loader2, Briefcase } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useMemo, useEffect } from 'react';
-import { initialLabs, mockPatientData, mockReports, type MockReport } from '@/lib/mock-data';
 import { getTransactionHistory, recordTransaction, type Transaction } from '@/lib/transactions';
 import { getCommissionWalletData, requestWithdrawal as requestCommissionWithdrawal, recordCommission, type CommissionTransaction } from '@/lib/commission-wallet';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
@@ -27,10 +26,6 @@ const AnalyticsDashboard = dynamic(() => import('@/components/lab/analytics-dash
     loading: () => <div className="flex items-center justify-center min-h-[400px]"><Loader2 className="animate-spin" /></div>,
 });
 
-
-const LABS_KEY = 'mockLabs';
-const PATIENTS_KEY = 'mockPatientData';
-const REPORTS_KEY = 'mockReports';
 
 export default function LabDashboardPage() {
     const { toast } = useToast();
@@ -52,36 +47,37 @@ export default function LabDashboardPage() {
 
     useEffect(() => {
         setIsClient(true);
-        if(typeof window !== 'undefined') {
-            const storedUser = sessionStorage.getItem('user');
-            if (storedUser) {
-                const u = JSON.parse(storedUser);
-                setUser(u);
-
-                const storedLabs = sessionStorage.getItem(LABS_KEY);
-                const allLabs = storedLabs ? JSON.parse(storedLabs) : initialLabs;
-                const myDetails = allLabs.find((p: any) => p.id === u.id);
-                setLabDetails(myDetails);
-                setCommissionWallet(getCommissionWalletData(u.id));
-            }
-             if (!sessionStorage.getItem(REPORTS_KEY)) {
-                sessionStorage.setItem(REPORTS_KEY, JSON.stringify(mockReports));
-            }
-            if (!sessionStorage.getItem(PATIENTS_KEY)) {
-                sessionStorage.setItem(PATIENTS_KEY, JSON.stringify(mockPatientData));
-            }
-        }
+        // This effect will run on the client side.
     }, []);
 
-    const handleSearchPatient = (searchTermValue: string, type: 'payment' | 'upload') => {
-        const allPatients = JSON.parse(sessionStorage.getItem(PATIENTS_KEY) || '[]');
+    useEffect(() => {
+        async function fetchData() {
+            if (isClient) {
+                const storedUser = sessionStorage.getItem('user');
+                if (storedUser) {
+                    const u = JSON.parse(storedUser);
+                    setUser(u);
+                    // Replace with actual API call to get lab details
+                    // const myDetails = await getLabDetailsAPI(u.id);
+                    // setLabDetails(myDetails);
+                    setCommissionWallet(await getCommissionWalletData(u.id));
+                }
+            }
+        }
+        fetchData();
+    }, [isClient]);
+
+    const handleSearchPatient = async (searchTermValue: string, type: 'payment' | 'upload') => {
+        // In a real app, this would be an API call to your backend
+        console.warn("Using placeholder for patient search. Connect to your database.");
         const searchTerm = searchTermValue.toLowerCase();
-        const foundPatient = allPatients.find((p: any) => p.phone === searchTerm || (p.email && p.email.toLowerCase() === searchTerm));
+        // const foundPatient = await findPatientAPI(searchTerm);
+        const foundPatient = null; // Placeholder
 
         if (foundPatient) {
             if (type === 'payment') {
                 setPatient(foundPatient);
-                setPatientTransactionHistory(getTransactionHistory(foundPatient.id));
+                setPatientTransactionHistory(await getTransactionHistory(foundPatient.id));
                 setOtpSent(false);
                 setOtp('');
                 setTotalBill('');
@@ -121,7 +117,7 @@ export default function LabDashboardPage() {
     }, [totalBill, labDetails]);
 
 
-    const handleRedeem = () => {
+    const handleRedeem = async () => {
         if (otp !== '123456') {
             toast({
                 title: "Invalid OTP",
@@ -154,7 +150,7 @@ export default function LabDashboardPage() {
         }
         
         // Debit points from patient
-        recordTransaction(patient.id, {
+        await recordTransaction(patient.id, {
             type: 'debit',
             amount: pointsToPay,
             description: `Paid for bill at ${labDetails.name}`,
@@ -172,7 +168,7 @@ export default function LabDashboardPage() {
         });
         
         // Credit commission to lab
-        recordCommission(user.id, {
+        await recordCommission(user.id, {
             type: 'credit',
             amount: commissionAmount,
             description: `Commission from ${patient.name}'s bill`,
@@ -181,7 +177,7 @@ export default function LabDashboardPage() {
         });
         
         // Check for referral milestone
-        checkPartnerMilestone(user.id, 'lab');
+        await checkPartnerMilestone(user.id, 'lab');
 
         toast({
             title: "Payment Successful!",
@@ -192,13 +188,13 @@ export default function LabDashboardPage() {
         // Refresh data
         setPatient(null);
         setPatientSearch('');
-        setCommissionWallet(getCommissionWalletData(user.id));
+        setCommissionWallet(await getCommissionWalletData(user.id));
         setOtpSent(false);
         setOtp('');
         setTotalBill('');
     };
 
-    const handleUploadReport = () => {
+    const handleUploadReport = async () => {
         if (!reportFile || !reportName) {
             toast({
                 title: "Upload Failed",
@@ -208,18 +204,8 @@ export default function LabDashboardPage() {
             return;
         }
         
-        const allReports = JSON.parse(sessionStorage.getItem(REPORTS_KEY) || '[]');
-        const newReport: MockReport = {
-            id: `rep${Date.now()}`,
-            patientId: uploadPatient.id,
-            name: reportName,
-            lab: labDetails.name,
-            date: new Date().toISOString(),
-            file: 'mock.pdf' // In a real app, this would be a URL to the uploaded file
-        };
-        
-        const updatedReports = [...allReports, newReport];
-        sessionStorage.setItem(REPORTS_KEY, JSON.stringify(updatedReports));
+        // In a real app, this would upload the file to Firebase Storage and create a record in Firestore.
+        console.warn("Using placeholder for report upload. Connect to your database and storage.");
 
         addNotification(uploadPatient.id, {
             title: 'New Report Available',
@@ -238,7 +224,7 @@ export default function LabDashboardPage() {
         setReportName('');
     }
 
-    const handleCommissionWithdrawal = () => {
+    const handleCommissionWithdrawal = async () => {
         const withdrawalAmount = commissionWallet.balance;
          if (withdrawalAmount <= 0) {
             toast({
@@ -248,14 +234,14 @@ export default function LabDashboardPage() {
             });
             return;
         }
-        requestCommissionWithdrawal(user.id, labDetails.name, withdrawalAmount);
-        setCommissionWallet(getCommissionWalletData(user.id));
+        await requestCommissionWithdrawal(user.id, labDetails.name, withdrawalAmount);
+        setCommissionWallet(await getCommissionWalletData(user.id));
     }
 
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <main className="flex-1 bg-slate-50/50">
+      <main className="flex-1 bg-slate-50/50 pb-20 md:pb-0">
         <div className="container mx-auto py-12">
             <div className="mb-8">
                 <h1 className="text-3xl font-headline font-bold">Lab Dashboard</h1>
@@ -267,11 +253,14 @@ export default function LabDashboardPage() {
             <div className="grid lg:grid-cols-3 gap-8 items-start mt-8">
                 <div className="lg:col-span-2 grid gap-8">
                      <Card className="shadow-sm">
-                        <CardHeader>
-                            <CardTitle>Process Patient Bill</CardTitle>
-                            <CardDescription>
-                                Help patients pay using their Health Points.
-                            </CardDescription>
+                        <CardHeader className="flex flex-row items-center gap-4">
+                             <Beaker className="w-8 h-8 text-primary"/>
+                            <div>
+                                <CardTitle>Process Patient Bill</CardTitle>
+                                <CardDescription>
+                                    Help patients pay using their Health Points.
+                                </CardDescription>
+                            </div>
                         </CardHeader>
                         <CardContent className="space-y-6">
                             <div className="space-y-2 max-w-sm">
@@ -348,24 +337,6 @@ export default function LabDashboardPage() {
                                 </Card>
                             )}
 
-                        </CardContent>
-                    </Card>
-                    <Card className="shadow-sm">
-                        <CardHeader className="flex flex-row items-center gap-4">
-                            <Briefcase className="w-8 h-8 text-primary"/>
-                            <div>
-                                <CardTitle>Book a Doctor Appointment</CardTitle>
-                                <CardDescription>
-                                   Find and book a doctor for a patient.
-                                </CardDescription>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                             <Button asChild className="w-full">
-                                <Link href="/book-doctor-appointment">
-                                    Book Appointment
-                                </Link>
-                             </Button>
                         </CardContent>
                     </Card>
                     <Card className="shadow-sm">

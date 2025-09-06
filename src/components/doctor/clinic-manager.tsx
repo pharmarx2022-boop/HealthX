@@ -43,13 +43,16 @@ import {
 } from "@/components/ui/dialog"
 import { Checkbox } from '@/components/ui/checkbox';
 import Image from 'next/image';
-import { PlusCircle, Edit, Trash2, MapPin, Calendar, Clock, Upload, X, ChevronsUpDown, Check, Link as LinkIcon, Users } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, MapPin, Calendar, Clock, Upload, X, ChevronsUpDown, Check, Link as LinkIcon, Users, Repeat, CalendarDays } from 'lucide-react';
 import { initialClinics } from '@/lib/mock-data';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import { Calendar as DatePicker } from '../ui/calendar';
+import { format } from 'date-fns';
 
 const CLINICS_KEY = 'mockClinics';
 
@@ -64,10 +67,26 @@ const clinicSchema = z.object({
   dataAiHint: z.string().optional(),
   consultationFee: z.coerce.number().positive('Fee must be a positive number.'),
   patientLimit: z.coerce.number().positive('Limit must be a positive number.').optional(),
-  days: z.array(z.string()).refine((value) => value.some((item) => item), {
-    message: 'You have to select at least one day.',
-  }),
+  availabilityType: z.enum(['days', 'dates']).default('days'),
+  days: z.array(z.string()).optional(),
+  specificDates: z.array(z.date()).optional(),
   slots: z.string().min(1, 'Please enter at least one time slot.'),
+}).refine(data => {
+    if (data.availabilityType === 'days') {
+        return data.days && data.days.length > 0;
+    }
+    return true;
+}, {
+    message: 'You have to select at least one day.',
+    path: ['days']
+}).refine(data => {
+    if (data.availabilityType === 'dates') {
+        return data.specificDates && data.specificDates.length > 0;
+    }
+    return true;
+}, {
+    message: 'You have to select at least one date.',
+    path: ['specificDates']
 });
 
 type ClinicFormValues = z.infer<typeof clinicSchema>;
@@ -76,9 +95,9 @@ export function ClinicManager() {
   const { toast } = useToast();
   const [isClient, setIsClient] = useState(false);
   const [user, setUser] = useState<any>(null);
-  const [clinics, setClinics] = useState<ClinicFormValues[]>([]);
+  const [clinics, setClinics] = useState<(Omit<ClinicFormValues, 'specificDates'> & { specificDates?: string[] })[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingClinic, setEditingClinic] = useState<ClinicFormValues | null>(null);
+  const [editingClinic, setEditingClinic] = useState<(Omit<ClinicFormValues, 'specificDates'> & { specificDates?: string[] }) | null>(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -108,7 +127,9 @@ export function ClinicManager() {
         dataAiHint: 'clinic interior',
         consultationFee: 0,
         patientLimit: 20,
+        availabilityType: 'days',
         days: [],
+        specificDates: [],
         slots: '',
     },
   });
@@ -118,7 +139,10 @@ export function ClinicManager() {
           form.setValue('doctorId', user.id);
       }
       if(editingClinic) {
-          form.reset(editingClinic);
+          form.reset({
+              ...editingClinic,
+              specificDates: editingClinic.specificDates?.map(d => new Date(d)) || []
+          });
       } else {
           form.reset({
             id: '',
@@ -129,7 +153,9 @@ export function ClinicManager() {
             dataAiHint: 'clinic interior',
             consultationFee: 0,
             patientLimit: 20,
+            availabilityType: 'days',
             days: [],
+            specificDates: [],
             slots: '',
           });
       }
@@ -149,16 +175,22 @@ export function ClinicManager() {
 
   const onSubmit = (data: ClinicFormValues) => {
     let updatedClinics;
+     const dataWithStringDates = {
+        ...data,
+        specificDates: data.specificDates?.map(d => d.toISOString()),
+    };
+
+
     if (editingClinic) {
       // Editing existing clinic
-      updatedClinics = clinics.map(c => c.id === editingClinic.id ? { ...c, ...data } : c);
+      updatedClinics = clinics.map(c => c.id === editingClinic.id ? { ...c, ...dataWithStringDates } : c);
        toast({
         title: 'Clinic Updated!',
         description: 'Your clinic details have been saved.',
       });
     } else {
       // Adding new clinic
-      const newClinic = { ...data, id: `clinic${Date.now()}` };
+      const newClinic = { ...dataWithStringDates, id: `clinic${Date.now()}` };
       updatedClinics = [...clinics, newClinic];
        toast({
         title: 'Clinic Added!',
@@ -172,7 +204,7 @@ export function ClinicManager() {
     setIsDialogOpen(false);
   };
   
-  const handleEdit = (clinic: ClinicFormValues) => {
+  const handleEdit = (clinic: (Omit<ClinicFormValues, 'specificDates'> & { specificDates?: string[] })) => {
     setEditingClinic(clinic);
     setIsDialogOpen(true);
   }
@@ -191,7 +223,26 @@ export function ClinicManager() {
   const userClinics = isClient ? clinics.filter(c => c.doctorId === user?.id) : [];
 
   const currentImage = form.watch('image');
+  const availabilityType = form.watch('availabilityType');
   const isApproved = user?.status === 'approved';
+
+  const renderAvailability = (clinic: typeof clinics[0]) => {
+    if (clinic.availabilityType === 'dates' && clinic.specificDates) {
+      const formattedDates = clinic.specificDates.map(d => format(new Date(d), 'dd MMM')).join(', ');
+      return (
+        <div className="flex items-start gap-2 text-sm text-muted-foreground">
+             <CalendarDays className="w-4 h-4 mt-0.5 shrink-0"/>
+             <span>{formattedDates}</span>
+        </div>
+      );
+    }
+    return (
+      <div className="flex items-start gap-2 text-sm text-muted-foreground">
+           <Calendar className="w-4 h-4 mt-0.5 shrink-0"/>
+           <span>{clinic.days?.join(', ')}</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -279,47 +330,96 @@ export function ClinicManager() {
                             
                             <FormField
                                 control={form.control}
-                                name="days"
-                                render={() => (
-                                    <FormItem>
-                                    <div className="mb-4">
-                                        <FormLabel className="text-base">Available Days</FormLabel>
-                                        <FormDescription>Select the days of the week this clinic is open.</FormDescription>
-                                    </div>
-                                    <div className="grid grid-cols-3 gap-2">
-                                        {daysOfWeek.map((day) => (
-                                        <FormField
-                                            key={day}
-                                            control={form.control}
-                                            name="days"
-                                            render={({ field }) => {
-                                            return (
-                                                <FormItem
-                                                key={day}
-                                                className="flex flex-row items-center space-x-3 space-y-0"
-                                                >
-                                                <FormControl>
-                                                    <Checkbox
-                                                    checked={field.value?.includes(day)}
-                                                    onCheckedChange={(checked) => {
-                                                        return checked
-                                                        ? field.onChange([...(field.value || []), day])
-                                                        : field.onChange(field.value?.filter((value) => value !== day)
-                                                        )
-                                                    }}
-                                                    />
-                                                </FormControl>
-                                                <FormLabel className="font-normal">{day}</FormLabel>
-                                                </FormItem>
-                                            )
-                                            }}
-                                        />
-                                        ))}
-                                    </div>
+                                name="availabilityType"
+                                render={({ field }) => (
+                                    <FormItem className="space-y-3">
+                                    <FormLabel>Availability Type</FormLabel>
+                                    <FormControl>
+                                        <RadioGroup
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value}
+                                        className="flex gap-4"
+                                        >
+                                        <FormItem className="flex items-center space-x-3 space-y-0">
+                                            <FormControl>
+                                                <RadioGroupItem value="days" />
+                                            </FormControl>
+                                            <FormLabel className="font-normal flex items-center gap-2"><Repeat /> Recurring Days</FormLabel>
+                                        </FormItem>
+                                        <FormItem className="flex items-center space-x-3 space-y-0">
+                                            <FormControl>
+                                                <RadioGroupItem value="dates" />
+                                            </FormControl>
+                                            <FormLabel className="font-normal flex items-center gap-2"><CalendarDays /> Specific Dates</FormLabel>
+                                        </FormItem>
+                                        </RadioGroup>
+                                    </FormControl>
                                     <FormMessage />
                                     </FormItem>
                                 )}
                             />
+
+                            {availabilityType === 'days' ? (
+                                <FormField
+                                    control={form.control}
+                                    name="days"
+                                    render={() => (
+                                        <FormItem>
+                                            <div className="grid grid-cols-3 gap-2 border p-4 rounded-md">
+                                                {daysOfWeek.map((day) => (
+                                                <FormField
+                                                    key={day}
+                                                    control={form.control}
+                                                    name="days"
+                                                    render={({ field }) => {
+                                                    return (
+                                                        <FormItem
+                                                        key={day}
+                                                        className="flex flex-row items-center space-x-3 space-y-0"
+                                                        >
+                                                        <FormControl>
+                                                            <Checkbox
+                                                            checked={field.value?.includes(day)}
+                                                            onCheckedChange={(checked) => {
+                                                                return checked
+                                                                ? field.onChange([...(field.value || []), day])
+                                                                : field.onChange(field.value?.filter((value) => value !== day)
+                                                                )
+                                                            }}
+                                                            />
+                                                        </FormControl>
+                                                        <FormLabel className="font-normal">{day}</FormLabel>
+                                                        </FormItem>
+                                                    )
+                                                    }}
+                                                />
+                                                ))}
+                                            </div>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            ) : (
+                                <FormField
+                                    control={form.control}
+                                    name="specificDates"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col items-center">
+                                            <FormControl>
+                                                <DatePicker
+                                                    mode="multiple"
+                                                    selected={field.value}
+                                                    onSelect={field.onChange}
+                                                    className="rounded-md border"
+                                                    disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            )}
+                            
 
                              <FormField control={form.control} name="slots" render={({ field }) => (
                                 <FormItem>
@@ -362,10 +462,7 @@ export function ClinicManager() {
                                 </Link>
                              </div>
                         </div>
-                        <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                             <Calendar className="w-4 h-4 mt-0.5 shrink-0"/>
-                             <span>{clinic.days.join(', ')}</span>
-                        </div>
+                        {renderAvailability(clinic)}
                          <div className="flex items-start gap-2 text-sm text-muted-foreground">
                              <Clock className="w-4 h-4 mt-0.5 shrink-0"/>
                              <span>{clinic.slots}</span>

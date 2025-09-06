@@ -21,7 +21,6 @@ import { MOCK_OTP } from '@/lib/auth';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { Card, CardFooter } from '../ui/card';
 import { addNotification, sendBookingOtpNotification } from '@/lib/notifications';
-import { mockPatients } from '@/components/doctor/patient-list';
 import { mockFamilyMembers } from '@/lib/family-members';
 import { processPayment } from '@/lib/payment';
 
@@ -36,7 +35,9 @@ type Doctor = {
 type Clinic = {
     id: string;
     name: string;
-    days: string[];
+    availabilityType: 'days' | 'dates';
+    days?: string[];
+    specificDates?: string[];
     slots: string;
     consultationFee: number;
     patientLimit?: number;
@@ -195,8 +196,17 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
         if (!selectedClinic) {
             return true;
         }
-        const dayOfWeek = format(date, 'EEEE');
-        return !selectedClinic.days.includes(dayOfWeek);
+
+        if (selectedClinic.availabilityType === 'dates' && selectedClinic.specificDates) {
+            return !selectedClinic.specificDates.some(d => format(new Date(d), 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd'));
+        }
+
+        if (selectedClinic.availabilityType === 'days' && selectedClinic.days) {
+            const dayOfWeek = format(date, 'EEEE');
+            return !selectedClinic.days.includes(dayOfWeek);
+        }
+
+        return true; // Disable if no availability is set
     };
 
     const handleSearchPatient = () => {

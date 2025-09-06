@@ -63,6 +63,7 @@ export const initialClinics = [
     dataAiHint: 'clinic interior',
     consultationFee: 1500,
     patientLimit: 25,
+    availabilityType: 'days',
     days: ['Monday', 'Wednesday', 'Friday'],
     slots: '10:00 AM, 11:00 AM, 12:00 PM, 02:00 PM',
   },
@@ -75,6 +76,7 @@ export const initialClinics = [
     dataAiHint: 'clinic inside',
     consultationFee: 1200,
     patientLimit: 30,
+    availabilityType: 'days',
     days: ['Tuesday', 'Thursday', 'Saturday'],
     slots: '09:00 AM, 10:00 AM, 11:00 AM',
   },
@@ -87,7 +89,8 @@ export const initialClinics = [
     dataAiHint: 'modern clinic',
     consultationFee: 1000,
     patientLimit: 20,
-    days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+    availabilityType: 'dates',
+    specificDates: [new Date(2024, 6, 20).toISOString(), new Date(2024, 6, 27).toISOString()],
     slots: '03:00 PM, 04:00 PM, 05:00 PM',
   },
   {
@@ -99,6 +102,7 @@ export const initialClinics = [
     dataAiHint: 'pediatric clinic',
     consultationFee: 800,
     patientLimit: 15,
+    availabilityType: 'days',
     days: ['Monday', 'Wednesday', 'Friday', 'Saturday'],
     slots: '10:00 AM, 11:30 AM, 01:00 PM',
   }
@@ -172,4 +176,3 @@ export const mockReports: MockReport[] = [
     { id: 'rep1', patientId: 'patient_1', name: 'Complete Blood Count', lab: 'Metropolis Labs', date: '2024-05-10T10:00:00Z', file: 'mock.pdf' },
     { id: 'rep2', patientId: 'patient_1', name: 'Lipid Profile', lab: 'Metropolis Labs', date: '2024-05-10T10:00:00Z', file: 'mock.pdf' }
 ];
-

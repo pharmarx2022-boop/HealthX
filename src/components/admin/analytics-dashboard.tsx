@@ -16,6 +16,7 @@ import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInter
 import { initialDoctors, initialLabs, initialPharmacies, mockPatientData, initialClinics } from '@/lib/mock-data';
 import { cn } from '@/lib/utils';
 import { getAllUsersForAdmin, type UserData } from '@/lib/auth';
+import { Badge } from '../ui/badge';
 
 const userGrowthData = [
   { month: 'January', users: 12 },
@@ -109,6 +110,7 @@ export function AnalyticsDashboard() {
   const [clinicFilter, setClinicFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
   const [refundFilter, setRefundFilter] = useState('All');
+  const [coordinatorFilter, setCoordinatorFilter] = useState('All');
 
   React.useEffect(() => {
     const users = getAllUsersForAdmin();
@@ -192,14 +194,21 @@ export function AnalyticsDashboard() {
       return { id: pharmacy.id, name: pharmacy.name, type: 'Pharmacy', transactions: transactions, commission: `INR ${commission.toFixed(2)}` };
     });
     
-    const healthCoordinators = allUsers.filter(u => u.role === 'health-coordinator').map(hc => {
-        const bookings = timeFilteredAppointments.filter(appt => appt.healthCoordinatorId === hc.id && appt.status === 'done').length;
-        const earnings = bookings * 50; // Mock earning logic
-        return { id: hc.id, name: hc.fullName, type: 'Health Coordinator', bookings: bookings, earnings: `INR ${earnings.toFixed(2)}` };
-    });
+    const healthCoordinatorsData = timeFilteredAppointments
+        .filter(appt => appt.healthCoordinatorId)
+        .filter(appt => coordinatorFilter === 'All' || appt.healthCoordinatorId === coordinatorFilter)
+        .map(appt => {
+            const coordinator = allUsers.find(u => u.id === appt.healthCoordinatorId);
+            const doctor = initialDoctors.find(d => d.id === appt.doctorId);
+            return {
+                ...appt,
+                coordinatorName: coordinator?.fullName || 'Unknown',
+                doctorName: doctor?.name || 'Unknown',
+            }
+        });
 
-    return { labs, pharmacies, healthCoordinators };
-  }, [timeFilteredAppointments, allUsers]);
+    return { labs, pharmacies, healthCoordinators: healthCoordinatorsData };
+  }, [timeFilteredAppointments, allUsers, coordinatorFilter]);
 
   const handleTimeFilterChange = (value: string) => {
       setTimeFilter(value);
@@ -284,6 +293,16 @@ export function AnalyticsDashboard() {
             </SelectTrigger>
             <SelectContent>
                 {refundStatuses.map(status => <SelectItem key={status} value={status}>{status}</SelectItem>)}
+            </SelectContent>
+        </Select>
+        <Select value={coordinatorFilter} onValueChange={setCoordinatorFilter}>
+            <SelectTrigger className="w-full sm:w-[220px]">
+                 <Briefcase className="mr-2 h-4 w-4 text-muted-foreground"/>
+                <SelectValue placeholder="All Health Coordinators" />
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem value="All">All Health Coordinators</SelectItem>
+                {allUsers.filter(u => u.role === 'health-coordinator').map(c => <SelectItem key={c.id} value={c.id}>{c.fullName}</SelectItem>)}
             </SelectContent>
         </Select>
     </div>
@@ -471,25 +490,39 @@ export function AnalyticsDashboard() {
              <Card className="lg:col-span-2">
                 <CardHeader>
                      <CardTitle className="flex items-center gap-2"><Briefcase/> Health Coordinator Performance</CardTitle>
-                     <CardDescription>Bookings and earnings for the selected period.</CardDescription>
+                     <CardDescription>Detailed log of appointments booked by coordinators.</CardDescription>
                 </CardHeader>
                  <CardContent>
                       <Table>
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Coordinator</TableHead>
-                                <TableHead className="text-center">Completed Bookings</TableHead>
-                                <TableHead className="text-right">Total Earnings</TableHead>
+                                <TableHead>Patient</TableHead>
+                                <TableHead>Doctor</TableHead>
+                                <TableHead>Date</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead className="text-right">Refund Status</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {partnerPerformanceData.healthCoordinators.map((p) => (
-                                <TableRow key={p.id}>
-                                    <TableCell className="font-medium">{p.name}</TableCell>
-                                    <TableCell className="text-center">{p.bookings}</TableCell>
-                                    <TableCell className="text-right">{p.earnings}</TableCell>
+                            {partnerPerformanceData.healthCoordinators.length > 0 ? partnerPerformanceData.healthCoordinators.map((appt) => (
+                                <TableRow key={appt.id}>
+                                    <TableCell className="font-medium">{appt.coordinatorName}</TableCell>
+                                    <TableCell>{appt.name}</TableCell>
+                                    <TableCell>{appt.doctorName}</TableCell>
+                                    <TableCell>{format(new Date(appt.appointmentDate), 'PP')}</TableCell>
+                                    <TableCell>
+                                        <Badge variant={appt.status === 'done' ? 'secondary' : (appt.status === 'cancelled' || appt.status === 'absent') ? 'destructive' : 'default'} className="capitalize">{appt.status}</Badge>
+                                    </TableCell>
+                                    <TableCell className="text-right">{appt.refundStatus}</TableCell>
                                 </TableRow>
-                            ))}
+                            )) : (
+                                 <TableRow>
+                                    <TableCell colSpan={6} className="text-center h-24">
+                                        No appointments booked by Health Coordinators for the selected filters.
+                                    </TableCell>
+                                </TableRow>
+                            )}
                         </TableBody>
                      </Table>
                  </CardContent>

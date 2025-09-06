@@ -238,7 +238,7 @@ export function Header() {
         <Link href="/" className="flex items-center gap-2">
           <HeartPulse className="w-8 h-8 text-primary" />
           <span className="text-xl font-headline font-bold text-primary">
-            HealthLink Hub
+            HealthX
           </span>
         </Link>
 
@@ -264,7 +264,7 @@ export function Header() {
                     <Link href="/" className="flex items-center gap-2" onClick={() => setIsSheetOpen(false)}>
                         <HeartPulse className="w-8 h-8 text-primary" />
                         <span className="text-lg font-bold text-primary">
-                            HealthLink Hub
+                            HealthX
                         </span>
                     </Link>
                     <SheetClose asChild>

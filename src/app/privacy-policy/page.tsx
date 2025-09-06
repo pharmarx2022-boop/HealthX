@@ -9,11 +9,11 @@ export default function PrivacyPolicyPage() {
       <main className="flex-1 bg-slate-50/50">
         <div className="container mx-auto py-16">
           <div className="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow">
-            <h1 className="text-3xl font-headline font-bold mb-6">Privacy Policy for HealthLink Hub</h1>
+            <h1 className="text-3xl font-headline font-bold mb-6">Privacy Policy for HealthX</h1>
             <div className="space-y-6 text-muted-foreground">
               <p><strong>Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</strong></p>
               
-              <p>HealthLink Hub ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our website and mobile application (collectively, the "Platform"). Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the platform.</p>
+              <p>HealthX ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our website and mobile application (collectively, the "Platform"). Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the platform.</p>
               
               <p className="border-l-4 border-primary pl-4 italic">This document is a template and not legal advice. You must consult with a qualified legal professional to ensure your Privacy Policy is compliant with all applicable laws, including the Information Technology Act, 2000 and the (Indian) Contract Act, 1872.</p>
               

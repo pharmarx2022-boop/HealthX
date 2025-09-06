@@ -21,7 +21,7 @@ type Referral = {
 
 // --- Milestone Definitions ---
 const MILESTONES = {
-    doctor: { threshold: 1000, reward: 1000, unit: 'consultations' },
+    doctor: { threshold: 10, reward: 1000, unit: 'consultations' },
     pharmacy: { threshold: 10000, reward: 500, unit: 'INR' },
     lab: { threshold: 10000, reward: 500, unit: 'INR' },
     'health-coordinator': { threshold: 50, reward: 250, unit: 'bookings' },

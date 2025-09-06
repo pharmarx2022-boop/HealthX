@@ -26,7 +26,7 @@ export default function AboutUsPage() {
       <main className="flex-1 bg-slate-50/50">
         <div className="container mx-auto py-16">
           <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-headline font-bold">About HealthLink Hub</h1>
+            <h1 className="text-4xl md:text-5xl font-headline font-bold">About HealthX</h1>
             <p className="text-lg text-muted-foreground mt-4 max-w-3xl mx-auto">
               We are dedicated to revolutionizing the healthcare landscape by creating a truly connected and accessible ecosystem.
             </p>
@@ -55,7 +55,7 @@ export default function AboutUsPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-center text-muted-foreground">
-                    To seamlessly connect patients with doctors, pharmacies, and labs on a single, intuitive platform. We are on a mission to revolutionize the healthcare experience through our unique cash-refund and Health Point rewards system, making every interaction within the HealthLink Hub ecosystem both valuable and convenient.
+                    To seamlessly connect patients with doctors, pharmacies, and labs on a single, intuitive platform. We are on a mission to revolutionize the healthcare experience through our unique cash-refund and Health Point rewards system, making every interaction within the HealthX ecosystem both valuable and convenient.
                 </p>
               </CardContent>
             </Card>

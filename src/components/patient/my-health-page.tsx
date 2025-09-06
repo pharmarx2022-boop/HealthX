@@ -57,7 +57,7 @@ export function MyHealthPage() {
                 
                 const storedPatients = sessionStorage.getItem(PATIENTS_KEY);
                 const allAppointments = storedPatients ? JSON.parse(storedPatients) : mockPatients;
-                const userAppointments = allAppointments.filter((p: any) => p.id === u.id || p.name === u.fullName || (u.fullName === 'Rohan Sharma' && p.name === 'Rohan Sharma'));
+                const userAppointments = allAppointments.filter((p: any) => p.id === u.id || p.name === u.fullName);
                 setMyAppointments(userAppointments);
                 
                 const reminder = userAppointments.find(appt => appt.nextAppointmentDate && !isNaN(new Date(appt.nextAppointmentDate).getTime()) && new Date(appt.nextAppointmentDate) > new Date());
@@ -152,7 +152,7 @@ export function MyHealthPage() {
 
     const handleShare = async (appt: any) => {
         const doctor = initialDoctors.find(d => d.id === appt.doctorId);
-        const shareText = `Appointment Details:\n- Patient: ${appt.name}\n- Doctor: ${doctor?.name}\n- Clinic: ${appt.clinic}\n- Date: ${format(new Date(appt.appointmentDate), 'PPP')}\n- Time: ${format(new Date(appt.appointmentDate), 'p')}\n\nBooked via HealthLink Hub.`;
+        const shareText = `Appointment Details:\n- Patient: ${appt.name}\n- Doctor: ${doctor?.name}\n- Clinic: ${appt.clinic}\n- Date: ${format(new Date(appt.appointmentDate), 'PPP')}\n- Time: ${format(new Date(appt.appointmentDate), 'p')}\n\nBooked via HealthX.`;
 
         if (navigator.share) {
             try {

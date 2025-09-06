@@ -18,20 +18,20 @@ export type TeamMember = {
 const initialTeamMembers: TeamMember[] = [
   {
     id: 'team_1',
-    name: 'Dr. Anjali Sharma',
+    name: 'Alisha Singh',
     title: 'Founder & CEO',
-    image: 'https://picsum.photos/400/400',
+    image: 'https://picsum.photos/id/1011/400/400',
     dataAiHint: 'ceo portrait',
     bio: 'A visionary leader with a passion for leveraging technology to improve healthcare access for all.',
-    linkedin: 'https://linkedin.com/in/anjalisharma',
-    twitter: 'https://x.com/anjalisharma',
-    instagram: 'https://instagram.com/anjalisharma'
+    linkedin: 'https://linkedin.com/in/alishasingh',
+    twitter: 'https://x.com/alishasingh',
+    instagram: 'https://instagram.com/alishasingh'
   },
   {
     id: 'team_2',
-    name: 'Vikram Singh',
+    name: 'Rohan Mehta',
     title: 'Chief Technology Officer',
-    image: 'https://picsum.photos/401/401',
+    image: 'https://picsum.photos/id/1005/400/400',
     dataAiHint: 'cto portrait',
     bio: 'The architect of our platform, ensuring a seamless and secure experience for all users.',
     linkedin: '#',
@@ -40,9 +40,9 @@ const initialTeamMembers: TeamMember[] = [
   },
   {
     id: 'team_3',
-    name: 'Priya Patel',
+    name: 'Sonia Patel',
     title: 'Head of Patient Relations',
-    image: 'https://picsum.photos/402/402',
+    image: 'https://picsum.photos/id/1027/400/400',
     dataAiHint: 'manager portrait',
     bio: 'Dedicated to making sure every patient feels heard, supported, and cared for.',
     linkedin: '#',

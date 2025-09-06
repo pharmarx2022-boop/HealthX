@@ -14,7 +14,7 @@ const ADMIN_ACCOUNTS = [
 export const MOCK_OTP = '123456';
 
 const generateReferralCode = () => {
-    return `HLH-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+    return `HX-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 }
 
 const getAllUsers = () => {

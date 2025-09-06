@@ -1,25 +1,23 @@
 
 import type { Metadata } from 'next';
-import { Playfair_Display, PT_Sans } from 'next/font/google';
+import { Inter, Lora } from 'next/font/google';
 import { cn } from '@/lib/utils';
 import { Toaster } from "@/components/ui/toaster";
 import './globals.css';
 
-const fontSans = PT_Sans({
+const fontSans = Inter({
   subsets: ['latin'],
-  weight: ['400', '700'],
   variable: '--font-sans',
 })
 
-const fontSerif = Playfair_Display({
+const fontSerif = Lora({
   subsets: ['latin'],
-  weight: ['400', '700'],
   variable: '--font-serif',
 })
 
 
 export const metadata: Metadata = {
-  title: 'HealthLink Hub',
+  title: 'HealthX',
   description: 'An integrated platform for Doctors, Patients, Pharmacies, Labs, and Agents.',
 };
 

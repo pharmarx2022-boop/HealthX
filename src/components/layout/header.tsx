@@ -3,7 +3,7 @@
 'use client';
 
 import Link from 'next/link';
-import { HeartPulse, Menu, X, UserCircle, LogOut, Settings, Briefcase, Users, Pill, Beaker, Gift, Bell, Calendar, LayoutDashboard, Info, Mail } from 'lucide-react';
+import { HeartPulse, Menu, X, UserCircle, LogOut, Settings, Briefcase, Users, Pill, Beaker, Gift, Bell, Calendar, LayoutDashboard, Info, Mail, ShieldCheck, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from '@/components/ui/sheet';
 import { useState, useEffect } from 'react';
@@ -296,6 +296,16 @@ export function Header() {
                   <Button variant="ghost" asChild className="justify-start text-lg">
                      <Link href="/contact" onClick={() => setIsSheetOpen(false)}>
                         <Mail className="mr-2" /> Contact Us
+                    </Link>
+                  </Button>
+                   <Button variant="ghost" asChild className="justify-start text-lg">
+                     <Link href="/terms-of-service" onClick={() => setIsSheetOpen(false)}>
+                        <FileText className="mr-2" /> Terms of Service
+                    </Link>
+                  </Button>
+                   <Button variant="ghost" asChild className="justify-start text-lg">
+                     <Link href="/privacy-policy" onClick={() => setIsSheetOpen(false)}>
+                        <ShieldCheck className="mr-2" /> Privacy Policy
                     </Link>
                   </Button>
                 </nav>

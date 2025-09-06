@@ -15,10 +15,10 @@ export function Footer() {
            <Link href="/contact" className="text-sm text-muted-foreground hover:text-primary hidden md:inline-block">
             Contact Us
           </Link>
-          <Link href="/terms-of-service" className="text-sm text-muted-foreground hover:text-primary">
+          <Link href="/terms-of-service" className="text-sm text-muted-foreground hover:text-primary hidden md:inline-block">
             Terms of Service
           </Link>
-          <Link href="/privacy-policy" className="text-sm text-muted-foreground hover:text-primary">
+          <Link href="/privacy-policy" className="text-sm text-muted-foreground hover:text-primary hidden md:inline-block">
             Privacy Policy
           </Link>
         </nav>

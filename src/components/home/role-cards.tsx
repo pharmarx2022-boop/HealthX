@@ -2,6 +2,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Stethoscope, User, Briefcase, Pill, Beaker, ChevronRight } from 'lucide-react';
@@ -9,33 +10,38 @@ import { Stethoscope, User, Briefcase, Pill, Beaker, ChevronRight } from 'lucide
 const roles = [
   {
     name: 'Doctor',
-    icon: Stethoscope,
     description: 'Manage your appointments and clinics.',
     loginLink: '/login?role=doctor',
+    image: 'https://picsum.photos/id/1018/200/200',
+    dataAiHint: 'doctor portrait',
   },
   {
     name: 'Patient',
-    icon: User,
     description: 'Book appointments and view your records.',
     loginLink: '/login?role=patient',
+    image: 'https://picsum.photos/id/1025/200/200',
+    dataAiHint: 'patient portrait',
   },
   {
     name: 'Health Coordinator',
-    icon: Briefcase,
     description: 'Help others book and earn commissions.',
     loginLink: '/login?role=health-coordinator',
+    image: 'https://picsum.photos/id/1027/200/200',
+    dataAiHint: 'professional portrait',
   },
   {
     name: 'Pharmacy',
-    icon: Pill,
     description: 'Redeem Health Points for patients.',
     loginLink: '/login?role=pharmacy',
+    image: 'https://picsum.photos/id/24/200/200',
+    dataAiHint: 'pharmacy interior',
   },
   {
     name: 'Lab',
-    icon: Beaker,
     description: 'Upload reports and redeem Health Points.',
     loginLink: '/login?role=lab',
+    image: 'https://picsum.photos/id/30/200/200',
+    dataAiHint: 'lab scientist',
   },
 ];
 
@@ -52,20 +58,20 @@ export function RoleCards() {
         <div className="max-w-md mx-auto md:hidden">
             <div className="bg-white rounded-lg border shadow-sm divide-y">
                 {roles.map((role) => (
-                    <Link href={role.loginLink} key={role.name} className="block p-4 hover:bg-slate-50/70 active:bg-slate-50">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <div className="p-3 bg-primary/10 rounded-full">
-                                    <role.icon className="w-6 h-6 text-primary" />
-                                </div>
-                                <div className="text-left">
-                                    <p className="font-semibold text-lg">{role.name}</p>
-                                    <p className="text-sm text-muted-foreground">{role.description}</p>
-                                </div>
+                    <div key={role.name} className="p-4">
+                        <div className="flex items-center gap-4">
+                             <div className="relative w-16 h-16 rounded-full overflow-hidden shrink-0 border-2 border-primary/20">
+                                <Image src={role.image} alt={`${role.name} icon`} fill className="object-cover" data-ai-hint={role.dataAiHint} />
                             </div>
-                            <ChevronRight className="text-muted-foreground"/>
+                            <div className="flex-grow">
+                                <p className="font-semibold text-lg">{role.name}</p>
+                                <p className="text-sm text-muted-foreground">{role.description}</p>
+                            </div>
                         </div>
-                    </Link>
+                        <Button asChild className="w-full mt-3">
+                            <Link href={role.loginLink}>Login as {role.name}</Link>
+                        </Button>
+                    </div>
                 ))}
             </div>
         </div>
@@ -75,14 +81,14 @@ export function RoleCards() {
           {roles.map((role) => (
             <Card key={role.name} className="flex flex-col text-center items-center hover:shadow-xl transition-shadow duration-300 p-4 justify-between">
               <CardHeader className="items-center p-2">
-                <div className="p-3 bg-primary/10 rounded-full mb-2">
-                  <role.icon className="w-8 h-8 text-primary" />
+                <div className="relative w-24 h-24 rounded-full overflow-hidden mb-2 border-4 border-primary/10">
+                   <Image src={role.image} alt={`${role.name} icon`} fill className="object-cover" data-ai-hint={role.dataAiHint}/>
                 </div>
                 <CardTitle className="font-headline text-xl">{role.name}</CardTitle>
                  <CardDescription className="text-sm pt-1">{role.description}</CardDescription>
               </CardHeader>
               <CardContent className="flex-grow flex items-end w-full p-2">
-                <Button asChild className="w-full" variant="outline">
+                <Button asChild className="w-full">
                     <Link href={role.loginLink}>Login</Link>
                 </Button>
               </CardContent>

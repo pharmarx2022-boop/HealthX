@@ -8,12 +8,7 @@ import { Stethoscope, Loader2, User } from 'lucide-react';
 import { PatientList } from '@/components/doctor/patient-list';
 import dynamic from 'next/dynamic';
 import { useState, useEffect } from 'react';
-
-const AnalyticsDashboard = dynamic(() => import('@/components/doctor/analytics-dashboard').then(mod => mod.AnalyticsDashboard), {
-    ssr: false,
-    loading: () => <div className="flex items-center justify-center min-h-[400px]"><Loader2 className="animate-spin" /></div>,
-});
-
+import { AnalyticsDashboard } from '@/components/doctor/analytics-dashboard';
 
 export default function DoctorDashboardPage() {
     const [user, setUser] = useState<any | null>(null);

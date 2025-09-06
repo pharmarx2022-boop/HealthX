@@ -17,11 +17,7 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { NearbySearch } from '@/components/booking/nearby-search';
 import { BottomNavBar } from '@/components/layout/bottom-nav-bar';
-
-const AnalyticsDashboard = dynamic(() => import('@/components/health-coordinator/analytics-dashboard').then(mod => mod.AnalyticsDashboard), {
-    ssr: false,
-    loading: () => <div className="flex items-center justify-center min-h-[400px]"><Loader2 className="animate-spin" /></div>,
-});
+import { AnalyticsDashboard } from '@/components/health-coordinator/analytics-dashboard';
 
 
 export default function HealthCoordinatorDashboardPage() {

@@ -22,11 +22,7 @@ import { checkPartnerMilestone } from '@/lib/referrals';
 import Link from 'next/link';
 import { NearbySearch } from '@/components/booking/nearby-search';
 import { BottomNavBar } from '@/components/layout/bottom-nav-bar';
-
-const AnalyticsDashboard = dynamic(() => import('@/components/pharmacy/analytics-dashboard').then(mod => mod.AnalyticsDashboard), {
-    ssr: false,
-    loading: () => <div className="flex items-center justify-center min-h-[400px]"><Loader2 className="animate-spin" /></div>,
-});
+import { AnalyticsDashboard } from '@/components/pharmacy/analytics-dashboard';
 
 
 const PHARMACIES_KEY = 'mockPharmacies';

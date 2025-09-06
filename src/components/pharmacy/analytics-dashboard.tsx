@@ -2,9 +2,9 @@
 'use client';
 
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart';
-import { Users, Gift } from 'lucide-react';
+import { Users, Gift, Banknote } from 'lucide-react';
 
 const chartData = [
   { month: 'January', transactions: 152 },
@@ -26,7 +26,7 @@ const statCards = [
     {
         title: 'Total HealthPoints Collected',
         value: 'INR 25,600',
-        icon: () => <span className="font-bold">INR</span>,
+        icon: Banknote,
         description: 'All-time points collected from bills.',
     },
     {
@@ -63,6 +63,7 @@ export function AnalyticsDashboard() {
         <Card>
             <CardHeader>
                 <CardTitle>Transaction Analytics</CardTitle>
+                <CardDescription>Your transaction volume over the past 6 months.</CardDescription>
             </CardHeader>
             <CardContent>
                 <ChartContainer config={chartConfig} className="min-h-[200px] w-full">

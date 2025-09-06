@@ -13,8 +13,6 @@ export default function TermsOfServicePage() {
             <div className="space-y-6 text-muted-foreground">
               <p><strong>Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</strong></p>
               
-              <p className="border-l-4 border-primary pl-4 italic">This document is a template and not legal advice. You must consult with a qualified legal professional to ensure your Terms of Service are compliant with all applicable laws, including the Information Technology Act, 2000 and the (Indian) Contract Act, 1872.</p>
-
               <h2 className="text-xl font-bold text-foreground pt-4">1. Agreement to Terms</h2>
               <p>By using our platform, HealthX ("Platform"), you agree to be bound by these Terms of Service ("Terms"). This constitutes a legally binding agreement between you and HealthX. If you disagree with any part of the terms, then you may not access the Service. These Terms apply to all visitors, users, and others who access or use the Service, including Patients, Doctors, Pharmacies, Labs, and Health Coordinators (collectively, "Users").</p>
               

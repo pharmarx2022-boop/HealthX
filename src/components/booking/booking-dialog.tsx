@@ -23,6 +23,7 @@ import { Card, CardFooter } from '../ui/card';
 import { addNotification, sendBookingOtpNotification } from '@/lib/notifications';
 import { mockPatients } from '@/components/doctor/patient-list';
 import { mockFamilyMembers } from '@/lib/family-members';
+import { processPayment } from '@/lib/payment';
 
 type Doctor = {
     id: string;
@@ -54,7 +55,7 @@ interface BookingDialogProps {
     doctor: Doctor;
     clinics: Clinic[];
     familyMembers: FamilyMember[];
-    onConfirm: (patientId: string, clinicId: string, date: Date, time: string) => void;
+    onConfirm: (patientId: string, clinicId: string, date: Date, time: string, transactionId: string) => void;
 }
 
 const calculateAge = (dob: string | Date) => {
@@ -72,6 +73,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
     const { toast } = useToast();
     const [userRole, setUserRole] = useState<string | null>(null);
     const [user, setUser] = useState<any | null>(null);
+    const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
     // Form state
     const [selectedClinicId, setSelectedClinicId] = useState<string | undefined>();
@@ -116,6 +118,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
             setIsSearching(false);
             setOtpSent(false);
             setOtp('');
+            setIsProcessingPayment(false);
         }
     }, [isOpen, user?.id, user?.role, clinics]);
 
@@ -142,9 +145,9 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
     
     const isPartnerBooking = userRole === 'health-coordinator' || userRole === 'lab' || userRole === 'pharmacy';
 
-    const handleConfirmBooking = () => {
+    const handleConfirmBooking = async () => {
         const patientId = isPartnerBooking ? selectedPatientId : user.id;
-        if (!patientId || !selectedClinicId || !selectedDate || !selectedTime) {
+        if (!patientId || !selectedClinicId || !selectedClinic || !selectedDate || !selectedTime) {
              toast({ title: "Incomplete Details", description: "Please fill all the booking details before proceeding.", variant: "destructive" });
              return;
         }
@@ -153,21 +156,36 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
             return;
         }
 
-        if (isPartnerBooking) {
-            if (otp !== MOCK_OTP) {
-                toast({ title: "Invalid OTP", description: "The OTP entered is incorrect.", variant: "destructive" });
-                return;
-            }
+        if (isPartnerBooking && otp !== MOCK_OTP) {
+            toast({ title: "Invalid OTP", description: "The OTP entered is incorrect.", variant: "destructive" });
+            return;
         }
 
-        // Simulate payment and confirm
-        addNotification(patientId, {
-            title: 'Appointment Confirmed!',
-            message: `Your booking with ${doctor.name} at ${selectedClinic?.name} for ${format(selectedDate, 'PPP')} is confirmed.`,
-            icon: 'calendar',
-            href: '/patient/my-health'
-        });
-        onConfirm(patientId, selectedClinicId, selectedDate, selectedTime);
+        setIsProcessingPayment(true);
+        try {
+            const paymentResult = await processPayment({
+                amount: selectedClinic.consultationFee,
+                currency: 'INR',
+                description: `Appointment with ${doctor.name}`,
+                patientId: patientId,
+            });
+
+            if (paymentResult.success) {
+                addNotification(patientId, {
+                    title: 'Appointment Confirmed!',
+                    message: `Your booking with ${doctor.name} at ${selectedClinic?.name} for ${format(selectedDate, 'PPP')} is confirmed.`,
+                    icon: 'calendar',
+                    href: '/patient/my-health'
+                });
+                onConfirm(patientId, selectedClinicId, selectedDate, selectedTime, paymentResult.transactionId);
+            } else {
+                 toast({ title: "Payment Failed", description: paymentResult.error || "Could not process payment.", variant: "destructive" });
+            }
+        } catch (error) {
+            toast({ title: "An Error Occurred", description: "Something went wrong during payment.", variant: "destructive" });
+        } finally {
+            setIsProcessingPayment(false);
+        }
     }
     
     const isDateDisabled = (date: Date) => {
@@ -397,8 +415,9 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                         <p className="text-muted-foreground">Total Payable:</p>
                         <p className="text-xl font-bold">INR {selectedClinic?.consultationFee.toFixed(2) ?? '0.00'}</p>
                     </div>
-                    <Button className="w-full h-12" onClick={handleConfirmBooking}>
-                        <CreditCard className="mr-2"/> Pay & Confirm Booking
+                    <Button className="w-full h-12" onClick={handleConfirmBooking} disabled={isProcessingPayment}>
+                        {isProcessingPayment ? <Loader2 className="animate-spin mr-2"/> : <CreditCard className="mr-2"/>}
+                        {isProcessingPayment ? 'Processing...' : 'Pay & Confirm Booking'}
                     </Button>
                     <p className="text-xs text-muted-foreground text-center px-4">Your payment will be refunded to your original payment method AND you'll get 100% back in Health Points after the consultation.</p>
                 </CardFooter>

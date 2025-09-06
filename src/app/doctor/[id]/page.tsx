@@ -98,7 +98,7 @@ export default function DoctorDetailPage() {
     ? (doctor.reviewsList.reduce((acc, review) => acc + review.rating, 0) / totalReviews).toFixed(1)
     : 'N/A';
 
-  const handleBookingConfirm = (patientId: string, clinicId: string, date: Date, time: string) => {
+  const handleBookingConfirm = (patientId: string, clinicId: string, date: Date, time: string, transactionId: string) => {
     const clinic = doctorClinics.find(c => c.id === clinicId);
     if (!clinic) return;
 
@@ -110,6 +110,7 @@ export default function DoctorDetailPage() {
 
     const newAppointment = {
         id: `appt_${Date.now()}`,
+        transactionId,
         name: patientName,
         clinic: clinic.name,
         doctorId: doctor.id,

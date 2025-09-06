@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -193,7 +194,7 @@ export function NearbySearch({ allowedServices = ['doctor', 'pharmacy', 'lab'] }
     setIsBookingOpen(true);
   };
   
-  const handleBookingConfirm = (patientId: string, clinicId: string, date: Date, time: string) => {
+  const handleBookingConfirm = (patientId: string, clinicId: string, date: Date, time: string, transactionId: string) => {
     if (!selectedDoctor) return;
     const clinic = clinics.find(c => c.id === clinicId);
     if (!clinic) return;
@@ -206,6 +207,7 @@ export function NearbySearch({ allowedServices = ['doctor', 'pharmacy', 'lab'] }
 
     const newAppointment = {
         id: `appt_${Date.now()}`,
+        transactionId,
         name: patientName,
         clinic: clinic.name,
         clinicId: clinic.id,

@@ -4,9 +4,9 @@
 import * as React from 'react';
 import { useState, useMemo } from 'react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Pie, PieChart, Cell } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart';
-import { Users, Briefcase, Banknote, ShieldCheck, Stethoscope, Pill, Beaker, Calendar as CalendarIcon, Activity, Building, Badge as BadgeIcon, RefreshCw } from 'lucide-react';
+import { Users, Briefcase, Banknote, ShieldCheck, Stethoscope, Pill, Beaker, Calendar as CalendarIcon, Activity, Building, Badge as BadgeIcon, RefreshCw, CheckCircle } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
@@ -48,7 +48,7 @@ const revenueChartConfig = {
 } satisfies ChartConfig;
 
 
-const statCards = [
+const baseStatCards = [
     {
         title: 'Total Users',
         value: '1,254',
@@ -60,12 +60,6 @@ const statCards = [
         value: '78',
         icon: Briefcase,
         description: '+180.1% from last month',
-    },
-    {
-        title: 'Total Revenue',
-        value: 'INR 2,38,900',
-        icon: Banknote,
-        description: '+19% from last month',
     },
     {
         title: 'Pending Approvals',
@@ -120,6 +114,12 @@ export function AnalyticsDashboard() {
     const users = getAllUsersForAdmin();
     setAllUsers(users);
   }, []);
+  
+  const todaysConsultations = useMemo(() => {
+    return mockPatientData.filter(appt => 
+        isToday(new Date(appt.appointmentDate)) && appt.status === 'done'
+    ).length;
+  }, []);
 
   const timeFilteredAppointments = useMemo(() => {
      return mockPatientData.filter(appt => {
@@ -148,7 +148,7 @@ export function AnalyticsDashboard() {
         return true;
     });
 
-    return initialDoctors.map(doctor => {
+    const data = initialDoctors.map(doctor => {
         const doctorAppointments = fullyFilteredAppointments.filter(appt => appt.doctorId === doctor.id);
         if(doctorFilter !== 'All' && doctor.id !== doctorFilter) return null;
 
@@ -164,6 +164,17 @@ export function AnalyticsDashboard() {
             revenue: doctorAppointments.filter(a => a.status === 'done').reduce((sum, appt) => sum + appt.consultationFee, 0),
         };
     }).filter(Boolean).sort((a,b) => b!.revenue - a!.revenue);
+    
+    const totals = data.reduce((acc, curr) => {
+        acc.completed += curr!.completed;
+        acc.cancelled += curr!.cancelled;
+        acc.absent += curr!.absent;
+        acc.revenue += curr!.revenue;
+        return acc;
+    }, { completed: 0, cancelled: 0, absent: 0, revenue: 0 });
+
+    return { data, totals };
+
   }, [timeFilteredAppointments, clinicFilter, statusFilter, doctorFilter, refundFilter]);
   
   const partnerPerformanceData = useMemo(() => {
@@ -277,7 +288,17 @@ export function AnalyticsDashboard() {
   return (
     <div className="space-y-8">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {statCards.map((card) => (
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Today's Consultations</CardTitle>
+                    <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold">{todaysConsultations}</div>
+                    <p className="text-xs text-muted-foreground">Total consultations completed today.</p>
+                </CardContent>
+            </Card>
+            {baseStatCards.map((card) => (
                  <Card key={card.title}>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
@@ -356,7 +377,7 @@ export function AnalyticsDashboard() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {doctorPerformanceData.length > 0 ? doctorPerformanceData.map((doctor) => (
+                            {doctorPerformanceData.data.length > 0 ? doctorPerformanceData.data.map((doctor) => (
                                 <TableRow key={doctor!.id}>
                                     <TableCell>
                                         <div className="font-medium">{doctor!.name}</div>
@@ -375,6 +396,15 @@ export function AnalyticsDashboard() {
                                 </TableRow>
                             )}
                         </TableBody>
+                        <CardFooter className="bg-slate-50">
+                            <TableRow>
+                                <TableHead className="font-bold">Totals</TableHead>
+                                <TableHead className="text-center font-bold">{doctorPerformanceData.totals.completed}</TableHead>
+                                <TableHead className="text-center font-bold">{doctorPerformanceData.totals.cancelled}</TableHead>
+                                <TableHead className="text-center font-bold">{doctorPerformanceData.totals.absent}</TableHead>
+                                <TableHead className="text-right font-bold">INR {doctorPerformanceData.totals.revenue.toFixed(2)}</TableHead>
+                            </TableRow>
+                        </CardFooter>
                      </Table>
                  </div>
             </CardContent>

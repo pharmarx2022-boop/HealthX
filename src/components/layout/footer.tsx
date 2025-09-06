@@ -9,10 +9,10 @@ export function Footer() {
           © {new Date().getFullYear()} HealthLink Hub. All rights reserved.
         </p>
         <nav className="flex items-center gap-4 flex-wrap justify-center">
-           <Link href="/about" className="text-sm text-muted-foreground hover:text-primary">
+           <Link href="/about" className="text-sm text-muted-foreground hover:text-primary hidden md:inline-block">
             About Us
           </Link>
-           <Link href="/contact" className="text-sm text-muted-foreground hover:text-primary">
+           <Link href="/contact" className="text-sm text-muted-foreground hover:text-primary hidden md:inline-block">
             Contact Us
           </Link>
           <Link href="/terms-of-service" className="text-sm text-muted-foreground hover:text-primary">

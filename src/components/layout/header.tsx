@@ -3,7 +3,7 @@
 'use client';
 
 import Link from 'next/link';
-import { HeartPulse, Menu, X, UserCircle, LogOut, Settings, Briefcase, Users, Pill, Beaker, Gift, Bell, Calendar, LayoutDashboard } from 'lucide-react';
+import { HeartPulse, Menu, X, UserCircle, LogOut, Settings, Briefcase, Users, Pill, Beaker, Gift, Bell, Calendar, LayoutDashboard, Info, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from '@/components/ui/sheet';
 import { useState, useEffect } from 'react';
@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { NotificationPopover } from './notification-popover';
+import { Separator } from '../ui/separator';
 
 
 export function Header() {
@@ -247,7 +248,8 @@ export function Header() {
         </nav>
 
         {/* Mobile Navigation */}
-        <div className="md:hidden">
+        <div className="md:hidden flex items-center gap-2">
+          {user && <NotificationPopover userId={user.id} />}
           <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
@@ -272,8 +274,30 @@ export function Header() {
                         </Button>
                     </SheetClose>
                 </div>
-                <nav className="flex flex-col gap-4">
-                  {renderMobileAuthButtons()}
+                <nav className="flex flex-col gap-2">
+                  {user ? (
+                    renderMobileAuthButtons()
+                  ) : (
+                     <Button variant="default" asChild className="justify-start text-lg h-12">
+                        <Link href="#roles" onClick={() => setIsSheetOpen(false)}>
+                            <UserCircle className="mr-2" />
+                            Login / Sign Up
+                        </Link>
+                     </Button>
+                  )}
+                  
+                  <Separator className="my-2"/>
+                  
+                  <Button variant="ghost" asChild className="justify-start text-lg">
+                    <Link href="/about" onClick={() => setIsSheetOpen(false)}>
+                        <Info className="mr-2" /> About Us
+                    </Link>
+                  </Button>
+                  <Button variant="ghost" asChild className="justify-start text-lg">
+                     <Link href="/contact" onClick={() => setIsSheetOpen(false)}>
+                        <Mail className="mr-2" /> Contact Us
+                    </Link>
+                  </Button>
                 </nav>
               </div>
             </SheetContent>

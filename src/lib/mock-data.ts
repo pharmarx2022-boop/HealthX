@@ -181,16 +181,13 @@ nextWeek.setDate(nextWeek.getDate() + 7);
 
 
 export const mockPatientData = [
-  { id: 'patient_1', name: 'Rohan Sharma', email: 'rohan@example.com', phone: '9876543210' },
-  { id: 'patient_2', name: 'Priya Singh', email: 'priya@example.com', phone: '9876543211' },
-  // Add appointment-like data here for analytics
-  { id: 'appt_1', doctorId: 'doctor_1', status: 'done', appointmentDate: lastWeek.toISOString(), consultationFee: 1500 },
-  { id: 'appt_2', doctorId: 'doctor_1', status: 'done', appointmentDate: yesterday.toISOString(), consultationFee: 1200 },
-  { id: 'appt_3', doctorId: 'doctor_2', status: 'done', appointmentDate: today.toISOString(), consultationFee: 1000 },
-  { id: 'appt_4', doctorId: 'doctor_1', status: 'upcoming', appointmentDate: nextWeek.toISOString(), consultationFee: 1500 },
-  { id: 'appt_5', doctorId: 'doctor_3', status: 'done', appointmentDate: lastWeek.toISOString(), consultationFee: 800 },
-  { id: 'appt_6', doctorId: 'doctor_1', status: 'cancelled', appointmentDate: lastWeek.toISOString(), consultationFee: 1200 },
-  { id: 'appt_7', doctorId: 'doctor_2', status: 'absent', appointmentDate: yesterday.toISOString(), consultationFee: 1000 },
+  { id: 'patient_1', name: 'Rohan Sharma', email: 'rohan@example.com', phone: '9876543210', doctorId: 'doctor_1', clinic: 'Andheri West Clinic', status: 'done', appointmentDate: lastWeek.toISOString(), consultationFee: 1500 },
+  { id: 'patient_2', name: 'Priya Singh', email: 'priya@example.com', phone: '9876543211', doctorId: 'doctor_1', clinic: 'Dadar East Clinic', status: 'done', appointmentDate: yesterday.toISOString(), consultationFee: 1200 },
+  { id: 'patient_3', name: 'Amit Patel', email: 'amit@example.com', phone: '9876543212', doctorId: 'doctor_2', clinic: 'Skin & Hair Clinic', status: 'done', appointmentDate: today.toISOString(), consultationFee: 1000 },
+  { id: 'patient_4', name: 'Sunita Rai', email: 'sunita@example.com', phone: '9876543213', doctorId: 'doctor_1', clinic: 'Andheri West Clinic', status: 'upcoming', appointmentDate: nextWeek.toISOString(), consultationFee: 1500 },
+  { id: 'patient_5', name: 'Vijay Kumar', email: 'vijay@example.com', phone: '9876543214', doctorId: 'doctor_3', clinic: 'Happy Kids Pediatrics', status: 'done', appointmentDate: lastWeek.toISOString(), consultationFee: 800 },
+  { id: 'patient_6', name: 'Neha Gupta', email: 'neha@example.com', phone: '9876543215', doctorId: 'doctor_1', clinic: 'Dadar East Clinic', status: 'cancelled', appointmentDate: lastWeek.toISOString(), consultationFee: 1200 },
+  { id: 'patient_7', name: 'Karan Malhotra', email: 'karan@example.com', phone: '9876543216', doctorId: 'doctor_2', clinic: 'Skin & Hair Clinic', status: 'absent', appointmentDate: yesterday.toISOString(), consultationFee: 1000 },
 ];
 
 

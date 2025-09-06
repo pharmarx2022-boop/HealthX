@@ -6,18 +6,16 @@ import { useState, useMemo } from 'react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Pie, PieChart, Cell } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart';
-import { Users, Briefcase, Banknote, ShieldCheck, Stethoscope, Pill, Beaker, Calendar as CalendarIcon, UserX, UserCheck, Activity } from 'lucide-react';
+import { Users, Briefcase, Banknote, ShieldCheck, Stethoscope, Pill, Beaker, Calendar as CalendarIcon, UserX, UserCheck, Activity, Building, Badge } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, isToday, isSameDay } from 'date-fns';
-import { initialDoctors, initialLabs, initialPharmacies, mockPatientData } from '@/lib/mock-data';
+import { initialDoctors, initialLabs, initialPharmacies, mockPatientData, initialClinics } from '@/lib/mock-data';
 import { cn } from '@/lib/utils';
 import { getAllUsersForAdmin, type UserData } from '@/lib/auth';
-import { getTransactionHistory } from '@/lib/transactions';
-import { getCommissionWalletData } from '@/lib/commission-wallet';
 
 const userGrowthData = [
   { month: 'January', users: 12 },
@@ -104,13 +102,19 @@ const recentActivities = [
     }
 ]
 
+const appointmentStatuses = ['All', 'Done', 'Upcoming', 'Cancelled', 'Absent'];
+const clinicNames = ['All', ...initialClinics.map(c => c.name)];
+
 export function AnalyticsDashboard() {
   const [timeFilter, setTimeFilter] = useState('all');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [allUsers, setAllUsers] = useState<UserData[]>([]);
+  
+  // New filters for doctor performance
+  const [clinicFilter, setClinicFilter] = useState('All');
+  const [statusFilter, setStatusFilter] = useState('All');
 
   React.useEffect(() => {
-    // In a real app, this data would be fetched once and stored in a context/state manager
     const users = getAllUsersForAdmin();
     setAllUsers(users);
   }, []);
@@ -134,8 +138,14 @@ export function AnalyticsDashboard() {
 
 
   const doctorPerformanceData = useMemo(() => {
+    const fullyFilteredAppointments = timeFilteredAppointments.filter(appt => {
+        if (clinicFilter !== 'All' && appt.clinic !== clinicFilter) return false;
+        if (statusFilter !== 'All' && appt.status.toLowerCase() !== statusFilter.toLowerCase()) return false;
+        return true;
+    });
+
     return initialDoctors.map(doctor => {
-        const doctorAppointments = timeFilteredAppointments.filter(appt => appt.doctorId === doctor.id);
+        const doctorAppointments = fullyFilteredAppointments.filter(appt => appt.doctorId === doctor.id);
         const countByStatus = (status: string) => doctorAppointments.filter(a => a.status === status).length;
 
         return {
@@ -148,7 +158,7 @@ export function AnalyticsDashboard() {
             revenue: doctorAppointments.filter(a => a.status === 'done').reduce((sum, appt) => sum + appt.consultationFee, 0),
         };
     }).sort((a,b) => b.revenue - a.revenue);
-  }, [timeFilteredAppointments]);
+  }, [timeFilteredAppointments, clinicFilter, statusFilter]);
   
   const partnerPerformanceData = useMemo(() => {
     const labs = initialLabs.map(lab => {
@@ -181,41 +191,59 @@ export function AnalyticsDashboard() {
   }
   
   const renderFilterControls = () => (
-      <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-            <Popover>
-                <PopoverTrigger asChild>
-                <Button
-                    variant={"outline"}
-                    className={cn(
-                        "w-full sm:w-[240px] justify-start text-left font-normal",
-                        !selectedDate && "text-muted-foreground"
-                    )}
-                >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
-                </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                        mode="single"
-                        selected={selectedDate ?? undefined}
-                        onSelect={handleDateSelect}
-                        initialFocus
-                    />
-                </PopoverContent>
-            </Popover>
-            <Select value={timeFilter} onValueChange={handleTimeFilterChange}>
-                <SelectTrigger className="w-full sm:w-[180px]">
-                    <SelectValue placeholder="Select time frame" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="all">All Time</SelectItem>
-                    <SelectItem value="today">Today</SelectItem>
-                    <SelectItem value="week">This Week</SelectItem>
-                    <SelectItem value="month">This Month</SelectItem>
-                </SelectContent>
-            </Select>
-        </div>
+     <div className="flex flex-col sm:flex-row flex-wrap items-center gap-2 w-full">
+        <Popover>
+            <PopoverTrigger asChild>
+            <Button
+                variant={"outline"}
+                className={cn(
+                    "w-full sm:w-auto justify-start text-left font-normal",
+                    !selectedDate && "text-muted-foreground"
+                )}
+            >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
+            </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                    mode="single"
+                    selected={selectedDate ?? undefined}
+                    onSelect={handleDateSelect}
+                    initialFocus
+                />
+            </PopoverContent>
+        </Popover>
+        <Select value={timeFilter} onValueChange={handleTimeFilterChange}>
+            <SelectTrigger className="w-full sm:w-[150px]">
+                <SelectValue placeholder="Select period" />
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem value="all">All Time</SelectItem>
+                <SelectItem value="today">Today</SelectItem>
+                <SelectItem value="week">This Week</SelectItem>
+                <SelectItem value="month">This Month</SelectItem>
+            </SelectContent>
+        </Select>
+        <Select value={clinicFilter} onValueChange={setClinicFilter}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+                 <Building className="mr-2 h-4 w-4 text-muted-foreground"/>
+                <SelectValue placeholder="Filter by clinic" />
+            </SelectTrigger>
+            <SelectContent>
+                {clinicNames.map(name => <SelectItem key={name} value={name}>{name}</SelectItem>)}
+            </SelectContent>
+        </Select>
+         <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+                <Badge className="mr-2 h-4 w-4 text-muted-foreground"/>
+                <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+                {appointmentStatuses.map(status => <SelectItem key={status} value={status}>{status}</SelectItem>)}
+            </SelectContent>
+        </Select>
+    </div>
   );
 
   return (
@@ -280,7 +308,7 @@ export function AnalyticsDashboard() {
 
         {/* Doctor Performance */}
         <Card>
-            <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <CardHeader className="flex flex-col items-start gap-4">
                 <div>
                     <CardTitle className="flex items-center gap-2"><Stethoscope/> Doctor Performance</CardTitle>
                     <CardDescription>Consultation and revenue metrics for each doctor.</CardDescription>
@@ -314,7 +342,7 @@ export function AnalyticsDashboard() {
                             )) : (
                                 <TableRow>
                                     <TableCell colSpan={5} className="text-center h-24">
-                                        No appointment data for the selected period.
+                                        No appointment data for the selected filters.
                                     </TableCell>
                                 </TableRow>
                             )}

@@ -6,7 +6,7 @@ import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import Image from 'next/image';
 import { Target, Eye, Users, Linkedin, Twitter, Instagram } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { getTeamMembers, type TeamMember } from '@/lib/team-members';
 import { getContent, type SiteContent } from '@/lib/content';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -30,6 +30,24 @@ export default function AboutUsPage() {
     }
     fetchData();
   }, []);
+  
+  const groupedTeamMembers = useMemo(() => {
+    const groupOrder: TeamMember['category'][] = ['Founder', 'Director', 'Independent Director', 'Investor', 'Other'];
+    const groups: { [key in TeamMember['category']]?: TeamMember[] } = {};
+
+    teamMembers.forEach(member => {
+        if (!groups[member.category]) {
+            groups[member.category] = [];
+        }
+        groups[member.category]!.push(member);
+    });
+    
+    return groupOrder.map(category => ({
+        category,
+        members: groups[category] || []
+    })).filter(group => group.members.length > 0);
+
+  }, [teamMembers]);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -85,35 +103,42 @@ export default function AboutUsPage() {
               <h2 className="text-3xl md:text-4xl font-headline font-bold">Meet Our Team</h2>
               <p className="text-lg text-muted-foreground mt-2">The minds behind the mission.</p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {isLoading ? (
-                Array.from({ length: 3 }).map((_, i) => (
-                  <Card key={i}><CardContent className="p-6 space-y-4"><Skeleton className="h-32 w-32 rounded-full mx-auto" /><Skeleton className="h-5 w-3/4 mx-auto" /><Skeleton className="h-4 w-1/2 mx-auto" /><Skeleton className="h-10 w-full mx-auto" /></CardContent></Card>
-                ))
+             {isLoading ? (
+                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <Card key={i}><CardContent className="p-6 space-y-4"><Skeleton className="h-32 w-32 rounded-full mx-auto" /><Skeleton className="h-5 w-3/4 mx-auto" /><Skeleton className="h-4 w-1/2 mx-auto" /><Skeleton className="h-10 w-full mx-auto" /></CardContent></Card>
+                    ))}
+                 </div>
               ) : (
-                teamMembers.map((member) => (
-                  <Card key={member.id} className="text-center hover:shadow-xl transition-shadow flex flex-col">
-                    <CardContent className="p-6 flex-grow">
-                      <div className="w-32 h-32 rounded-full mx-auto overflow-hidden border-4 border-primary/20 mb-4 relative">
-                          <Image src={member.image} alt={member.name} fill className="object-cover" data-ai-hint={member.dataAiHint} />
-                      </div>
-                      <h3 className="text-xl font-semibold font-headline">{member.name}</h3>
-                      <p className="text-primary font-medium">{member.title}</p>
-                      <p className="text-muted-foreground mt-2 text-sm">{member.bio}</p>
-                    </CardContent>
-                    {(member.linkedin || member.twitter || member.instagram) && (
-                         <CardFooter className="p-4 border-t bg-slate-50/70 justify-center">
-                            <div className="flex gap-4">
-                                {member.linkedin && <Link href={member.linkedin} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary"><Linkedin/></Link>}
-                                {member.twitter && <Link href={member.twitter} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary"><Twitter/></Link>}
-                                {member.instagram && <Link href={member.instagram} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary"><Instagram/></Link>}
-                            </div>
-                        </CardFooter>
-                    )}
-                  </Card>
-                ))
+                 groupedTeamMembers.map(group => (
+                    <div key={group.category} className="mb-12">
+                        <h3 className="text-2xl font-headline font-bold mb-6 text-center">{group.category}</h3>
+                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {group.members.map((member) => (
+                              <Card key={member.id} className="text-center hover:shadow-xl transition-shadow flex flex-col">
+                                <CardContent className="p-6 flex-grow">
+                                  <div className="w-32 h-32 rounded-full mx-auto overflow-hidden border-4 border-primary/20 mb-4 relative">
+                                      <Image src={member.image} alt={member.name} fill className="object-cover" data-ai-hint={member.dataAiHint} />
+                                  </div>
+                                  <h3 className="text-xl font-semibold font-headline">{member.name}</h3>
+                                  <p className="text-primary font-medium">{member.title}</p>
+                                  <p className="text-muted-foreground mt-2 text-sm">{member.bio}</p>
+                                </CardContent>
+                                {(member.linkedin || member.twitter || member.instagram) && (
+                                     <CardFooter className="p-4 border-t bg-slate-50/70 justify-center">
+                                        <div className="flex gap-4">
+                                            {member.linkedin && <Link href={member.linkedin} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary"><Linkedin/></Link>}
+                                            {member.twitter && <Link href={member.twitter} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary"><Twitter/></Link>}
+                                            {member.instagram && <Link href={member.instagram} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary"><Instagram/></Link>}
+                                        </div>
+                                    </CardFooter>
+                                )}
+                              </Card>
+                            ))}
+                        </div>
+                    </div>
+                 ))
               )}
-            </div>
           </div>
         </div>
       </main>

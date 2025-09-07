@@ -4,9 +4,12 @@
 
 // This file should be refactored to use a backend service like Firestore.
 
+export const teamMemberCategories = ['Founder', 'Director', 'Independent Director', 'Investor', 'Other'] as const;
+
 export type TeamMember = {
     id: string;
     name: string;
+    category: typeof teamMemberCategories[number];
     title: string;
     image: string;
     dataAiHint: string;
@@ -20,6 +23,7 @@ const initialTeam: TeamMember[] = [
     {
         id: '1',
         name: 'Dr. Sameer Sharma',
+        category: 'Founder',
         title: 'Founder & CEO',
         image: 'https://picsum.photos/seed/ceo/400/400',
         dataAiHint: "professional man",
@@ -30,6 +34,7 @@ const initialTeam: TeamMember[] = [
     {
         id: '2',
         name: 'Aisha Khan',
+        category: 'Director',
         title: 'Chief Technology Officer',
         image: 'https://picsum.photos/seed/cto/400/400',
         dataAiHint: "professional woman",
@@ -39,6 +44,7 @@ const initialTeam: TeamMember[] = [
     {
         id: '3',
         name: 'Raj Patel',
+        category: 'Director',
         title: 'Head of Operations',
         image: 'https://picsum.photos/seed/ops/400/400',
         dataAiHint: "smiling man",

@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
-import { getTeamMembers, addTeamMember, updateTeamMember, deleteTeamMember, type TeamMember } from '@/lib/team-members';
+import { getTeamMembers, addTeamMember, updateTeamMember, deleteTeamMember, type TeamMember, teamMemberCategories } from '@/lib/team-members';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
@@ -17,10 +17,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { PlusCircle, Edit, Trash2, Upload, Loader2, Link as LinkIcon } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const memberSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(1, 'Name is required.'),
+  category: z.enum(teamMemberCategories, { required_error: "A category is required." }),
   title: z.string().min(1, 'Title is required.'),
   bio: z.string().min(1, 'Bio is required.'),
   image: z.string().min(1, 'An image is required.'),
@@ -71,6 +73,7 @@ export default function TeamManagementPage() {
           form.reset({
             id: '',
             name: '',
+            category: undefined,
             title: '',
             bio: '',
             image: '',
@@ -175,6 +178,28 @@ export default function TeamManagementPage() {
                         <FormField control={form.control} name="name" render={({ field }) => (
                             <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
+
+                        <FormField
+                            control={form.control}
+                            name="category"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Category</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a category" />
+                                        </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {teamMemberCategories.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
                         <FormField control={form.control} name="title" render={({ field }) => (
                             <FormItem><FormLabel>Title / Role</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
@@ -233,7 +258,7 @@ export default function TeamManagementPage() {
                     </div>
                     <div className="flex-grow">
                         <CardTitle>{member.name}</CardTitle>
-                        <CardDescription>{member.title}</CardDescription>
+                        <CardDescription>{member.title} ({member.category})</CardDescription>
                     </div>
                 </CardHeader>
                 <CardContent className="flex-grow text-center sm:text-left">

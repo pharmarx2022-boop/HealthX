@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import Link from 'next/link';
@@ -73,7 +72,7 @@ export default function LoginPage() {
         setMagicLinkSent(true);
         toast({
             title: "Magic Link Sent!",
-            description: "A sign-in link has been sent to your email. (For demo, click 'Sign In' below)",
+            description: "A sign-in link has been sent to your email. Please check your inbox.",
         })
     } catch(error: any) {
         toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -190,11 +189,8 @@ export default function LoginPage() {
             ) : (
                 <div className="text-center space-y-4">
                     <MailCheck className="mx-auto h-12 w-12 text-green-500"/>
-                    <p>A sign-in link has been sent to <strong>{form.getValues('email')}</strong>.</p>
-                    <p className="text-sm text-muted-foreground">(For demonstration purposes, you can click the button below to sign in immediately.)</p>
-                    <Button onClick={handleSignIn} className="w-full" disabled={isSigningIn}>
-                        {isSigningIn ? <Loader2 className="animate-spin" /> : "Sign In"}
-                    </Button>
+                    <p className="font-medium">Check your inbox!</p>
+                    <p>A sign-in link has been sent to <br/><strong>{form.getValues('email')}</strong>.</p>
                      <Button variant="link" className="w-full" onClick={() => setMagicLinkSent(false)}>
                         Use a different email
                     </Button>

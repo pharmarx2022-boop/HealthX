@@ -65,7 +65,7 @@ export default function LoginPage() {
 
   const handleSendMagicLink = async (values: z.infer<typeof loginSchema>) => {
     try {
-        await sendOtp(values.email); // Re-using the same mock OTP sender
+        await sendOtp(values.email);
          if(values.referralCode) {
             sessionStorage.setItem('referralCode', values.referralCode);
         }
@@ -79,57 +79,6 @@ export default function LoginPage() {
     }
   }
 
-  const handleSignIn = async () => {
-    if (!selectedRole) return;
-    setIsSigningIn(true);
-    const email = form.getValues('email');
-    const referralCode = sessionStorage.getItem('referralCode') || undefined;
-
-    // Simulate clicking the magic link by using the mock OTP
-    setTimeout(() => { 
-        const { user, error, isNewUser } = signInWithOtp(email, '123456', selectedRole, referralCode);
-
-        if (user) {
-            sessionStorage.setItem('user', JSON.stringify(user));
-            if (referralCode) sessionStorage.removeItem('referralCode');
-            const dashboardPath = user.role === 'admin' ? '/admin' 
-                           : user.role === 'patient' ? '/patient/my-health'
-                           : `/${user.role}/dashboard`;
-
-            if (isNewUser) {
-                addNotification(user.id, {
-                    title: 'Welcome to HealthLink Hub!',
-                    message: 'Your account is ready. Complete your profile to get started.',
-                    icon: 'login',
-                    href: `/${user.role}/profile`
-                });
-            } else {
-                 addNotification(user.id, {
-                    title: 'Login Successful',
-                    message: 'You have successfully logged in.',
-                    icon: 'login',
-                    href: dashboardPath
-                });
-            }
-             if (user.status === 'pending') {
-                toast({
-                    title: "Account Pending Approval",
-                    description: "Some features are disabled until admin approval.",
-                    duration: 9000,
-                });
-            }
-            router.push(dashboardPath);
-
-        } else {
-            toast({
-                title: "Login Failed",
-                description: error || "An unknown error occurred.",
-                variant: "destructive"
-            });
-        }
-        setIsSigningIn(false);
-    }, 1000);
-  }
   
   const roleDisplayName = selectedRole ? (selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)).replace('-coordinator', ' Coordinator') : '';
 

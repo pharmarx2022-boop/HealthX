@@ -2,22 +2,7 @@
 
 'use client';
 
-export const mockFamilyMembers = [
-    {
-        id: 'family1',
-        name: 'Rohan Sharma',
-        relationship: 'Spouse',
-        dob: '1988-05-10',
-        sex: 'Male'
-    },
-    {
-        id: 'family2',
-        name: 'Priya Sharma',
-        relationship: 'Child',
-        dob: '2015-11-22',
-        sex: 'Female'
-    },
-];
+export const mockFamilyMembers: any[] = [];
 
 const FAMILY_KEY_PREFIX = 'familyMembers_'; // Per-user storage
 

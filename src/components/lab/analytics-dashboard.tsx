@@ -6,14 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart';
 import { FileText, Gift, Banknote } from 'lucide-react';
 
-const chartData = [
-  { month: 'January', reports: 32 },
-  { month: 'February', reports: 45 },
-  { month: 'March', reports: 38 },
-  { month: 'April', reports: 55 },
-  { month: 'May', reports: 49 },
-  { month: 'June', reports: 62 },
-];
+const chartData: any[] = [];
 
 const chartConfig = {
   reports: {
@@ -25,19 +18,19 @@ const chartConfig = {
 const statCards = [
     {
         title: 'Total HealthPoints Collected',
-        value: 'INR 12,450',
+        value: 'INR 0.00',
         icon: Banknote,
         description: 'All-time points collected.',
     },
     {
         title: 'Reports Uploaded',
-        value: '281',
+        value: '0',
         icon: FileText,
         description: 'Total reports uploaded for patients.',
     },
     {
         title: 'Total Commission Earned',
-        value: 'INR 1,500',
+        value: 'INR 0.00',
         icon: Gift,
         description: 'From referring new partners.',
     }
@@ -66,21 +59,25 @@ export function AnalyticsDashboard() {
                 <CardDescription>Your report upload volume over the past 6 months.</CardDescription>
             </CardHeader>
             <CardContent>
-                <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
-                <BarChart accessibilityLayer data={chartData}>
-                    <CartesianGrid vertical={false} />
-                    <XAxis
-                        dataKey="month"
-                        tickLine={false}
-                        tickMargin={10}
-                        axisLine={false}
-                        tickFormatter={(value) => value.slice(0, 3)}
-                    />
-                    <YAxis />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar dataKey="reports" fill="var(--color-reports)" radius={4} />
-                </BarChart>
-                </ChartContainer>
+                 {chartData.length > 0 ? (
+                    <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+                        <BarChart accessibilityLayer data={chartData}>
+                            <CartesianGrid vertical={false} />
+                            <XAxis
+                                dataKey="month"
+                                tickLine={false}
+                                tickMargin={10}
+                                axisLine={false}
+                                tickFormatter={(value) => value.slice(0, 3)}
+                            />
+                            <YAxis />
+                            <ChartTooltip content={<ChartTooltipContent />} />
+                            <Bar dataKey="reports" fill="var(--color-reports)" radius={4} />
+                        </BarChart>
+                    </ChartContainer>
+                ) : (
+                    <div className="text-center text-muted-foreground p-8">No report data yet.</div>
+                )}
             </CardContent>
         </Card>
     </div>

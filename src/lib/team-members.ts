@@ -19,39 +19,7 @@ export type TeamMember = {
     instagram?: string;
 }
 
-const initialTeam: TeamMember[] = [
-    {
-        id: '1',
-        name: 'Dr. Sameer Sharma',
-        category: 'Founder',
-        title: 'Founder & CEO',
-        image: 'https://picsum.photos/seed/ceo/400/400',
-        dataAiHint: "professional man",
-        bio: 'With a vision to revolutionize healthcare access, Dr. Sharma founded HealthX to bridge the gap between patients and providers through technology.',
-        linkedin: 'https://linkedin.com',
-        twitter: 'https://x.com'
-    },
-    {
-        id: '2',
-        name: 'Aisha Khan',
-        category: 'Director',
-        title: 'Chief Technology Officer',
-        image: 'https://picsum.photos/seed/cto/400/400',
-        dataAiHint: "professional woman",
-        bio: 'Aisha leads our engineering team, driving the development of our innovative platform with a passion for user-centric design and scalable solutions.',
-        linkedin: 'https://linkedin.com',
-    },
-    {
-        id: '3',
-        name: 'Raj Patel',
-        category: 'Director',
-        title: 'Head of Operations',
-        image: 'https://picsum.photos/seed/ops/400/400',
-        dataAiHint: "smiling man",
-        bio: 'Raj ensures the seamless operation of the HealthX ecosystem, managing partner relations and ensuring a high-quality experience for all users.',
-        instagram: 'https://instagram.com'
-    }
-];
+const initialTeam: TeamMember[] = [];
 
 const TEAM_KEY = 'teamMembers';
 

@@ -11,6 +11,8 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { mockPatientData } from '@/lib/mock-data';
+import { getTransactionHistory } from '@/lib/transactions';
 
 const AdminAssistedRefundInputSchema = z.object({
   userId: z.string().describe('The ID of the user requesting the refund.'),
@@ -53,28 +55,6 @@ const refundVerificationPrompt = ai.definePrompt({
   Verification Result: `,
 });
 
-// Mock database
-const MOCK_USER_DATA: Record<string, { consultationHistory: string[], walletBalance: number }> = {
-    'user_abc123': {
-        consultationHistory: [
-            'Consulted Dr. Sharma for cardiology on 2023-10-15. Paid INR 1200.',
-            'Follow-up with Dr. Sharma on 2023-10-22. Paid INR 800.',
-            'Consulted Dr. Singh for dermatology on 2023-11-05. Paid INR 1500.'
-        ],
-        walletBalance: 250,
-    },
-    'user_def456': {
-        consultationHistory: ['No recent consultations.'],
-        walletBalance: 1000,
-    },
-    'user_ghi789': {
-        consultationHistory: [
-            'Consulted Dr. Patel for pediatrics on 2023-11-10. Paid INR 900.',
-        ],
-        walletBalance: 50,
-    }
-}
-
 const getUserConsultationHistory = ai.defineTool({
   name: 'getUserConsultationHistory',
   description: 'Retrieves a summary of the user consultation history.',
@@ -84,9 +64,10 @@ const getUserConsultationHistory = ai.defineTool({
   outputSchema: z.string(),
 },
 async (input) => {
-    const userData = MOCK_USER_DATA[input.userId];
-    if (userData) {
-      return userData.consultationHistory.join(' ');
+    const allAppointments = JSON.parse(sessionStorage.getItem('mockPatients') || '[]');
+    const userAppointments = allAppointments.filter((appt: any) => appt.id === input.userId || appt.name === input.userId); // Loosely match by name for demo
+    if (userAppointments.length > 0) {
+        return userAppointments.map((appt: any) => `Consulted on ${appt.appointmentDate} for ${appt.consultation}. Paid INR ${appt.consultationFee}.`).join(' ');
     }
     return `No consultation history found for user ${input.userId}.`;
   }
@@ -101,8 +82,8 @@ const getUserWalletBalance = ai.defineTool({
   outputSchema: z.number(),
 },
 async (input) => {
-    const userData = MOCK_USER_DATA[input.userId];
-    return userData?.walletBalance ?? 0;
+    const { balance } = getTransactionHistory(input.userId);
+    return balance;
   }
 );
 

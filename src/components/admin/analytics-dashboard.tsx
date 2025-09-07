@@ -17,15 +17,9 @@ import { initialDoctors, initialLabs, initialPharmacies, mockPatientData, initia
 import { cn } from '@/lib/utils';
 import { getAllUsersForAdmin, type UserData } from '@/lib/auth';
 import { Badge } from '../ui/badge';
+import { getWithdrawalRequests } from '@/lib/commission-wallet';
 
-const userGrowthData = [
-  { month: 'January', users: 12 },
-  { month: 'February', users: 19 },
-  { month: 'March', users: 15 },
-  { month: 'April', users: 21 },
-  { month: 'May', users: 18 },
-  { month: 'June', users: 25 },
-];
+const userGrowthData: any[] = [];
 
 const userGrowthChartConfig = {
   users: {
@@ -34,12 +28,7 @@ const userGrowthChartConfig = {
   },
 } satisfies ChartConfig;
 
-const revenueData = [
-  { name: 'Doctor Consultations', value: 400, fill: 'var(--color-consultations)' },
-  { name: 'Lab Commissions', value: 300, fill: 'var(--color-labs)' },
-  { name: 'Pharmacy Commissions', value: 300, fill: 'var(--color-pharmacies)' },
-  { name: 'Health Coordinator Fees', value: 200, fill: 'var(--color-coordinators)' },
-];
+const revenueData: any[] = [];
 
 const revenueChartConfig = {
   consultations: { label: 'Doctor Consultations', color: 'hsl(var(--chart-1))' },
@@ -48,54 +37,7 @@ const revenueChartConfig = {
   coordinators: { label: 'Health Coordinator Fees', color: 'hsl(var(--chart-4))' },
 } satisfies ChartConfig;
 
-
-const baseStatCards = [
-    {
-        title: 'Total Users',
-        value: '1,254',
-        icon: Users,
-        description: '+20.1% from last month',
-    },
-    {
-        title: 'Active Partners',
-        value: '78',
-        icon: Briefcase,
-        description: '+180.1% from last month',
-    },
-    {
-        title: 'Pending Approvals',
-        value: '5',
-        icon: ShieldCheck,
-        description: '3 doctors, 2 labs',
-    }
-];
-
-const recentActivities = [
-    {
-        icon: Stethoscope,
-        name: 'Dr. Priya Patel',
-        action: 'joined as a new doctor.',
-        time: '2024-08-15T10:00:00Z'
-    },
-    {
-        icon: Pill,
-        name: 'Wellness Forever',
-        action: 'had their account approved.',
-        time: '2024-08-15T09:30:00Z'
-    },
-    {
-        icon: Users,
-        name: 'Rohan Sharma',
-        action: 'completed an appointment.',
-        time: '2024-08-15T08:00:00Z'
-    },
-    {
-        icon: Beaker,
-        name: 'Metropolis Labs',
-        action: 'requested a withdrawal of INR 5,000.',
-        time: '2024-08-14T15:00:00Z'
-    }
-]
+const recentActivities: any[] = [];
 
 const appointmentStatuses = ['All', 'Done', 'Upcoming', 'Cancelled', 'Absent'];
 const refundStatuses = ['All', 'Refunded', 'Not Refunded'];
@@ -104,6 +46,7 @@ export function AnalyticsDashboard() {
   const [timeFilter, setTimeFilter] = useState('all');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [allUsers, setAllUsers] = useState<UserData[]>([]);
+  const [pendingApprovals, setPendingApprovals] = useState<any[]>([]);
   
   // New filters for doctor performance
   const [doctorFilter, setDoctorFilter] = useState('All');
@@ -115,13 +58,17 @@ export function AnalyticsDashboard() {
   React.useEffect(() => {
     const users = getAllUsersForAdmin();
     setAllUsers(users);
+    getWithdrawalRequests().then(reqs => setPendingApprovals(reqs.filter(r => r.status === 'pending')));
   }, []);
   
-  const todaysConsultations = useMemo(() => {
-    return mockPatientData.filter(appt => 
+  const stats = useMemo(() => {
+    const totalUsers = allUsers.length;
+    const activePartners = allUsers.filter(u => u.status === 'approved' && u.role !== 'patient').length;
+    const todaysConsultations = mockPatientData.filter(appt => 
         isToday(new Date(appt.appointmentDate)) && appt.status === 'done'
     ).length;
-  }, []);
+    return { totalUsers, activePartners, todaysConsultations };
+  }, [allUsers]);
 
   const timeFilteredAppointments = useMemo(() => {
      return mockPatientData.filter(appt => {
@@ -180,19 +127,8 @@ export function AnalyticsDashboard() {
   }, [timeFilteredAppointments, clinicFilter, statusFilter, doctorFilter, refundFilter]);
   
   const partnerPerformanceData = useMemo(() => {
-    // In a real app, this data would come from aggregated transaction logs.
-    // For this mock-up, we generate semi-random data but ensure it's consistent.
-    const labs = initialLabs.map(lab => {
-      const transactions = Math.floor(Math.random() * 50);
-      const commission = transactions * 25; // Mock commission logic
-      return { id: lab.id, name: lab.name, type: 'Lab', transactions: transactions, commission: `INR ${commission.toFixed(2)}` };
-    });
-
-    const pharmacies = initialPharmacies.map(pharmacy => {
-       const transactions = Math.floor(Math.random() * 100);
-       const commission = transactions * 12.5; // Mock commission logic
-      return { id: pharmacy.id, name: pharmacy.name, type: 'Pharmacy', transactions: transactions, commission: `INR ${commission.toFixed(2)}` };
-    });
+    const labs = initialLabs.map(lab => ({ id: lab.id, name: lab.name, type: 'Lab', transactions: 0, commission: 'INR 0.00' }));
+    const pharmacies = initialPharmacies.map(pharmacy => ({ id: pharmacy.id, name: pharmacy.name, type: 'Pharmacy', transactions: 0, commission: 'INR 0.00' }));
     
     const healthCoordinatorsData = timeFilteredAppointments
         .filter(appt => appt.healthCoordinatorId)
@@ -317,28 +253,45 @@ export function AnalyticsDashboard() {
                     <CheckCircle className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                    <div className="text-2xl font-bold">{todaysConsultations}</div>
-                    <p className="text-xs text-muted-foreground">Total consultations completed today.</p>
+                    <div className="text-2xl font-bold">{stats.todaysConsultations}</div>
+                    <p className="text-xs text-muted-foreground">Consultations completed today.</p>
                 </CardContent>
             </Card>
-            {baseStatCards.map((card) => (
-                 <Card key={card.title}>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
-                        <card.icon className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{card.value}</div>
-                        <p className="text-xs text-muted-foreground">{card.description}</p>
-                    </CardContent>
-                </Card>
-            ))}
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold">{stats.totalUsers}</div>
+                    <p className="text-xs text-muted-foreground">Total registered users.</p>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Active Partners</CardTitle>
+                    <Briefcase className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold">{stats.activePartners}</div>
+                    <p className="text-xs text-muted-foreground">Approved partners on the platform.</p>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Pending Approvals</CardTitle>
+                    <ShieldCheck className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold">{pendingApprovals.length}</div>
+                    <p className="text-xs text-muted-foreground">New partners awaiting approval.</p>
+                </CardContent>
+            </Card>
         </div>
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
              <Card className="lg:col-span-2">
                 <CardHeader>
                     <CardTitle>New User Growth</CardTitle>
-                    <CardDescription>January - June 2024</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <ChartContainer config={userGrowthChartConfig} className="min-h-[200px] w-full">
@@ -361,7 +314,6 @@ export function AnalyticsDashboard() {
             <Card>
                 <CardHeader>
                     <CardTitle>Revenue Breakdown</CardTitle>
-                    <CardDescription>Sources of all platform income.</CardDescription>
                 </CardHeader>
                 <CardContent className="flex justify-center">
                     <ChartContainer config={revenueChartConfig} className="min-h-[200px] w-full max-w-[250px]">
@@ -450,13 +402,17 @@ export function AnalyticsDashboard() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {partnerPerformanceData.pharmacies.map((p) => (
+                            {partnerPerformanceData.pharmacies.length > 0 ? partnerPerformanceData.pharmacies.map((p) => (
                                 <TableRow key={p.id}>
                                     <TableCell className="font-medium">{p.name}</TableCell>
                                     <TableCell className="text-center">{p.transactions}</TableCell>
                                     <TableCell className="text-right">{p.commission}</TableCell>
                                 </TableRow>
-                            ))}
+                            )) : (
+                                <TableRow>
+                                    <TableCell colSpan={3} className="h-24 text-center">No pharmacy data yet.</TableCell>
+                                </TableRow>
+                            )}
                         </TableBody>
                      </Table>
                  </CardContent>
@@ -476,13 +432,17 @@ export function AnalyticsDashboard() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {partnerPerformanceData.labs.map((p) => (
+                            {partnerPerformanceData.labs.length > 0 ? partnerPerformanceData.labs.map((p) => (
                                 <TableRow key={p.id}>
                                     <TableCell className="font-medium">{p.name}</TableCell>
                                     <TableCell className="text-center">{p.transactions}</TableCell>
                                     <TableCell className="text-right">{p.commission}</TableCell>
                                 </TableRow>
-                            ))}
+                            )) : (
+                                <TableRow>
+                                    <TableCell colSpan={3} className="h-24 text-center">No lab data yet.</TableCell>
+                                </TableRow>
+                            )}
                         </TableBody>
                      </Table>
                  </CardContent>
@@ -536,7 +496,7 @@ export function AnalyticsDashboard() {
             </CardHeader>
             <CardContent>
                 <div className="space-y-6">
-                    {recentActivities.map((activity, index) => (
+                    {recentActivities.length > 0 ? recentActivities.map((activity, index) => (
                         <div key={index} className="flex items-center gap-4">
                             <div className="bg-slate-100 p-2 rounded-full">
                                 <activity.icon className="h-5 w-5 text-muted-foreground" />
@@ -548,7 +508,9 @@ export function AnalyticsDashboard() {
                                 {format(new Date(activity.time), 'PP, p')}
                             </div>
                         </div>
-                    ))}
+                    )) : (
+                        <p className="text-center text-muted-foreground py-4">No recent activity.</p>
+                    )}
                 </div>
             </CardContent>
         </Card>

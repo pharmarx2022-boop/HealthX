@@ -6,14 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart';
 import { CalendarCheck, Users, Banknote } from 'lucide-react';
 
-const chartData = [
-  { month: 'January', bookings: 12 },
-  { month: 'February', bookings: 19 },
-  { month: 'March', bookings: 15 },
-  { month: 'April', bookings: 21 },
-  { month: 'May', bookings: 18 },
-  { month: 'June', bookings: 25 },
-];
+const chartData: any[] = [];
 
 const chartConfig = {
   bookings: {
@@ -25,19 +18,19 @@ const chartConfig = {
 const statCards = [
     {
         title: 'Total Appointments Booked',
-        value: '110',
+        value: '0',
         icon: CalendarCheck,
         description: 'All-time appointments booked.',
     },
     {
         title: 'Patients Assisted',
-        value: '45',
+        value: '0',
         icon: Users,
         description: 'Unique patients you have helped.',
     },
     {
         title: 'Total Commission Earned',
-        value: 'INR 5,500',
+        value: 'INR 0.00',
         icon: Banknote,
         description: 'Based on all completed bookings.',
     }
@@ -66,21 +59,25 @@ export function AnalyticsDashboard() {
                  <CardDescription>Your booking volume over the past 6 months.</CardDescription>
             </CardHeader>
             <CardContent>
-                <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
-                <BarChart accessibilityLayer data={chartData}>
-                    <CartesianGrid vertical={false} />
-                    <XAxis
-                        dataKey="month"
-                        tickLine={false}
-                        tickMargin={10}
-                        axisLine={false}
-                        tickFormatter={(value) => value.slice(0, 3)}
-                    />
-                    <YAxis />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar dataKey="bookings" fill="var(--color-bookings)" radius={4} />
-                </BarChart>
-                </ChartContainer>
+                 {chartData.length > 0 ? (
+                    <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+                        <BarChart accessibilityLayer data={chartData}>
+                            <CartesianGrid vertical={false} />
+                            <XAxis
+                                dataKey="month"
+                                tickLine={false}
+                                tickMargin={10}
+                                axisLine={false}
+                                tickFormatter={(value) => value.slice(0, 3)}
+                            />
+                            <YAxis />
+                            <ChartTooltip content={<ChartTooltipContent />} />
+                            <Bar dataKey="bookings" fill="var(--color-bookings)" radius={4} />
+                        </BarChart>
+                    </ChartContainer>
+                 ) : (
+                    <div className="text-center text-muted-foreground p-8">No booking data yet.</div>
+                 )}
             </CardContent>
         </Card>
     </div>

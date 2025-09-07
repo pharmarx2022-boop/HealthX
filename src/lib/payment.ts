@@ -1,5 +1,4 @@
 
-
 'use client';
 
 /**
@@ -31,12 +30,16 @@ type PaymentResult = {
 export async function processPayment(details: PaymentDetails): Promise<PaymentResult> {
     console.log(`Initiating payment for ${details.currency} ${details.amount} for patient ${details.patientId}...`);
     
-    //
+    // In a real app, you would use your secret keys from environment variables like this:
+    const apiKey = process.env.PAYMENT_GATEWAY_API_KEY;
+    const apiSecret = process.env.PAYMENT_GATEWAY_API_SECRET;
+
     // --- REAL PAYMENT GATEWAY INTEGRATION LOGIC GOES HERE ---
-    // 1. Create an order/intent with your payment provider.
-    // 2. Open the payment provider's checkout/modal.
-    // 3. Handle the response (success or failure) from the provider.
-    // 4. Return the result.
+    // 1. Check if apiKey and apiSecret are available.
+    // 2. Create an order/intent with your payment provider using the keys.
+    // 3. Open the payment provider's checkout/modal.
+    // 4. Handle the response (success or failure) from the provider.
+    // 5. Return the result.
     //
 
     // Simulate network delay and API call

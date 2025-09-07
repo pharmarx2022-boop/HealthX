@@ -5,21 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { WithdrawalRequests } from '@/components/admin/withdrawal-requests';
 import { TransactionHistory } from '@/components/admin/transaction-history';
 import { ApprovalRequests } from '@/components/admin/approval-requests';
-import dynamic from 'next/dynamic';
-import { Loader2 } from 'lucide-react';
-
-const RefundTool = dynamic(() => import('@/components/admin/refund-tool').then(mod => mod.RefundTool), {
-  ssr: false,
-  loading: () => <div className="flex items-center justify-center p-8"><Loader2 className="animate-spin" /></div>,
-});
-
 
 export default function AdminPage() {
   return (
      <div className="space-y-8">
         <div className="mb-8">
             <h1 className="text-3xl font-headline font-bold">Admin Dashboard</h1>
-            <p className="text-muted-foreground">Manage users, approvals, and refunds.</p>
+            <p className="text-muted-foreground">Manage users, approvals, and withdrawals.</p>
         </div>
         
         <div className="grid lg:grid-cols-3 gap-8 items-start">
@@ -33,17 +25,6 @@ export default function AdminPage() {
                     </CardHeader>
                     <CardContent>
                         <ApprovalRequests />
-                    </CardContent>
-                </Card>
-                <Card className="shadow-sm">
-                    <CardHeader>
-                        <CardTitle>AI-Assisted Refund Tool</CardTitle>
-                        <CardDescription>
-                            Use this tool to quickly verify user refund requests by looking up consultation history and wallet balance.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <RefundTool />
                     </CardContent>
                 </Card>
                 <Card className="shadow-sm">

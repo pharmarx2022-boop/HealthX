@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { HeartPulse, Menu, X, UserCircle, LogOut, Settings, Briefcase, Users, Pill, Beaker, Gift, Bell, Calendar, LayoutDashboard, Info, Mail, ShieldCheck, FileText, ArrowLeft } from 'lucide-react';
+import { HeartPulse, Menu, X, UserCircle, LogOut, Settings, Briefcase, Users, Pill, Beaker, Gift, Bell, Calendar, LayoutDashboard, Info, Mail, ShieldCheck, FileText, ArrowLeft, Wallet, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from '@/components/ui/sheet';
 import { useState, useEffect } from 'react';
@@ -37,7 +37,9 @@ export function Header() {
   const handleLogout = () => {
     if (typeof window !== 'undefined') {
       sessionStorage.removeItem('user');
-      sessionStorage.removeItem(`notifications_${user.id}`);
+      if(user) {
+        sessionStorage.removeItem(`notifications_${user.id}`);
+      }
     }
     setUser(null);
     router.push('/');
@@ -99,12 +101,30 @@ export function Header() {
                         </DropdownMenuItem>
                     </>
                 )}
-                {user.role === 'patient' && (
+                 {user.role === 'patient' && (
                     <>
                          <DropdownMenuItem asChild>
                             <Link href="/patient/profile">
                                 <Settings className="mr-2" />
                                 <span>Manage Profile</span>
+                            </Link>
+                        </DropdownMenuItem>
+                         <DropdownMenuItem asChild>
+                            <Link href="/patient/my-health#appointments">
+                               <Calendar className="mr-2" />
+                                <span>Your Appointments</span>
+                            </Link>
+                        </DropdownMenuItem>
+                         <DropdownMenuItem asChild>
+                            <Link href="/patient/my-health#reports">
+                                <FileText className="mr-2" />
+                                <span>My Reports</span>
+                            </Link>
+                        </DropdownMenuItem>
+                         <DropdownMenuItem asChild>
+                            <Link href="/patient/my-health#wallet">
+                                <Wallet className="mr-2" />
+                                <span>Health Points</span>
                             </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
@@ -161,7 +181,7 @@ export function Header() {
         <>
           <Button variant="ghost" asChild className="justify-start text-lg">
             <Link href={dashboardPath} onClick={() => setIsSheetOpen(false)}>
-              <UserCircle className="mr-2" />
+              <LayoutDashboard className="mr-2" />
               Dashboard
             </Link>
           </Button>
@@ -187,6 +207,31 @@ export function Header() {
                         <Link href="/patient/profile" onClick={() => setIsSheetOpen(false)}>
                             <Settings className="mr-2" />
                             Manage Profile
+                        </Link>
+                    </Button>
+                    <Separator className="my-1" />
+                    <Button variant="ghost" asChild className="justify-start text-lg">
+                        <Link href="/patient/my-health#appointments" onClick={() => setIsSheetOpen(false)}>
+                           <Calendar className="mr-2" />
+                           Your Appointments
+                        </Link>
+                    </Button>
+                     <Button variant="ghost" asChild className="justify-start text-lg">
+                        <Link href="/patient/my-health#reports" onClick={() => setIsSheetOpen(false)}>
+                           <FileText className="mr-2" />
+                           My Reports
+                        </Link>
+                    </Button>
+                     <Button variant="ghost" asChild className="justify-start text-lg">
+                        <Link href="/patient/my-health#wallet" onClick={() => setIsSheetOpen(false)}>
+                           <Wallet className="mr-2" />
+                           Health Points
+                        </Link>
+                    </Button>
+                     <Button variant="ghost" asChild className="justify-start text-lg">
+                        <Link href="/patient/my-health#reminders" onClick={() => setIsSheetOpen(false)}>
+                           <Bell className="mr-2" />
+                           Reminders
                         </Link>
                     </Button>
                     <Button variant="ghost" asChild className="justify-start text-lg">
@@ -221,6 +266,7 @@ export function Header() {
                     </Link>
                 </Button>
            )}
+           <Separator className="my-1"/>
           <Button variant="ghost" className="justify-start text-lg" onClick={handleLogout}>
             <LogOut className="mr-2" />
             Logout

@@ -4,6 +4,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { User, Calendar, Clock, Stethoscope, RefreshCw, Bell, Star, Users, Wallet, History, FileText, Loader2, Store, KeyRound, Share2, Gift, Briefcase, Pill, Trash2, Beaker } from 'lucide-react';
 import { useState, useEffect, useMemo, useRef } from 'react';
+import { useSearchParams } from 'next/navigation'
 import { mockPatientData as mockPatients } from '@/lib/mock-data';
 import { initialDoctors, initialLabs, initialPharmacies } from '@/lib/mock-data';
 import { format } from 'date-fns';
@@ -38,6 +39,7 @@ type ReviewTarget = {
 
 export function MyHealthPage() {
     const { toast } = useToast();
+    const searchParams = useSearchParams();
     const [myAppointments, setMyAppointments] = useState<any[]>([]);
     const [isClient, setIsClient] = useState(false);
     const [isReviewOpen, setIsReviewOpen] = useState(false);
@@ -47,7 +49,14 @@ export function MyHealthPage() {
     const [comment, setComment] = useState('');
     const [user, setUser] = useState<any | null>(null);
     const [healthReminders, setHealthReminders] = useState<HealthReminder[]>([]);
+    const [activeTab, setActiveTab] = useState('appointments');
 
+    useEffect(() => {
+        const hash = window.location.hash.replace('#', '');
+        if (['appointments', 'reports', 'reminders', 'family', 'wallet'].includes(hash)) {
+            setActiveTab(hash);
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         setIsClient(true);
@@ -200,67 +209,36 @@ export function MyHealthPage() {
         <>
             <div className="space-y-8">
                 <div className="mb-4">
-                    <h1 className="text-3xl font-headline font-bold">My Health</h1>
-                    <p className="text-muted-foreground">Manage your appointments and health records.</p>
+                    <h1 className="text-3xl font-headline font-bold">My Health Dashboard</h1>
+                    <p className="text-muted-foreground">Manage your appointments, reports, and more.</p>
                 </div>
+                
+                 <Card className="shadow-sm">
+                    <CardHeader className="flex flex-row items-center gap-4">
+                        <Briefcase className="w-8 h-8 text-primary"/>
+                        <div>
+                            <CardTitle>Book New Appointment</CardTitle>
+                            <CardDescription>
+                                Find doctors, labs, and pharmacies near you.
+                            </CardDescription>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                            <NearbySearch />
+                    </CardContent>
+                </Card>
 
-                <div className="grid lg:grid-cols-3 gap-8 items-start">
-                    <div className="lg:col-span-2 space-y-8">
-                         <Card className="shadow-sm">
-                            <CardHeader className="flex flex-row items-center gap-4">
-                                <Briefcase className="w-8 h-8 text-primary"/>
-                                <div>
-                                    <CardTitle>Book New Appointment</CardTitle>
-                                    <CardDescription>
-                                       Find doctors, labs, and pharmacies near you.
-                                    </CardDescription>
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                 <NearbySearch />
-                            </CardContent>
-                        </Card>
-                    </div>
-                    <div className="lg:col-span-1 space-y-8">
-                         <Card className="shadow-sm">
-                            <CardHeader className="flex flex-row items-center gap-4">
-                                <Gift className="w-8 h-8 text-primary" />
-                                <div>
-                                    <CardTitle>Health Points</CardTitle>
-                                    <CardDescription>
-                                        Your bonus rewards.
-                                    </CardDescription>
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-3xl font-bold">INR {transactionHistory.balance.toFixed(2)}</p>
-                                <p className="text-sm text-muted-foreground mt-1">Available to redeem.</p>
-                            </CardContent>
-                            <CardFooter className="flex flex-col gap-2">
-                                <Button variant="link" className="p-0 h-auto" onClick={() => setIsHistoryOpen(true)}>
-                                    <History className="mr-2"/> View History
-                                </Button>
-                                 <Alert className="text-center">
-                                    <KeyRound className="h-4 w-4"/>
-                                    <AlertTitle>How to Redeem?</AlertTitle>
-                                    <AlertDescription>
-                                        Ask any partner to initiate a redemption. You will receive an OTP on your app notification to confirm the payment.
-                                    </AlertDescription>
-                                </Alert>
-                            </CardFooter>
-                        </Card>
-                    </div>
-                </div>
                 <Card>
                     <CardHeader>
                         <CardTitle>Patient Account</CardTitle>
                         <CardDescription>All your health information in one place.</CardDescription>
                     </CardHeader>
                     <CardContent>
-                         <Tabs defaultValue="appointments" className="w-full">
-                            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 mb-6">
+                         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                            <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 mb-6">
                                 <TabsTrigger value="appointments"><Calendar className="mr-2 h-4 w-4"/>Appointments</TabsTrigger>
                                 <TabsTrigger value="reports"><FileText className="mr-2 h-4 w-4"/>Reports</TabsTrigger>
+                                <TabsTrigger value="wallet"><Wallet className="mr-2 h-4 w-4" />Health Points</TabsTrigger>
                                 <TabsTrigger value="reminders"><Bell className="mr-2 h-4 w-4"/>Reminders</TabsTrigger>
                                 <TabsTrigger value="family"><Users className="mr-2 h-4 w-4"/>Family</TabsTrigger>
                             </TabsList>
@@ -319,6 +297,35 @@ export function MyHealthPage() {
                             </TabsContent>
                              <TabsContent value="reports">
                                 <MyReports />
+                            </TabsContent>
+                             <TabsContent value="wallet">
+                                 <Card className="shadow-sm max-w-sm mx-auto">
+                                    <CardHeader className="flex flex-row items-center gap-4">
+                                        <Gift className="w-8 h-8 text-primary" />
+                                        <div>
+                                            <CardTitle>Health Points</CardTitle>
+                                            <CardDescription>
+                                                Your bonus rewards.
+                                            </CardDescription>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <p className="text-3xl font-bold">INR {transactionHistory.balance.toFixed(2)}</p>
+                                        <p className="text-sm text-muted-foreground mt-1">Available to redeem.</p>
+                                    </CardContent>
+                                    <CardFooter className="flex flex-col gap-2">
+                                        <Button variant="link" className="p-0 h-auto" onClick={() => setIsHistoryOpen(true)}>
+                                            <History className="mr-2"/> View History
+                                        </Button>
+                                        <Alert className="text-center">
+                                            <KeyRound className="h-4 w-4"/>
+                                            <AlertTitle>How to Redeem?</AlertTitle>
+                                            <AlertDescription>
+                                                Ask any partner to initiate a redemption. You will receive an OTP on your app notification to confirm the payment.
+                                            </AlertDescription>
+                                        </Alert>
+                                    </CardFooter>
+                                </Card>
                             </TabsContent>
                             <TabsContent value="reminders">
                                 {healthReminders.length > 0 ? (

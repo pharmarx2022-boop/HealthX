@@ -25,13 +25,46 @@ export async function sendOtp(email: string) {
 // In production, this would query your database.
 export async function checkUserExists(email: string, role: string): Promise<UserData | null> {
     console.log("Checking user existence would be a backend call.");
-    return null;
+    if (typeof window === 'undefined') return null;
+
+    const key = `${role}sData`; // e.g., doctorsData, patientsData
+    const allUsersOfType = JSON.parse(localStorage.getItem(key) || '[]');
+    const user = allUsersOfType.find((u: any) => u.email === email);
+    
+    // Special check for admin user
+    if (role === 'admin' && email === 'admin@healthx.com') {
+        return {
+            id: 'admin_user',
+            email: 'admin@healthx.com',
+            role: 'admin',
+            fullName: 'Platform Administrator',
+            phone: '0000000000',
+            password: 'password', // Mock password
+            status: 'approved',
+            dateJoined: new Date().toISOString(),
+        };
+    }
+
+    return user || null;
 }
 
 // In production, this would be a secure API call to your backend.
 export async function signInWithPassword(email: string, password: string, role: string) {
-    console.log("Password sign-in would be a secure backend call.");
-    return { user: null, error: "Backend not connected. This is a placeholder." };
+    if (typeof window === 'undefined') {
+        return { user: null, error: "Sign in must be done on the client-side." };
+    }
+    
+    const user = await checkUserExists(email, role);
+
+    if (!user) {
+        return { user: null, error: "No account found with that email for this role." };
+    }
+
+    if (user.password !== password) {
+         return { user: null, error: "Incorrect password." };
+    }
+
+    return { user, error: null };
 }
 
 // In production, this would be a secure API call to your backend.
@@ -49,7 +82,20 @@ export function isRegistrationNumberUnique(role: 'doctor' | 'lab' | 'pharmacy', 
 export const isAadharNumberUnique = (aadharNumber: string, currentUserId: string): boolean => { return true; }
 export function getAllPendingUsers(): any[] { return []; }
 export function updateUserStatus(userId: string, role: string, newStatus: 'approved' | 'rejected') { return true; }
-export function verifyAdmin(): boolean { return false; }
+
+export function verifyAdmin(): boolean {
+    if (typeof window === 'undefined') {
+        return false;
+    }
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+        const user = JSON.parse(storedUser);
+        // For prototype purposes, we designate a specific email as the admin
+        return user.email === 'admin@healthx.com' && user.role === 'admin';
+    }
+    return false;
+}
+
 export function getAllUsersForAdmin(): UserData[] { return []; }
 export function toggleUserStatus(userId: string, role: string) { return true; }
 export async function updateUserByAdmin(userId: string, role: string, updatedData: Partial<UserData>): Promise<void> {}

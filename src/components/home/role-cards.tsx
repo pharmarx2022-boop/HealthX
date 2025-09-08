@@ -80,7 +80,7 @@ export function RoleCards() {
               </CardHeader>
               <CardContent className="flex-grow flex items-end w-full p-2">
                 <Button asChild className="w-full">
-                    <Link href={role.loginLink}>Login as {role.name}</Link>
+                    <Link href={role.loginLink}>Login / Sign up</Link>
                 </Button>
               </CardContent>
             </Card>

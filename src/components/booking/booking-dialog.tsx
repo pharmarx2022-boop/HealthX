@@ -161,17 +161,9 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
         let platformFeeRate = 0;
 
         if (isPartnerBooking) {
-            if (patientWantsHealthPoints) {
-                platformFeeRate = 0.10; // Partner books, patient wants points -> 10%
-            } else {
-                platformFeeRate = 0.05; // Partner books, patient does NOT want points -> 5%
-            }
+            platformFeeRate = patientWantsHealthPoints ? 0.10 : 0.05;
         } else { // Patient is booking
-            if (patientWantsHealthPoints) {
-                platformFeeRate = 0.05; // Patient books, wants points -> 5%
-            } else {
-                platformFeeRate = 0; // Patient books, does NOT want points -> 0%
-            }
+            platformFeeRate = patientWantsHealthPoints ? 0.05 : 0;
         }
         
         const platformFee = fee * platformFeeRate;
@@ -379,7 +371,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
     
     const renderDetailsStep = () => (
         <>
-            <DialogHeader className="p-6 pb-4 border-b">
+            <DialogHeader>
                 <DialogTitle>Book Appointment with {doctor.name}</DialogTitle>
                 <DialogDescription>
                     Fill in the details below to reserve your slot.
@@ -449,7 +441,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                     </Select>
                 </div>
             </div>
-            <DialogFooter className="p-6 border-t">
+            <DialogFooter>
                 <Button className="w-full" onClick={handleProceedToBilling}>Proceed to Billing</Button>
             </DialogFooter>
         </>
@@ -457,7 +449,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
 
     const renderPaymentStep = () => (
          <>
-            <DialogHeader className="p-6 pb-4 border-b flex-row items-center sticky top-0 bg-background z-10">
+            <DialogHeader className="p-6 pb-4 border-b flex-row items-center">
                 <Button variant="ghost" size="icon" className="mr-2" onClick={() => setStep('details')}>
                     <ArrowLeft />
                 </Button>
@@ -543,7 +535,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                 )}
             </div>
              {feeDetails && (
-                <DialogFooter className="p-6 border-t sticky bottom-0 bg-background z-10">
+                <DialogFooter className="p-6 border-t">
                     <Button className="w-full h-12 text-lg" onClick={handleConfirmBooking} disabled={isProcessingPayment}>
                         {isProcessingPayment ? <Loader2 className="animate-spin mr-2"/> : <CreditCard className="mr-2"/>}
                         {isProcessingPayment ? 'Processing...' : `Pay & Confirm Booking`}

@@ -19,7 +19,6 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { addNotification, sendRedemptionOtpNotification } from '@/lib/notifications';
 import { checkPartnerMilestone } from '@/lib/referrals';
 import { NearbySearch } from '@/components/booking/nearby-search';
-import { BottomNavBar } from '@/components/layout/bottom-nav-bar';
 import { AnalyticsDashboard } from '@/components/lab/analytics-dashboard';
 import { Textarea } from '@/components/ui/textarea';
 import { getRemindersForPartner, addReminder, deleteReminder, type HealthReminder } from '@/lib/reminders';
@@ -602,7 +601,6 @@ export default function LabDashboardPage() {
         </div>
       </main>
       <Footer />
-      <BottomNavBar />
     </div>
   );
 }

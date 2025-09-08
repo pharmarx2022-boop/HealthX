@@ -4,7 +4,6 @@
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { NearbySearch } from '@/components/booking/nearby-search';
-import { BottomNavBar } from '@/components/layout/bottom-nav-bar';
 
 export default function BookAppointmentPage() {
   return (
@@ -20,7 +19,6 @@ export default function BookAppointmentPage() {
         </div>
       </main>
       <Footer />
-      <BottomNavBar />
     </div>
   );
 }

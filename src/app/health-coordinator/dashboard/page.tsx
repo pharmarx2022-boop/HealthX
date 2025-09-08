@@ -14,7 +14,6 @@ import { format } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Link from 'next/link';
 import { NearbySearch } from '@/components/booking/nearby-search';
-import { BottomNavBar } from '@/components/layout/bottom-nav-bar';
 import { AnalyticsDashboard } from '@/components/health-coordinator/analytics-dashboard';
 import { suggestTestsForPatients } from '@/ai/flows/suggest-test-flow';
 import type { TestSuggestion } from '@/ai/schemas/test-suggestion-schema';
@@ -223,7 +222,6 @@ export default function HealthCoordinatorDashboardPage() {
                 </div>
             </main>
             <Footer />
-            <BottomNavBar />
         </div>
     );
 }

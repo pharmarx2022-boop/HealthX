@@ -130,10 +130,7 @@ export default function DoctorDetailPage() {
     sessionStorage.setItem(PATIENTS_KEY, JSON.stringify(updatedPatients));
     setAllAppointments(updatedPatients);
     
-    const toastDescription = user?.role === 'health-coordinator' 
-      ? `The appointment for ${patientName} at ${clinic.name} is booked. A receipt has been sent to the patient's email.`
-      : `Your appointment at ${clinic.name} is booked. A receipt has been sent to your email. Your fee is secured and will be refunded as Health Points after the consultation is marked complete by the doctor.`;
-
+    const toastDescription = `Your appointment at ${clinic.name} is booked. Remember to pay INR ${clinic.consultationFee.toFixed(2)} in cash at the clinic. Your online deposit is secure and will be refunded after your visit.`;
 
     toast({
         title: "Booking Confirmed!",

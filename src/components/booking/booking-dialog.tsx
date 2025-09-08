@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { Calendar as CalendarIcon, User, Search, Loader2, CreditCard, Users } from 'lucide-react';
+import { Calendar as CalendarIcon, User, Search, Loader2, CreditCard, Users, Info } from 'lucide-react';
 import { Calendar } from '../ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -19,11 +19,13 @@ import { mockPatientData } from '@/lib/mock-data';
 import { useToast } from '@/hooks/use-toast';
 import { MOCK_OTP } from '@/lib/auth';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
-import { Card, CardFooter } from '../ui/card';
+import { Card, CardFooter, CardContent } from '../ui/card';
 import { addNotification, sendBookingOtpNotification } from '@/lib/notifications';
 import { mockFamilyMembers } from '@/lib/family-members';
 import { processPayment } from '@/lib/payment';
 import { recordCommission } from '@/lib/commission-wallet';
+import { Checkbox } from '../ui/checkbox';
+import { Separator } from '../ui/separator';
 
 type Doctor = {
     id: string;
@@ -84,6 +86,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
     
     // Patient flow state
     const [selectedPatientId, setSelectedPatientId] = useState('self');
+    const [patientOptsOut, setPatientOptsOut] = useState(false);
     
     // Health Coordinator / Partner flow state
     const [patientSearch, setPatientSearch] = useState('');
@@ -121,6 +124,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
             setOtpSent(false);
             setOtp('');
             setIsProcessingPayment(false);
+            setPatientOptsOut(false);
         }
     }, [isOpen, user?.id, user?.role, clinics]);
 
@@ -168,7 +172,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
             const paymentResult = await processPayment({
                 amount: selectedClinic.consultationFee,
                 currency: 'INR',
-                description: `Appointment with ${doctor.name}`,
+                description: `Security Deposit for appointment with ${doctor.name}`,
                 patientId: patientId,
             });
 
@@ -237,6 +241,30 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
             description: `An OTP has been sent as a notification to ${foundPatient.name}. The mock OTP is ${MOCK_OTP}.`
         })
     }
+    
+    const getFeeDetails = () => {
+        if (!selectedClinic) return null;
+        
+        const fee = selectedClinic.consultationFee;
+        let platformFee = 0;
+        let infoText = `Pay ₹${fee.toFixed(2)} in cash at the clinic. This online payment is a fully refundable security deposit.`;
+        let rewardText = `After your visit, your ₹${fee.toFixed(2)} deposit will be refunded AND you'll earn ₹${fee.toFixed(2)} in Health Points!`;
+
+        if (isPartnerBooking) {
+            platformFee = fee * 0.10;
+            infoText = `The patient will pay ₹${fee.toFixed(2)} in cash at the clinic. A 10% platform fee of ₹${platformFee.toFixed(2)} will be applied.`;
+            rewardText = "Health Points are not applicable for partner bookings.";
+        } else if (patientOptsOut) {
+            platformFee = fee * 0.05;
+            infoText = `Pay ₹${fee.toFixed(2)} in cash at the clinic. A 5% platform fee of ₹${platformFee.toFixed(2)} will be applied.`;
+            rewardText = "You have opted out of earning Health Points.";
+        }
+
+        return { fee, platformFee, infoText, rewardText };
+    }
+
+    const feeDetails = getFeeDetails();
+
 
     const renderPatientSelector = () => (
         <div>
@@ -271,6 +299,14 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                     </div>
                 ))}
             </RadioGroup>
+            {!isPartnerBooking && (
+                <div className="flex items-center space-x-2 mt-4 p-3 bg-slate-50 border rounded-md">
+                    <Checkbox id="opt-out" checked={patientOptsOut} onCheckedChange={(checked) => setPatientOptsOut(Boolean(checked))} />
+                    <Label htmlFor="opt-out" className="text-sm font-normal">
+                        I don't want to receive Health Points. A 5% platform fee will apply.
+                    </Label>
+                </div>
+            )}
         </div>
     );
 
@@ -421,17 +457,28 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                         </div>
                     )}
                 </div>
-                <CardFooter className="flex-col gap-4 !p-0 !pt-4 border-t">
-                    <div className="w-full flex justify-between items-center px-1">
-                        <p className="text-muted-foreground">Total Payable:</p>
-                        <p className="text-xl font-bold">INR {selectedClinic?.consultationFee.toFixed(2) ?? '0.00'}</p>
-                    </div>
-                    <Button className="w-full h-12" onClick={handleConfirmBooking} disabled={isProcessingPayment}>
-                        {isProcessingPayment ? <Loader2 className="animate-spin mr-2"/> : <CreditCard className="mr-2"/>}
-                        {isProcessingPayment ? 'Processing...' : 'Pay & Confirm Booking'}
-                    </Button>
-                    <p className="text-xs text-muted-foreground text-center px-4">Your payment will be refunded to your original payment method AND you'll get 100% back in Health Points after the consultation.</p>
-                </CardFooter>
+
+                 {feeDetails && (
+                    <CardFooter className="flex-col gap-4 !p-0 !pt-4 border-t">
+                        <Alert>
+                            <Info className="h-4 w-4" />
+                            <AlertTitle>Payment Policy</AlertTitle>
+                            <AlertDescription className="space-y-2">
+                                <p>{feeDetails.infoText}</p>
+                                <p className="text-primary font-medium">{feeDetails.rewardText}</p>
+                            </AlertDescription>
+                        </Alert>
+                        <Separator />
+                        <div className="w-full flex justify-between items-center px-1">
+                            <p className="text-muted-foreground">Security Deposit:</p>
+                            <p className="text-xl font-bold">INR {feeDetails.fee.toFixed(2)}</p>
+                        </div>
+                        <Button className="w-full h-12" onClick={handleConfirmBooking} disabled={isProcessingPayment}>
+                            {isProcessingPayment ? <Loader2 className="animate-spin mr-2"/> : <CreditCard className="mr-2"/>}
+                            {isProcessingPayment ? 'Processing...' : 'Pay Security Deposit'}
+                        </Button>
+                    </CardFooter>
+                 )}
             </DialogContent>
         </Dialog>
     );

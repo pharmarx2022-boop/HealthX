@@ -1,27 +1,27 @@
 
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Book, Stethoscope, RefreshCw, ShoppingCart, Wallet, Gift } from "lucide-react";
+import { Book, Stethoscope, RefreshCw, ShoppingCart, Wallet, Gift, HandCoins } from "lucide-react";
 
 const steps = [
     {
         icon: Book,
-        title: "1. Pre-Pay to Book Slot",
-        description: "Pay the consultation fee online as a fully refundable security deposit to reserve your appointment.",
+        title: "1. Pay a Security Deposit",
+        description: "Pay the consultation fee online as a fully refundable security deposit to reserve your appointment slot.",
     },
     {
         icon: Stethoscope,
-        title: "2. Visit The Doctor",
-        description: "Attend your consultation as scheduled. There are no hidden fees to be paid at the clinic.",
+        title: "2. Pay at the Clinic",
+        description: "Visit the doctor and pay the full consultation fee in cash directly at the clinic after your visit.",
     },
     {
         icon: RefreshCw,
-        title: "3. Get a Full Refund",
-        description: "After the doctor marks your visit as complete, your initial deposit is fully refunded to your original payment method.",
+        title: "3. Get Your Deposit Back",
+        description: "Once the doctor marks your visit as complete, your initial online security deposit is fully refunded.",
     },
     {
         icon: Gift,
-        title: "4. Earn Health Points",
-        description: "As a bonus, you also get 100% of the consultation fee back as valuable Health Points to use on other services.",
+        title: "4. Earn Bonus Health Points",
+        description: "As a bonus, you also get 100% of the consultation fee back as valuable Health Points for future use.",
     }
 ]
 

@@ -107,7 +107,7 @@ export default function PatientDetailPage() {
 
     toast({
         title: "Consultation Complete!",
-        description: `A refund for INR ${patient?.consultationFee.toFixed(2)} has been issued to the patient's original payment method, and Health Points have been credited.`,
+        description: `Security deposit refund for INR ${patient?.consultationFee.toFixed(2)} has been initiated. Health points have been credited to the patient's account.`,
     });
   };
 
@@ -230,14 +230,14 @@ export default function PatientDetailPage() {
                   <CreditCard className="w-5 h-5 text-primary"/> 
                   <div>
                     <p className="font-medium text-foreground">Consultation Fee</p>
-                    <p>INR {patient.consultationFee.toFixed(2)}</p>
+                    <p>INR {patient.consultationFee.toFixed(2)} (Paid in cash at clinic)</p>
                   </div>
                 </div>
                  <div className="flex items-center text-muted-foreground gap-3">
                   <RefreshCw className="w-5 h-5 text-primary"/> 
                   <div>
-                    <p className="font-medium text-foreground">Refund Status</p>
-                    <p>{patient.refundStatus}</p>
+                    <p className="font-medium text-foreground">Security Deposit Refund</p>
+                    <p>{patient.refundStatus} (INR {patient.consultationFee.toFixed(2)})</p>
                   </div>
                 </div>
               </div>
@@ -288,7 +288,7 @@ export default function PatientDetailPage() {
                             <AlertDialogHeader>
                                 <AlertDialogTitle>Confirm Consultation Completion</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    This will mark the consultation as complete. A full refund of INR {patient.consultationFee.toFixed(2)} will be issued to the patient's original payment method, and an equal amount of Health Points will be credited to their account as a reward. This action cannot be undone.
+                                    This will mark the consultation as complete. A full refund of the INR {patient.consultationFee.toFixed(2)} security deposit will be issued to the patient, and an equal amount of Health Points will be credited to their account. This action cannot be undone.
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>

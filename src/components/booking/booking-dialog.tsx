@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -376,8 +375,8 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[480px] p-0 flex flex-col">
-                <DialogHeader className="p-6 pb-0">
+            <DialogContent className="sm:max-w-[480px] p-0 flex flex-col max-h-[90vh]">
+                <DialogHeader className="p-6 pb-4">
                     <DialogTitle>Book Appointment with {doctor.name}</DialogTitle>
                     <DialogDescription>
                         Confirm the details below to book your slot.
@@ -467,7 +466,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                 </div>
 
                  {feeDetails && (
-                    <CardFooter className="flex-col gap-3 p-6 !pt-4 border-t bg-slate-50/50 mt-auto">
+                    <CardFooter className="flex-col gap-3 p-6 border-t bg-slate-50/50">
                          <Alert variant="default" className="bg-blue-50 border-blue-200 text-blue-900 w-full">
                             <Info className="h-4 w-4 !text-blue-900" />
                             <AlertTitle className="font-semibold">Important Payment Information</AlertTitle>
@@ -514,5 +513,3 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
         </Dialog>
     );
 }
-
-    

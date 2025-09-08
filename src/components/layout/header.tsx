@@ -28,7 +28,7 @@ export function Header() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const storedUser = sessionStorage.getItem('user');
+      const storedUser = localStorage.getItem('user');
       if (storedUser) {
         setUser(JSON.parse(storedUser));
       }
@@ -37,9 +37,9 @@ export function Header() {
 
   const handleLogout = () => {
     if (typeof window !== 'undefined') {
-      sessionStorage.removeItem('user');
+      localStorage.removeItem('user');
       if(user) {
-        sessionStorage.removeItem(`notifications_${user.id}`);
+        localStorage.removeItem(`notifications_${user.id}`);
       }
     }
     setUser(null);

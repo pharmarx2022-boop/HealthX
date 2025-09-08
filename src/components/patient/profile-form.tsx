@@ -48,7 +48,7 @@ export function PatientProfileForm() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const storedUser = sessionStorage.getItem('user');
+      const storedUser = localStorage.getItem('user');
       const u = storedUser ? JSON.parse(storedUser) : null;
       setUser(u);
 
@@ -88,13 +88,13 @@ export function PatientProfileForm() {
     // Only update password if a new one is provided
     const newPassword = data.password ? data.password : user.password;
     const updatedUser = { ...user, fullName: data.fullName, phone: data.phone, email: data.email, password: newPassword };
-    sessionStorage.setItem('user', JSON.stringify(updatedUser));
+    localStorage.setItem('user', JSON.stringify(updatedUser));
     setUser(updatedUser);
     
     // We also need to update the mock patient data if this user has appointments
-    const allPatients = JSON.parse(sessionStorage.getItem('mockPatientData') || '[]');
+    const allPatients = JSON.parse(localStorage.getItem('mockPatientData') || '[]');
     const updatedPatients = allPatients.map((p: any) => p.patientId === user.id ? {...p, name: data.fullName, phone: data.phone} : p);
-    sessionStorage.setItem('mockPatientData', JSON.stringify(updatedPatients));
+    localStorage.setItem('mockPatientData', JSON.stringify(updatedPatients));
 
     setOriginalPhone(data.phone);
     setIsVerifyingPhone(false);

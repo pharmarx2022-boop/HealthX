@@ -64,7 +64,7 @@ const getUserConsultationHistory = ai.defineTool({
   outputSchema: z.string(),
 },
 async (input) => {
-    const allAppointments = JSON.parse(sessionStorage.getItem('mockPatients') || '[]');
+    const allAppointments = JSON.parse(localStorage.getItem('mockPatients') || '[]');
     const userAppointments = allAppointments.filter((appt: any) => appt.id === input.userId || appt.name === input.userId); // Loosely match by name for demo
     if (userAppointments.length > 0) {
         return userAppointments.map((appt: any) => `Consulted on ${appt.appointmentDate} for ${appt.consultation}. Paid INR ${appt.consultationFee}.`).join(' ');

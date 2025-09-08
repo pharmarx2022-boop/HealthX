@@ -45,25 +45,25 @@ export default function PharmacyToolsPage() {
 
     useEffect(() => {
         if(typeof window !== 'undefined') {
-            const storedUser = sessionStorage.getItem('user');
+            const storedUser = localStorage.getItem('user');
             if (storedUser) {
                 const u = JSON.parse(storedUser);
                 setUser(u);
 
-                const storedPharmacies = sessionStorage.getItem(PHARMACIES_KEY);
+                const storedPharmacies = localStorage.getItem(PHARMACIES_KEY);
                 const allPharmacies = storedPharmacies ? JSON.parse(storedPharmacies) : initialPharmacies;
                 const myDetails = allPharmacies.find((p: any) => p.id === u.id);
                 setPharmacyDetails(myDetails);
                 setActiveReminders(getRemindersForPartner(u.id));
             }
-             if (!sessionStorage.getItem(PATIENTS_KEY)) {
-                sessionStorage.setItem(PATIENTS_KEY, JSON.stringify(mockPatientData));
+             if (!localStorage.getItem(PATIENTS_KEY)) {
+                localStorage.setItem(PATIENTS_KEY, JSON.stringify(mockPatientData));
             }
         }
     }, []);
 
     const handleSearchPatient = (searchTermValue: string, type: 'payment' | 'reminder') => {
-        const allPatients = JSON.parse(sessionStorage.getItem(PATIENTS_KEY) || '[]');
+        const allPatients = JSON.parse(localStorage.getItem(PATIENTS_KEY) || '[]');
         const searchTerm = searchTermValue.toLowerCase();
         const foundPatient = allPatients.find((p: any) => p.phone === searchTerm || (p.email && p.email.toLowerCase() === searchTerm));
     

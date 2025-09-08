@@ -22,8 +22,8 @@ export function TransactionHistory() {
 
     useEffect(() => {
         // This is a mock data generation. In a real app, this data would come from your payment gateway API.
-        const allAppointments = JSON.parse(sessionStorage.getItem('mockPatients') || '[]') || mockPatients;
-        const allDoctors = JSON.parse(sessionStorage.getItem('doctorsData') || '[]') || initialDoctors;
+        const allAppointments = JSON.parse(localStorage.getItem('mockPatients') || '[]') || mockPatients;
+        const allDoctors = JSON.parse(localStorage.getItem('doctorsData') || '[]') || initialDoctors;
         
         const generatedTransactions = allAppointments
             .filter((appt: any) => appt.status === 'done' || appt.status === 'upcoming')

@@ -44,11 +44,11 @@ export default function LabDetailPage() {
   useEffect(() => {
     setIsClient(true);
     if (typeof window !== 'undefined') {
-      const storedLabs = sessionStorage.getItem(LABS_KEY);
+      const storedLabs = localStorage.getItem(LABS_KEY);
       if (storedLabs) {
         setLabs(JSON.parse(storedLabs));
       } else {
-        sessionStorage.setItem(LABS_KEY, JSON.stringify(initialLabs));
+        localStorage.setItem(LABS_KEY, JSON.stringify(initialLabs));
       }
     }
   }, []);

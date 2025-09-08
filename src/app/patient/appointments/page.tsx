@@ -36,14 +36,14 @@ export default function AppointmentsPage() {
     const [comment, setComment] = useState('');
 
     const fetchData = (userId: string) => {
-        const storedPatients = sessionStorage.getItem(PATIENTS_KEY);
+        const storedPatients = localStorage.getItem(PATIENTS_KEY);
         const allAppointments = storedPatients ? JSON.parse(storedPatients) : mockPatients;
         setMyAppointments(allAppointments.filter((p: any) => p.patientId === userId));
     };
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            const storedUser = sessionStorage.getItem('user');
+            const storedUser = localStorage.getItem('user');
             if (storedUser) {
                 const u = JSON.parse(storedUser);
                 setUser(u);
@@ -89,7 +89,7 @@ export default function AppointmentsPage() {
             initialData = initialPharmacies;
         }
 
-        const storedData = sessionStorage.getItem(key);
+        const storedData = localStorage.getItem(key);
         let partners = storedData ? JSON.parse(storedData) : initialData;
         const updatedPartners = partners.map((p: any) => {
             if (p.id === reviewTarget.id) {
@@ -97,17 +97,17 @@ export default function AppointmentsPage() {
             }
             return p;
         });
-        sessionStorage.setItem(key, JSON.stringify(updatedPartners));
+        localStorage.setItem(key, JSON.stringify(updatedPartners));
 
         if (reviewTarget.type === 'doctor' && reviewTarget.transactionId) {
-             const allStoredAppointments = JSON.parse(sessionStorage.getItem(PATIENTS_KEY) || '[]');
+             const allStoredAppointments = JSON.parse(localStorage.getItem(PATIENTS_KEY) || '[]');
              const finalAppointments = allStoredAppointments.map((appt: any) => {
                 if (appt.id === reviewTarget.transactionId) {
                     return { ...appt, reviewed: true };
                 }
                 return appt;
             });
-            sessionStorage.setItem(PATIENTS_KEY, JSON.stringify(finalAppointments));
+            localStorage.setItem(PATIENTS_KEY, JSON.stringify(finalAppointments));
         }
 
         toast({

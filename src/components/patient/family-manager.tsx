@@ -69,11 +69,11 @@ export function FamilyManager() {
 
   useEffect(() => {
     setIsClient(true);
-    const storedFamily = sessionStorage.getItem(FAMILY_KEY);
+    const storedFamily = localStorage.getItem(FAMILY_KEY);
     if (storedFamily) {
       setFamilyMembers(JSON.parse(storedFamily));
     } else {
-      sessionStorage.setItem(FAMILY_KEY, JSON.stringify(mockFamilyMembers));
+      localStorage.setItem(FAMILY_KEY, JSON.stringify(mockFamilyMembers));
       setFamilyMembers(mockFamilyMembers);
     }
   }, []);
@@ -129,7 +129,7 @@ export function FamilyManager() {
     }
 
     setFamilyMembers(updatedFamily);
-    sessionStorage.setItem(FAMILY_KEY, JSON.stringify(updatedFamily));
+    localStorage.setItem(FAMILY_KEY, JSON.stringify(updatedFamily));
     setEditingMember(null);
     setIsDialogOpen(false);
   };
@@ -142,7 +142,7 @@ export function FamilyManager() {
   const handleDelete = (memberId: string) => {
       const updatedFamily = familyMembers.filter(m => m.id !== memberId);
       setFamilyMembers(updatedFamily);
-      sessionStorage.setItem(FAMILY_KEY, JSON.stringify(updatedFamily));
+      localStorage.setItem(FAMILY_KEY, JSON.stringify(updatedFamily));
       toast({
         title: 'Member Removed',
         description: 'The family member has been removed.',

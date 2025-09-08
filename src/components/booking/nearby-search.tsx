@@ -68,7 +68,7 @@ export function NearbySearch({ allowedServices = ['doctor', 'pharmacy', 'lab'] }
     setLabs([]);
     setFamilyMembers([]);
 
-    const storedUser = sessionStorage.getItem('user');
+    const storedUser = localStorage.getItem('user');
     setUser(storedUser ? JSON.parse(storedUser) : null);
       
     handleLocationRequest();

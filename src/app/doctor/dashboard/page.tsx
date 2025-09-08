@@ -16,7 +16,7 @@ export default function DoctorDashboardPage() {
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            const storedUser = sessionStorage.getItem('user');
+            const storedUser = localStorage.getItem('user');
             if (storedUser) {
                 setUser(JSON.parse(storedUser));
             }

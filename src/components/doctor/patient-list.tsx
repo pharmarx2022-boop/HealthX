@@ -43,6 +43,12 @@ export function PatientList() {
 
   useEffect(() => {
     // In a real app, this would be an API call to fetch patients for the logged-in doctor
+    if (typeof window !== 'undefined') {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+        }
+    }
     setPatients([]);
     setIsLoading(false);
   }, []);

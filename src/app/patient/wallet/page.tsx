@@ -37,7 +37,7 @@ export default function WalletPage() {
 
     useEffect(() => {
         if(typeof window !== 'undefined') {
-            const storedUser = sessionStorage.getItem('user');
+            const storedUser = localStorage.getItem('user');
             if (storedUser) {
                 const u = JSON.parse(storedUser);
                 setUser(u);

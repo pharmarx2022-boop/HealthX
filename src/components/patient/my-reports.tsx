@@ -26,15 +26,15 @@ export function MyReports() {
     const [user, setUser] = useState<any | null>(null);
 
     useEffect(() => {
-        const storedUser = sessionStorage.getItem('user');
+        const storedUser = localStorage.getItem('user');
         if (storedUser) {
             const u = JSON.parse(storedUser);
             setUser(u);
 
-            const storedReports = sessionStorage.getItem(REPORTS_KEY);
+            const storedReports = localStorage.getItem(REPORTS_KEY);
             const allReports = storedReports ? JSON.parse(storedReports) : mockReports;
             if (!storedReports) {
-                sessionStorage.setItem(REPORTS_KEY, JSON.stringify(mockReports));
+                localStorage.setItem(REPORTS_KEY, JSON.stringify(mockReports));
             }
             
             setMyReports(allReports.filter((rep: MockReport) => rep.patientId === u.id));

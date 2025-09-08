@@ -42,11 +42,11 @@ export default function PharmacyDetailPage() {
   useEffect(() => {
     setIsClient(true);
     if (typeof window !== 'undefined') {
-      const storedPharmacies = sessionStorage.getItem(PHARMACIES_KEY);
+      const storedPharmacies = localStorage.getItem(PHARMACIES_KEY);
       if (storedPharmacies) {
         setPharmacies(JSON.parse(storedPharmacies));
       } else {
-        sessionStorage.setItem(PHARMACIES_KEY, JSON.stringify(initialPharmacies));
+        localStorage.setItem(PHARMACIES_KEY, JSON.stringify(initialPharmacies));
       }
     }
   }, []);

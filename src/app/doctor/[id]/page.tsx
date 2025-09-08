@@ -42,29 +42,29 @@ export default function DoctorDetailPage() {
   useEffect(() => {
     setIsClient(true);
     if (typeof window !== 'undefined') {
-      const storedUser = sessionStorage.getItem('user');
+      const storedUser = localStorage.getItem('user');
       setUser(storedUser ? JSON.parse(storedUser) : null);
 
-      const storedDoctors = sessionStorage.getItem(DOCTORS_KEY);
+      const storedDoctors = localStorage.getItem(DOCTORS_KEY);
       if (storedDoctors) {
         setDoctors(JSON.parse(storedDoctors));
       } else {
-        sessionStorage.setItem(DOCTORS_KEY, JSON.stringify(initialDoctors));
+        localStorage.setItem(DOCTORS_KEY, JSON.stringify(initialDoctors));
       }
 
-      const storedFamily = sessionStorage.getItem(FAMILY_KEY);
+      const storedFamily = localStorage.getItem(FAMILY_KEY);
       if (storedFamily) {
         setFamilyMembers(JSON.parse(storedFamily));
       } else {
-        sessionStorage.setItem(FAMILY_KEY, JSON.stringify(mockFamilyMembers));
+        localStorage.setItem(FAMILY_KEY, JSON.stringify(mockFamilyMembers));
         setFamilyMembers(mockFamilyMembers);
       }
 
-      const storedClinics = sessionStorage.getItem(CLINICS_KEY);
+      const storedClinics = localStorage.getItem(CLINICS_KEY);
       const allClinics = storedClinics ? JSON.parse(storedClinics) : initialClinics;
       setDoctorClinics(allClinics.filter((c: Clinic) => c.doctorId === id));
 
-      const storedPatients = sessionStorage.getItem(PATIENTS_KEY);
+      const storedPatients = localStorage.getItem(PATIENTS_KEY);
       setAllAppointments(storedPatients ? JSON.parse(storedPatients) : mockPatients);
     }
   }, [id]);
@@ -125,9 +125,9 @@ export default function DoctorDetailPage() {
         reviewed: false
     };
 
-    const allPatients = JSON.parse(sessionStorage.getItem(PATIENTS_KEY) || '[]');
+    const allPatients = JSON.parse(localStorage.getItem(PATIENTS_KEY) || '[]');
     const updatedPatients = [...allPatients, newAppointment];
-    sessionStorage.setItem(PATIENTS_KEY, JSON.stringify(updatedPatients));
+    localStorage.setItem(PATIENTS_KEY, JSON.stringify(updatedPatients));
     setAllAppointments(updatedPatients);
     
     const toastDescription = `Your appointment at ${clinic.name} is booked. Remember to pay INR ${clinic.consultationFee.toFixed(2)} in cash at the clinic. Your online deposit is secure and will be refunded after your visit.`;

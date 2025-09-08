@@ -14,7 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
 import { Loader2, Upload, Briefcase, MapPin, Copy, FileText, BadgeCheck, Phone, Mail, KeyRound } from 'lucide-react';
 import { initialDoctors } from '@/lib/mock-data';
-import { isRegistrationNumberUnique, isPhoneUnique, MOCK_OTP, sendOtp } from '@/lib/auth';
+import { isRegistrationNumberUnique, isPhoneUnique, sendOtp } from '@/lib/auth';
 import { cn } from '@/lib/utils';
 
 const DOCTORS_KEY = 'doctorsData';
@@ -73,15 +73,15 @@ export function ProfileForm() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const storedUser = sessionStorage.getItem('user');
+      const storedUser = localStorage.getItem('user');
       const u = storedUser ? JSON.parse(storedUser) : null;
       setUser(u);
 
-      const storedDoctors = sessionStorage.getItem(DOCTORS_KEY);
+      const storedDoctors = localStorage.getItem(DOCTORS_KEY);
       const allDoctors = storedDoctors ? JSON.parse(storedDoctors) : initialDoctors;
       
       if (!storedDoctors) {
-        sessionStorage.setItem(DOCTORS_KEY, JSON.stringify(initialDoctors));
+        localStorage.setItem(DOCTORS_KEY, JSON.stringify(initialDoctors));
       }
 
       const doctorData = allDoctors.find((d: any) => d.id === (u?.id));
@@ -133,17 +133,17 @@ export function ProfileForm() {
     if (data.phone !== originalPhone) {
       if (!isVerifyingPhone) {
         setIsVerifyingPhone(true);
-        toast({ title: 'Verify New Phone Number', description: `An OTP has been sent to ${data.phone}. Please enter it to confirm the change. (Demo OTP: ${MOCK_OTP})` });
+        toast({ title: 'Verify New Phone Number', description: `An OTP has been sent to ${data.phone}. Please enter it to confirm the change. (Demo OTP: 123456)` });
         return;
       }
       
-      if (data.otp !== MOCK_OTP) {
+      if (data.otp !== '123456') {
         form.setError('otp', { type: 'manual', message: 'Invalid OTP.' });
         return;
       }
     }
 
-    const storedDoctors = sessionStorage.getItem(DOCTORS_KEY);
+    const storedDoctors = localStorage.getItem(DOCTORS_KEY);
     const allDoctors = storedDoctors ? JSON.parse(storedDoctors) : initialDoctors;
 
     const updatedDoctors = allDoctors.map((d: any) => {
@@ -155,10 +155,10 @@ export function ProfileForm() {
         return d;
     });
 
-    sessionStorage.setItem(DOCTORS_KEY, JSON.stringify(updatedDoctors));
+    localStorage.setItem(DOCTORS_KEY, JSON.stringify(updatedDoctors));
     
     const updatedUser = { ...user, fullName: data.name, phone: data.phone, email: data.email };
-    sessionStorage.setItem('user', JSON.stringify(updatedUser));
+    localStorage.setItem('user', JSON.stringify(updatedUser));
     
     setOriginalPhone(data.phone);
     setIsVerifyingPhone(false);

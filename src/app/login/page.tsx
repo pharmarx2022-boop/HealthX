@@ -72,7 +72,7 @@ export default function LoginPage() {
   }, [searchParams, router, toast]);
   
   const handleSuccessfulLogin = (user: UserData, isNewUser: boolean) => {
-    sessionStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem('user', JSON.stringify(user));
     toast({ title: "Signed In Successfully!", description: `Welcome, ${user.fullName || user.email}` });
 
     if (isNewUser) {
@@ -89,8 +89,8 @@ export default function LoginPage() {
     else redirectPath = `/${user.role}/dashboard`;
     
     router.push(redirectPath);
-    if(sessionStorage.getItem('referralCode')) {
-        sessionStorage.removeItem('referralCode');
+    if(localStorage.getItem('referralCode')) {
+        localStorage.removeItem('referralCode');
     }
   }
   
@@ -99,7 +99,7 @@ export default function LoginPage() {
     setIsSubmitting(true);
     
     if (referralCode) {
-        sessionStorage.setItem('referralCode', referralCode);
+        localStorage.setItem('referralCode', referralCode);
     }
     
     const user = await checkUserExists(email, selectedRole);

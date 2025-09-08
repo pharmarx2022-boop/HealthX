@@ -12,7 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import Image from 'next/image';
 import { Loader2, Upload, Copy, BadgeCheck, FileText, IdCard, Phone, Mail, KeyRound } from 'lucide-react';
-import { isAadharNumberUnique, isPhoneUnique, MOCK_OTP } from '@/lib/auth';
+import { isAadharNumberUnique, isPhoneUnique } from '@/lib/auth';
 import { cn } from '@/lib/utils';
 
 const profileSchema = z.object({
@@ -59,7 +59,7 @@ export function HealthCoordinatorProfileForm() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const storedUser = sessionStorage.getItem('user');
+      const storedUser = localStorage.getItem('user');
       const u = storedUser ? JSON.parse(storedUser) : null;
       setUser(u);
 
@@ -117,11 +117,11 @@ export function HealthCoordinatorProfileForm() {
     if (data.phone !== originalPhone) {
       if (!isVerifyingPhone) {
         setIsVerifyingPhone(true);
-        toast({ title: 'Verify New Phone Number', description: `An OTP has been sent to ${data.phone}. Please enter it to confirm the change. (Demo OTP: ${MOCK_OTP})` });
+        toast({ title: 'Verify New Phone Number', description: `An OTP has been sent to ${data.phone}. Please enter it to confirm the change. (Demo OTP: 123456)` });
         return;
       }
       
-      if (data.otp !== MOCK_OTP) {
+      if (data.otp !== '123456') {
         form.setError('otp', { type: 'manual', message: 'Invalid OTP.' });
         return;
       }
@@ -130,7 +130,7 @@ export function HealthCoordinatorProfileForm() {
     // Only update password if a new one is provided
     const newPassword = data.password ? data.password : user.password;
     const updatedUser = { ...user, ...data, password: newPassword, otp: undefined };
-    sessionStorage.setItem('user', JSON.stringify(updatedUser));
+    localStorage.setItem('user', JSON.stringify(updatedUser));
     setUser(updatedUser);
 
     setOriginalPhone(data.phone);

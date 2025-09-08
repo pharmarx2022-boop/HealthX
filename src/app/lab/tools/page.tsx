@@ -49,28 +49,28 @@ export default function LabToolsPage() {
 
     useEffect(() => {
         if(typeof window !== 'undefined') {
-            const storedUser = sessionStorage.getItem('user');
+            const storedUser = localStorage.getItem('user');
             if (storedUser) {
                 const u = JSON.parse(storedUser);
                 setUser(u);
 
-                const storedLabs = sessionStorage.getItem(LABS_KEY);
+                const storedLabs = localStorage.getItem(LABS_KEY);
                 const allLabs = storedLabs ? JSON.parse(storedLabs) : initialLabs;
                 const myDetails = allLabs.find((p: any) => p.id === u.id);
                 setLabDetails(myDetails);
                 setActiveReminders(getRemindersForPartner(u.id));
             }
-             if (!sessionStorage.getItem(REPORTS_KEY)) {
-                sessionStorage.setItem(REPORTS_KEY, JSON.stringify(mockReports));
+             if (!localStorage.getItem(REPORTS_KEY)) {
+                localStorage.setItem(REPORTS_KEY, JSON.stringify(mockReports));
             }
-            if (!sessionStorage.getItem(PATIENTS_KEY)) {
-                sessionStorage.setItem(PATIENTS_KEY, JSON.stringify(mockPatientData));
+            if (!localStorage.getItem(PATIENTS_KEY)) {
+                localStorage.setItem(PATIENTS_KEY, JSON.stringify(mockPatientData));
             }
         }
     }, []);
 
     const handleSearchPatient = (searchTermValue: string, type: 'payment' | 'upload' | 'reminder') => {
-        const allPatients = JSON.parse(sessionStorage.getItem(PATIENTS_KEY) || '[]');
+        const allPatients = JSON.parse(localStorage.getItem(PATIENTS_KEY) || '[]');
         const searchTerm = searchTermValue.toLowerCase();
         const foundPatient = allPatients.find((p: any) => p.phone === searchTerm || (p.email && p.email.toLowerCase() === searchTerm));
 
@@ -207,7 +207,7 @@ export default function LabToolsPage() {
             return;
         }
         
-        const allReports = JSON.parse(sessionStorage.getItem(REPORTS_KEY) || '[]');
+        const allReports = JSON.parse(localStorage.getItem(REPORTS_KEY) || '[]');
         const newReport: MockReport = {
             id: `rep${Date.now()}`,
             patientId: uploadPatient.id,
@@ -218,7 +218,7 @@ export default function LabToolsPage() {
         };
         
         const updatedReports = [...allReports, newReport];
-        sessionStorage.setItem(REPORTS_KEY, JSON.stringify(updatedReports));
+        localStorage.setItem(REPORTS_KEY, JSON.stringify(updatedReports));
 
         addNotification(uploadPatient.id, {
             title: 'New Report Available',

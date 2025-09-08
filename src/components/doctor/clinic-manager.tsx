@@ -103,15 +103,15 @@ export function ClinicManager() {
   useEffect(() => {
     setIsClient(true);
     if (typeof window !== 'undefined') {
-      const storedUser = sessionStorage.getItem('user');
+      const storedUser = localStorage.getItem('user');
       const user = storedUser ? JSON.parse(storedUser) : null;
       setUser(user);
 
-      const storedClinics = sessionStorage.getItem(CLINICS_KEY);
+      const storedClinics = localStorage.getItem(CLINICS_KEY);
       if (storedClinics) {
         setClinics(JSON.parse(storedClinics));
       } else {
-        sessionStorage.setItem(CLINICS_KEY, JSON.stringify(initialClinics));
+        localStorage.setItem(CLINICS_KEY, JSON.stringify(initialClinics));
         setClinics(initialClinics);
       }
     }
@@ -202,7 +202,7 @@ export function ClinicManager() {
     }
 
     setClinics(updatedClinics);
-    sessionStorage.setItem(CLINICS_KEY, JSON.stringify(updatedClinics));
+    localStorage.setItem(CLINICS_KEY, JSON.stringify(updatedClinics));
     setEditingClinic(null);
     setIsDialogOpen(false);
   };
@@ -215,7 +215,7 @@ export function ClinicManager() {
   const handleDelete = (clinicId: string) => {
       const updatedClinics = clinics.filter(c => c.id !== clinicId);
       setClinics(updatedClinics);
-      sessionStorage.setItem(CLINICS_KEY, JSON.stringify(updatedClinics));
+      localStorage.setItem(CLINICS_KEY, JSON.stringify(updatedClinics));
       toast({
         title: 'Clinic Removed',
         description: 'The clinic has been removed from your profile.',

@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { Calendar as CalendarIcon, User, Search, Loader2, CreditCard, Users, Info } from 'lucide-react';
+import { Calendar as CalendarIcon, User, Search, Loader2, CreditCard, Users, Info, Sparkles } from 'lucide-react';
 import { Calendar } from '../ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -78,6 +78,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
     const [userRole, setUserRole] = useState<string | null>(null);
     const [user, setUser] = useState<any | null>(null);
     const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
     // Form state
     const [selectedClinicId, setSelectedClinicId] = useState<string | undefined>();
@@ -151,9 +152,42 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
     
     const isPartnerBooking = userRole === 'health-coordinator' || userRole === 'lab' || userRole === 'pharmacy';
 
+    const getFeeDetails = () => {
+        if (!selectedClinic) return null;
+        
+        const fee = selectedClinic.consultationFee;
+        let platformFeeRate = 0;
+
+        if (isPartnerBooking) {
+            platformFeeRate = patientOptsOut ? 0.10 : 0.05; // 10% if partner opts out for patient, 5% otherwise
+        } else {
+            platformFeeRate = patientOptsOut ? 0.05 : 0; // 5% if patient opts out, 0% otherwise
+        }
+        
+        const platformFee = fee * platformFeeRate;
+        const totalOnlinePayment = fee + platformFee;
+
+        let infoText = `A non-refundable platform fee of ₹${platformFee.toFixed(2)} is applied.`;
+        let rewardText = `Pay ₹${fee.toFixed(2)} in cash at the clinic.`;
+
+        if (!patientOptsOut) {
+            rewardText += ` After your visit, your ₹${fee.toFixed(2)} deposit will be refunded AND you'll earn ₹${fee.toFixed(2)} in Health Points!`;
+        }
+
+        if (platformFee === 0) {
+            infoText = `You've opted to earn Health Points! No platform fee will be charged.`;
+        }
+
+
+        return { fee, platformFee, totalOnlinePayment, infoText, rewardText };
+    }
+
+    const feeDetails = getFeeDetails();
+
+
     const handleConfirmBooking = async () => {
         const patientId = isPartnerBooking && foundPatient ? foundPatient.id : user.id;
-        if (!patientId || !selectedClinicId || !selectedClinic || !selectedDate || !selectedTime) {
+        if (!patientId || !selectedClinicId || !selectedClinic || !selectedDate || !selectedTime || !feeDetails) {
              toast({ title: "Incomplete Details", description: "Please fill all the booking details before proceeding.", variant: "destructive" });
              return;
         }
@@ -170,9 +204,9 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
         setIsProcessingPayment(true);
         try {
             const paymentResult = await processPayment({
-                amount: selectedClinic.consultationFee,
+                amount: feeDetails.totalOnlinePayment,
                 currency: 'INR',
-                description: `Security Deposit for appointment with ${doctor.name}`,
+                description: `Booking for ${doctor.name}`,
                 patientId: patientId,
             });
 
@@ -241,30 +275,6 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
             description: `An OTP has been sent as a notification to ${foundPatient.name}. The mock OTP is ${MOCK_OTP}.`
         })
     }
-    
-    const getFeeDetails = () => {
-        if (!selectedClinic) return null;
-        
-        const fee = selectedClinic.consultationFee;
-        let platformFee = 0;
-        let infoText = `Pay ₹${fee.toFixed(2)} in cash at the clinic. This online payment is a fully refundable security deposit.`;
-        let rewardText = `After your visit, your ₹${fee.toFixed(2)} deposit will be refunded AND you'll earn ₹${fee.toFixed(2)} in Health Points!`;
-
-        if (isPartnerBooking) {
-            platformFee = fee * 0.10;
-            infoText = `The patient will pay ₹${fee.toFixed(2)} in cash at the clinic. A 10% platform fee of ₹${platformFee.toFixed(2)} will be applied.`;
-            rewardText = "Health Points are not applicable for partner bookings.";
-        } else if (patientOptsOut) {
-            platformFee = fee * 0.05;
-            infoText = `Pay ₹${fee.toFixed(2)} in cash at the clinic. A 5% platform fee of ₹${platformFee.toFixed(2)} will be applied.`;
-            rewardText = "You have opted out of earning Health Points.";
-        }
-
-        return { fee, platformFee, infoText, rewardText };
-    }
-
-    const feeDetails = getFeeDetails();
-
 
     const renderPatientSelector = () => (
         <div>
@@ -299,14 +309,14 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                     </div>
                 ))}
             </RadioGroup>
-            {!isPartnerBooking && (
-                <div className="flex items-center space-x-2 mt-4 p-3 bg-slate-50 border rounded-md">
-                    <Checkbox id="opt-out" checked={patientOptsOut} onCheckedChange={(checked) => setPatientOptsOut(Boolean(checked))} />
-                    <Label htmlFor="opt-out" className="text-sm font-normal">
-                        I don't want to receive Health Points. A 5% platform fee will apply.
-                    </Label>
-                </div>
-            )}
+            
+            <div className="flex items-center space-x-2 mt-4 p-3 bg-slate-50 border rounded-md">
+                <Checkbox id="opt-out" checked={patientOptsOut} onCheckedChange={(checked) => setPatientOptsOut(Boolean(checked))} />
+                <Label htmlFor="opt-out" className="text-sm font-normal">
+                    I don't want to receive Health Points bonus for this appointment.
+                </Label>
+            </div>
+            
         </div>
     );
 
@@ -364,6 +374,13 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                             </div>
                         ))}
                     </RadioGroup>
+
+                     <div className="flex items-center space-x-2 mt-4 p-3 bg-white border rounded-md">
+                        <Checkbox id="partner-opt-out" checked={patientOptsOut} onCheckedChange={(checked) => setPatientOptsOut(Boolean(checked))} />
+                        <Label htmlFor="partner-opt-out" className="text-sm font-normal">
+                           Opt patient out of receiving Health Points bonus. (10% platform fee will apply)
+                        </Label>
+                    </div>
                 </div>
             )}
         </div>
@@ -397,7 +414,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
 
                     <div>
                         <Label htmlFor="date" className="font-semibold">Date</Label>
-                        <Popover>
+                        <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                             <PopoverTrigger asChild>
                                 <Button
                                     id="date"
@@ -416,7 +433,10 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                                 <Calendar
                                     mode="single"
                                     selected={selectedDate}
-                                    onSelect={setSelectedDate}
+                                    onSelect={(date) => {
+                                        setSelectedDate(date);
+                                        setIsCalendarOpen(false);
+                                    }}
                                     disabled={isDateDisabled}
                                     initialFocus
                                     footer={isDateFull ? <p className="text-center text-sm text-destructive p-2">This date is fully booked.</p> : null}
@@ -459,27 +479,52 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                 </div>
 
                  {feeDetails && (
-                    <CardFooter className="flex-col gap-4 !p-0 !pt-4 border-t">
-                        <Alert>
-                            <Info className="h-4 w-4" />
-                            <AlertTitle>Payment Policy</AlertTitle>
-                            <AlertDescription className="space-y-2">
-                                <p>{feeDetails.infoText}</p>
-                                <p className="text-primary font-medium">{feeDetails.rewardText}</p>
+                    <CardFooter className="flex-col gap-3 !p-0 !pt-4 border-t">
+                         <Alert variant="default" className="bg-blue-50 border-blue-200 text-blue-900 w-full">
+                            <Info className="h-4 w-4 !text-blue-900" />
+                            <AlertTitle className="font-semibold">Important Payment Information</AlertTitle>
+                            <AlertDescription>
+                                <p className="font-semibold">Step 1 (Online): Pay a fully refundable security deposit now.</p>
+                                <p className="font-semibold">Step 2 (At Clinic): Pay the full consultation fee in cash at the clinic.</p>
                             </AlertDescription>
                         </Alert>
-                        <Separator />
-                        <div className="w-full flex justify-between items-center px-1">
-                            <p className="text-muted-foreground">Security Deposit:</p>
-                            <p className="text-xl font-bold">INR {feeDetails.fee.toFixed(2)}</p>
+                       
+                        <div className="w-full space-y-2 p-4 border-y">
+                             <h4 className="font-semibold">Billing Summary</h4>
+                             <div className="flex justify-between text-sm">
+                                <p>Refundable Security Deposit:</p>
+                                <p className="font-medium">₹{feeDetails.fee.toFixed(2)}</p>
+                             </div>
+                             <div className="flex justify-between text-sm">
+                                <p>Platform Fee:</p>
+                                <p className="font-medium">₹{feeDetails.platformFee.toFixed(2)}</p>
+                             </div>
+                             <Separator className="my-2"/>
+                             <div className="flex justify-between font-bold text-base">
+                                <p>Total Online Payment:</p>
+                                <p>₹{feeDetails.totalOnlinePayment.toFixed(2)}</p>
+                             </div>
                         </div>
-                        <Button className="w-full h-12" onClick={handleConfirmBooking} disabled={isProcessingPayment}>
-                            {isProcessingPayment ? <Loader2 className="animate-spin mr-2"/> : <CreditCard className="mr-2"/>}
-                            {isProcessingPayment ? 'Processing...' : 'Pay Security Deposit'}
-                        </Button>
+
+                         <Alert variant="default" className="bg-green-50 border-green-200 text-green-900 w-full">
+                            <Sparkles className="h-4 w-4 !text-green-900" />
+                            <AlertTitle className="font-semibold">Your Reward</AlertTitle>
+                            <AlertDescription>
+                                {patientOptsOut ? "You have opted out of Health Points for this booking." : `After your visit, your deposit is refunded AND you get ₹${feeDetails.fee.toFixed(2)} in Health Points!`}
+                            </AlertDescription>
+                        </Alert>
+                       
+                        <div className="w-full px-1 pt-2">
+                            <Button className="w-full h-12 text-lg" onClick={handleConfirmBooking} disabled={isProcessingPayment}>
+                                {isProcessingPayment ? <Loader2 className="animate-spin mr-2"/> : <CreditCard className="mr-2"/>}
+                                {isProcessingPayment ? 'Processing...' : `Pay & Confirm Booking`}
+                            </Button>
+                        </div>
                     </CardFooter>
                  )}
             </DialogContent>
         </Dialog>
     );
 }
+
+    

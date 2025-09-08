@@ -32,6 +32,57 @@ const generateReferralCode = () => {
 const initializeUsers = () => {
      if (typeof window !== 'undefined' && !sessionStorage.getItem(USERS_KEY)) {
         const initialMockUsers = [
+             // Simple, role-based emails for easy testing
+            {
+                id: 'patient_test_1',
+                email: 'patient@example.com',
+                fullName: 'Priya Patient',
+                phone: '9876543210',
+                role: 'patient',
+                status: 'approved',
+                dateJoined: new Date().toISOString(),
+            },
+            {
+                id: 'doctor_test_1',
+                email: 'doctor@example.com',
+                fullName: 'Dr. Dev Doctor',
+                phone: '9876543211',
+                role: 'doctor',
+                status: 'approved',
+                dateJoined: new Date().toISOString(),
+                referralCode: 'HX-DOCTEST'
+            },
+            {
+                id: 'coordinator_test_1',
+                email: 'coordinator@example.com',
+                fullName: 'Chirag Coordinator',
+                phone: '9876543212',
+                role: 'health-coordinator',
+                status: 'approved',
+                dateJoined: new Date().toISOString(),
+                referralCode: 'HX-HCTEST'
+            },
+            {
+                id: 'lab_test_1',
+                email: 'lab@example.com',
+                fullName: 'Leo Lab',
+                phone: '9876543213',
+                role: 'lab',
+                status: 'approved',
+                dateJoined: new Date().toISOString(),
+                referralCode: 'HX-LABTEST'
+            },
+            {
+                id: 'pharmacy_test_1',
+                email: 'pharmacy@example.com',
+                fullName: 'Parth Pharmacy',
+                phone: '9876543214',
+                role: 'pharmacy',
+                status: 'approved',
+                dateJoined: new Date().toISOString(),
+                referralCode: 'HX-PHARMTEST'
+            },
+            // --- Additional detailed mock users ---
             {
                 id: 'patient_rohan_1687889900',
                 email: 'rohan.patel@example.com',

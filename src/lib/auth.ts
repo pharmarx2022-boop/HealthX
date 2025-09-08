@@ -31,7 +31,77 @@ const generateReferralCode = () => {
 
 const initializeUsers = () => {
      if (typeof window !== 'undefined' && !sessionStorage.getItem(USERS_KEY)) {
-        sessionStorage.setItem(USERS_KEY, JSON.stringify([]));
+        const initialMockUsers = [
+            {
+                id: 'patient_rohan_1687889900',
+                email: 'rohan.patel@example.com',
+                fullName: 'Rohan Patel',
+                phone: '9820098200',
+                role: 'patient',
+                status: 'approved',
+                dateJoined: new Date().toISOString(),
+            },
+            {
+                id: 'patient_priya_1687889955',
+                email: 'priya.singh@example.com',
+                fullName: 'Priya Singh',
+                phone: '9820098201',
+                role: 'patient',
+                status: 'approved',
+                dateJoined: new Date().toISOString(),
+            },
+            {
+                id: 'doctor_anjali_1687890123',
+                email: 'anjali.sharma@example.com',
+                fullName: 'Dr. Anjali Sharma',
+                phone: '9876543210',
+                role: 'doctor',
+                status: 'approved',
+                dateJoined: new Date().toISOString(),
+                referralCode: 'HX-DOCANJALI'
+            },
+             {
+                id: 'doctor_vikram_1687890456',
+                email: 'vikram.singh@example.com',
+                fullName: 'Dr. Vikram Singh',
+                phone: '9876543211',
+                role: 'doctor',
+                status: 'approved',
+                dateJoined: new Date().toISOString(),
+                referralCode: 'HX-DOCVIKRAM'
+            },
+            {
+                id: 'pharmacy_wellness_1687890789',
+                email: 'contact@wellness.com',
+                fullName: 'Wellness Forever Pharmacy',
+                phone: '919988776655',
+                role: 'pharmacy',
+                status: 'approved',
+                dateJoined: new Date().toISOString(),
+                referralCode: 'HX-PHRMWELL'
+            },
+            {
+                id: 'lab_metropolis_1687891122',
+                email: 'support@metropolis.com',
+                fullName: 'Metropolis Lab',
+                phone: '919988776644',
+                role: 'lab',
+                status: 'approved',
+                dateJoined: new Date().toISOString(),
+                referralCode: 'HX-LABMETRO'
+            },
+            {
+                id: 'hc_amit_1687891455',
+                email: 'amit.kumar@example.com',
+                fullName: 'Amit Kumar',
+                phone: '9123456789',
+                role: 'health-coordinator',
+                status: 'approved',
+                dateJoined: new Date().toISOString(),
+                referralCode: 'HX-HCAMIT'
+            }
+        ];
+        sessionStorage.setItem(USERS_KEY, JSON.stringify(initialMockUsers));
     }
 }
 initializeUsers();

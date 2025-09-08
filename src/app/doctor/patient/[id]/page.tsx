@@ -183,8 +183,8 @@ export default function PatientDetailPage() {
                   <RefreshCw className="w-5 h-5 text-primary"/> 
                   <div>
                     <p className="font-medium text-foreground">Security Deposit Refund</p>
-                    <p>{patient.refundStatus} (INR {patient.consultationFee.toFixed(2)})</p>
-                    <p className="text-xs text-muted-foreground">If not marked absent, this will be auto-refunded 3 days after the appointment.</p>
+                    <p>{patient.refundStatus}</p>
+                    <p className="text-xs text-muted-foreground">The deposit is refunded automatically 3 days after the appointment unless the patient is marked absent.</p>
                   </div>
                 </div>
               </div>

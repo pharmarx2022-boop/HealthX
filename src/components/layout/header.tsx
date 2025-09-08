@@ -2,9 +2,9 @@
 'use client';
 
 import Link from 'next/link';
-import { HeartPulse, Menu, X, UserCircle, LogOut, Settings, Briefcase, Users, Pill, Beaker, Gift, Bell, Calendar, LayoutDashboard, Info, Mail, ShieldCheck, FileText, ArrowLeft, Wallet, History } from 'lucide-react';
+import { HeartPulse, Menu, X, UserCircle, LogOut, Settings, Briefcase, Users, Pill, Beaker, Gift, Bell, Calendar, LayoutDashboard, Info, Mail, ShieldCheck, FileText, ArrowLeft, Wallet, History, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle, SheetHeader } from '@/components/ui/sheet';
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -302,24 +302,26 @@ export function Header() {
                 <span className="sr-only">Open menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[280px]">
-               <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-8">
-                    <Link href="/" className="flex items-center gap-2" onClick={() => setIsSheetOpen(false)}>
-                        <HeartPulse className="w-8 h-8 text-primary" />
-                        <span className="text-lg font-bold text-primary">
-                            HealthX
-                        </span>
-                    </Link>
-                    <SheetClose asChild>
-                        <Button variant="ghost" size="icon">
-                            <X className="h-6 w-6" />
-                            <span className="sr-only">Close menu</span>
-                        </Button>
-                    </SheetClose>
-                </div>
-                <nav className="flex flex-col gap-2">
+            <SheetContent side="right" className="w-[280px] flex flex-col p-0">
+               <SheetHeader className="p-6 pb-0">
+                  <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
+                  <div className="flex items-center justify-between">
+                      <Link href="/" className="flex items-center gap-2" onClick={() => setIsSheetOpen(false)}>
+                          <HeartPulse className="w-8 h-8 text-primary" />
+                          <span className="text-lg font-bold text-primary">
+                              HealthX
+                          </span>
+                      </Link>
+                      <SheetClose asChild>
+                          <Button variant="ghost" size="icon">
+                              <X className="h-6 w-6" />
+                              <span className="sr-only">Close menu</span>
+                          </Button>
+                      </SheetClose>
+                  </div>
+               </SheetHeader>
+              <div className="p-6 pt-4 flex-grow flex flex-col">
+                <nav className="flex flex-col gap-2 flex-grow">
                   {user ? (
                     renderMobileAuthButtons()
                   ) : (
@@ -354,6 +356,12 @@ export function Header() {
                     </Link>
                   </Button>
                 </nav>
+                 <div className="mt-auto pt-6 text-center text-xs text-muted-foreground space-y-2">
+                    <p>© {new Date().getFullYear()} HealthX. All rights reserved.</p>
+                     <p className="flex items-center justify-center gap-1.5">
+                        Made in West Bengal <Heart className="w-3 h-3 text-red-500 fill-current" />
+                    </p>
+                </div>
               </div>
             </SheetContent>
           </Sheet>

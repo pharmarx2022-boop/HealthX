@@ -13,13 +13,30 @@ export type ContactSubmission = {
   date: string;
 };
 
+const SUBMISSIONS_KEY = 'contactSubmissions';
+
 export async function getSubmissions(): Promise<ContactSubmission[]> {
-  // In production, this would fetch from a backend API.
-  return Promise.resolve([]);
+  return new Promise((resolve) => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem(SUBMISSIONS_KEY);
+      resolve(stored ? JSON.parse(stored) : []);
+    } else {
+      resolve([]);
+    }
+  });
 }
 
 export async function saveSubmission(data: Omit<ContactSubmission, 'id' | 'date'>): Promise<void> {
-   // In production, this would post to a backend API.
-   console.log("Submitting contact form data to backend:", data);
-   return Promise.resolve();
+   return new Promise(async (resolve) => {
+    if (typeof window !== 'undefined') {
+        const submissions = await getSubmissions();
+        const newSubmission: ContactSubmission = {
+            ...data,
+            id: `sub_${Date.now()}`,
+            date: new Date().toISOString(),
+        };
+        localStorage.setItem(SUBMISSIONS_KEY, JSON.stringify([newSubmission, ...submissions]));
+    }
+    resolve();
+  });
 }

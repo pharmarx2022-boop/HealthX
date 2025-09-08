@@ -78,11 +78,11 @@ For any queries or grievances related to our Privacy Policy or the processing of
 export async function getContent(): Promise<SiteContent> {
   return new Promise((resolve) => {
     if (typeof window !== 'undefined') {
-      const storedContent = sessionStorage.getItem(CONTENT_KEY);
+      const storedContent = localStorage.getItem(CONTENT_KEY);
       if (storedContent) {
         resolve(JSON.parse(storedContent));
       } else {
-        sessionStorage.setItem(CONTENT_KEY, JSON.stringify(defaultContent));
+        localStorage.setItem(CONTENT_KEY, JSON.stringify(defaultContent));
         resolve(defaultContent);
       }
     } else {
@@ -94,7 +94,7 @@ export async function getContent(): Promise<SiteContent> {
 export async function saveContent(content: SiteContent): Promise<void> {
    return new Promise((resolve) => {
     if (typeof window !== 'undefined') {
-        sessionStorage.setItem(CONTENT_KEY, JSON.stringify(content));
+        localStorage.setItem(CONTENT_KEY, JSON.stringify(content));
     }
     resolve();
   });

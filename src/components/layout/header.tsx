@@ -18,6 +18,7 @@ import {
 import { NotificationPopover } from './notification-popover';
 import { Separator } from '../ui/separator';
 import { ScrollArea } from '../ui/scroll-area';
+import { ThemeToggle } from './theme-toggle';
 
 
 export function Header() {
@@ -175,7 +176,7 @@ export function Header() {
         </>
       );
     }
-    return null;
+    return <ThemeToggle />;
   };
   
     const renderMobileAuthButtons = () => {
@@ -342,7 +343,7 @@ export function Header() {
 
         {/* Mobile Navigation */}
         <div className="md:hidden flex items-center gap-2">
-          {user && <NotificationPopover userId={user.id} />}
+          {user ? <NotificationPopover userId={user.id} /> : <ThemeToggle />}
           <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
@@ -377,7 +378,7 @@ export function Header() {
                          <Button variant="default" asChild className="justify-start text-lg h-12" onClick={() => setIsSheetOpen(false)}>
                             <Link href="/#roles">
                                 <UserCircle className="mr-2" />
-                                Login / Sign Up
+                                Login / Sign up
                             </Link>
                          </Button>
                       )}

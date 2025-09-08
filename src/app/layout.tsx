@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Inter, Lora } from 'next/font/google';
 import { cn } from '@/lib/utils';
 import { Toaster } from "@/components/ui/toaster";
+import { ThemeProvider } from '@/components/layout/theme-provider';
 import './globals.css';
 
 const fontSans = Inter({
@@ -35,8 +36,15 @@ export default function RootLayout({
            fontSerif.variable
         )}
       >
-        {children}
-        <Toaster />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

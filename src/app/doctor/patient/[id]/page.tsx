@@ -103,7 +103,7 @@ export default function PatientDetailPage() {
     const now = new Date();
     const appointmentDate = new Date(patient.appointmentDate);
     // Allow action from the time of appointment up to 3 days after.
-    const gracePeriodEndDate = addDays(appointmentDate, 4);
+    const gracePeriodEndDate = addDays(appointmentDate, 3);
     gracePeriodEndDate.setHours(0,0,0,0);
 
     return now >= appointmentDate && now < gracePeriodEndDate;

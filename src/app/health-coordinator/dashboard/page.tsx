@@ -5,7 +5,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BadgePercent, Banknote, Briefcase, History, Gift, Loader2, Bot, Beaker } from 'lucide-react';
+import { BadgePercent, Banknote, Briefcase, History, Gift, Loader2, Bot, Beaker, LayoutDashboard, Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect, useTransition } from 'react';
 import { getCommissionWalletData, requestWithdrawal, type CommissionTransaction } from '@/lib/commission-wallet';
@@ -13,12 +13,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { format } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
 import { NearbySearch } from '@/components/booking/nearby-search';
 import { BottomNavBar } from '@/components/layout/bottom-nav-bar';
 import { AnalyticsDashboard } from '@/components/health-coordinator/analytics-dashboard';
 import { suggestTestsForPatients } from '@/ai/flows/suggest-test-flow';
 import type { TestSuggestion } from '@/ai/schemas/test-suggestion-schema';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const AITestSuggestions = () => {
     const [suggestions, setSuggestions] = useState<TestSuggestion[]>([]);
@@ -131,83 +131,95 @@ export default function HealthCoordinatorDashboardPage() {
                         <p className="text-muted-foreground">Book appointments and manage your commissions.</p>
                     </div>
 
-                    <AnalyticsDashboard />
-                    
-                    <div className="grid lg:grid-cols-3 gap-8 items-start mt-8">
-                        <div className="lg:col-span-2 space-y-8">
+                    <Tabs defaultValue="dashboard" className="w-full">
+                        <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 mb-6">
+                            <TabsTrigger value="dashboard"><LayoutDashboard className="mr-2 h-4 w-4"/>Dashboard</TabsTrigger>
+                            <TabsTrigger value="booking"><Calendar className="mr-2 h-4 w-4"/>Book</TabsTrigger>
+                            <TabsTrigger value="tools"><Bot className="mr-2 h-4 w-4"/>AI Tools</TabsTrigger>
+                        </TabsList>
+                        
+                        <TabsContent value="dashboard">
+                            <div className="grid lg:grid-cols-3 gap-8 items-start">
+                                 <div className="lg:col-span-2 space-y-8">
+                                     <AnalyticsDashboard />
+                                 </div>
+                                 <div className="lg:col-span-1 space-y-8">
+                                    <Card className="shadow-sm">
+                                        <CardHeader>
+                                            <CardTitle className="flex items-center gap-2"><Gift/> Total Earnings</CardTitle>
+                                            <CardDescription>Your earnings from booking appointments and referring new partners.</CardDescription>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <p className="text-4xl font-bold">INR {isClient ? commissionWallet.balance.toFixed(2) : '0.00'}</p>
+                                        </CardContent>
+                                        <CardFooter className="flex-col items-start gap-4">
+                                            <Button className="w-full" onClick={handleWithdrawalRequest} disabled={!isClient || commissionWallet.balance < 1000}>
+                                                <Banknote className="mr-2"/> Request Withdrawal (Min. INR 1000)
+                                            </Button>
+                                            <Dialog>
+                                                <DialogTrigger asChild>
+                                                    <Button variant="link" className="p-0 h-auto self-center">
+                                                        <History className="mr-2"/> View Earnings History
+                                                    </Button>
+                                                </DialogTrigger>
+                                                <DialogContent>
+                                                    <DialogHeader>
+                                                        <DialogTitle>Earnings History</DialogTitle>
+                                                        <DialogDescription>A record of your referral earnings and withdrawals.</DialogDescription>
+                                                    </DialogHeader>
+                                                    <div className="max-h-[50vh] overflow-y-auto -mx-6 px-6">
+                                                        <ul className="space-y-4 py-4">
+                                                            {isClient && commissionWallet.transactions.length > 0 ? (
+                                                                commissionWallet.transactions.map((tx, index) => (
+                                                                    <li key={index} className="flex items-center justify-between">
+                                                                        <div>
+                                                                            <p className="font-medium">{tx.description}</p>
+                                                                            <p className="text-xs text-muted-foreground mt-1">{format(new Date(tx.date), 'PP, p')}</p>
+                                                                        </div>
+                                                                        <span className={`font-semibold capitalize ${tx.type === 'credit' ? 'text-green-600' : 'text-destructive'}`}>
+                                                                            {tx.type === 'credit' ? '+' : '-'} INR {tx.amount.toFixed(2)} <span className="text-muted-foreground">({tx.status})</span>
+                                                                        </span>
+                                                                    </li>
+                                                                ))
+                                                            ) : (
+                                                                <p className="text-center text-muted-foreground py-4">No commission transactions yet.</p>
+                                                            )}
+                                                        </ul>
+                                                    </div>
+                                                </DialogContent>
+                                            </Dialog>
+                                        </CardFooter>
+                                    </Card>
+                                     <Alert variant="outline" className="w-full">
+                                        <BadgePercent className="h-4 w-4" />
+                                        <AlertTitle>How Earnings Work</AlertTitle>
+                                        <AlertDescription>
+                                            You earn a 5% commission for every appointment you book that is successfully completed. You also earn referral bonuses when partners you refer join the platform.
+                                        </AlertDescription>
+                                    </Alert>
+                                 </div>
+                            </div>
+                        </TabsContent>
+
+                        <TabsContent value="booking">
                              <Card className="shadow-sm">
-                                <CardHeader className="flex flex-row items-center gap-4">
-                                    <Briefcase className="w-8 h-8 text-primary"/>
-                                    <div>
-                                        <CardTitle>Book an Appointment</CardTitle>
-                                        <CardDescription>
-                                           Find doctors, labs, and pharmacies for your patients.
-                                        </CardDescription>
-                                    </div>
+                                <CardHeader>
+                                    <CardTitle>Book an Appointment</CardTitle>
+                                    <CardDescription>
+                                       Find doctors, labs, and pharmacies for your patients.
+                                    </CardDescription>
                                 </CardHeader>
                                 <CardContent>
                                      <NearbySearch />
                                 </CardContent>
                             </Card>
-                        </div>
+                        </TabsContent>
+                        
+                        <TabsContent value="tools">
+                           <AITestSuggestions />
+                        </TabsContent>
 
-                        <div className="lg:col-span-1 space-y-8">
-                             <AITestSuggestions />
-                             <Card className="shadow-sm">
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2"><Gift/> Total Earnings</CardTitle>
-                                    <CardDescription>Your earnings from booking appointments and referring new partners.</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-4xl font-bold">INR {isClient ? commissionWallet.balance.toFixed(2) : '0.00'}</p>
-                                </CardContent>
-                                <CardFooter className="flex-col items-start gap-4">
-                                    <Button className="w-full" onClick={handleWithdrawalRequest} disabled={!isClient || commissionWallet.balance < 1000}>
-                                        <Banknote className="mr-2"/> Request Withdrawal (Min. INR 1000)
-                                    </Button>
-                                    <Dialog>
-                                        <DialogTrigger asChild>
-                                            <Button variant="link" className="p-0 h-auto self-center">
-                                                <History className="mr-2"/> View Earnings History
-                                            </Button>
-                                        </DialogTrigger>
-                                        <DialogContent>
-                                            <DialogHeader>
-                                                <DialogTitle>Earnings History</DialogTitle>
-                                                <DialogDescription>A record of your referral earnings and withdrawals.</DialogDescription>
-                                            </DialogHeader>
-                                            <div className="max-h-[50vh] overflow-y-auto -mx-6 px-6">
-                                                <ul className="space-y-4 py-4">
-                                                    {isClient && commissionWallet.transactions.length > 0 ? (
-                                                        commissionWallet.transactions.map((tx, index) => (
-                                                            <li key={index} className="flex items-center justify-between">
-                                                                <div>
-                                                                    <p className="font-medium">{tx.description}</p>
-                                                                    <p className="text-xs text-muted-foreground mt-1">{format(new Date(tx.date), 'PP, p')}</p>
-                                                                </div>
-                                                                <span className={`font-semibold capitalize ${tx.type === 'credit' ? 'text-green-600' : 'text-destructive'}`}>
-                                                                    {tx.type === 'credit' ? '+' : '-'} INR {tx.amount.toFixed(2)} <span className="text-muted-foreground">({tx.status})</span>
-                                                                </span>
-                                                            </li>
-                                                        ))
-                                                    ) : (
-                                                        <p className="text-center text-muted-foreground py-4">No commission transactions yet.</p>
-                                                    )}
-                                                </ul>
-                                            </div>
-                                        </DialogContent>
-                                    </Dialog>
-                                </CardFooter>
-                            </Card>
-                             <Alert variant="outline" className="w-full">
-                                <BadgePercent className="h-4 w-4" />
-                                <AlertTitle>How Earnings Work</AlertTitle>
-                                <AlertDescription>
-                                    You earn a 5% commission for every appointment you book that is successfully completed. You also earn referral bonuses when partners you refer join the platform.
-                                </AlertDescription>
-                            </Alert>
-                        </div>
-                    </div>
+                    </Tabs>
                 </div>
             </main>
             <Footer />

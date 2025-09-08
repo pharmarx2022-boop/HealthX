@@ -87,7 +87,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
     
     // Patient flow state
     const [selectedPatientId, setSelectedPatientId] = useState('self');
-    const [patientOptsOut, setPatientOptsOut] = useState(false);
+    const [patientWantsHealthPoints, setPatientWantsHealthPoints] = useState(false);
     
     // Health Coordinator / Partner flow state
     const [patientSearch, setPatientSearch] = useState('');
@@ -126,7 +126,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
             setOtpSent(false);
             setOtp('');
             setIsProcessingPayment(false);
-            setPatientOptsOut(false);
+            setPatientWantsHealthPoints(false); // Default to free booking
         }
     }, [isOpen, user?.id, user?.role, clinics]);
 
@@ -159,10 +159,8 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
         const fee = selectedClinic.consultationFee;
         let platformFeeRate = 0;
 
-        if (isPartnerBooking) {
-            platformFeeRate = patientOptsOut ? 0.10 : 0.05;
-        } else {
-            platformFeeRate = patientOptsOut ? 0.05 : 0;
+        if (patientWantsHealthPoints) {
+            platformFeeRate = 0.05; // 5% fee if patient opts-in for points
         }
         
         const platformFee = fee * platformFeeRate;
@@ -478,13 +476,15 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                     </div>
                 )}
                  <div className="flex items-center space-x-2 mt-4 p-3 bg-slate-50 border rounded-md">
-                    <Checkbox id="opt-out" checked={patientOptsOut} onCheckedChange={(checked) => setPatientOptsOut(Boolean(checked))} />
-                    <Label htmlFor="opt-out" className="text-sm font-normal leading-tight">
-                        {isPartnerBooking 
-                            ? "Opt patient out of receiving Health Points bonus."
-                            : "I want to opt-out of receiving Health Points bonus."
-                        }
-                    </Label>
+                    <Checkbox id="earn-points" checked={patientWantsHealthPoints} onCheckedChange={(checked) => setPatientWantsHealthPoints(Boolean(checked))} />
+                    <div className="grid gap-1.5 leading-none">
+                        <Label htmlFor="earn-points" className="font-medium">
+                           Yes, I want to earn Health Points for this visit.
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                            A 5% platform fee will be added to your payment to unlock this benefit.
+                        </p>
+                    </div>
                 </div>
 
                 {feeDetails && (
@@ -519,7 +519,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                             <Sparkles className="h-4 w-4 !text-green-900" />
                             <AlertTitle className="font-semibold">Your Reward</AlertTitle>
                             <AlertDescription>
-                                {patientOptsOut ? "You have opted out of Health Points for this booking." : `After your visit, your deposit is refunded AND you get ₹${feeDetails.fee.toFixed(2)} in Health Points!`}
+                                {!patientWantsHealthPoints ? "Opt-in to earn Health Points equal to 100% of your consultation fee!" : `After your visit, your deposit is refunded AND you get ₹${feeDetails.fee.toFixed(2)} in Health Points!`}
                             </AlertDescription>
                         </Alert>
                     </div>

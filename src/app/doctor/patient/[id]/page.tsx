@@ -7,10 +7,10 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, User, Calendar, Clock, Stethoscope, FileText, MessageSquare, CreditCard, RefreshCw, BadgeCheck, BellPlus, CalendarPlus, Loader2 } from 'lucide-react';
+import { ArrowLeft, User, Calendar, Clock, Stethoscope, FileText, MessageSquare, CreditCard, RefreshCw, BadgeCheck, BellPlus, CalendarPlus, Loader2, UserX } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
-import { format } from 'date-fns';
+import { format, addDays } from 'date-fns';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
@@ -41,7 +41,14 @@ export default function PatientDetailPage() {
   const handleMarkAsComplete = () => {
     toast({
         title: "Action Required",
-        description: "Backend integration needed to mark consultation as complete.",
+        description: "Backend integration needed to mark consultation as complete and issue Health Points.",
+    });
+  };
+  
+   const handleMarkAsAbsent = () => {
+    toast({
+        title: "Action Required",
+        description: "Backend integration needed to mark patient as absent and forfeit their security deposit.",
     });
   };
 
@@ -91,13 +98,13 @@ export default function PatientDetailPage() {
     return null;
   }
   
-  const isCompletionAllowed = () => {
+  const isActionAllowed = () => {
     if (!patient || patient.status !== 'upcoming') return false;
     const now = new Date();
     const appointmentDate = new Date(patient.appointmentDate);
-    const gracePeriodEndDate = new Date(appointmentDate);
-    gracePeriodEndDate.setDate(gracePeriodEndDate.getDate() + 4); 
-    gracePeriodEndDate.setHours(0, 0, 0, 0);
+    // Allow action from the time of appointment up to 3 days after.
+    const gracePeriodEndDate = addDays(appointmentDate, 4);
+    gracePeriodEndDate.setHours(0,0,0,0);
 
     return now >= appointmentDate && now < gracePeriodEndDate;
   };
@@ -177,6 +184,7 @@ export default function PatientDetailPage() {
                   <div>
                     <p className="font-medium text-foreground">Security Deposit Refund</p>
                     <p>{patient.refundStatus} (INR {patient.consultationFee.toFixed(2)})</p>
+                    <p className="text-xs text-muted-foreground">If not marked absent, this will be auto-refunded 3 days after the appointment.</p>
                   </div>
                 </div>
               </div>
@@ -216,23 +224,43 @@ export default function PatientDetailPage() {
               </div>
             </CardContent>
              {patient.status === 'upcoming' && (
-                <CardFooter className="bg-slate-50/70 mt-6 py-4 px-6 border-t flex-wrap justify-between items-center gap-4">
+                <CardFooter className="bg-slate-50/70 mt-6 py-4 px-6 border-t flex-wrap justify-center sm:justify-end items-center gap-4">
+                     <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                             <Button variant="destructive" size="lg" className="w-full sm:w-auto" disabled={!isActionAllowed()}>
+                               <UserX className="mr-2"/> Mark Patient as Absent
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Confirm Patient Absent</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This will mark the patient as a no-show. Their INR {patient.consultationFee.toFixed(2)} security deposit will be forfeited and will not be refunded. This action cannot be undone.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleMarkAsAbsent} className="bg-destructive hover:bg-destructive/90">Confirm Absent</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button size="lg" className="w-full sm:w-auto" disabled={!isCompletionAllowed()}>
-                               <BadgeCheck className="mr-2"/> Consultation done & God bless you
+                            <Button size="lg" className="w-full sm:w-auto" disabled={!isActionAllowed()}>
+                               <BadgeCheck className="mr-2"/> Consultation Done (Issue Points)
                             </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
                                 <AlertDialogTitle>Confirm Consultation Completion</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    This will mark the consultation as complete. A full refund of the INR {patient.consultationFee.toFixed(2)} security deposit will be issued to the patient, and an equal amount of Health Points will be credited to their account. This action cannot be undone.
+                                    This will mark the consultation as complete and credit INR {patient.consultationFee.toFixed(2)} in Health Points to the patient's account. The security deposit will be refunded separately and automatically.
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleMarkAsComplete}>Confirm & Proceed</AlertDialogAction>
+                                <AlertDialogAction onClick={handleMarkAsComplete}>Confirm & Issue Points</AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>

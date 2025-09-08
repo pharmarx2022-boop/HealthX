@@ -97,6 +97,8 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
     const [otpSent, setOtpSent] = useState(false);
     const [otp, setOtp] = useState('');
     
+    const isPartnerBooking = userRole === 'health-coordinator' || userRole === 'lab' || userRole === 'pharmacy';
+
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const storedUser = sessionStorage.getItem('user');
@@ -126,9 +128,10 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
             setOtpSent(false);
             setOtp('');
             setIsProcessingPayment(false);
-            setPatientWantsHealthPoints(false);
+            // Default checkbox state based on who is booking
+            setPatientWantsHealthPoints(isPartnerBooking);
         }
-    }, [isOpen, user?.id, user?.role, clinics]);
+    }, [isOpen, user?.id, user?.role, clinics, isPartnerBooking]);
 
     const selectedClinic = useMemo(() => {
         return clinics.find(c => c.id === selectedClinicId);
@@ -151,16 +154,24 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
         return appointmentsOnDate.length >= selectedClinic.patientLimit;
     }, [selectedDate, selectedClinic]);
     
-    const isPartnerBooking = userRole === 'health-coordinator' || userRole === 'lab' || userRole === 'pharmacy';
-
     const getFeeDetails = () => {
         if (!selectedClinic) return null;
         
         const fee = selectedClinic.consultationFee;
         let platformFeeRate = 0;
 
-        if (patientWantsHealthPoints) {
-            platformFeeRate = 0.05; // 5% fee if patient opts-in for points
+        if (isPartnerBooking) {
+            if (patientWantsHealthPoints) {
+                platformFeeRate = 0.10; // Partner books, patient wants points -> 10%
+            } else {
+                platformFeeRate = 0.05; // Partner books, patient does NOT want points -> 5%
+            }
+        } else { // Patient is booking
+            if (patientWantsHealthPoints) {
+                platformFeeRate = 0.05; // Patient books, wants points -> 5%
+            } else {
+                platformFeeRate = 0; // Patient books, does NOT want points -> 0%
+            }
         }
         
         const platformFee = fee * platformFeeRate;
@@ -446,7 +457,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
 
     const renderPaymentStep = () => (
          <>
-            <DialogHeader className="p-6 pb-4 border-b flex-row items-center">
+            <DialogHeader className="p-6 pb-4 border-b flex-row items-center sticky top-0 bg-background z-10">
                 <Button variant="ghost" size="icon" className="mr-2" onClick={() => setStep('details')}>
                     <ArrowLeft />
                 </Button>
@@ -484,13 +495,14 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                     </div>
                 </div>
 
-                <Alert variant="default" className="bg-green-50 border-green-200 text-green-900 w-full">
+                 <Alert variant="default" className="bg-green-50 border-green-200 text-green-900 w-full">
                     <Gift className="h-4 w-4 !text-green-900" />
                     <AlertTitle className="font-semibold">What are Health Points?</AlertTitle>
                     <AlertDescription>
                         Health Points are rewards you can use to get discounts on medicines and lab tests from our partner pharmacies and labs.
                     </AlertDescription>
                 </Alert>
+                
 
                 {feeDetails && (
                     <div className="space-y-3">
@@ -531,7 +543,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                 )}
             </div>
              {feeDetails && (
-                <DialogFooter className="p-6 border-t">
+                <DialogFooter className="p-6 border-t sticky bottom-0 bg-background z-10">
                     <Button className="w-full h-12 text-lg" onClick={handleConfirmBooking} disabled={isProcessingPayment}>
                         {isProcessingPayment ? <Loader2 className="animate-spin mr-2"/> : <CreditCard className="mr-2"/>}
                         {isProcessingPayment ? 'Processing...' : `Pay & Confirm Booking`}

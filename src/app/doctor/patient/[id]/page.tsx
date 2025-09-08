@@ -7,7 +7,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, User, Calendar, Clock, Stethoscope, FileText, MessageSquare, CreditCard, RefreshCw, BadgeCheck, BellPlus } from 'lucide-react';
+import { ArrowLeft, User, Calendar, Clock, Stethoscope, FileText, MessageSquare, CreditCard, RefreshCw, BadgeCheck, BellPlus, CalendarPlus } from 'lucide-react';
 import Link from 'next/link';
 import { mockPatientData as mockPatients } from '@/lib/mock-data';
 import { Badge } from '@/components/ui/badge';
@@ -22,6 +22,7 @@ import { addNotification } from '@/lib/notifications';
 import { initialDoctors } from '@/lib/mock-data';
 import { checkDoctorMilestone } from '@/lib/referrals';
 import { recordCommission } from '@/lib/commission-wallet';
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 export default function PatientDetailPage() {
   const params = useParams();
@@ -29,6 +30,8 @@ export default function PatientDetailPage() {
   const { toast } = useToast();
   const [isClient, setIsClient] = useState(false);
   const [nextAppointment, setNextAppointment] = useState<Date | undefined>(undefined);
+  const [rescheduleDate, setRescheduleDate] = useState<Date | undefined>(undefined);
+  const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
 
   // We need to manage patient state locally to reflect changes
   const [allPatients, setAllPatients] = useState(mockPatients);
@@ -142,6 +145,45 @@ export default function PatientDetailPage() {
         title: "Reminder Set",
         description: `Patient will be reminded for their appointment on ${format(nextAppointment, 'PPP')}.`,
     });
+  }
+
+  const handleReschedule = () => {
+    if (!rescheduleDate || !patient) {
+        toast({ title: "No date selected", description: "Please select a new date for the appointment.", variant: "destructive" });
+        return;
+    }
+    
+    const originalDate = format(new Date(patient.appointmentDate), 'PPP');
+    const newDate = format(rescheduleDate, 'PPP');
+    const newAppointmentDate = new Date(rescheduleDate);
+    // Keep original time
+    const originalTime = new Date(patient.appointmentDate);
+    newAppointmentDate.setHours(originalTime.getHours(), originalTime.getMinutes());
+
+
+    const updatedPatients = allPatients.map(p => {
+        if (p.id === id) {
+            return { ...p, appointmentDate: newAppointmentDate.toISOString() };
+        }
+        return p;
+    });
+    setAllPatients(updatedPatients);
+    sessionStorage.setItem('mockPatients', JSON.stringify(updatedPatients));
+
+    addNotification(patient.id, {
+        title: 'Appointment Rescheduled',
+        message: `Your doctor has rescheduled your appointment from ${originalDate} to ${newDate}.`,
+        icon: 'calendar',
+        href: '/patient/appointments'
+    });
+
+    toast({
+        title: "Appointment Rescheduled",
+        description: `The appointment has been moved to ${newDate}. The patient has been notified.`,
+    });
+    
+    setIsRescheduleOpen(false);
+    setRescheduleDate(undefined);
   }
 
   if (!isClient) {
@@ -277,7 +319,7 @@ export default function PatientDetailPage() {
               </div>
             </CardContent>
              {patient.status === 'upcoming' && (
-                <CardFooter className="bg-slate-50/70 mt-6 py-4 px-6 border-t">
+                <CardFooter className="bg-slate-50/70 mt-6 py-4 px-6 border-t flex-wrap justify-between items-center gap-4">
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <Button size="lg" className="w-full sm:w-auto">
@@ -297,6 +339,33 @@ export default function PatientDetailPage() {
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>
+
+                    <Dialog open={isRescheduleOpen} onOpenChange={setIsRescheduleOpen}>
+                        <DialogTrigger asChild>
+                            <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                                <CalendarPlus className="mr-2" /> Reschedule
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Reschedule Appointment</DialogTitle>
+                                <DialogDescription>Select a new date for {patient.name}'s appointment. The patient will be notified of the change.</DialogDescription>
+                            </DialogHeader>
+                            <div className="py-4">
+                                <CalendarPicker
+                                    mode="single"
+                                    selected={rescheduleDate}
+                                    onSelect={setRescheduleDate}
+                                    initialFocus
+                                    disabled={(date) => date < new Date()}
+                                />
+                            </div>
+                            <DialogFooter>
+                                <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
+                                <Button onClick={handleReschedule}>Confirm Reschedule</Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
                 </CardFooter>
             )}
           </Card>
@@ -306,3 +375,4 @@ export default function PatientDetailPage() {
     </div>
   );
 }
+

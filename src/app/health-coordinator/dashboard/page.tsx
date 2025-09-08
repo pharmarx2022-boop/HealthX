@@ -5,9 +5,9 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BadgePercent, Banknote, Briefcase, History, Gift, Loader2 } from 'lucide-react';
+import { BadgePercent, Banknote, Briefcase, History, Gift, Loader2, Bot, Beaker } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { getCommissionWalletData, requestWithdrawal, type CommissionTransaction } from '@/lib/commission-wallet';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { format } from 'date-fns';
@@ -17,6 +17,73 @@ import dynamic from 'next/dynamic';
 import { NearbySearch } from '@/components/booking/nearby-search';
 import { BottomNavBar } from '@/components/layout/bottom-nav-bar';
 import { AnalyticsDashboard } from '@/components/health-coordinator/analytics-dashboard';
+import { suggestTestsForPatients, type TestSuggestion } from '@/ai/flows/suggest-test-flow';
+
+const AITestSuggestions = () => {
+    const [suggestions, setSuggestions] = useState<TestSuggestion[]>([]);
+    const [isPending, startTransition] = useTransition();
+    const { toast } = useToast();
+
+    const handleGetSuggestions = () => {
+        startTransition(async () => {
+            try {
+                const result = await suggestTestsForPatients();
+                setSuggestions(result);
+            } catch (e) {
+                console.error(e);
+                toast({
+                    title: "Error fetching suggestions",
+                    description: e instanceof Error ? e.message : "An unknown error occurred.",
+                    variant: "destructive"
+                });
+            }
+        });
+    }
+
+    return (
+         <Card className="shadow-sm">
+            <CardHeader className="flex flex-row items-center gap-4">
+                <Bot className="w-8 h-8 text-primary"/>
+                <div>
+                    <CardTitle>AI Test Suggestions</CardTitle>
+                    <CardDescription>
+                        Get AI-powered recommendations for patient lab tests based on their history.
+                    </CardDescription>
+                </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                {suggestions.length > 0 ? (
+                    <div className="space-y-4">
+                        {suggestions.map((suggestion, index) => (
+                            <Card key={index} className="bg-slate-50">
+                                <CardContent className="p-4">
+                                    <p className="font-semibold">{suggestion.patientName}</p>
+                                    <p><span className="font-medium">Suggested Test:</span> {suggestion.suggestedTest}</p>
+                                    <p className="text-sm text-muted-foreground"><span className="font-medium">Reason:</span> {suggestion.reason}</p>
+                                    <Button asChild size="sm" className="mt-2">
+                                        <Link href="/book-appointment?service=lab">
+                                            <Beaker className="mr-2 h-4 w-4"/> Book Lab Test
+                                        </Link>
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center text-muted-foreground py-4">
+                       Click the button to generate test suggestions for your patients.
+                    </div>
+                )}
+            </CardContent>
+             <CardFooter>
+                 <Button onClick={handleGetSuggestions} disabled={isPending} className="w-full">
+                    {isPending ? <Loader2 className="animate-spin mr-2"/> :  <Bot className="mr-2" />}
+                    {suggestions.length > 0 ? 'Refresh Suggestions' : 'Get Suggestions'}
+                </Button>
+            </CardFooter>
+        </Card>
+    )
+}
 
 
 export default function HealthCoordinatorDashboardPage() {
@@ -84,6 +151,7 @@ export default function HealthCoordinatorDashboardPage() {
                         </div>
 
                         <div className="lg:col-span-1 space-y-8">
+                             <AITestSuggestions />
                              <Card className="shadow-sm">
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2"><Gift/> Total Earnings</CardTitle>

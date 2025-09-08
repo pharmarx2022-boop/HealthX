@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { HeartPulse, Menu, X, UserCircle, LogOut, Settings, Briefcase, Users, Pill, Beaker, Gift, Bell, Calendar, LayoutDashboard, Info, Mail, ShieldCheck, FileText, ArrowLeft, Wallet, History, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle, SheetHeader } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -47,7 +47,6 @@ export function Header() {
     setIsSheetOpen(false);
   };
   
-  // Hide header on admin pages for a cleaner look, as it has its own layout
   if (pathname?.startsWith('/admin')) {
       return null;
   }
@@ -111,25 +110,25 @@ export function Header() {
                             </Link>
                         </DropdownMenuItem>
                          <DropdownMenuItem asChild>
-                            <Link href="/patient/my-health#appointments">
+                            <Link href="/patient/appointments">
                                <Calendar className="mr-2" />
                                 <span>Your Appointments</span>
                             </Link>
                         </DropdownMenuItem>
                          <DropdownMenuItem asChild>
-                            <Link href="/patient/my-health#reports">
+                            <Link href="/patient/reports">
                                 <FileText className="mr-2" />
                                 <span>My Reports</span>
                             </Link>
                         </DropdownMenuItem>
                          <DropdownMenuItem asChild>
-                            <Link href="/patient/my-health#wallet">
+                            <Link href="/patient/wallet">
                                 <Wallet className="mr-2" />
                                 <span>Health Points</span>
                             </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                            <Link href="/patient/my-health#family">
+                            <Link href="/patient/family">
                                 <Users className="mr-2" />
                                 <span>Family Members</span>
                             </Link>
@@ -212,31 +211,31 @@ export function Header() {
                     </Button>
                     <Separator className="my-1" />
                     <Button variant="ghost" asChild className="justify-start text-lg">
-                        <Link href="/patient/my-health" onClick={() => setIsSheetOpen(false)}>
+                        <Link href="/patient/appointments" onClick={() => setIsSheetOpen(false)}>
                            <Calendar className="mr-2" />
                            Your Appointments
                         </Link>
                     </Button>
                      <Button variant="ghost" asChild className="justify-start text-lg">
-                        <Link href="/patient/my-health?tab=reports" onClick={() => setIsSheetOpen(false)}>
+                        <Link href="/patient/reports" onClick={() => setIsSheetOpen(false)}>
                            <FileText className="mr-2" />
                            My Reports
                         </Link>
                     </Button>
                      <Button variant="ghost" asChild className="justify-start text-lg">
-                        <Link href="/patient/my-health?tab=wallet" onClick={() => setIsSheetOpen(false)}>
+                        <Link href="/patient/wallet" onClick={() => setIsSheetOpen(false)}>
                            <Wallet className="mr-2" />
                            Health Points
                         </Link>
                     </Button>
                      <Button variant="ghost" asChild className="justify-start text-lg">
-                        <Link href="/patient/my-health?tab=reminders" onClick={() => setIsSheetOpen(false)}>
+                        <Link href="/patient/reminders" onClick={() => setIsSheetOpen(false)}>
                            <Bell className="mr-2" />
                            Reminders
                         </Link>
                     </Button>
                     <Button variant="ghost" asChild className="justify-start text-lg">
-                        <Link href="/patient/my-health?tab=family" onClick={() => setIsSheetOpen(false)}>
+                        <Link href="/patient/family" onClick={() => setIsSheetOpen(false)}>
                             <Users className="mr-2" />
                             Family Members
                         </Link>

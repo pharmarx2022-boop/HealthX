@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { NotificationPopover } from './notification-popover';
 import { Separator } from '../ui/separator';
+import { ScrollArea } from '../ui/scroll-area';
 
 
 export function Header() {
@@ -211,31 +212,31 @@ export function Header() {
                     </Button>
                     <Separator className="my-1" />
                     <Button variant="ghost" asChild className="justify-start text-lg">
-                        <Link href="/patient/my-health#appointments" onClick={() => setIsSheetOpen(false)}>
+                        <Link href="/patient/my-health" onClick={() => setIsSheetOpen(false)}>
                            <Calendar className="mr-2" />
                            Your Appointments
                         </Link>
                     </Button>
                      <Button variant="ghost" asChild className="justify-start text-lg">
-                        <Link href="/patient/my-health#reports" onClick={() => setIsSheetOpen(false)}>
+                        <Link href="/patient/my-health?tab=reports" onClick={() => setIsSheetOpen(false)}>
                            <FileText className="mr-2" />
                            My Reports
                         </Link>
                     </Button>
                      <Button variant="ghost" asChild className="justify-start text-lg">
-                        <Link href="/patient/my-health#wallet" onClick={() => setIsSheetOpen(false)}>
+                        <Link href="/patient/my-health?tab=wallet" onClick={() => setIsSheetOpen(false)}>
                            <Wallet className="mr-2" />
                            Health Points
                         </Link>
                     </Button>
                      <Button variant="ghost" asChild className="justify-start text-lg">
-                        <Link href="/patient/my-health#reminders" onClick={() => setIsSheetOpen(false)}>
+                        <Link href="/patient/my-health?tab=reminders" onClick={() => setIsSheetOpen(false)}>
                            <Bell className="mr-2" />
                            Reminders
                         </Link>
                     </Button>
                     <Button variant="ghost" asChild className="justify-start text-lg">
-                        <Link href="/patient/my-health#family" onClick={() => setIsSheetOpen(false)}>
+                        <Link href="/patient/my-health?tab=family" onClick={() => setIsSheetOpen(false)}>
                             <Users className="mr-2" />
                             Family Members
                         </Link>
@@ -302,8 +303,8 @@ export function Header() {
                 <span className="sr-only">Open menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[280px] flex flex-col p-0">
-               <SheetHeader className="p-6 pb-0">
+            <SheetContent side="right" className="w-[300px] flex flex-col p-0">
+               <SheetHeader className="p-4 border-b">
                   <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
                   <div className="flex items-center justify-between">
                       <Link href="/" className="flex items-center gap-2" onClick={() => setIsSheetOpen(false)}>
@@ -320,49 +321,51 @@ export function Header() {
                       </SheetClose>
                   </div>
                </SheetHeader>
-              <div className="p-6 pt-4 flex-grow flex flex-col">
-                <nav className="flex flex-col gap-2 flex-grow">
-                  {user ? (
-                    renderMobileAuthButtons()
-                  ) : (
-                     <Button variant="default" asChild className="justify-start text-lg h-12">
-                        <Link href="/#roles" onClick={() => setIsSheetOpen(false)}>
-                            <UserCircle className="mr-2" />
-                            Login / Sign Up
+                <ScrollArea className="flex-1">
+                  <div className="p-4 flex-grow flex flex-col">
+                    <nav className="flex flex-col gap-1 flex-grow">
+                      {user ? (
+                        renderMobileAuthButtons()
+                      ) : (
+                         <Button variant="default" asChild className="justify-start text-lg h-12">
+                            <Link href="/#roles" onClick={() => setIsSheetOpen(false)}>
+                                <UserCircle className="mr-2" />
+                                Login / Sign Up
+                            </Link>
+                         </Button>
+                      )}
+                      
+                      <Separator className="my-2"/>
+                      
+                      <Button variant="ghost" asChild className="justify-start text-base">
+                        <Link href="/about" onClick={() => setIsSheetOpen(false)}>
+                            <Info className="mr-2" /> About Us
                         </Link>
-                     </Button>
-                  )}
-                  
-                  <Separator className="my-2"/>
-                  
-                  <Button variant="ghost" asChild className="justify-start text-lg">
-                    <Link href="/about" onClick={() => setIsSheetOpen(false)}>
-                        <Info className="mr-2" /> About Us
-                    </Link>
-                  </Button>
-                  <Button variant="ghost" asChild className="justify-start text-lg">
-                     <Link href="/contact" onClick={() => setIsSheetOpen(false)}>
-                        <Mail className="mr-2" /> Contact Us
-                    </Link>
-                  </Button>
-                   <Button variant="ghost" asChild className="justify-start text-lg">
-                     <Link href="/terms-of-service" onClick={() => setIsSheetOpen(false)}>
-                        <FileText className="mr-2" /> Terms of Service
-                    </Link>
-                  </Button>
-                   <Button variant="ghost" asChild className="justify-start text-lg">
-                     <Link href="/privacy-policy" onClick={() => setIsSheetOpen(false)}>
-                        <ShieldCheck className="mr-2" /> Privacy Policy
-                    </Link>
-                  </Button>
-                </nav>
-                 <div className="mt-auto pt-6 text-center text-xs text-muted-foreground space-y-2">
+                      </Button>
+                      <Button variant="ghost" asChild className="justify-start text-base">
+                         <Link href="/contact" onClick={() => setIsSheetOpen(false)}>
+                            <Mail className="mr-2" /> Contact Us
+                        </Link>
+                      </Button>
+                       <Button variant="ghost" asChild className="justify-start text-base">
+                         <Link href="/terms-of-service" onClick={() => setIsSheetOpen(false)}>
+                            <FileText className="mr-2" /> Terms of Service
+                        </Link>
+                      </Button>
+                       <Button variant="ghost" asChild className="justify-start text-base">
+                         <Link href="/privacy-policy" onClick={() => setIsSheetOpen(false)}>
+                            <ShieldCheck className="mr-2" /> Privacy Policy
+                        </Link>
+                      </Button>
+                    </nav>
+                  </div>
+                </ScrollArea>
+                 <div className="p-4 mt-auto border-t text-center text-xs text-muted-foreground space-y-1">
                     <p>© {new Date().getFullYear()} HealthX. All rights reserved.</p>
                      <p className="flex items-center justify-center gap-1.5">
                         Made in West Bengal <Heart className="w-3 h-3 text-red-500 fill-current" />
                     </p>
                 </div>
-              </div>
             </SheetContent>
           </Sheet>
         </div>

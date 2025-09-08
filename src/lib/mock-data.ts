@@ -207,7 +207,7 @@ export const mockPatientData: any[] = [
     },
     {
         id: 'patient_test_1',
-        name: 'Priya Patient',
+        name: 'Suresh Sharma',
         email: 'patient@example.com',
         phone: '9876543210',
         role: 'patient',

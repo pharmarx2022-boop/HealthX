@@ -5,17 +5,10 @@
 export const mockFamilyMembers: any[] = [
     {
         id: 'family_1',
-        name: 'Anita Patel',
+        name: 'Sunita Sharma',
         relationship: 'Spouse',
         dob: '1990-05-20',
         sex: 'Female',
-    },
-    {
-        id: 'family_2',
-        name: 'Aarav Patel',
-        relationship: 'Son',
-        dob: '2018-10-15',
-        sex: 'Male',
     }
 ];
 

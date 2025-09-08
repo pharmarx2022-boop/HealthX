@@ -36,7 +36,7 @@ const initializeUsers = () => {
             {
                 id: 'patient_test_1',
                 email: 'patient@example.com',
-                fullName: 'Priya Patient',
+                fullName: 'Suresh Sharma',
                 phone: '9876543210',
                 role: 'patient',
                 status: 'approved',

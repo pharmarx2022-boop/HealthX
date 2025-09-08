@@ -13,6 +13,9 @@ import {
   SidebarMenuButton,
   SidebarFooter,
   SidebarInset,
+  SidebarSeparator,
+  SidebarGroup,
+  SidebarGroupLabel,
 } from '@/components/ui/sidebar';
 import {
   LayoutDashboard,
@@ -58,63 +61,32 @@ export default function AdminLayout({
     setIsLoading(false);
   }, [router]);
 
-  const menuItems = [
-    {
-      href: '/admin',
-      label: 'Dashboard',
-      icon: LayoutDashboard,
-    },
-    {
-      href: '/admin/appointments',
-      label: 'Appointments',
-      icon: Calendar,
-    },
-    {
-      href: '/admin/booking',
-      label: 'Book for Patient',
-      icon: BookUser,
-    },
-    {
-      href: '/admin/analytics',
-      label: 'Analytics',
-      icon: LineChart,
-    },
-    {
-      href: '/admin/users',
-      label: 'Users',
-      icon: Users,
-    },
-    {
-      href: '/admin/support',
-      label: 'Support',
-      icon: MessageSquare,
-    },
-    {
-      href: '/admin/inquiries',
-      label: 'Inquiries',
-      icon: HelpCircle,
-    },
-    {
-      href: '/admin/approvals',
-      label: 'Approvals',
-      icon: ShieldCheck,
-    },
-    {
-      href: '/admin/withdrawals',
-      label: 'Withdrawals',
-      icon: Banknote,
-    },
-     {
-      href: '/admin/team',
-      label: 'Team',
-      icon: Contact,
-    },
-    {
-      href: '/admin/content',
-      label: 'Site Content',
-      icon: FileText,
-    }
+  const mainNav = [
+    { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/admin/analytics', label: 'Analytics', icon: LineChart },
   ];
+
+  const bookingNav = [
+     { href: '/admin/appointments', label: 'All Appointments', icon: Calendar },
+     { href: '/admin/booking', label: 'Book for Patient', icon: BookUser },
+  ];
+
+  const userManagementNav = [
+      { href: '/admin/users', label: 'User Management', icon: Users },
+      { href: '/admin/approvals', label: 'Partner Approvals', icon: ShieldCheck },
+      { href: '/admin/withdrawals', label: 'Withdrawals', icon: Banknote },
+  ];
+
+  const supportNav = [
+      { href: '/admin/support', label: 'AI Support Assistant', icon: MessageSquare },
+      { href: '/admin/inquiries', label: 'Contact Inquiries', icon: HelpCircle },
+  ];
+
+  const contentNav = [
+      { href: '/admin/content', label: 'Site Content', icon: FileText },
+      { href: '/admin/team', label: 'Team Members', icon: Contact },
+  ];
+
 
   if (isLoading) {
     return (
@@ -151,20 +123,76 @@ export default function AdminLayout({
             </SidebarHeader>
             <SidebarContent>
                 <SidebarMenu>
-                    {menuItems.map((item) => (
-                        <SidebarMenuItem key={item.href}>
-                            <Link href={item.href}>
-                                <SidebarMenuButton
-                                    isActive={pathname === item.href}
-                                    icon={<item.icon />}
-                                    tooltip={item.label}
-                                >
-                                    {item.label}
-                                </SidebarMenuButton>
-                            </Link>
-                        </SidebarMenuItem>
-                    ))}
+                  {mainNav.map((item) => (
+                      <SidebarMenuItem key={item.href}>
+                          <Link href={item.href}>
+                              <SidebarMenuButton isActive={pathname === item.href} icon={<item.icon />} tooltip={item.label}>
+                                  {item.label}
+                              </SidebarMenuButton>
+                          </Link>
+                      </SidebarMenuItem>
+                  ))}
                 </SidebarMenu>
+                <SidebarSeparator />
+                 <SidebarGroup>
+                    <SidebarGroupLabel>Bookings</SidebarGroupLabel>
+                    <SidebarMenu>
+                       {bookingNav.map((item) => (
+                          <SidebarMenuItem key={item.href}>
+                              <Link href={item.href}>
+                                  <SidebarMenuButton isActive={pathname === item.href} icon={<item.icon />} tooltip={item.label}>
+                                      {item.label}
+                                  </SidebarMenuButton>
+                              </Link>
+                          </SidebarMenuItem>
+                      ))}
+                    </SidebarMenu>
+                </SidebarGroup>
+                <SidebarSeparator />
+                 <SidebarGroup>
+                    <SidebarGroupLabel>User Management</SidebarGroupLabel>
+                    <SidebarMenu>
+                       {userManagementNav.map((item) => (
+                          <SidebarMenuItem key={item.href}>
+                              <Link href={item.href}>
+                                  <SidebarMenuButton isActive={pathname === item.href} icon={<item.icon />} tooltip={item.label}>
+                                      {item.label}
+                                  </SidebarMenuButton>
+                              </Link>
+                          </SidebarMenuItem>
+                      ))}
+                    </SidebarMenu>
+                </SidebarGroup>
+                <SidebarSeparator />
+                 <SidebarGroup>
+                    <SidebarGroupLabel>Support</SidebarGroupLabel>
+                    <SidebarMenu>
+                       {supportNav.map((item) => (
+                          <SidebarMenuItem key={item.href}>
+                              <Link href={item.href}>
+                                  <SidebarMenuButton isActive={pathname === item.href} icon={<item.icon />} tooltip={item.label}>
+                                      {item.label}
+                                  </SidebarMenuButton>
+                              </Link>
+                          </SidebarMenuItem>
+                      ))}
+                    </SidebarMenu>
+                </SidebarGroup>
+                <SidebarSeparator />
+                 <SidebarGroup>
+                    <SidebarGroupLabel>Content</SidebarGroupLabel>
+                    <SidebarMenu>
+                       {contentNav.map((item) => (
+                          <SidebarMenuItem key={item.href}>
+                              <Link href={item.href}>
+                                  <SidebarMenuButton isActive={pathname === item.href} icon={<item.icon />} tooltip={item.label}>
+                                      {item.label}
+                                  </SidebarMenuButton>
+                              </Link>
+                          </SidebarMenuItem>
+                      ))}
+                    </SidebarMenu>
+                </SidebarGroup>
             </SidebarContent>
             <SidebarFooter>
                 {/* Optional Footer Content */}

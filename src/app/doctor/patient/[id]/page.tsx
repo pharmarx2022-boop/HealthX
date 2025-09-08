@@ -90,6 +90,8 @@ export default function PatientDetailPage() {
     notFound();
     return null;
   }
+  
+  const isAppointmentPast = new Date(patient.appointmentDate) < new Date();
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -208,7 +210,7 @@ export default function PatientDetailPage() {
                 <CardFooter className="bg-slate-50/70 mt-6 py-4 px-6 border-t flex-wrap justify-between items-center gap-4">
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button size="lg" className="w-full sm:w-auto">
+                            <Button size="lg" className="w-full sm:w-auto" disabled={!isAppointmentPast}>
                                <BadgeCheck className="mr-2"/> Consultation done & God bless you
                             </Button>
                         </AlertDialogTrigger>

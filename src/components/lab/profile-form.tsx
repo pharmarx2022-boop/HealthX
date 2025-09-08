@@ -37,7 +37,7 @@ const profileSchema = z.object({
   email: z.string().email(),
   location: z.string().min(1, 'Location is required.'),
   image: z.string().min(1, 'A lab picture is required.'),
-  discount: z.coerce.number().min(30, 'Discount must be at least 30%.').max(100, 'Discount cannot exceed 100%.'),
+  discount: z.coerce.number().min(20, 'Discount must be at least 20%.').max(100, 'Discount cannot exceed 100%.'),
   phoneNumber: z.string().min(10, 'A valid phone number is required.'),
   referralCode: z.string().optional(),
   googleMapsLink: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
@@ -75,7 +75,7 @@ export function LabProfileForm() {
       email: '',
       location: '',
       image: '',
-      discount: 30,
+      discount: 20,
       phoneNumber: '',
       referralCode: '',
       googleMapsLink: '',
@@ -350,11 +350,11 @@ export function LabProfileForm() {
                         <FormLabel>Health Points Discount</FormLabel>
                         <FormControl>
                              <div className="relative">
-                                <Input type="number" placeholder="e.g. 30" {...field} className="pl-8" min="30" />
+                                <Input type="number" placeholder="e.g. 20" {...field} className="pl-8" min="20" />
                                 <Percent className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             </div>
                         </FormControl>
-                        <p className="text-sm text-muted-foreground">Minimum 30%. This is the discount patients get when they redeem Health Points at your lab.</p>
+                        <p className="text-sm text-muted-foreground">Minimum 20%. This is the discount patients get when they redeem Health Points at your lab.</p>
                         <FormMessage />
                     </FormItem>
                 )} />

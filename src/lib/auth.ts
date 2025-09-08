@@ -1,7 +1,8 @@
 
-
 // THIS IS A MOCK AUTHENTICATION FILE FOR PROTOTYPING ONLY
 // In a real application, this would be replaced with a secure authentication service like Firebase Authentication.
+
+import { createReferral } from "./referrals";
 
 export const MOCK_OTP = '123456';
 
@@ -17,6 +18,7 @@ export type UserData = {
     role: string;
     fullName: string;
     phone: string;
+    password?: string;
     referralCode?: string;
     status: 'pending' | 'approved' | 'rejected' | 'disabled';
     dateJoined: string;
@@ -41,6 +43,7 @@ const initializeUsers = () => {
                 role: 'patient',
                 status: 'approved',
                 dateJoined: new Date().toISOString(),
+                password: 'password123'
             },
             {
                 id: 'doctor_test_1',
@@ -50,7 +53,8 @@ const initializeUsers = () => {
                 role: 'doctor',
                 status: 'approved',
                 dateJoined: new Date().toISOString(),
-                referralCode: 'HX-DOCTEST'
+                referralCode: 'HX-DOCTEST',
+                password: 'password123'
             },
             {
                 id: 'coordinator_test_1',
@@ -180,6 +184,22 @@ export async function sendOtp(email: string) {
     return true;
 }
 
+export async function checkUserExists(email: string, role: string): Promise<UserData | null> {
+    const allUsers = getAllUsers();
+    const user = allUsers.find(u => u.email === email && u.role === role);
+    return user || null;
+}
+
+export async function signInWithPassword(email: string, password: string, role: string) {
+    const user = await checkUserExists(email, role);
+    if (!user) {
+        return { user: null, error: "No account found with this email for the selected role." };
+    }
+    if (user.password !== password) {
+        return { user: null, error: "Incorrect password. Please try again." };
+    }
+    return { user, error: null };
+}
 
 export const isEmailUnique = (email: string): boolean => {
     const allUsers = getAllUsers();
@@ -192,7 +212,7 @@ export const isPhoneUnique = (phone: string, currentUserId: string): boolean => 
     return !foundUser || foundUser.id === currentUserId;
 }
 
-export function signInWithOtp(email: string, otp: string, role: string, referralCode?: string) {
+export async function signInWithOtp(email: string, otp: string, role: string, referralCode?: string) {
     if (otp !== MOCK_OTP) {
         return { user: null, error: "Invalid OTP/magic link.", isNewUser: false };
     }
@@ -218,7 +238,7 @@ export function signInWithOtp(email: string, otp: string, role: string, referral
     const isNewUser = true;
     const emailPrefix = email.split('@')[0];
     const isProfessional = ['doctor', 'pharmacy', 'lab', 'health-coordinator'].includes(role);
-    const canRefer = ['pharmacy', 'lab', 'health-coordinator'].includes(role);
+    const canRefer = ['doctor', 'pharmacy', 'lab', 'health-coordinator'].includes(role);
 
     const user: UserData = { 
         id: `${role}_${emailPrefix}_${Date.now()}`,
@@ -231,18 +251,18 @@ export function signInWithOtp(email: string, otp: string, role: string, referral
         dateJoined: new Date().toISOString(),
     };
     
-    allUsers.push(user);
-    saveAllUsers(allUsers);
     
      if (referralCode) {
         const referrer = findUserByReferralCode(referralCode);
         if (referrer) {
-            // Placeholder for creating referral record
-            console.log(`Referral created: ${referrer.id} referred ${user.id}`);
+            createReferral(referrer.id, user.id, role as any);
         } else {
              return { user: null, error: "Invalid referral code.", isNewUser: false };
         }
     }
+    
+    allUsers.push(user);
+    saveAllUsers(allUsers);
 
     return { user, error: null, isNewUser };
 }

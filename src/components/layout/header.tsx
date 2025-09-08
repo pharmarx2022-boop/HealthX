@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { HeartPulse, Menu, X, UserCircle, LogOut, Settings, Briefcase, Users, Pill, Beaker, Gift, Bell, Calendar, LayoutDashboard, Info, Mail, ShieldCheck, FileText, ArrowLeft, Wallet, History, Heart, Bot } from 'lucide-react';
+import { HeartPulse, Menu, X, UserCircle, LogOut, Settings, Briefcase, Users, Pill, Beaker, Gift, Bell, Calendar, LayoutDashboard, Info, Mail, ShieldCheck, FileText, ArrowLeft, Wallet, History, Heart, Bot, BadgePercent, Banknote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useState, useEffect } from 'react';
@@ -185,22 +185,22 @@ export function Header() {
                            : `/${user.role}/dashboard`;
       return (
         <>
-          <Button variant="ghost" asChild className="justify-start text-lg">
-            <Link href={dashboardPath} onClick={() => setIsSheetOpen(false)}>
+          <Button variant="ghost" asChild className="justify-start text-lg" onClick={() => setIsSheetOpen(false)}>
+            <Link href={dashboardPath}>
               <LayoutDashboard className="mr-2" />
               Dashboard
             </Link>
           </Button>
            {user.role === 'doctor' && (
              <>
-                <Button variant="ghost" asChild className="justify-start text-lg">
-                    <Link href="/doctor/profile" onClick={() => setIsSheetOpen(false)}>
+                <Button variant="ghost" asChild className="justify-start text-lg" onClick={() => setIsSheetOpen(false)}>
+                    <Link href="/doctor/profile">
                         <Settings className="mr-2" />
                         Profile
                     </Link>
                 </Button>
-                 <Button variant="ghost" asChild className="justify-start text-lg">
-                    <Link href="/doctor/clinics" onClick={() => setIsSheetOpen(false)}>
+                 <Button variant="ghost" asChild className="justify-start text-lg" onClick={() => setIsSheetOpen(false)}>
+                    <Link href="/doctor/clinics">
                         <Briefcase className="mr-2" />
                         My Clinics
                     </Link>
@@ -209,39 +209,39 @@ export function Header() {
            )}
            {user.role === 'patient' && (
                <>
-                    <Button variant="ghost" asChild className="justify-start text-lg">
-                        <Link href="/patient/profile" onClick={() => setIsSheetOpen(false)}>
+                    <Button variant="ghost" asChild className="justify-start text-lg" onClick={() => setIsSheetOpen(false)}>
+                        <Link href="/patient/profile">
                             <Settings className="mr-2" />
                             Manage Profile
                         </Link>
                     </Button>
                     <Separator className="my-1" />
-                    <Button variant="ghost" asChild className="justify-start text-lg">
-                        <Link href="/patient/appointments" onClick={() => setIsSheetOpen(false)}>
+                    <Button variant="ghost" asChild className="justify-start text-lg" onClick={() => setIsSheetOpen(false)}>
+                        <Link href="/patient/appointments">
                            <Calendar className="mr-2" />
                            Your Appointments
                         </Link>
                     </Button>
-                     <Button variant="ghost" asChild className="justify-start text-lg">
-                        <Link href="/patient/reports" onClick={() => setIsSheetOpen(false)}>
+                     <Button variant="ghost" asChild className="justify-start text-lg" onClick={() => setIsSheetOpen(false)}>
+                        <Link href="/patient/reports">
                            <FileText className="mr-2" />
                            My Reports
                         </Link>
                     </Button>
-                     <Button variant="ghost" asChild className="justify-start text-lg">
-                        <Link href="/patient/wallet" onClick={() => setIsSheetOpen(false)}>
+                     <Button variant="ghost" asChild className="justify-start text-lg" onClick={() => setIsSheetOpen(false)}>
+                        <Link href="/patient/wallet">
                            <Wallet className="mr-2" />
                            Health Points
                         </Link>
                     </Button>
-                     <Button variant="ghost" asChild className="justify-start text-lg">
-                        <Link href="/patient/reminders" onClick={() => setIsSheetOpen(false)}>
+                     <Button variant="ghost" asChild className="justify-start text-lg" onClick={() => setIsSheetOpen(false)}>
+                        <Link href="/patient/reminders">
                            <Bell className="mr-2" />
                            Reminders
                         </Link>
                     </Button>
-                    <Button variant="ghost" asChild className="justify-start text-lg">
-                        <Link href="/patient/family" onClick={() => setIsSheetOpen(false)}>
+                    <Button variant="ghost" asChild className="justify-start text-lg" onClick={() => setIsSheetOpen(false)}>
+                        <Link href="/patient/family">
                             <Users className="mr-2" />
                             Family Members
                         </Link>
@@ -250,20 +250,20 @@ export function Header() {
            )}
            {user.role === 'health-coordinator' && (
                 <>
-                    <Button variant="ghost" asChild className="justify-start text-lg">
-                        <Link href="/health-coordinator/profile" onClick={() => setIsSheetOpen(false)}>
+                    <Button variant="ghost" asChild className="justify-start text-lg" onClick={() => setIsSheetOpen(false)}>
+                        <Link href="/health-coordinator/profile">
                             <Settings className="mr-2" />
                             Profile
                         </Link>
                     </Button>
-                    <Button variant="ghost" asChild className="justify-start text-lg">
-                        <Link href="/health-coordinator/booking" onClick={() => setIsSheetOpen(false)}>
+                    <Button variant="ghost" asChild className="justify-start text-lg" onClick={() => setIsSheetOpen(false)}>
+                        <Link href="/health-coordinator/booking">
                             <Calendar className="mr-2" />
                             Book Appointment
                         </Link>
                     </Button>
-                     <Button variant="ghost" asChild className="justify-start text-lg">
-                        <Link href="/health-coordinator/tools" onClick={() => setIsSheetOpen(false)}>
+                     <Button variant="ghost" asChild className="justify-start text-lg" onClick={() => setIsSheetOpen(false)}>
+                        <Link href="/health-coordinator/tools">
                             <Bot className="mr-2" />
                             AI Tools
                         </Link>
@@ -272,20 +272,20 @@ export function Header() {
             )}
            {user.role === 'pharmacy' && (
                  <>
-                    <Button variant="ghost" asChild className="justify-start text-lg">
-                        <Link href="/pharmacy/profile" onClick={() => setIsSheetOpen(false)}>
+                    <Button variant="ghost" asChild className="justify-start text-lg" onClick={() => setIsSheetOpen(false)}>
+                        <Link href="/pharmacy/profile">
                             <Settings className="mr-2" />
                             Profile
                         </Link>
                     </Button>
-                     <Button variant="ghost" asChild className="justify-start text-lg">
-                        <Link href="/pharmacy/booking" onClick={() => setIsSheetOpen(false)}>
+                     <Button variant="ghost" asChild className="justify-start text-lg" onClick={() => setIsSheetOpen(false)}>
+                        <Link href="/pharmacy/booking">
                             <Calendar className="mr-2" />
                            Book for Patient
                         </Link>
                     </Button>
-                     <Button variant="ghost" asChild className="justify-start text-lg">
-                        <Link href="/pharmacy/tools" onClick={() => setIsSheetOpen(false)}>
+                     <Button variant="ghost" asChild className="justify-start text-lg" onClick={() => setIsSheetOpen(false)}>
+                        <Link href="/pharmacy/tools">
                            <Pill className="mr-2" />
                            Patient Tools
                         </Link>
@@ -294,20 +294,20 @@ export function Header() {
            )}
            {user.role === 'lab' && (
                 <>
-                    <Button variant="ghost" asChild className="justify-start text-lg">
-                        <Link href="/lab/profile" onClick={() => setIsSheetOpen(false)}>
+                    <Button variant="ghost" asChild className="justify-start text-lg" onClick={() => setIsSheetOpen(false)}>
+                        <Link href="/lab/profile">
                             <Settings className="mr-2" />
                             Profile
                         </Link>
                     </Button>
-                    <Button variant="ghost" asChild className="justify-start text-lg">
-                        <Link href="/lab/booking" onClick={() => setIsSheetOpen(false)}>
+                    <Button variant="ghost" asChild className="justify-start text-lg" onClick={() => setIsSheetOpen(false)}>
+                        <Link href="/lab/booking">
                             <Calendar className="mr-2" />
                            Book for Patient
                         </Link>
                     </Button>
-                    <Button variant="ghost" asChild className="justify-start text-lg">
-                        <Link href="/lab/tools" onClick={() => setIsSheetOpen(false)}>
+                    <Button variant="ghost" asChild className="justify-start text-lg" onClick={() => setIsSheetOpen(false)}>
+                        <Link href="/lab/tools">
                             <Beaker className="mr-2" />
                             Patient Tools
                         </Link>
@@ -374,8 +374,8 @@ export function Header() {
                       {user ? (
                         renderMobileAuthButtons()
                       ) : (
-                         <Button variant="default" asChild className="justify-start text-lg h-12">
-                            <Link href="/#roles" onClick={() => setIsSheetOpen(false)}>
+                         <Button variant="default" asChild className="justify-start text-lg h-12" onClick={() => setIsSheetOpen(false)}>
+                            <Link href="/#roles">
                                 <UserCircle className="mr-2" />
                                 Login / Sign Up
                             </Link>
@@ -383,24 +383,41 @@ export function Header() {
                       )}
                       
                       <Separator className="my-2"/>
+                       <Button variant="ghost" asChild className="justify-start text-base" onClick={() => setIsSheetOpen(false)}>
+                         <Link href="/health-points">
+                            <Gift className="mr-2" /> How Health Points Work
+                        </Link>
+                      </Button>
+                       <Button variant="ghost" asChild className="justify-start text-base" onClick={() => setIsSheetOpen(false)}>
+                         <Link href="/commissions">
+                            <BadgePercent className="mr-2" /> Commissions & Referrals
+                        </Link>
+                      </Button>
+                       <Button variant="ghost" asChild className="justify-start text-base" onClick={() => setIsSheetOpen(false)}>
+                         <Link href="/platform-fees">
+                            <Banknote className="mr-2" /> Platform Fees
+                        </Link>
+                      </Button>
                       
-                      <Button variant="ghost" asChild className="justify-start text-base">
-                        <Link href="/about" onClick={() => setIsSheetOpen(false)}>
+                      <Separator className="my-2"/>
+                      
+                      <Button variant="ghost" asChild className="justify-start text-base" onClick={() => setIsSheetOpen(false)}>
+                        <Link href="/about">
                             <Info className="mr-2" /> About Us
                         </Link>
                       </Button>
-                      <Button variant="ghost" asChild className="justify-start text-base">
-                         <Link href="/contact" onClick={() => setIsSheetOpen(false)}>
+                      <Button variant="ghost" asChild className="justify-start text-base" onClick={() => setIsSheetOpen(false)}>
+                         <Link href="/contact">
                             <Mail className="mr-2" /> Contact Us
                         </Link>
                       </Button>
-                       <Button variant="ghost" asChild className="justify-start text-base">
-                         <Link href="/terms-of-service" onClick={() => setIsSheetOpen(false)}>
+                       <Button variant="ghost" asChild className="justify-start text-base" onClick={() => setIsSheetOpen(false)}>
+                         <Link href="/terms-of-service">
                             <FileText className="mr-2" /> Terms of Service
                         </Link>
                       </Button>
-                       <Button variant="ghost" asChild className="justify-start text-base">
-                         <Link href="/privacy-policy" onClick={() => setIsSheetOpen(false)}>
+                       <Button variant="ghost" asChild className="justify-start text-base" onClick={() => setIsSheetOpen(false)}>
+                         <Link href="/privacy-policy">
                             <ShieldCheck className="mr-2" /> Privacy Policy
                         </Link>
                       </Button>

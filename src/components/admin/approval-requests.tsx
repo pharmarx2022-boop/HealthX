@@ -109,7 +109,7 @@ export function ApprovalRequests() {
                                         {req.role === 'health-coordinator' ? (
                                              req.aadharNumber ? (
                                                 <div className="flex flex-col">
-                                                    <span className="text-xs font-mono flex items-center gap-2"><IdCard className="w-4 h-4" /> {req.aadharNumber}</span>
+                                                    <span className="text-xs font-mono flex items-center gap-2"><IdCard className="w-4 h-4" /> Aadhar: {req.aadharNumber}</span>
                                                     {(req.aadharFrontImage || req.aadharBackImage) && (
                                                         <Dialog>
                                                             <DialogTrigger asChild>
@@ -135,7 +135,7 @@ export function ApprovalRequests() {
                                         ) : (
                                             req.registrationNumber ? (
                                                 <div className="flex flex-col">
-                                                    <span className="text-xs font-mono">{req.registrationNumber}</span>
+                                                    <span className="text-xs font-mono">Reg #: {req.registrationNumber}</span>
                                                     {req.registrationCertificate && (
                                                         <Dialog>
                                                             <DialogTrigger asChild>

@@ -29,6 +29,7 @@ import {
   HelpCircle,
   ClipboardList,
   Calendar,
+  BookUser,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -67,6 +68,11 @@ export default function AdminLayout({
       href: '/admin/appointments',
       label: 'Appointments',
       icon: Calendar,
+    },
+    {
+      href: '/admin/booking',
+      label: 'Book for Patient',
+      icon: BookUser,
     },
     {
       href: '/admin/analytics',

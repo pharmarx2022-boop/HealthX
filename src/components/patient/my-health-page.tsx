@@ -44,13 +44,11 @@ export function MyHealthPage() {
     const [myAppointments, setMyAppointments] = useState<any[]>([]);
     const [isClient, setIsClient] = useState(false);
     const [isReviewOpen, setIsReviewOpen] = useState(false);
-    const [isHistoryOpen, setIsHistoryOpen] = useState(false);
     const [reviewTarget, setReviewTarget] = useState<ReviewTarget | null>(null);
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState('');
     const [user, setUser] = useState<any | null>(null);
-    const [healthReminders, setHealthReminders] = useState<HealthReminder[]>([]);
-
+   
     useEffect(() => {
         setIsClient(true);
         if(typeof window !== 'undefined') {
@@ -63,19 +61,9 @@ export function MyHealthPage() {
                 const allAppointments = storedPatients ? JSON.parse(storedPatients) : mockPatients;
                 const userAppointments = allAppointments.filter((p: any) => p.id === u.id || p.name === u.fullName);
                 setMyAppointments(userAppointments);
-                
-                setHealthReminders(getRemindersForPatient(u.id));
             }
         }
-    }, [isClient, isReviewOpen]); // Re-check appointments when review dialog closes
-
-    const transactionHistory = useMemo(() => {
-        if (!isClient || !user) return { balance: 0, transactions: [], reviewedTransactionIds: new Set() };
-        const history = getTransactionHistory(user.id);
-        const reviewedIds = new Set(history.transactions.filter(tx => tx.reviewed).map(tx => tx.id));
-        return { ...history, reviewedTransactionIds: reviewedIds };
-    }, [isClient, user, isReviewOpen]);
-
+    }, [isClient, isReviewOpen]);
 
     const openReviewDialog = (target: ReviewTarget) => {
         setReviewTarget(target);
@@ -176,34 +164,13 @@ export function MyHealthPage() {
             }
         }
     };
-    
-    const handleDeleteReminder = (reminderId: string) => {
-        deleteReminder(reminderId);
-        if (user) {
-            setHealthReminders(getRemindersForPatient(user.id));
-        }
-        toast({
-            title: "Reminder Disabled",
-            description: "You will no longer receive notifications for this reminder.",
-            variant: "destructive",
-        });
-    };
-
-    const getPartnerIcon = (type: 'pharmacy' | 'lab') => {
-        switch(type) {
-            case 'pharmacy': return <Pill className="w-4 h-4 text-primary" />;
-            case 'lab': return <Beaker className="w-4 h-4 text-primary" />;
-            default: return <Store className="w-4 h-4 text-primary" />;
-        }
-    }
-
 
     return (
         <>
             <div className="space-y-8">
                 <div className="mb-4">
                     <h1 className="text-3xl font-headline font-bold">My Health Dashboard</h1>
-                    <p className="text-muted-foreground">Manage your appointments, reports, and more.</p>
+                    <p className="text-muted-foreground">Manage your appointments.</p>
                 </div>
                 
                  <Card className="shadow-sm">
@@ -221,140 +188,62 @@ export function MyHealthPage() {
                     </CardContent>
                 </Card>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-                    <div className="lg:col-span-2 space-y-8">
-                        <Card>
-                             <CardHeader>
-                                <CardTitle className="flex items-center gap-2"><Calendar/> Your Appointments</CardTitle>
-                             </CardHeader>
-                             <CardContent className="space-y-6">
-                                {isClient && myAppointments.length > 0 ? (
-                                    myAppointments.map(appt => (
-                                        <Card key={appt.id} className="overflow-hidden">
-                                            <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-50/70 p-4">
-                                                <div>
-                                                    <CardTitle className="text-lg font-headline">Consultation at {appt.clinic}</CardTitle>
-                                                    <CardDescription className="flex flex-col sm:flex-row sm:items-center gap-x-4 gap-y-1 pt-1">
-                                                        <span className="flex items-center gap-2"><Calendar className="w-4 h-4"/> {format(new Date(appt.appointmentDate), 'EEEE, MMMM d, yyyy')}</span>
-                                                        <span className="flex items-center gap-2"><Clock className="w-4 h-4"/> {format(new Date(appt.appointmentDate), 'p')}</span>
-                                                    </CardDescription>
-                                                </div>
-                                                <Badge variant={appt.status === 'done' ? 'secondary' : 'default'} className="capitalize mt-2 sm:mt-0">{appt.status}</Badge>
-                                            </CardHeader>
-                                            <CardContent className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                <div className="flex items-center text-muted-foreground gap-3">
-                                                    <Stethoscope className="w-5 h-5 text-primary shrink-0" />
-                                                    <div>
-                                                        <p className="font-medium text-foreground">Reason</p>
-                                                        <p>{appt.consultation}</p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center text-muted-foreground gap-3">
-                                                    <p className="font-bold text-primary text-lg shrink-0">INR</p>
-                                                    <div>
-                                                        <p className="font-medium text-foreground">Fee Paid</p>
-                                                        <p>INR {appt.consultationFee.toFixed(2)}</p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center text-muted-foreground gap-3 col-span-1 sm:col-span-2">
-                                                    <RefreshCw className="w-5 h-5 text-primary shrink-0" />
-                                                    <div>
-                                                        <p className="font-medium text-foreground">Refund Status</p>
-                                                        <p>{appt.refundStatus} (Full cash refund + Health Points bonus)</p>
-                                                    </div>
-                                                </div>
-                                            </CardContent>
-                                            <CardFooter className="bg-slate-50/70 p-4 border-t flex flex-wrap justify-between gap-2">
-                                                <Button variant="outline" onClick={() => openReviewDialog({type: 'doctor', id: appt.doctorId, name: initialDoctors.find(d => d.id === appt.doctorId)?.name || 'Doctor', transactionId: appt.id})} disabled={appt.reviewed || appt.status !== 'done'}>
-                                                    <Star className="mr-2 h-4 w-4"/> {appt.reviewed ? 'Review Submitted' : 'Leave a Review'}
-                                                </Button>
-                                                <Button variant="outline" onClick={() => handleShare(appt)}>
-                                                    <Share2 className="mr-2 h-4 w-4"/> Share
-                                                </Button>
-                                            </CardFooter>
-                                        </Card>
-                                    ))
-                                ) : (
-                                    <p className="text-center py-8 text-muted-foreground">You have no upcoming appointments.</p>
-                                )}
-                             </CardContent>
-                        </Card>
-                         <Card>
-                             <CardHeader>
-                                <CardTitle className="flex items-center gap-2"><FileText/> My Reports</CardTitle>
-                             </CardHeader>
-                             <CardContent>
-                                <MyReports />
-                             </CardContent>
-                        </Card>
-                    </div>
-
-                    <div className="lg:col-span-1 space-y-8">
-                         <Card className="shadow-sm">
-                            <CardHeader className="flex flex-row items-center gap-4">
-                                <Wallet className="w-8 h-8 text-primary" />
-                                <div>
-                                    <CardTitle>Health Points</CardTitle>
-                                    <CardDescription>
-                                        Your bonus rewards.
-                                    </CardDescription>
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-3xl font-bold">INR {transactionHistory.balance.toFixed(2)}</p>
-                                <p className="text-sm text-muted-foreground mt-1">Available to redeem.</p>
-                            </CardContent>
-                            <CardFooter className="flex flex-col gap-2">
-                                <Button variant="link" className="p-0 h-auto" onClick={() => setIsHistoryOpen(true)}>
-                                    <History className="mr-2"/> View History
-                                </Button>
-                                <Alert className="text-center">
-                                    <KeyRound className="h-4 w-4"/>
-                                    <AlertTitle>How to Redeem?</AlertTitle>
-                                    <AlertDescription>
-                                        Ask any partner to initiate a redemption. You will receive an OTP on your app notification to confirm the payment.
-                                    </AlertDescription>
-                                </Alert>
-                            </CardFooter>
-                        </Card>
-                         <Card>
-                             <CardHeader>
-                                <CardTitle className="flex items-center gap-2"><Bell/> Health Reminders</CardTitle>
-                             </CardHeader>
-                             <CardContent>
-                                {healthReminders.length > 0 ? (
-                                    <div className="space-y-3">
-                                        {healthReminders.map(r => (
-                                            <div key={r.id} className="flex items-start justify-between p-3 border rounded-md bg-slate-50/70">
-                                                <div className="flex items-center gap-3 flex-1">
-                                                    {getPartnerIcon(r.partnerType)}
-                                                    <div className="flex-1">
-                                                        <p className="font-semibold">{r.details}</p>
-                                                        <p className="text-sm text-muted-foreground">From: {r.partnerName}</p>
-                                                        <p className="text-xs text-muted-foreground mt-1">Next reminder on: {format(new Date(r.nextReminderDate), 'PPP')}</p>
-                                                    </div>
-                                                </div>
-                                                <Button variant="ghost" size="icon" className="shrink-0" onClick={() => handleDeleteReminder(r.id)}>
-                                                    <Trash2 className="w-4 h-4 text-destructive" />
-                                                </Button>
+                <Card>
+                     <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Calendar/> Your Appointments</CardTitle>
+                     </CardHeader>
+                     <CardContent className="space-y-6">
+                        {isClient && myAppointments.length > 0 ? (
+                            myAppointments.map(appt => (
+                                <Card key={appt.id} className="overflow-hidden">
+                                    <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-50/70 p-4">
+                                        <div>
+                                            <CardTitle className="text-lg font-headline">Consultation at {appt.clinic}</CardTitle>
+                                            <CardDescription className="flex flex-col sm:flex-row sm:items-center gap-x-4 gap-y-1 pt-1">
+                                                <span className="flex items-center gap-2"><Calendar className="w-4 h-4"/> {format(new Date(appt.appointmentDate), 'EEEE, MMMM d, yyyy')}</span>
+                                                <span className="flex items-center gap-2"><Clock className="w-4 h-4"/> {format(new Date(appt.appointmentDate), 'p')}</span>
+                                            </CardDescription>
+                                        </div>
+                                        <Badge variant={appt.status === 'done' ? 'secondary' : 'default'} className="capitalize mt-2 sm:mt-0">{appt.status}</Badge>
+                                    </CardHeader>
+                                    <CardContent className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div className="flex items-center text-muted-foreground gap-3">
+                                            <Stethoscope className="w-5 h-5 text-primary shrink-0" />
+                                            <div>
+                                                <p className="font-medium text-foreground">Reason</p>
+                                                <p>{appt.consultation}</p>
                                             </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <p className="text-sm text-muted-foreground text-center py-8">You have no active health reminders.</p>
-                                )}
-                             </CardContent>
-                        </Card>
-                        <Card>
-                             <CardHeader>
-                                <CardTitle className="flex items-center gap-2"><Users/> Family Members</CardTitle>
-                             </CardHeader>
-                             <CardContent>
-                                 <FamilyManager />
-                             </CardContent>
-                        </Card>
-                    </div>
-                </div>
+                                        </div>
+                                        <div className="flex items-center text-muted-foreground gap-3">
+                                            <p className="font-bold text-primary text-lg shrink-0">INR</p>
+                                            <div>
+                                                <p className="font-medium text-foreground">Fee Paid</p>
+                                                <p>INR {appt.consultationFee.toFixed(2)}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center text-muted-foreground gap-3 col-span-1 sm:col-span-2">
+                                            <RefreshCw className="w-5 h-5 text-primary shrink-0" />
+                                            <div>
+                                                <p className="font-medium text-foreground">Refund Status</p>
+                                                <p>{appt.refundStatus} (Full cash refund + Health Points bonus)</p>
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                    <CardFooter className="bg-slate-50/70 p-4 border-t flex flex-wrap justify-between gap-2">
+                                        <Button variant="outline" onClick={() => openReviewDialog({type: 'doctor', id: appt.doctorId, name: initialDoctors.find(d => d.id === appt.doctorId)?.name || 'Doctor', transactionId: appt.id})} disabled={appt.reviewed || appt.status !== 'done'}>
+                                            <Star className="mr-2 h-4 w-4"/> {appt.reviewed ? 'Review Submitted' : 'Leave a Review'}
+                                        </Button>
+                                        <Button variant="outline" onClick={() => handleShare(appt)}>
+                                            <Share2 className="mr-2 h-4 w-4"/> Share
+                                        </Button>
+                                    </CardFooter>
+                                </Card>
+                            ))
+                        ) : (
+                            <p className="text-center py-8 text-muted-foreground">You have no upcoming appointments.</p>
+                        )}
+                     </CardContent>
+                </Card>
             </div>
 
             {/* Review Dialog */}
@@ -396,54 +285,6 @@ export function MyHealthPage() {
                         </DialogClose>
                         <Button onClick={handleSubmitReview}>Submit Review</Button>
                     </DialogFooter>
-                </DialogContent>
-            </Dialog>
-
-             {/* Transaction History Dialog */}
-            <Dialog open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
-                <DialogContent className="max-w-md">
-                    <DialogHeader>
-                        <DialogTitle>Health Points History</DialogTitle>
-                        <DialogDescription>
-                            A record of your earnings and redemptions.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="max-h-[60vh] overflow-y-auto -mx-6 px-6">
-                        <ul className="space-y-4 py-4">
-                             {transactionHistory.transactions.length > 0 ? (
-                                transactionHistory.transactions.map((tx) => {
-                                    const isDebit = tx.type === 'debit';
-                                    const canReview = isDebit && (tx.partnerType === 'lab' || tx.partnerType === 'pharmacy') && !tx.reviewed;
-                                    
-                                    return (
-                                    <li key={tx.id} className="flex items-start justify-between">
-                                        <div className="flex-1">
-                                            <p className="font-medium">{tx.description}</p>
-                                            <p className="text-xs text-muted-foreground mt-1">{format(new Date(tx.date), 'PP, p')}</p>
-                                            {canReview && (
-                                                <Button 
-                                                    variant="link" 
-                                                    className="p-0 h-auto text-xs mt-1"
-                                                    onClick={() => {
-                                                        setIsHistoryOpen(false);
-                                                        openReviewDialog({type: tx.partnerType!, id: tx.partnerId!, name: tx.partnerName!, transactionId: tx.id});
-                                                    }}
-                                                >
-                                                    <Star className="mr-1 h-3 w-3" /> Leave a review
-                                                </Button>
-                                            )}
-                                        </div>
-                                        <span className={`font-semibold shrink-0 ml-4 ${tx.type === 'credit' ? 'text-green-600' : 'text-destructive'}`}>
-                                            {tx.type === 'credit' ? '+' : '-'} INR {tx.amount.toFixed(2)}
-                                        </span>
-                                    </li>
-                                    )
-                                })
-                             ) : (
-                                <p className="text-sm text-muted-foreground text-center py-4">No transactions yet.</p>
-                             )}
-                        </ul>
-                    </div>
                 </DialogContent>
             </Dialog>
         </>

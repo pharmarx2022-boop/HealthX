@@ -91,7 +91,16 @@ export default function PatientDetailPage() {
     return null;
   }
   
-  const isAppointmentPast = new Date(patient.appointmentDate) < new Date();
+  const isCompletionAllowed = () => {
+    if (!patient || patient.status !== 'upcoming') return false;
+    const now = new Date();
+    const appointmentDate = new Date(patient.appointmentDate);
+    const gracePeriodEndDate = new Date(appointmentDate);
+    gracePeriodEndDate.setDate(gracePeriodEndDate.getDate() + 4); 
+    gracePeriodEndDate.setHours(0, 0, 0, 0);
+
+    return now >= appointmentDate && now < gracePeriodEndDate;
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -210,7 +219,7 @@ export default function PatientDetailPage() {
                 <CardFooter className="bg-slate-50/70 mt-6 py-4 px-6 border-t flex-wrap justify-between items-center gap-4">
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button size="lg" className="w-full sm:w-auto" disabled={!isAppointmentPast}>
+                            <Button size="lg" className="w-full sm:w-auto" disabled={!isCompletionAllowed()}>
                                <BadgeCheck className="mr-2"/> Consultation done & God bless you
                             </Button>
                         </AlertDialogTrigger>

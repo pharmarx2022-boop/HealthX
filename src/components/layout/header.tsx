@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { HeartPulse, Menu, X, UserCircle, LogOut, Settings, Briefcase, Users, Pill, Beaker, Gift, Bell, Calendar, LayoutDashboard, Info, Mail, ShieldCheck, FileText, ArrowLeft, Wallet, History, Heart } from 'lucide-react';
+import { HeartPulse, Menu, X, UserCircle, LogOut, Settings, Briefcase, Users, Pill, Beaker, Gift, Bell, Calendar, LayoutDashboard, Info, Mail, ShieldCheck, FileText, ArrowLeft, Wallet, History, Heart, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useState, useEffect } from 'react';
@@ -127,6 +127,12 @@ export function Header() {
                                 <span>Health Points</span>
                             </Link>
                         </DropdownMenuItem>
+                         <DropdownMenuItem asChild>
+                            <Link href="/patient/reminders">
+                                <Bell className="mr-2" />
+                                <span>Reminders</span>
+                            </Link>
+                        </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                             <Link href="/patient/family">
                                 <Users className="mr-2" />
@@ -190,13 +196,13 @@ export function Header() {
                 <Button variant="ghost" asChild className="justify-start text-lg">
                     <Link href="/doctor/profile" onClick={() => setIsSheetOpen(false)}>
                         <Settings className="mr-2" />
-                        Manage Profile
+                        Profile
                     </Link>
                 </Button>
                  <Button variant="ghost" asChild className="justify-start text-lg">
                     <Link href="/doctor/clinics" onClick={() => setIsSheetOpen(false)}>
                         <Briefcase className="mr-2" />
-                        Manage Clinics
+                        My Clinics
                     </Link>
                 </Button>
             </>
@@ -243,28 +249,70 @@ export function Header() {
                 </>
            )}
            {user.role === 'health-coordinator' && (
-              <Button variant="ghost" asChild className="justify-start text-lg">
-                  <Link href="/health-coordinator/profile" onClick={() => setIsSheetOpen(false)}>
-                      <Settings className="mr-2" />
-                      Manage Profile
-                  </Link>
-              </Button>
+                <>
+                    <Button variant="ghost" asChild className="justify-start text-lg">
+                        <Link href="/health-coordinator/profile" onClick={() => setIsSheetOpen(false)}>
+                            <Settings className="mr-2" />
+                            Profile
+                        </Link>
+                    </Button>
+                    <Button variant="ghost" asChild className="justify-start text-lg">
+                        <Link href="/health-coordinator/booking" onClick={() => setIsSheetOpen(false)}>
+                            <Calendar className="mr-2" />
+                            Book Appointment
+                        </Link>
+                    </Button>
+                     <Button variant="ghost" asChild className="justify-start text-lg">
+                        <Link href="/health-coordinator/tools" onClick={() => setIsSheetOpen(false)}>
+                            <Bot className="mr-2" />
+                            AI Tools
+                        </Link>
+                    </Button>
+                </>
             )}
            {user.role === 'pharmacy' && (
-                <Button variant="ghost" asChild className="justify-start text-lg">
-                    <Link href="/pharmacy/profile" onClick={() => setIsSheetOpen(false)}>
-                        <Pill className="mr-2" />
-                        Manage Profile
-                    </Link>
-                </Button>
+                 <>
+                    <Button variant="ghost" asChild className="justify-start text-lg">
+                        <Link href="/pharmacy/profile" onClick={() => setIsSheetOpen(false)}>
+                            <Settings className="mr-2" />
+                            Profile
+                        </Link>
+                    </Button>
+                     <Button variant="ghost" asChild className="justify-start text-lg">
+                        <Link href="/pharmacy/booking" onClick={() => setIsSheetOpen(false)}>
+                            <Calendar className="mr-2" />
+                           Book for Patient
+                        </Link>
+                    </Button>
+                     <Button variant="ghost" asChild className="justify-start text-lg">
+                        <Link href="/pharmacy/tools" onClick={() => setIsSheetOpen(false)}>
+                           <Pill className="mr-2" />
+                           Patient Tools
+                        </Link>
+                    </Button>
+                </>
            )}
            {user.role === 'lab' && (
-                <Button variant="ghost" asChild className="justify-start text-lg">
-                    <Link href="/lab/profile" onClick={() => setIsSheetOpen(false)}>
-                        <Beaker className="mr-2" />
-                        Manage Profile
-                    </Link>
-                </Button>
+                <>
+                    <Button variant="ghost" asChild className="justify-start text-lg">
+                        <Link href="/lab/profile" onClick={() => setIsSheetOpen(false)}>
+                            <Settings className="mr-2" />
+                            Profile
+                        </Link>
+                    </Button>
+                    <Button variant="ghost" asChild className="justify-start text-lg">
+                        <Link href="/lab/booking" onClick={() => setIsSheetOpen(false)}>
+                            <Calendar className="mr-2" />
+                           Book for Patient
+                        </Link>
+                    </Button>
+                    <Button variant="ghost" asChild className="justify-start text-lg">
+                        <Link href="/lab/tools" onClick={() => setIsSheetOpen(false)}>
+                            <Beaker className="mr-2" />
+                            Patient Tools
+                        </Link>
+                    </Button>
+                </>
            )}
            <Separator className="my-1"/>
           <Button variant="ghost" className="justify-start text-lg" onClick={handleLogout}>

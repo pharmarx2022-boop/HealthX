@@ -4,8 +4,14 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { ArrowLeft, LayoutDashboard, User } from 'lucide-react';
+import { ArrowLeft, LayoutDashboard, User, Settings, Briefcase, Pill, Beaker, Bot, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+type NavItem = {
+    href: string;
+    icon: React.ElementType;
+    label: string;
+};
 
 export function BottomNavBar() {
   const [user, setUser] = useState<any | null>(null);
@@ -25,17 +31,48 @@ export function BottomNavBar() {
     return null; // Don't show for admin or patient roles
   }
 
-  const dashboardPath = `/${user.role}/dashboard`;
-  const profilePath = `/${user.role}/profile`;
+  let navItems: NavItem[] = [];
 
-  const navItems = [
-    { href: dashboardPath, icon: LayoutDashboard, label: 'Dashboard' },
-    { href: profilePath, icon: User, label: 'Profile' },
-  ];
+  switch (user.role) {
+    case 'doctor':
+        navItems = [
+            { href: '/doctor/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+            { href: '/doctor/clinics', icon: Briefcase, label: 'Clinics' },
+            { href: '/doctor/profile', icon: Settings, label: 'Profile' },
+        ];
+        break;
+    case 'health-coordinator':
+        navItems = [
+            { href: '/health-coordinator/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+            { href: '/health-coordinator/booking', icon: Calendar, label: 'Book' },
+            { href: '/health-coordinator/tools', icon: Bot, label: 'AI Tools' },
+        ];
+        break;
+     case 'lab':
+        navItems = [
+            { href: '/lab/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+            { href: '/lab/tools', icon: Beaker, label: 'Tools' },
+            { href: '/lab/profile', icon: Settings, label: 'Profile' },
+        ];
+        break;
+     case 'pharmacy':
+        navItems = [
+            { href: '/pharmacy/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+            { href: '/pharmacy/tools', icon: Pill, label: 'Tools' },
+            { href: '/pharmacy/profile', icon: Settings, label: 'Profile' },
+        ];
+        break;
+    default:
+        navItems = [
+            { href: `/${user.role}/dashboard`, icon: LayoutDashboard, label: 'Dashboard' },
+            { href: `/${user.role}/profile`, icon: Settings, label: 'Profile' },
+        ];
+  }
+
 
   return (
     <footer className="fixed bottom-0 left-0 z-50 w-full h-16 bg-background border-t md:hidden">
-      <div className="grid h-full grid-cols-3 font-medium">
+      <div className="grid h-full grid-cols-4 font-medium">
         <button
           onClick={() => router.back()}
           className="inline-flex flex-col items-center justify-center px-5 hover:bg-muted"

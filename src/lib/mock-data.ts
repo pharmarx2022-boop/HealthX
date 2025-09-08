@@ -204,6 +204,27 @@ export const mockPatientData: any[] = [
         status: 'done',
         reviewed: true,
         patientOptsOut: false
+    },
+    {
+        id: 'patient_test_1',
+        name: 'Priya Patient',
+        email: 'patient@example.com',
+        phone: '9876543210',
+        role: 'patient',
+        status: 'approved',
+        transactionId: 'txn_3',
+        clinic: 'Dadar East Clinic',
+        clinicId: 'clinic2',
+        doctorId: 'doctor_anjali_1687890123',
+        bookedById: null,
+        bookedByRole: null,
+        appointmentDate: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString(),
+        consultation: 'General Checkup',
+        consultationFee: 1200,
+        refundStatus: 'Refunded',
+        status: 'done',
+        reviewed: false,
+        patientOptsOut: false
     }
 ];
 

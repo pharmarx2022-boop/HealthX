@@ -1,9 +1,6 @@
 
-
 // THIS FILE IS A PLACEHOLDER FOR PRODUCTION AUTHENTICATION
 // In a real application, this would be replaced with a secure authentication service like Firebase Authentication.
-
-export const MOCK_OTP = '123456';
 
 export type UserData = {
     id: string;
@@ -20,7 +17,7 @@ export type UserData = {
 
 // This function simulates sending an OTP. In production, this would use a service like Twilio or Firebase Auth.
 export async function sendOtp(email: string) {
-    console.log(`OTP/Magic Link SENT to ${email}: For non-production, the mock code is ${MOCK_OTP}`);
+    console.log(`A real magic link would be sent to ${email} by a backend service.`);
     await new Promise(resolve => setTimeout(resolve, 500));
     return true;
 }

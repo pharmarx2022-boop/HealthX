@@ -14,7 +14,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { signInWithOtp, sendOtp, MOCK_OTP, signInWithPassword, checkUserExists, UserData } from '@/lib/auth';
+import { signInWithPassword, sendOtp, signInWithOtp, checkUserExists, UserData } from '@/lib/auth';
 import { MailCheck, Loader2 } from 'lucide-react';
 import { addNotification } from '@/lib/notifications';
 
@@ -65,6 +65,10 @@ export default function LoginPage() {
         });
         router.push('/');
     }
+    // In a production app, you would check for the magic link token in the URL here.
+    // e.g., const token = searchParams.get('token');
+    // if (token) { handleTokenLogin(token); }
+
   }, [searchParams, router, toast]);
   
   const handleSuccessfulLogin = (user: UserData, isNewUser: boolean) => {
@@ -108,7 +112,7 @@ export default function LoginPage() {
       setLoginStep('magicLinkSent');
       toast({
           title: "Magic Link Sent!",
-          description: "A sign-in link has been sent to your email. For testing, you can use the bypass button.",
+          description: "A sign-in link has been sent to your email. Please check your inbox to continue.",
       });
     }
     setIsSubmitting(false);
@@ -127,23 +131,6 @@ export default function LoginPage() {
     setIsSubmitting(false);
   }
   
-  const handleMagicLinkLogin = async () => {
-    if (!selectedRole) return;
-    setIsSubmitting(true);
-
-    const email = form.getValues('email');
-    const referralCode = sessionStorage.getItem('referralCode') || undefined;
-
-    const { user, error, isNewUser } = await signInWithOtp(email, MOCK_OTP, selectedRole, referralCode);
-
-    if (user) {
-      handleSuccessfulLogin(user, isNewUser);
-    } else {
-      toast({ title: "Sign-in Failed", description: error, variant: "destructive" });
-    }
-    setIsSubmitting(false);
-  }
-  
   const handleSendMagicLinkAgain = async () => {
     setIsSubmitting(true);
     const email = form.getValues('email');
@@ -151,7 +138,7 @@ export default function LoginPage() {
     setLoginStep('magicLinkSent');
     toast({
         title: "Magic Link Sent!",
-        description: "A sign-in link has been sent to your email. For testing, you can use the bypass button.",
+        description: "A new sign-in link has been sent to your email.",
     });
     setIsSubmitting(false);
   }
@@ -208,9 +195,6 @@ export default function LoginPage() {
             <p className="font-medium">Check your inbox!</p>
             <p>A sign-in link has been sent to <br /><strong>{emailValue}</strong>.</p>
             <div className="space-y-2">
-              <Button className="w-full" onClick={handleMagicLinkLogin} disabled={isSubmitting}>
-                {isSubmitting ? <Loader2 className="animate-spin" /> : 'Bypass for Testing'}
-              </Button>
               <Button variant="link" className="w-full" onClick={() => setLoginStep('enterEmail')}>
                 Use a different email
               </Button>
@@ -273,7 +257,7 @@ export default function LoginPage() {
             <CardTitle className="text-2xl font-headline">{roleDisplayName} Login</CardTitle>
             <CardDescription>
                 {loginStep === 'enterPassword' && 'Welcome back! Enter your password to continue.'}
-                {loginStep === 'magicLinkSent' && 'Check your email for a sign-in link or use the test button.'}
+                {loginStep === 'magicLinkSent' && 'Check your email for a sign-in link.'}
                 {loginStep === 'enterEmail' && 'Enter your email to sign in or create an account.'}
             </CardDescription>
           </CardHeader>

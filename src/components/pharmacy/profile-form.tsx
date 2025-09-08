@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import Image from 'next/image';
 import { Loader2, Upload, Percent, Phone, Copy, Link as LinkIcon, MapPin, BadgeCheck, FileText, Mail, Calendar, Clock, Truck, KeyRound } from 'lucide-react';
 import { initialPharmacies } from '@/lib/mock-data';
-import { isRegistrationNumberUnique, isPhoneUnique, MOCK_OTP } from '@/lib/auth';
+import { isRegistrationNumberUnique, isPhoneUnique } from '@/lib/auth';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '../ui/checkbox';
 import { Switch } from '../ui/switch';
@@ -137,11 +137,11 @@ export function PharmacyProfileForm() {
     if (data.phoneNumber !== originalPhone) {
       if (!isVerifyingPhone) {
         setIsVerifyingPhone(true);
-        toast({ title: 'Verify New Phone Number', description: `An OTP has been sent to ${data.phoneNumber}. Please enter it to confirm the change. (Demo OTP: ${MOCK_OTP})` });
+        toast({ title: 'Verify New Phone Number', description: `An OTP has been sent to ${data.phoneNumber}. Please enter it to confirm the change. (Demo OTP: 123456)` });
         return;
       }
       
-      if (data.otp !== MOCK_OTP) {
+      if (data.otp !== '123456') {
         form.setError('otp', { type: 'manual', message: 'Invalid OTP.' });
         return;
       }

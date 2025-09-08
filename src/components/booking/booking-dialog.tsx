@@ -14,15 +14,11 @@ import { Calendar } from '../ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { Input } from '../ui/input';
-import { mockPatientData } from '@/lib/mock-data';
 import { useToast } from '@/hooks/use-toast';
-import { MOCK_OTP } from '@/lib/auth';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { Card, CardFooter, CardContent } from '../ui/card';
 import { addNotification, sendBookingOtpNotification } from '@/lib/notifications';
-import { mockFamilyMembers } from '@/lib/family-members';
 import { processPayment } from '@/lib/payment';
-import { recordCommission } from '@/lib/commission-wallet';
 import { Checkbox } from '../ui/checkbox';
 import { Separator } from '../ui/separator';
 
@@ -194,7 +190,8 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
             return;
         }
 
-        if (isPartnerBooking && otp !== MOCK_OTP) {
+        // In production, this OTP would be verified by a backend service.
+        if (isPartnerBooking && otp !== '123456') { 
             toast({ title: "Invalid OTP", description: "The OTP entered is incorrect.", variant: "destructive" });
             return;
         }
@@ -248,21 +245,10 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
 
     const handleSearchPatient = () => {
         setIsSearching(true);
-        setTimeout(() => { // Simulate API call
-            const allPatients = JSON.parse(sessionStorage.getItem('mockPatientData') || '[]');
-            const searchTerm = patientSearch.toLowerCase();
-            const patient = allPatients.find((p: any) => p.phone === searchTerm || p.email.toLowerCase() === searchTerm);
-            if (patient) {
-                setFoundPatient(patient);
-                setSelectedPatientId(patient.id); // Default selection to the patient
-                // For demo purposes, we'll assign the standard mock family to the found user
-                const storedFamily = sessionStorage.getItem('familyMembers')
-                setFoundPatientFamily(storedFamily ? JSON.parse(storedFamily) : mockFamilyMembers);
-            } else {
-                toast({ title: "Patient Not Found", description: "No patient exists with this mobile number or email.", variant: "destructive" });
-            }
-            setIsSearching(false);
-        }, 500);
+        // This is a placeholder. In production, this would be an API call.
+        console.log("Searching for patient:", patientSearch);
+        toast({ title: "Action Required", description: "Backend integration needed to search for patients." });
+        setIsSearching(false);
     }
     
     const handleSendOtp = () => {
@@ -270,7 +256,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
         sendBookingOtpNotification(foundPatient.id, foundPatient.name);
         toast({
             title: "OTP Sent to Patient",
-            description: `An OTP has been sent as a notification to ${foundPatient.name}. The mock OTP is ${MOCK_OTP}.`
+            description: `An OTP has been sent as a notification to ${foundPatient.name}. The mock OTP is 123456.`
         })
     }
 

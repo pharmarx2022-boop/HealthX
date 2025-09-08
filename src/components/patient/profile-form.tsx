@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -11,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Loader2, Phone, Mail, KeyRound } from 'lucide-react';
-import { MOCK_OTP, isPhoneUnique } from '@/lib/auth';
+import { isPhoneUnique } from '@/lib/auth';
 
 const profileSchema = z.object({
   fullName: z.string().min(1, 'Full name is required.'),
@@ -76,11 +75,11 @@ export function PatientProfileForm() {
     if (data.phone !== originalPhone) {
       if (!isVerifyingPhone) {
         setIsVerifyingPhone(true);
-        toast({ title: 'Verify New Phone Number', description: `An OTP has been sent to ${data.phone}. Please enter it to confirm the change. (Demo OTP: ${MOCK_OTP})` });
+        toast({ title: 'Verify New Phone Number', description: `An OTP has been sent to ${data.phone}. Please enter it to confirm the change. (Demo OTP: 123456)` });
         return;
       }
       
-      if (data.otp !== MOCK_OTP) {
+      if (data.otp !== '123456') {
         form.setError('otp', { type: 'manual', message: 'Invalid OTP.' });
         return;
       }

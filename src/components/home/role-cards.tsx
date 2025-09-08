@@ -50,7 +50,7 @@ export function RoleCards() {
         </div>
 
         {/* Mobile View: Compact List */}
-        <div className="max-w-md mx-auto md:hidden">
+        <div className="max-w-md mx-auto sm:hidden">
             <div className="bg-white rounded-lg border shadow-sm divide-y">
                 {roles.map((role) => (
                     <Link key={role.name} href={role.loginLink} className="p-4 flex items-center gap-4 text-left w-full hover:bg-slate-50/70 transition-colors">
@@ -67,8 +67,8 @@ export function RoleCards() {
             </div>
         </div>
 
-        {/* Desktop View: Cards */}
-        <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 max-w-7xl mx-auto">
+        {/* Desktop & Tablet View: Cards */}
+        <div className="hidden sm:grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 max-w-7xl mx-auto">
           {roles.map((role) => (
             <Card key={role.name} className="flex flex-col text-center items-center hover:shadow-xl transition-shadow duration-300 p-4 justify-between">
               <CardHeader className="items-center p-2">

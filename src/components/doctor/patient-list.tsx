@@ -4,11 +4,10 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, Trash2, CalendarClock, DownloadIcon } from 'lucide-react';
+import { Calendar as CalendarIcon, Trash2, CalendarClock, DownloadIcon, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { mockPatientData as mockPatients } from '@/lib/mock-data';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -22,9 +21,8 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { addNotification } from '@/lib/notifications';
 
-const clinics = ['All', 'Andheri West Clinic', 'Dadar East Clinic', 'Skin & Hair Clinic', 'Happy Kids Pediatrics'];
+const clinics = ['All'];
 const days = ['All', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const consultationStatuses = ['All', 'Done', 'Upcoming'];
 
@@ -44,17 +42,8 @@ export function PatientList() {
   });
 
   useEffect(() => {
-    const storedUser = sessionStorage.getItem('user');
-    if (storedUser) {
-        const u = JSON.parse(storedUser);
-        setUser(u);
-        const storedPatients = sessionStorage.getItem('mockPatients');
-        const allAppointments = storedPatients ? JSON.parse(storedPatients) : mockPatients;
-        setPatients(allAppointments.filter((p: any) => p.doctorId === u.id));
-    }
-     if (!sessionStorage.getItem('mockPatients')) {
-        sessionStorage.setItem('mockPatients', JSON.stringify(mockPatients));
-    }
+    // In a real app, this would be an API call to fetch patients for the logged-in doctor
+    setPatients([]);
     setIsLoading(false);
   }, []);
 
@@ -63,15 +52,9 @@ export function PatientList() {
   };
 
   const filteredPatients = useMemo(() => {
-    return patients.filter(patient => {
-        const appointmentDate = new Date(patient.appointmentDate);
-        if (filters.name && !patient.name.toLowerCase().includes(filters.name.toLowerCase())) return false;
-        if (filters.clinic !== 'All' && patient.clinic !== filters.clinic) return false;
-        if (filters.date && format(appointmentDate, 'yyyy-MM-dd') !== format(filters.date, 'yyyy-MM-dd')) return false;
-        if (filters.day !== 'All' && format(appointmentDate, 'EEEE') !== filters.day) return false;
-        if (filters.status !== 'All' && patient.status !== filters.status.toLowerCase()) return false;
-        return true;
-    });
+    // This filtering should be done on the backend in a real app.
+    // Returning an empty array as there's no mock data.
+    return [];
   }, [filters, patients]);
 
   const handleSelectAll = (checked: boolean | 'indeterminate') => {
@@ -93,38 +76,17 @@ export function PatientList() {
   };
 
   const handleBulkCancel = () => {
-    const allStoredAppointments = JSON.parse(sessionStorage.getItem('mockPatients') || '[]');
-    const remainingAppointments = allStoredAppointments.filter((p: any) => !selectedRows.has(p.id));
-    sessionStorage.setItem('mockPatients', JSON.stringify(remainingAppointments));
-    
-    // Also update the local state for the current doctor
-    setPatients(patients.filter(p => !selectedRows.has(p.id)));
-
-    selectedRows.forEach(id => {
-        const patient = patients.find(p => p.id === id);
-        if (patient) {
-            addNotification(patient.id, {
-                title: 'Appointment Canceled',
-                message: 'Your doctor has canceled your upcoming appointment. Your payment has been refunded.',
-                icon: 'calendar',
-                href: '/patient/my-health'
-            });
-        }
-    });
-
     toast({
-        title: "Appointments Canceled",
-        description: `${selectedRows.size} appointment(s) have been canceled. Patients have been notified and refunded.`
-    })
-    setSelectedRows(new Set());
+        title: "Action Required",
+        description: "Backend integration needed to cancel appointments.",
+    });
   }
 
   const handleBulkReschedule = () => {
     toast({
-        title: "Appointments Rescheduled",
-        description: `${selectedRows.size} appointment(s) have been successfully rescheduled.`
-    })
-    setSelectedRows(new Set());
+        title: "Action Required",
+        description: "Backend integration needed to reschedule appointments.",
+    });
   }
   
   const handleDownload = () => {
@@ -145,12 +107,10 @@ export function PatientList() {
       head: tableHead,
       body: tableBody,
       didDrawPage: (data) => {
-        // Header
         doc.setFontSize(20);
         doc.setTextColor(40);
         doc.text("Patient List", data.settings.margin.left, 22);
 
-        // Footer
         const pageCount = doc.internal.getNumberOfPages();
         doc.setFontSize(10);
         doc.text(
@@ -306,7 +266,7 @@ export function PatientList() {
                     </TableHeader>
                     <TableBody>
                         {isLoading ? (
-                            <TableRow><TableCell colSpan={6} className="h-24 text-center">Loading appointments...</TableCell></TableRow>
+                            <TableRow><TableCell colSpan={6} className="h-24 text-center"><Loader2 className="animate-spin mr-2 inline-block"/>Loading appointments...</TableCell></TableRow>
                         ) : filteredPatients.length > 0 ? (
                             filteredPatients.map(patient => (
                                 <TableRow key={patient.id} data-state={selectedRows.has(patient.id) ? "selected" : ""}>
@@ -346,5 +306,3 @@ export function PatientList() {
     </div>
   )
 }
-
-    

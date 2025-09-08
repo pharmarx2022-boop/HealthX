@@ -2,7 +2,7 @@
 
 'use client';
 
-// This file should be refactored to use a backend service like Firestore.
+// In production, this data would be fetched from a backend (e.g., a CMS or database).
 
 export const teamMemberCategories = ['Founder', 'Director', 'Independent Director', 'Investor', 'Other'] as const;
 
@@ -19,36 +19,20 @@ export type TeamMember = {
     instagram?: string;
 }
 
-const initialTeam: TeamMember[] = [];
 
-const TEAM_KEY = 'teamMembers';
-
-// In a real app, this would fetch from Firestore, scoped to the logged-in user.
+// In a real app, these functions would make API calls to a backend service.
 export function getTeamMembers(): TeamMember[] {
-     if (typeof window === 'undefined') return [];
-     const stored = sessionStorage.getItem(TEAM_KEY);
-     if (stored) {
-        return JSON.parse(stored);
-     }
-     sessionStorage.setItem(TEAM_KEY, JSON.stringify(initialTeam));
-     return initialTeam;
+     return [];
 }
 
 export function addTeamMember(member: Omit<TeamMember, 'id'>) {
-    const members = getTeamMembers();
-    const newMember = { ...member, id: `team_${Date.now()}` };
-    const updatedMembers = [...members, newMember];
-    sessionStorage.setItem(TEAM_KEY, JSON.stringify(updatedMembers));
+    console.log("Adding team member would be a backend call.");
 }
 
 export function updateTeamMember(updatedMember: TeamMember) {
-    const members = getTeamMembers();
-    const updatedMembers = members.map(m => m.id === updatedMember.id ? updatedMember : m);
-    sessionStorage.setItem(TEAM_KEY, JSON.stringify(updatedMembers));
+    console.log("Updating team member would be a backend call.");
 }
 
 export function deleteTeamMember(memberId: string) {
-    const members = getTeamMembers();
-    const updatedMembers = members.filter(m => m.id !== memberId);
-    sessionStorage.setItem(TEAM_KEY, JSON.stringify(updatedMembers));
+    console.log("Deleting team member would be a backend call.");
 }

@@ -7,9 +7,8 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, User, Calendar, Clock, Stethoscope, FileText, MessageSquare, CreditCard, RefreshCw, BadgeCheck, BellPlus, CalendarPlus } from 'lucide-react';
+import { ArrowLeft, User, Calendar, Clock, Stethoscope, FileText, MessageSquare, CreditCard, RefreshCw, BadgeCheck, BellPlus, CalendarPlus, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { mockPatientData as mockPatients } from '@/lib/mock-data';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -17,105 +16,37 @@ import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Calendar as CalendarPicker } from '@/components/ui/calendar';
-import { recordTransaction } from '@/lib/transactions';
-import { addNotification } from '@/lib/notifications';
-import { initialDoctors } from '@/lib/mock-data';
-import { checkDoctorMilestone } from '@/lib/referrals';
-import { recordCommission } from '@/lib/commission-wallet';
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 export default function PatientDetailPage() {
   const params = useParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const { toast } = useToast();
-  const [isClient, setIsClient] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [patient, setPatient] = useState<any>(null);
   const [nextAppointment, setNextAppointment] = useState<Date | undefined>(undefined);
   const [rescheduleDate, setRescheduleDate] = useState<Date | undefined>(undefined);
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
 
-  // We need to manage patient state locally to reflect changes
-  const [allPatients, setAllPatients] = useState(mockPatients);
-  const patient = allPatients.find(p => p.id === id);
-  
-  // This ensures we have the latest patient data if the user navigates back and forth
   useEffect(() => {
-    setIsClient(true);
-    const storedPatients = sessionStorage.getItem('mockPatients');
-    if (storedPatients) {
-      setAllPatients(JSON.parse(storedPatients));
-    }
-  }, []);
-  
-  useEffect(() => {
-    if (patient?.nextAppointmentDate && !isNaN(new Date(patient.nextAppointmentDate).getTime())) {
-        setNextAppointment(new Date(patient.nextAppointmentDate));
-    }
-  }, [patient]);
-
+    // In a real app, you would fetch patient data from your backend using the `id`
+    // For now, we simulate a loading state
+    const timer = setTimeout(() => {
+      // setPatient(null); // To test the not found case
+      setIsLoading(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [id]);
 
   const handleMarkAsComplete = () => {
-    if (!patient) return;
-    
-    // Credit Health Points to the patient
-    const patientUserId = patient.id; 
-    recordTransaction(patientUserId, {
-        type: 'credit',
-        amount: patient.consultationFee,
-        description: `Bonus Health Points from consultation on ${format(new Date(patient.appointmentDate), 'PP')}`,
-        date: new Date(),
-    });
-    const doctor = initialDoctors.find(d => d.id === patient.doctorId);
-    
-    addNotification(patientUserId, {
-        title: 'Health Points Added!',
-        message: `You've earned INR ${patient.consultationFee.toFixed(2)} in Health Points from your consultation with ${doctor?.name || 'your doctor'}.`,
-        icon: 'wallet',
-        href: '/patient/my-health'
-    });
-
-    // Check for doctor referral milestone
-    if (doctor) {
-        checkDoctorMilestone(doctor.id);
-    }
-    
-    // Award commission if booked by a partner
-    if (patient.bookedById && patient.bookedByRole) {
-        const commissionAmount = patient.consultationFee * 0.05;
-        recordCommission(patient.bookedById, {
-            type: 'credit',
-            amount: commissionAmount,
-            description: `Commission for booking for ${patient.name}`,
-            date: new Date(),
-            status: 'success'
-        });
-        addNotification(patient.bookedById, {
-            title: 'Commission Earned!',
-            message: `You earned INR ${commissionAmount.toFixed(2)} for a completed appointment.`,
-            icon: 'gift',
-            href: `/${patient.bookedByRole}/dashboard`
-        });
-    }
-
-    // Update patient status
-    const updatedPatients = allPatients.map(p => {
-      if (p.id === id) {
-        return { ...p, status: 'done', refundStatus: 'Refunded' };
-      }
-      return p;
-    });
-
-    setAllPatients(updatedPatients);
-    // Persist changes to session storage to simulate a database update
-    sessionStorage.setItem('mockPatients', JSON.stringify(updatedPatients));
-
     toast({
-        title: "Consultation Complete!",
-        description: `Security deposit refund for INR ${patient?.consultationFee.toFixed(2)} has been initiated. Health points have been credited to the patient's account.`,
+        title: "Action Required",
+        description: "Backend integration needed to mark consultation as complete.",
     });
   };
 
   const handleSetReminder = () => {
-    if (!nextAppointment || !patient) {
+    if (!nextAppointment) {
         toast({
             title: "No date selected",
             description: "Please select a date for the next appointment reminder.",
@@ -123,27 +54,9 @@ export default function PatientDetailPage() {
         });
         return;
     }
-
-    const updatedPatients = allPatients.map(p => {
-      if (p.id === id) {
-        return { ...p, nextAppointmentDate: nextAppointment.toISOString() };
-      }
-      return p;
-    });
-
-    setAllPatients(updatedPatients);
-    sessionStorage.setItem('mockPatients', JSON.stringify(updatedPatients));
-    
-    addNotification(patient.id, {
-        title: 'Follow-up Reminder Set',
-        message: `Your doctor scheduled a follow-up for ${format(nextAppointment, 'PPP')}.`,
-        icon: 'calendar',
-        href: '/patient/my-health'
-    });
-
-    toast({
-        title: "Reminder Set",
-        description: `Patient will be reminded for their appointment on ${format(nextAppointment, 'PPP')}.`,
+     toast({
+        title: "Action Required",
+        description: "Backend integration needed to set reminder.",
     });
   }
 
@@ -152,46 +65,21 @@ export default function PatientDetailPage() {
         toast({ title: "No date selected", description: "Please select a new date for the appointment.", variant: "destructive" });
         return;
     }
-    
-    const originalDate = format(new Date(patient.appointmentDate), 'PPP');
-    const newDate = format(rescheduleDate, 'PPP');
-    const newAppointmentDate = new Date(rescheduleDate);
-    // Keep original time
-    const originalTime = new Date(patient.appointmentDate);
-    newAppointmentDate.setHours(originalTime.getHours(), originalTime.getMinutes());
-
-
-    const updatedPatients = allPatients.map(p => {
-        if (p.id === id) {
-            return { ...p, appointmentDate: newAppointmentDate.toISOString() };
-        }
-        return p;
+     toast({
+        title: "Action Required",
+        description: "Backend integration needed to reschedule appointment.",
     });
-    setAllPatients(updatedPatients);
-    sessionStorage.setItem('mockPatients', JSON.stringify(updatedPatients));
-
-    addNotification(patient.id, {
-        title: 'Appointment Rescheduled',
-        message: `Your doctor has rescheduled your appointment from ${originalDate} to ${newDate}.`,
-        icon: 'calendar',
-        href: '/patient/appointments'
-    });
-
-    toast({
-        title: "Appointment Rescheduled",
-        description: `The appointment has been moved to ${newDate}. The patient has been notified.`,
-    });
-    
     setIsRescheduleOpen(false);
     setRescheduleDate(undefined);
   }
 
-  if (!isClient) {
+  if (isLoading) {
     return (
         <div className="flex flex-col min-h-screen">
             <Header />
             <main className="flex-1 bg-slate-50/50 flex items-center justify-center">
-                <p>Loading patient data...</p>
+                <Loader2 className="animate-spin mr-2"/>
+                <span>Loading patient data...</span>
             </main>
             <Footer />
         </div>
@@ -199,8 +87,6 @@ export default function PatientDetailPage() {
   }
 
   if (!patient) {
-    // This can happen if the page is loaded directly and state is not yet synced.
-    // A loading state or a redirect could be useful here in a real app.
     notFound();
     return null;
   }
@@ -375,4 +261,3 @@ export default function PatientDetailPage() {
     </div>
   );
 }
-

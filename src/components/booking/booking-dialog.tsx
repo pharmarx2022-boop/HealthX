@@ -158,28 +158,16 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
         const fee = selectedClinic.consultationFee;
         let platformFeeRate = 0;
 
-        if (isPartnerBooking) {
-            platformFeeRate = patientOptsOut ? 0.10 : 0.05; // 10% if partner opts out for patient, 5% otherwise
+         if (isPartnerBooking) {
+            platformFeeRate = patientOptsOut ? 0.10 : 0.05; 
         } else {
-            platformFeeRate = patientOptsOut ? 0.05 : 0; // 5% if patient opts out, 0% otherwise
+            platformFeeRate = patientOptsOut ? 0.05 : 0;
         }
         
         const platformFee = fee * platformFeeRate;
         const totalOnlinePayment = fee + platformFee;
 
-        let infoText = `A non-refundable platform fee of ₹${platformFee.toFixed(2)} is applied.`;
-        let rewardText = `Pay ₹${fee.toFixed(2)} in cash at the clinic.`;
-
-        if (!patientOptsOut) {
-            rewardText += ` After your visit, your ₹${fee.toFixed(2)} deposit will be refunded AND you'll earn ₹${fee.toFixed(2)} in Health Points!`;
-        }
-
-        if (platformFee === 0) {
-            infoText = `You've opted to earn Health Points! No platform fee will be charged.`;
-        }
-
-
-        return { fee, platformFee, totalOnlinePayment, infoText, rewardText };
+        return { fee, platformFee, totalOnlinePayment };
     }
 
     const feeDetails = getFeeDetails();
@@ -312,8 +300,8 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
             
             <div className="flex items-center space-x-2 mt-4 p-3 bg-slate-50 border rounded-md">
                 <Checkbox id="opt-out" checked={patientOptsOut} onCheckedChange={(checked) => setPatientOptsOut(Boolean(checked))} />
-                <Label htmlFor="opt-out" className="text-sm font-normal">
-                    I don't want to receive Health Points bonus for this appointment.
+                <Label htmlFor="opt-out" className="text-sm font-normal leading-tight">
+                    Opt-out of Health Points bonus. (A 5% non-refundable platform fee will apply)
                 </Label>
             </div>
             
@@ -377,8 +365,8 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
 
                      <div className="flex items-center space-x-2 mt-4 p-3 bg-white border rounded-md">
                         <Checkbox id="partner-opt-out" checked={patientOptsOut} onCheckedChange={(checked) => setPatientOptsOut(Boolean(checked))} />
-                        <Label htmlFor="partner-opt-out" className="text-sm font-normal">
-                           Opt patient out of receiving Health Points bonus. (10% platform fee will apply)
+                        <Label htmlFor="partner-opt-out" className="text-sm font-normal leading-tight">
+                           Opt patient out of Health Points. (A 10% platform fee will apply instead of 5%)
                         </Label>
                     </div>
                 </div>
@@ -388,14 +376,14 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[480px]">
-                <DialogHeader>
+            <DialogContent className="sm:max-w-[480px] p-0 flex flex-col">
+                <DialogHeader className="p-6 pb-0">
                     <DialogTitle>Book Appointment with {doctor.name}</DialogTitle>
                     <DialogDescription>
                         Confirm the details below to book your slot.
                     </DialogDescription>
                 </DialogHeader>
-                <div className="space-y-6 py-4 pr-2 max-h-[60vh] overflow-y-auto">
+                <div className="flex-1 overflow-y-auto px-6 space-y-6">
                     {isPartnerBooking ? renderPartnerPatientFinder() : renderPatientSelector()}
 
                     <div className={cn(isPartnerBooking && !foundPatient && "opacity-50 pointer-events-none")}>
@@ -479,7 +467,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                 </div>
 
                  {feeDetails && (
-                    <CardFooter className="flex-col gap-3 !p-0 !pt-4 border-t">
+                    <CardFooter className="flex-col gap-3 p-6 !pt-4 border-t bg-slate-50/50 mt-auto">
                          <Alert variant="default" className="bg-blue-50 border-blue-200 text-blue-900 w-full">
                             <Info className="h-4 w-4 !text-blue-900" />
                             <AlertTitle className="font-semibold">Important Payment Information</AlertTitle>
@@ -489,7 +477,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                             </AlertDescription>
                         </Alert>
                        
-                        <div className="w-full space-y-2 p-4 border-y">
+                        <div className="w-full space-y-2 py-4">
                              <h4 className="font-semibold">Billing Summary</h4>
                              <div className="flex justify-between text-sm">
                                 <p>Refundable Security Deposit:</p>
@@ -514,7 +502,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                             </AlertDescription>
                         </Alert>
                        
-                        <div className="w-full px-1 pt-2">
+                        <div className="w-full pt-2">
                             <Button className="w-full h-12 text-lg" onClick={handleConfirmBooking} disabled={isProcessingPayment}>
                                 {isProcessingPayment ? <Loader2 className="animate-spin mr-2"/> : <CreditCard className="mr-2"/>}
                                 {isProcessingPayment ? 'Processing...' : `Pay & Confirm Booking`}

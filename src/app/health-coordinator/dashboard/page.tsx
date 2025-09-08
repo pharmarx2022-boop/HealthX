@@ -17,7 +17,8 @@ import dynamic from 'next/dynamic';
 import { NearbySearch } from '@/components/booking/nearby-search';
 import { BottomNavBar } from '@/components/layout/bottom-nav-bar';
 import { AnalyticsDashboard } from '@/components/health-coordinator/analytics-dashboard';
-import { suggestTestsForPatients, type TestSuggestion } from '@/ai/flows/suggest-test-flow';
+import { suggestTestsForPatients } from '@/ai/flows/suggest-test-flow';
+import type { TestSuggestion } from '@/ai/schemas/test-suggestion-schema';
 
 const AITestSuggestions = () => {
     const [suggestions, setSuggestions] = useState<TestSuggestion[]>([]);

@@ -18,6 +18,7 @@ import { AnalyticsDashboard } from '@/components/health-coordinator/analytics-da
 import { suggestTestsForPatients } from '@/ai/flows/suggest-test-flow';
 import type { TestSuggestion } from '@/ai/schemas/test-suggestion-schema';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BottomNavBar } from '@/components/layout/bottom-nav-bar';
 
 const AITestSuggestions = () => {
     const [suggestions, setSuggestions] = useState<TestSuggestion[]>([]);
@@ -222,6 +223,7 @@ export default function HealthCoordinatorDashboardPage() {
                 </div>
             </main>
             <Footer />
+            <BottomNavBar />
         </div>
     );
 }

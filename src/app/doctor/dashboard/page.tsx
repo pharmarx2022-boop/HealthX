@@ -9,6 +9,7 @@ import { PatientList } from '@/components/doctor/patient-list';
 import dynamic from 'next/dynamic';
 import { useState, useEffect } from 'react';
 import { AnalyticsDashboard } from '@/components/doctor/analytics-dashboard';
+import { BottomNavBar } from '@/components/layout/bottom-nav-bar';
 
 export default function DoctorDashboardPage() {
     const [user, setUser] = useState<any | null>(null);
@@ -25,7 +26,7 @@ export default function DoctorDashboardPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <main className="flex-1 bg-slate-50/50">
+      <main className="flex-1 bg-slate-50/50 pb-20 md:pb-0">
         <div className="container mx-auto py-12">
             <div className="mb-8">
                 <h1 className="text-3xl font-headline font-bold">Doctor Dashboard</h1>
@@ -56,6 +57,7 @@ export default function DoctorDashboardPage() {
         </div>
       </main>
       <Footer />
+      <BottomNavBar />
     </div>
   );
 }

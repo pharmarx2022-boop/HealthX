@@ -23,6 +23,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { getRemindersForPartner, addReminder, deleteReminder, type HealthReminder } from '@/lib/reminders';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { NearbySearch } from '@/components/booking/nearby-search';
+import { BottomNavBar } from '@/components/layout/bottom-nav-bar';
 
 
 const PHARMACIES_KEY = 'mockPharmacies';
@@ -501,6 +502,7 @@ export default function PharmacyDashboardPage() {
         </div>
       </main>
       <Footer />
+      <BottomNavBar />
     </div>
   );
 }

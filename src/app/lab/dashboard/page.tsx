@@ -23,6 +23,7 @@ import { AnalyticsDashboard } from '@/components/lab/analytics-dashboard';
 import { Textarea } from '@/components/ui/textarea';
 import { getRemindersForPartner, addReminder, deleteReminder, type HealthReminder } from '@/lib/reminders';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BottomNavBar } from '@/components/layout/bottom-nav-bar';
 
 
 const LABS_KEY = 'mockLabs';
@@ -601,6 +602,7 @@ export default function LabDashboardPage() {
         </div>
       </main>
       <Footer />
+      <BottomNavBar />
     </div>
   );
 }

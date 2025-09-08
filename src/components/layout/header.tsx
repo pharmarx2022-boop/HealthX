@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { HeartPulse, Menu, X, UserCircle, LogOut, Settings, Briefcase, Users, Pill, Beaker, Gift, Bell, Calendar, LayoutDashboard, Info, Mail, ShieldCheck, FileText } from 'lucide-react';
+import { HeartPulse, Menu, X, UserCircle, LogOut, Settings, Briefcase, Users, Pill, Beaker, Gift, Bell, Calendar, LayoutDashboard, Info, Mail, ShieldCheck, FileText, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from '@/components/ui/sheet';
 import { useState, useEffect } from 'react';
@@ -59,7 +59,7 @@ export function Header() {
       return (
         <>
             <NotificationPopover userId={user.id} />
-             {(user.role === 'patient' || user.role === 'health-coordinator') && (
+             {(user.role === 'patient' || user.role === 'health-coordinator' || user.role === 'pharmacy' || user.role === 'lab') && (
                 <Button asChild>
                     <Link href="/book-appointment">
                         <Calendar className="mr-2 h-4 w-4" />
@@ -278,7 +278,7 @@ export function Header() {
                     renderMobileAuthButtons()
                   ) : (
                      <Button variant="default" asChild className="justify-start text-lg h-12">
-                        <Link href="#roles" onClick={() => setIsSheetOpen(false)}>
+                        <Link href="/#roles" onClick={() => setIsSheetOpen(false)}>
                             <UserCircle className="mr-2" />
                             Login / Sign Up
                         </Link>

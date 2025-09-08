@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useParams, notFound } from 'next/navigation';
+import { useParams, notFound, useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -17,9 +17,15 @@ import { useState, useEffect } from 'react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Calendar as CalendarPicker } from '@/components/ui/calendar';
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { mockPatientData } from '@/lib/mock-data';
+import { recordTransaction } from '@/lib/transactions';
+import { addNotification } from '@/lib/notifications';
+
+const PATIENTS_KEY = 'mockPatients';
 
 export default function PatientDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
@@ -29,27 +35,69 @@ export default function PatientDetailPage() {
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
 
   useEffect(() => {
-    // In a real app, you would fetch patient data from your backend using the `id`
-    // For now, we simulate a loading state
-    const timer = setTimeout(() => {
-      // setPatient(null); // To test the not found case
-      setIsLoading(false);
-    }, 1000);
-    return () => clearTimeout(timer);
+    if (typeof window !== 'undefined') {
+        const allPatients = JSON.parse(localStorage.getItem(PATIENTS_KEY) || '[]');
+        const foundPatient = allPatients.find((p: any) => p.id === id);
+        setPatient(foundPatient);
+    }
+    setIsLoading(false);
   }, [id]);
 
   const handleMarkAsComplete = () => {
-    toast({
-        title: "Action Required",
-        description: "Backend integration needed to mark consultation as complete and issue Health Points.",
+    if (!patient) return;
+
+    // Credit Health Points
+    recordTransaction(patient.patientId, {
+      type: 'credit',
+      amount: patient.consultationFee,
+      description: `Health Point bonus for consultation at ${patient.clinic}`,
+      date: new Date(),
     });
+
+    // Update appointment status
+    const allPatients = JSON.parse(localStorage.getItem(PATIENTS_KEY) || '[]');
+    const updatedPatients = allPatients.map((p: any) => 
+        p.id === patient.id ? { ...p, status: 'done' } : p
+    );
+    localStorage.setItem(PATIENTS_KEY, JSON.stringify(updatedPatients));
+
+    // Send notification
+     addNotification(patient.patientId, {
+        title: 'Health Points Added!',
+        message: `You have received INR ${patient.consultationFee.toFixed(2)} in Health Points for your recent consultation.`,
+        icon: 'gift',
+        href: '/patient/wallet'
+    });
+
+    toast({
+        title: "Consultation Completed!",
+        description: `Health Points have been issued to ${patient.name}. Their security deposit will be refunded automatically.`,
+    });
+    router.push('/doctor/dashboard');
   };
   
    const handleMarkAsAbsent = () => {
-    toast({
-        title: "Action Required",
-        description: "Backend integration needed to mark patient as absent and forfeit their security deposit.",
+    if (!patient) return;
+    
+    // Update appointment status to 'missed'
+    const allPatients = JSON.parse(localStorage.getItem(PATIENTS_KEY) || '[]');
+    const updatedPatients = allPatients.map((p: any) => 
+        p.id === patient.id ? { ...p, status: 'missed', refundStatus: 'Forfeited' } : p
+    );
+    localStorage.setItem(PATIENTS_KEY, JSON.stringify(updatedPatients));
+
+    addNotification(patient.patientId, {
+        title: 'Appointment Marked as No-Show',
+        message: `Your appointment at ${patient.clinic} was marked as missed. Your security deposit has been forfeited.`,
+        icon: 'calendar',
     });
+
+    toast({
+        title: "Patient Marked as Absent",
+        description: "The patient's security deposit will be forfeited.",
+        variant: "destructive"
+    });
+    router.push('/doctor/dashboard');
   };
 
   const handleSetReminder = () => {
@@ -103,8 +151,7 @@ export default function PatientDetailPage() {
     const now = new Date();
     const appointmentDate = new Date(patient.appointmentDate);
     // Allow action from the time of appointment up to 3 days after.
-    const gracePeriodEndDate = addDays(appointmentDate, 3);
-    gracePeriodEndDate.setHours(0,0,0,0);
+    const gracePeriodEndDate = addDays(new Date(appointmentDate).setHours(0,0,0,0), 3);
 
     return now >= appointmentDate && now < gracePeriodEndDate;
   };
@@ -300,3 +347,4 @@ export default function PatientDetailPage() {
     </div>
   );
 }
+

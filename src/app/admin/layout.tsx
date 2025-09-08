@@ -28,6 +28,7 @@ import {
   MessageSquare,
   HelpCircle,
   ClipboardList,
+  Calendar,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -61,6 +62,11 @@ export default function AdminLayout({
       href: '/admin',
       label: 'Dashboard',
       icon: LayoutDashboard,
+    },
+    {
+      href: '/admin/appointments',
+      label: 'Appointments',
+      icon: Calendar,
     },
     {
       href: '/admin/analytics',

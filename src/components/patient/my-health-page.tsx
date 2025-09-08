@@ -217,7 +217,7 @@ export function MyHealthPage() {
                         </div>
                     </CardHeader>
                     <CardContent>
-                            <NearbySearch />
+                            <NearbySearch allowedServices={['doctor', 'lab', 'pharmacy']} />
                     </CardContent>
                 </Card>
 
@@ -449,5 +449,3 @@ export function MyHealthPage() {
         </>
     );
 }
-
-    

@@ -22,7 +22,7 @@ const SupportAssistantInputSchema = z.object({
 export type SupportAssistantInput = z.infer<typeof SupportAssistantInputSchema>;
 
 const SupportAssistantOutputSchema = z.object({
-  userDataSummary: z.string().describe("A concise summary of the user's key data and recent activity."),
+  userDataSummary: z.string().describe("A concise, bulleted summary of the user's key data and recent activity."),
   suggestedReply: z.string().describe('A professionally drafted, empathetic reply to the user that addresses their query.'),
 });
 export type SupportAssistantOutput = z.infer<typeof SupportAssistantOutputSchema>;

@@ -94,7 +94,7 @@ export function PatientProfileForm() {
     
     // We also need to update the mock patient data if this user has appointments
     const allPatients = JSON.parse(sessionStorage.getItem('mockPatientData') || '[]');
-    const updatedPatients = allPatients.map((p: any) => p.id === user.id ? {...p, name: data.fullName, phone: data.phone} : p);
+    const updatedPatients = allPatients.map((p: any) => p.patientId === user.id ? {...p, name: data.fullName, phone: data.phone} : p);
     sessionStorage.setItem('mockPatientData', JSON.stringify(updatedPatients));
 
     setOriginalPhone(data.phone);

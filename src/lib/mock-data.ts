@@ -164,7 +164,8 @@ export const initialLabs: any[] = [
 
 export const mockPatientData: any[] = [
     {
-        id: 'patient_rohan_1687889900',
+        id: 'appt_rohan_1',
+        patientId: 'patient_rohan_1687889900',
         name: 'Rohan Patel',
         email: 'rohan.patel@example.com',
         phone: '9820098200',
@@ -185,7 +186,8 @@ export const mockPatientData: any[] = [
         patientOptsOut: false
     },
     {
-        id: 'patient_priya_1687889955',
+        id: 'appt_priya_1',
+        patientId: 'patient_priya_1687889955',
         name: 'Priya Singh',
         email: 'priya.singh@example.com',
         phone: '9820098201',
@@ -206,7 +208,8 @@ export const mockPatientData: any[] = [
         patientOptsOut: false
     },
     {
-        id: 'patient_test_1',
+        id: 'appt_suresh_1',
+        patientId: 'patient_test_1',
         name: 'Suresh Sharma',
         email: 'patient@example.com',
         phone: '9876543210',

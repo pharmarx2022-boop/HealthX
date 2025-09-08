@@ -56,16 +56,20 @@ export function addReminder(data: Omit<HealthReminder, 'id' | 'dateSet' | 'nextR
     saveAllReminders(allReminders);
 }
 
-export function deleteReminder(reminderId: string) {
+export function deleteReminder(reminderId: string, actorId: string) {
     let allReminders = getAllReminders();
     const reminder = allReminders.find(r => r.id === reminderId);
     
     if (reminder) {
-        addNotification(reminder.partnerId, {
-            title: 'Patient Canceled Reminder',
-            message: `${reminder.patientName} has disabled the monthly reminder for "${reminder.details}".`,
-            icon: 'bell'
-        });
+        // Notify the other party
+        if (actorId === reminder.patientId) {
+            // Patient deleted it, notify partner
+            addNotification(reminder.partnerId, {
+                title: 'Patient Canceled Reminder',
+                message: `${reminder.patientName} has disabled the monthly reminder for "${reminder.details}".`,
+                icon: 'bell'
+            });
+        }
     }
 
     allReminders = allReminders.filter(r => r.id !== reminderId);

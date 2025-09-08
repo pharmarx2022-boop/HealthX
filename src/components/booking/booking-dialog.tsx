@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { Calendar as CalendarIcon, User, Search, Loader2, CreditCard, Users, Info, Sparkles, ArrowLeft } from 'lucide-react';
+import { Calendar as CalendarIcon, User, Search, Loader2, CreditCard, Users, Info, Sparkles, ArrowLeft, Gift } from 'lucide-react';
 import { Calendar } from '../ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -126,7 +126,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
             setOtpSent(false);
             setOtp('');
             setIsProcessingPayment(false);
-            setPatientWantsHealthPoints(false); // Default to free booking
+            setPatientWantsHealthPoints(false);
         }
     }, [isOpen, user?.id, user?.role, clinics]);
 
@@ -374,7 +374,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                     Fill in the details below to reserve your slot.
                 </DialogDescription>
             </DialogHeader>
-            <div className="p-6 space-y-6 overflow-y-auto">
+            <div className="p-6 space-y-6 flex-1 overflow-y-auto">
                  {isPartnerBooking ? renderPartnerPatientFinder() : renderPatientSelector()}
 
                 <div className={cn(isPartnerBooking && !foundPatient && "opacity-50 pointer-events-none")}>
@@ -457,7 +457,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                     </DialogDescription>
                 </div>
             </DialogHeader>
-            <div className="p-6 space-y-4 overflow-y-auto">
+            <div className="p-6 space-y-4 flex-1 overflow-y-auto">
                 {isPartnerBooking && foundPatient && (
                     <div>
                         <Label className="font-semibold">Verify with Patient</Label>
@@ -475,17 +475,22 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
                         )}
                     </div>
                 )}
-                 <div className="flex items-center space-x-2 mt-4 p-3 bg-slate-50 border rounded-md">
-                    <Checkbox id="earn-points" checked={patientWantsHealthPoints} onCheckedChange={(checked) => setPatientWantsHealthPoints(Boolean(checked))} />
+                 <div className="flex items-start space-x-3 mt-4 p-3 bg-slate-50 border rounded-md">
+                    <Checkbox id="earn-points" checked={patientWantsHealthPoints} onCheckedChange={(checked) => setPatientWantsHealthPoints(Boolean(checked))} className="mt-1" />
                     <div className="grid gap-1.5 leading-none">
-                        <Label htmlFor="earn-points" className="font-medium">
+                        <Label htmlFor="earn-points" className="font-medium cursor-pointer">
                            Yes, I want to earn Health Points for this visit.
                         </Label>
-                        <p className="text-xs text-muted-foreground">
-                            A 5% platform fee will be added to your payment to unlock this benefit.
-                        </p>
                     </div>
                 </div>
+
+                <Alert variant="default" className="bg-green-50 border-green-200 text-green-900 w-full">
+                    <Gift className="h-4 w-4 !text-green-900" />
+                    <AlertTitle className="font-semibold">What are Health Points?</AlertTitle>
+                    <AlertDescription>
+                        Health Points are rewards you can use to get discounts on medicines and lab tests from our partner pharmacies and labs.
+                    </AlertDescription>
+                </Alert>
 
                 {feeDetails && (
                     <div className="space-y-3">

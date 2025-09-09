@@ -3,7 +3,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { format } from 'date-fns';
+import { format, getDay } from 'date-fns';
 import { Calendar as CalendarIcon, Trash2, CalendarClock, DownloadIcon, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import jsPDF from 'jspdf';
@@ -21,15 +21,18 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
+import { initialClinics, mockPatientData } from '@/lib/mock-data';
 
-const clinics = ['All'];
-const days = ['All', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-const consultationStatuses = ['All', 'Done', 'Upcoming'];
+const days = ['All', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const consultationStatuses = ['All', 'Done', 'Upcoming', 'Missed', 'Cancelled'];
 
+const PATIENTS_KEY = 'mockPatients';
+const CLINICS_KEY = 'mockClinics';
 
 export function PatientList() {
   const { toast } = useToast();
   const [patients, setPatients] = useState<any[]>([]);
+  const [doctorClinics, setDoctorClinics] = useState<string[]>(['All']);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [user, setUser] = useState<any | null>(null);
@@ -42,15 +45,22 @@ export function PatientList() {
   });
 
   useEffect(() => {
-    // In a real app, this would be an API call to fetch patients for the logged-in doctor
     if (typeof window !== 'undefined') {
         const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
+        const u = storedUser ? JSON.parse(storedUser) : null;
+        setUser(u);
+
+        if (u) {
+            const allPatients = JSON.parse(localStorage.getItem(PATIENTS_KEY) || '[]');
+            const doctorPatients = allPatients.filter((p: any) => p.doctorId === u.id);
+            setPatients(doctorPatients);
+
+            const allClinics = JSON.parse(localStorage.getItem(CLINICS_KEY) || '[]');
+            const userClinics = ['All', ...allClinics.filter((c: any) => c.doctorId === u.id).map((c: any) => c.name)];
+            setDoctorClinics(userClinics);
         }
+        setIsLoading(false);
     }
-    setPatients([]);
-    setIsLoading(false);
   }, []);
 
   const handleFilterChange = (key: keyof typeof filters, value: any) => {
@@ -58,9 +68,17 @@ export function PatientList() {
   };
 
   const filteredPatients = useMemo(() => {
-    // This filtering should be done on the backend in a real app.
-    // Returning an empty array as there's no mock data.
-    return [];
+    return patients.filter(p => {
+        const appointmentDate = new Date(p.appointmentDate);
+
+        const nameMatch = p.name.toLowerCase().includes(filters.name.toLowerCase());
+        const clinicMatch = filters.clinic === 'All' || p.clinic === filters.clinic;
+        const dateMatch = !filters.date || format(appointmentDate, 'yyyy-MM-dd') === format(filters.date, 'yyyy-MM-dd');
+        const dayMatch = filters.day === 'All' || getDay(appointmentDate) === days.indexOf(filters.day) - 1; // getDay is 0-indexed (Sun-Sat)
+        const statusMatch = filters.status === 'All' || p.status === filters.status.toLowerCase();
+
+        return nameMatch && clinicMatch && dateMatch && dayMatch && statusMatch;
+    });
   }, [filters, patients]);
 
   const handleSelectAll = (checked: boolean | 'indeterminate') => {
@@ -154,7 +172,7 @@ export function PatientList() {
                 <Select value={filters.clinic} onValueChange={(value) => handleFilterChange('clinic', value)}>
                     <SelectTrigger id="clinic"><SelectValue placeholder="Clinic" /></SelectTrigger>
                     <SelectContent>
-                        {clinics.map(clinic => <SelectItem key={clinic} value={clinic}>{clinic}</SelectItem>)}
+                        {doctorClinics.map(clinic => <SelectItem key={clinic} value={clinic}>{clinic}</SelectItem>)}
                     </SelectContent>
                 </Select>
             </div>
@@ -287,7 +305,7 @@ export function PatientList() {
                                     <TableCell className="hidden lg:table-cell">{patient.clinic}</TableCell>
                                     <TableCell>{format(new Date(patient.appointmentDate), 'PP, p')}</TableCell>
                                     <TableCell className="hidden sm:table-cell">
-                                        <Badge variant={patient.status === 'done' ? 'secondary' : 'default'}>
+                                        <Badge variant={patient.status === 'done' ? 'secondary' : 'default'} className="capitalize">
                                             {patient.status}
                                         </Badge>
                                     </TableCell>
@@ -301,7 +319,7 @@ export function PatientList() {
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={6} className="text-center h-24">
-                                    No patients found.
+                                    No patients found matching your filters.
                                 </TableCell>
                             </TableRow>
                         )}

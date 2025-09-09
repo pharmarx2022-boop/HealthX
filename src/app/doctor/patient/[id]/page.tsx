@@ -42,6 +42,23 @@ export default function PatientDetailPage() {
     }
     setIsLoading(false);
   }, [id]);
+  
+  useEffect(() => {
+    // Automated action logic
+    if (!patient || patient.status !== 'upcoming') return;
+
+    const gracePeriodEndDate = addDays(new Date(patient.appointmentDate), 2);
+    const now = new Date();
+
+    if (now > gracePeriodEndDate) {
+      handleMarkAsComplete();
+      toast({
+        title: "Appointment Auto-Completed",
+        description: `The grace period for ${patient.name}'s appointment has passed. Refund and Health Points have been automatically processed.`,
+      });
+    }
+  }, [patient]);
+
 
   const handleMarkAsComplete = () => {
     if (!patient) return;
@@ -54,24 +71,24 @@ export default function PatientDetailPage() {
       date: new Date(),
     });
 
-    // Update appointment status
+    // Update appointment status and refund status
     const allPatients = JSON.parse(localStorage.getItem(PATIENTS_KEY) || '[]');
     const updatedPatients = allPatients.map((p: any) => 
-        p.id === patient.id ? { ...p, status: 'done' } : p
+        p.id === patient.id ? { ...p, status: 'done', refundStatus: 'Refunded (Completed)' } : p
     );
     localStorage.setItem(PATIENTS_KEY, JSON.stringify(updatedPatients));
 
     // Send notification
      addNotification(patient.patientId, {
         title: 'Health Points Added!',
-        message: `You have received INR ${patient.consultationFee.toFixed(2)} in Health Points for your recent consultation.`,
+        message: `You have received INR ${patient.consultationFee.toFixed(2)} in Health Points for your recent consultation. Your security deposit has been refunded.`,
         icon: 'gift',
         href: '/patient/wallet'
     });
 
     toast({
         title: "Consultation Completed!",
-        description: `Health Points have been issued to ${patient.name}. Their security deposit will be refunded automatically.`,
+        description: `Health Points issued and refund processed for ${patient.name}.`,
     });
     router.push('/doctor/dashboard');
   };
@@ -82,7 +99,7 @@ export default function PatientDetailPage() {
     // Update appointment status to 'missed'
     const allPatients = JSON.parse(localStorage.getItem(PATIENTS_KEY) || '[]');
     const updatedPatients = allPatients.map((p: any) => 
-        p.id === patient.id ? { ...p, status: 'missed', refundStatus: 'Forfeited' } : p
+        p.id === patient.id ? { ...p, status: 'missed', refundStatus: 'Forfeited (No-Show)' } : p
     );
     localStorage.setItem(PATIENTS_KEY, JSON.stringify(updatedPatients));
 
@@ -94,7 +111,7 @@ export default function PatientDetailPage() {
 
     toast({
         title: "Patient Marked as Absent",
-        description: "The patient's security deposit will be forfeited.",
+        description: `The security deposit for ${patient.name} has been forfeited.`,
         variant: "destructive"
     });
     router.push('/doctor/dashboard');
@@ -150,8 +167,8 @@ export default function PatientDetailPage() {
     if (!patient || patient.status !== 'upcoming') return false;
     const now = new Date();
     const appointmentDate = new Date(patient.appointmentDate);
-    // Allow action from the time of appointment up to 3 days after.
-    const gracePeriodEndDate = addDays(new Date(appointmentDate).setHours(0,0,0,0), 3);
+    // Allow action from the time of appointment up to 2 days after.
+    const gracePeriodEndDate = addDays(new Date(appointmentDate), 2);
 
     return now >= appointmentDate && now < gracePeriodEndDate;
   };
@@ -231,7 +248,7 @@ export default function PatientDetailPage() {
                   <div>
                     <p className="font-medium text-foreground">Security Deposit Refund</p>
                     <p>{patient.refundStatus}</p>
-                    <p className="text-xs text-muted-foreground">The deposit is refunded automatically 3 days after the appointment unless the patient is marked absent.</p>
+                    <p className="text-xs text-muted-foreground">The deposit is refunded automatically 2 days after the appointment unless the patient is marked absent.</p>
                   </div>
                 </div>
               </div>
@@ -275,14 +292,14 @@ export default function PatientDetailPage() {
                      <AlertDialog>
                         <AlertDialogTrigger asChild>
                              <Button variant="destructive" size="lg" className="w-full sm:w-auto" disabled={!isActionAllowed()}>
-                               <UserX className="mr-2"/> Mark Patient as Absent
+                               <UserX className="mr-2"/> Patient Absent
                             </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
-                                <AlertDialogTitle>Confirm Patient Absent</AlertDialogTitle>
+                                <AlertDialogTitle>Confirm No-Show</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    This will mark the patient as a no-show. Their INR {patient.consultationFee.toFixed(2)} security deposit will be forfeited and will not be refunded. This action cannot be undone.
+                                    Did {patient.name} not attend the appointment? This will forfeit their security deposit. This action cannot be undone.
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
@@ -295,49 +312,22 @@ export default function PatientDetailPage() {
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <Button size="lg" className="w-full sm:w-auto" disabled={!isActionAllowed()}>
-                               <BadgeCheck className="mr-2"/> Consultation Done (Issue Points)
+                               <BadgeCheck className="mr-2"/> Consultation Done
                             </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
                                 <AlertDialogTitle>Confirm Consultation Completion</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    This will mark the consultation as complete and credit INR {patient.consultationFee.toFixed(2)} in Health Points to the patient's account. The security deposit will be refunded separately and automatically.
+                                   This will immediately refund the security deposit and issue INR {patient.consultationFee.toFixed(2)} in Health Points to {patient.name}.
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleMarkAsComplete}>Confirm & Issue Points</AlertDialogAction>
+                                <AlertDialogAction onClick={handleMarkAsComplete}>Confirm & Process</AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>
-
-                    <Dialog open={isRescheduleOpen} onOpenChange={setIsRescheduleOpen}>
-                        <DialogTrigger asChild>
-                            <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                                <CalendarPlus className="mr-2" /> Reschedule
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Reschedule Appointment</DialogTitle>
-                                <DialogDescription>Select a new date for {patient.name}'s appointment. The patient will be notified of the change.</DialogDescription>
-                            </DialogHeader>
-                            <div className="py-4">
-                                <CalendarPicker
-                                    mode="single"
-                                    selected={rescheduleDate}
-                                    onSelect={setRescheduleDate}
-                                    initialFocus
-                                    disabled={(date) => date < new Date()}
-                                />
-                            </div>
-                            <DialogFooter>
-                                <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
-                                <Button onClick={handleReschedule}>Confirm Reschedule</Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
                 </CardFooter>
             )}
           </Card>
@@ -347,4 +337,3 @@ export default function PatientDetailPage() {
     </div>
   );
 }
-

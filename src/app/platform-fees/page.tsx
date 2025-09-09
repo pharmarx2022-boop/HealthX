@@ -59,7 +59,7 @@ export default function PlatformFeesPage() {
                     <CardTitle className="flex items-center gap-3"><Banknote className="text-primary"/> Why is there a fee?</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-muted-foreground">The platform fee is a small charge applied only during the appointment booking process. It's crucial for sustaining the platform, covering payment gateway costs, and funding the valuable Health Points reward system that makes healthcare more affordable for everyone.</p>
+                    <p className="text-muted-foreground">The platform fee is a small, non-refundable charge applied only during the appointment booking process. It's crucial for sustaining the platform, covering payment gateway costs, and funding the valuable Health Points reward system that makes healthcare more affordable for everyone. This fee is non-refundable in all situations, including cancellations.</p>
                 </CardContent>
             </Card>
 

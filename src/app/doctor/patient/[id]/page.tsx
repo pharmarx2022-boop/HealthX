@@ -88,7 +88,7 @@ export default function PatientDetailPage() {
 
     toast({
         title: "Consultation Completed!",
-        description: `Health Points issued and refund processed for ${patient.name}.`,
+        description: `Health Points issued and security deposit refunded for ${patient.name}.`,
     });
     router.push('/doctor/dashboard');
   };
@@ -248,7 +248,7 @@ export default function PatientDetailPage() {
                   <div>
                     <p className="font-medium text-foreground">Security Deposit Refund</p>
                     <p>{patient.refundStatus}</p>
-                    <p className="text-xs text-muted-foreground">The deposit is refunded automatically 2 days after the appointment unless the patient is marked absent.</p>
+                    <p className="text-xs text-muted-foreground">The deposit is refunded automatically 2 days after the appointment unless the patient is marked absent. Platform fees are non-refundable.</p>
                   </div>
                 </div>
               </div>
@@ -297,9 +297,9 @@ export default function PatientDetailPage() {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
-                                <AlertDialogTitle>Confirm No-Show</AlertDialogTitle>
+                                <AlertDialogTitle>Confirm No-Show for {patient.name}?</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    Did {patient.name} not attend the appointment? This will forfeit their security deposit. This action cannot be undone.
+                                    This will forfeit the patient's security deposit. This action cannot be undone.
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>

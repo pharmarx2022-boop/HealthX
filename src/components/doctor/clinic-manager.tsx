@@ -319,7 +319,7 @@ export function ClinicManager() {
                              
                             {currentImage && (
                                 <div className="relative w-full aspect-[4/3] rounded-md overflow-hidden border">
-                                    <Image src={currentImage} alt="Clinic preview" fill style={{ objectFit: 'cover' }} />
+                                    <Image src={currentImage} alt="Clinic preview" fill style={{ objectFit: 'cover' }} data-ai-hint="clinic photo" />
                                 </div>
                             )}
                             <div className="grid grid-cols-2 gap-4">
@@ -460,7 +460,7 @@ export function ClinicManager() {
                 <Card key={clinic.id} className="flex flex-col">
                     <CardHeader>
                         <div className="relative w-full h-48 rounded-md overflow-hidden mb-4">
-                             <Image src={clinic.image || 'https://picsum.photos/400/300'} alt={clinic.name} fill style={{objectFit:"cover"}} data-ai-hint={clinic.dataAiHint || 'clinic'} />
+                             <Image src={clinic.image || 'https://placehold.co/400x300'} alt={clinic.name} fill style={{objectFit:"cover"}} data-ai-hint={clinic.dataAiHint || 'clinic'} />
                         </div>
                         <CardTitle>{clinic.name}</CardTitle>
                         <CardDescription className="flex items-center gap-2 pt-1 text-primary">

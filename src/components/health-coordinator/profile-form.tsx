@@ -299,7 +299,7 @@ export function HealthCoordinatorProfileForm() {
                                     <label htmlFor="aadhar-front-upload" className={cn("cursor-pointer", aadharNumberIsSet && 'cursor-not-allowed opacity-50')}>
                                         <div className="relative w-full aspect-video rounded-md border-2 border-dashed flex items-center justify-center text-muted-foreground hover:border-primary transition-colors">
                                             {aadharFrontImage ? (
-                                                <Image src={aadharFrontImage} alt="Aadhar Front Preview" fill className="object-contain p-2" />
+                                                <Image src={aadharFrontImage} alt="Aadhar Front Preview" fill className="object-contain p-2" data-ai-hint="id card" />
                                             ) : (
                                                 <div className="text-center">
                                                     <Upload className="mx-auto" />
@@ -329,7 +329,7 @@ export function HealthCoordinatorProfileForm() {
                                     <label htmlFor="aadhar-back-upload" className={cn("cursor-pointer", aadharNumberIsSet && 'cursor-not-allowed opacity-50')}>
                                         <div className="relative w-full aspect-video rounded-md border-2 border-dashed flex items-center justify-center text-muted-foreground hover:border-primary transition-colors">
                                             {aadharBackImage ? (
-                                                <Image src={aadharBackImage} alt="Aadhar Back Preview" fill className="object-contain p-2" />
+                                                <Image src={aadharBackImage} alt="Aadhar Back Preview" fill className="object-contain p-2" data-ai-hint="id card" />
                                             ) : (
                                                 <div className="text-center">
                                                     <Upload className="mx-auto" />

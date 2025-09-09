@@ -147,7 +147,7 @@ export function ApprovalRequests() {
                                                                 <DialogHeader>
                                                                     <DialogTitle>Registration Certificate for {req.fullName}</DialogTitle>
                                                                 </DialogHeader>
-                                                                <div className="relative w-full aspect-video mt-4 rounded-md overflow-hidden border">
+                                                                <div className="relative w-full aspect-[4/3] mt-4 rounded-md overflow-hidden border">
                                                                     <Image src={req.registrationCertificate} alt="Registration Certificate" fill className="object-contain"/>
                                                                 </div>
                                                             </DialogContent>

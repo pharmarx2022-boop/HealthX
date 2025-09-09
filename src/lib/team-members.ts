@@ -29,7 +29,7 @@ const defaultTeam: TeamMember[] = [
         name: 'Dr. Aarav Sharma',
         category: 'Founder',
         title: 'Founder & CEO',
-        image: 'https://picsum.photos/seed/aarav/400/400',
+        image: 'https://placehold.co/400x400/EBF5FF/1E40AF?text=AS',
         dataAiHint: 'professional man',
         bio: 'With over 20 years of experience in cardiology, Dr. Sharma founded HealthX to bridge the gap between patients and quality healthcare.',
         linkedin: 'https://linkedin.com',
@@ -40,7 +40,7 @@ const defaultTeam: TeamMember[] = [
         name: 'Priya Singh',
         category: 'Director',
         title: 'Director of Operations',
-        image: 'https://picsum.photos/seed/priya/400/400',
+        image: 'https://placehold.co/400x400/EBF5FF/1E40AF?text=PS',
         dataAiHint: 'professional woman',
         bio: 'Priya brings a wealth of experience in scaling operations for tech startups, ensuring a seamless experience for all our users.',
         linkedin: 'https://linkedin.com'

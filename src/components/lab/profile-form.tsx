@@ -98,15 +98,15 @@ export function LabProfileForm() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const storedUser = sessionStorage.getItem('user');
+      const storedUser = localStorage.getItem('user');
       const u = storedUser ? JSON.parse(storedUser) : null;
       setUser(u);
 
-      const storedLabs = sessionStorage.getItem(LABS_KEY);
+      const storedLabs = localStorage.getItem(LABS_KEY);
       const allLabs = storedLabs ? JSON.parse(storedLabs) : initialLabs;
       
       if (!storedLabs) {
-        sessionStorage.setItem(LABS_KEY, JSON.stringify(initialLabs));
+        localStorage.setItem(LABS_KEY, JSON.stringify(initialLabs));
       }
 
       const labData = allLabs.find((d: any) => d.id === u?.id);
@@ -167,7 +167,7 @@ export function LabProfileForm() {
       }
     }
 
-    const storedLabs = sessionStorage.getItem(LABS_KEY);
+    const storedLabs = localStorage.getItem(LABS_KEY);
     const allLabs = storedLabs ? JSON.parse(storedLabs) : initialLabs;
     
     const formattedData = {
@@ -187,10 +187,10 @@ export function LabProfileForm() {
         return p;
     });
 
-    sessionStorage.setItem(LABS_KEY, JSON.stringify(updatedLabs));
+    localStorage.setItem(LABS_KEY, JSON.stringify(updatedLabs));
     
     const updatedUser = { ...user, fullName: data.name, phone: data.phoneNumber, email: data.email };
-    sessionStorage.setItem('user', JSON.stringify(updatedUser));
+    localStorage.setItem('user', JSON.stringify(updatedUser));
 
     setOriginalPhone(data.phoneNumber);
     setIsVerifyingPhone(false);

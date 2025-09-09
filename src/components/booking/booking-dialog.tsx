@@ -97,7 +97,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            const storedUser = sessionStorage.getItem('user');
+            const storedUser = localStorage.getItem('user');
             if (storedUser) {
                 const u = JSON.parse(storedUser);
                 setUser(u);
@@ -142,7 +142,7 @@ export function BookingDialog({ isOpen, onOpenChange, doctor, clinics, familyMem
         if (!selectedDate || !selectedClinic || !selectedClinic.patientLimit) {
             return false;
         }
-        const allAppointments = JSON.parse(sessionStorage.getItem('mockPatients') || '[]');
+        const allAppointments = JSON.parse(localStorage.getItem('mockPatients') || '[]');
         const appointmentsOnDate = allAppointments.filter((appt: any) => 
             appt.clinicId === selectedClinic.id && 
             format(new Date(appt.appointmentDate), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')

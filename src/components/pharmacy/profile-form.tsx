@@ -82,15 +82,15 @@ export function PharmacyProfileForm() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const storedUser = sessionStorage.getItem('user');
+      const storedUser = localStorage.getItem('user');
       const u = storedUser ? JSON.parse(storedUser) : null;
       setUser(u);
 
-      const storedPharmacies = sessionStorage.getItem(PHARMACIES_KEY);
+      const storedPharmacies = localStorage.getItem(PHARMACIES_KEY);
       const allPharmacies = storedPharmacies ? JSON.parse(storedPharmacies) : initialPharmacies;
       
       if (!storedPharmacies) {
-        sessionStorage.setItem(PHARMACIES_KEY, JSON.stringify(initialPharmacies));
+        localStorage.setItem(PHARMACIES_KEY, JSON.stringify(initialPharmacies));
       }
 
       const pharmacyData = allPharmacies.find((d: any) => d.id === u?.id);
@@ -147,7 +147,7 @@ export function PharmacyProfileForm() {
       }
     }
 
-    const storedPharmacies = sessionStorage.getItem(PHARMACIES_KEY);
+    const storedPharmacies = localStorage.getItem(PHARMACIES_KEY);
     const allPharmacies = storedPharmacies ? JSON.parse(storedPharmacies) : initialPharmacies;
 
     const updatedPharmacies = allPharmacies.map((p: any) => {
@@ -158,10 +158,10 @@ export function PharmacyProfileForm() {
         return p;
     });
 
-    sessionStorage.setItem(PHARMACIES_KEY, JSON.stringify(updatedPharmacies));
+    localStorage.setItem(PHARMACIES_KEY, JSON.stringify(updatedPharmacies));
     
     const updatedUser = { ...user, fullName: data.name, phone: data.phoneNumber, email: data.email };
-    sessionStorage.setItem('user', JSON.stringify(updatedUser));
+    localStorage.setItem('user', JSON.stringify(updatedUser));
     
     setOriginalPhone(data.phoneNumber);
     setIsVerifyingPhone(false);

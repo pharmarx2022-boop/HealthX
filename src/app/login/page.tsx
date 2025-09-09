@@ -21,7 +21,6 @@ import { addNotification } from '@/lib/notifications';
 const loginSchema = z.object({
   email: z.string().email({ message: 'A valid email address is required.' }),
   password: z.string().optional(),
-  referralCode: z.string().optional(),
 });
 
 type Role = 'doctor' | 'patient' | 'health-coordinator' | 'admin' | 'pharmacy' | 'lab';
@@ -47,7 +46,6 @@ export default function LoginPage() {
     defaultValues: {
       email: '',
       password: '',
-      referralCode: '',
     },
   });
   
@@ -89,18 +87,11 @@ export default function LoginPage() {
     else redirectPath = `/${user.role}/dashboard`;
     
     router.push(redirectPath);
-    if(localStorage.getItem('referralCode')) {
-        localStorage.removeItem('referralCode');
-    }
   }
   
-  const handleCheckEmail = async ({ email, referralCode }: z.infer<typeof loginSchema>) => {
+  const handleCheckEmail = async ({ email }: z.infer<typeof loginSchema>) => {
     if (!selectedRole) return;
     setIsSubmitting(true);
-    
-    if (referralCode) {
-        localStorage.setItem('referralCode', referralCode);
-    }
     
     const user = await checkUserExists(email, selectedRole);
     setExistingUser(user);
@@ -219,22 +210,6 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-
-              {selectedRole !== 'patient' && (
-                <FormField
-                  control={form.control}
-                  name="referralCode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Referral Code (Optional)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter referral code if you have one" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-              />
-              )}
 
               <div className="space-y-2 pt-2">
                 <Button type="submit" className="w-full" disabled={isSubmitting}>
